@@ -1,0 +1,733 @@
+-- Create the veil2 demo app
+
+-- TODO:
+-- SIMON HAS NO PROJECT PRIVS
+
+-- PROBLEM: The context-based role->role mapping stuff does not work.
+
+--
+-- Continue checking different users' access to parties
+-- Provide a how-do-I-have priv function
+-- supplement superior_scope thingy with privilege inheritence (with
+-- filtering)
+
+
+create role demouser with login password 'pass';
+grant veil_user to demouser;
+
+create schema demo;
+comment on schema demo is
+'The schema where the underlying objects that Veil2 is protecting will
+be defined.'; 
+
+grant usage on schema demo to demouser;
+
+\echo ...party_types...
+create table demo.party_types (
+  party_type_id         integer not null primary key,
+  party_type_name       text not null
+);
+
+comment on table demo.party_types is
+'Lookup table identifying various classifications of party.';
+
+grant all on table demo.party_types to demouser;
+
+insert into demo.party_types
+       (party_type_id, party_type_name)
+values (1, 'person'),
+       (2, 'organisation');
+
+\echo ...parties_tbl...
+create table demo.parties_tbl (
+  party_id              integer not null primary key,
+  party_type_id         integer not null,
+  corp_id               integer not null,
+  org_id                integer not null,
+  party_name            text not null,
+  password              text,
+    foreign key (party_type_id)
+      references demo.party_types (party_type_id),
+    foreign key (corp_id)
+      references demo.parties_tbl (party_id),
+    foreign key (org_id)
+      references demo.parties_tbl (party_id)
+);
+
+comment on column demo.parties_tbl.corp_id is
+'This is the id of the corp that owns the record.  If you are an
+employee of corp X, your party record will have the party_id of corp X
+as its corp_id.  This is a data denormalisation for performance
+reasons, allowing faster tests for permissions in corp context.  Note
+that the corp_id could be determined by ascending the org_hierarchy
+from org_id.  The top-most parent of org will be the corp.';
+
+comment on column demo.parties_tbl.org_id is
+'This is the org that owns the record.  If you as a party work for a
+department, the org_id will be the party_id of that department.
+
+It would probably be better data modelling to identify orgs for
+thparties using other relations, but placing the org_id directly in the
+party record will improve the performance of access controls.';
+
+comment on table demo.parties_tbl is
+'Describes a party, and which org it belongs to.  Note that this is
+named with a _tbl suffix so that a view called parties can be used in
+its place.  This view simply hides the password field.';
+
+insert into demo.parties_tbl
+       (party_id, party_type_id, corp_id, 
+        org_id, party_name, password)
+values (100, 2, 100, 100, 'Veil Corp', null),
+       (101, 2, 100, 100, 'Secured Corp', null),
+       (102, 2, 100, 100, 'Protected Corp', null),
+       (103, 2, 100, 101, 'Secured Top Div', null),
+       (104, 2, 100, 101, 'Secured 2nd Div', null),
+       (105, 2, 101, 103, 'Department S', null),
+       (106, 2, 101, 103, 'Department S2', null),
+       (107, 2, 101, 104, 'Department s (lower)', null),
+       (108, 1, 100, 100, 'Alice', 'passwd1'),   -- superuser
+       (109, 1, 100, 101, 'Bob', 'passwd2'),     -- superuser for Secured Corp
+       (110, 1, 100, 102, 'Carol', 'passwd3'),   -- superuser for Protected Corp
+       (111, 1, 100, 100, 'Eve', 'passwd4'),     -- superuser for both corps
+       (112, 1, 101, 105, 'Sue', 'passwd5'),     -- superuser for dept s
+       (113, 1, 101, 105, 'Sharon', 'passwd6'),  -- vp for dept s
+       (114, 1, 101, 105, 'Simon', 'passwd7'),   -- pm for project S.1
+       (115, 1, 101, 105, 'Sara', 'passwd8'),    -- pm for project S2.1
+       (116, 1, 101, 105, 'Stef', 'passwd9'),    -- team member of S.1
+       (117, 1, 101, 105, 'Steve', 'passwd10'),  -- team member of both projects
+       (118, 2, 102, 102, 'Department P', null),
+       (119, 2, 102, 102, 'Department P2', null),       
+       (120, 1, 102, 102, 'Paul', 'passwd11'),
+       (121, 1, 102, 102, 'Pippa', 'passwd12'),
+       (122, 1, 102, 102, 'Phil', 'passwd13'),
+       (123, 1, 102, 102, 'Pete', 'passwd14'),
+       (124, 1, 102, 102, 'Pam', 'passwd15');
+
+grant all on demo.parties_tbl to demouser;
+
+\echo ...parties...
+-- Views must be created by an unprivileged user so that they do not
+-- bypass our row-level security!!
+-- An alternative to this is to build the view in under the privileged
+-- user, creating it as a secured view.
+
+grant create on schema demo to demouser;
+set session authorization demouser;
+
+create view demo.parties (
+       party_id, party_type_id,
+       corp_id, org_id, party_name,
+       password) as
+select party_id, party_type_id,
+       corp_id, org_id, party_name,
+       -- This view is a special case, as we don't want to show
+       -- passwords, so a little extra massaging of the select clause
+       -- is required.
+       case when password is not null then
+            'xxxxxxxxxxxx'
+       else null
+       end
+  from demo.parties_tbl;
+
+-- TODO: Instead-of triggers to manage inserts, updates and deletes.
+-- This is an exercise for the reader.
+
+grant all on demo.parties to demouser;
+
+reset session authorization;
+revoke create on schema demo from demouser;
+
+
+\echo ...org_hierarchy...
+create table demo.org_hierarchy (
+  org_id     		integer not null,
+  parent_org_id		integer not null,
+    primary key (org_id, parent_org_id),
+    foreign key (org_id)
+      references demo.parties_tbl (party_id),
+    foreign key (parent_org_id)
+      references demo.parties_tbl (party_id)
+);
+
+insert
+  into demo.org_hierarchy
+       (parent_org_id, org_id)
+values (100, 101),  -- Veil Corp -> Sec. Corp
+       (101, 103),  --              Sec. Corp -> Sec. Top Div
+       (103, 105),  --                           Sec. Top Div -> Dept S
+       (103, 106),  --                           Sec. Top Div -> Dept S2
+       (101, 104),  --              Sec. Corp -> Sec. 2nd Div
+       (104, 105),  --                           Sec. 2nd Div -> Dept s (lower)
+       (100, 102),  -- Veil Corp -> Prot. Corp
+       (102, 118),  --              Prot. Corp -> Dept P
+       (102, 119);  --              Prot. Corp -> Dept P2
+
+\echo ...projects...
+create table demo.projects (
+  project_id 	      	integer not null primary key,
+  corp_id		integer not null,
+  org_id		integer not null,
+  project_name		text not null,
+    foreign key (corp_id) references demo.parties_tbl(party_id),
+    unique (project_name, org_id),
+    foreign key (org_id) references demo.parties_tbl(party_id)
+);
+
+grant all on table demo.projects to demouser;
+
+insert
+  into demo.projects
+       (project_id, corp_id, org_id, project_name)
+values (1, 101, 105, 'S.1'),
+       (2, 101, 106, 'S2.1');
+
+
+\echo ...project_assignments...
+create table demo.project_assignments (
+  project_id 	      	integer not null,
+  party_id		integer not null,
+  role_id		integer not null,
+    primary key (project_id, party_id, role_id),
+    foreign key (party_id) references demo.parties_tbl(party_id),
+    foreign key (role_id) references veil2.roles(role_id)
+);
+
+grant all on table demo.project_assignments to demouser;
+
+
+-- VPD SETUP
+-- Refer to the Veil2 documentation for descriptions of the STEPs
+-- below.  The numbered steps below are described in the "Setting Up A
+-- Veil2' Virtual Private Database" section.
+
+-- STEP 1 is installing Veil2
+
+-- STEP 2 is defining authentication data and functions.
+-- For the purpose of this demo, we will be using only plaintext and
+-- bcrypt so no new authentication methods have to be defined and
+-- implemented. 
+
+-- Enable plaintext authentication.  DO NOT DO THIS IN REAL LIFE!!!!
+
+update veil2.authentication_types
+   set enabled = true
+ where shortname = 'plaintext';
+
+-- STEP 3:
+-- Define contexts, privileges and some initial roles.
+insert into veil2.security_context_types
+       (context_type_id, context_type_name,
+        description)
+values (3, 'corp context',
+        'For access to data that is specific to corps.'),
+       (4, 'org context',
+        'For access to data that is specific to subdivisions (orgs) of a corp.'),
+       (5, 'project context',
+        'For access to data that is specific to to project members.');
+
+insert into veil2.privileges
+       (privilege_id, privilege_name,
+        promotion_context_type_id, description)
+values (16, 'select party_types',
+        null, 'Allow select on demo.party_types'),
+       (17, 'select parties',
+        null, 'Allow select on demo.parties'),
+       (18, 'select roles',
+        null, 'Allow select on the roles view'),
+       (19, 'select role_roles',
+        null, 'Allow select on the role_roles view'),
+       (20, 'select party_roles',
+        null, 'Allow select on the party_roles view'),
+       (21, 'select projects',
+        null, 'Allow select on the projects table'),
+       (22, 'select project_assignments',
+        null, 'Allow select on the project_assignments table');
+
+insert
+  into veil2.roles
+       (role_id, role_type_id, role_name,
+        implicit, immutable, description)
+values (5, 1, 'party viewer',
+        false, true, 'can view party information'),
+       (6, 1, 'role viewer',
+        false, true, 'can view roles and assignments'),
+       (7, 1, 'employee',
+        false, false, 'can perform minimal employee duties'),
+       (8, 1, 'administration auditor',
+        false, false, 'can view administration data'),
+       (9, 1, 'administrator',
+        false, false, 'can manage administration data'),
+       (10, 1, 'project manager',
+        false, false, 'manages projects'),
+       (11, 1, 'project viewer',
+        false, true, 'can view project data'),
+       (12, 1, 'project manipulator',
+        false, true, 'can manipulate project data');
+
+insert into veil2.role_privileges
+       (role_id, privilege_id)
+values (5, 16),  -- party viewer -> select_party_types
+       (5, 17),  -- party viewer -> select_parties
+       (6, 18),  -- role viewer -> select_roles
+       (6, 19),  -- role viewer -> select role_roles
+       (6, 20),  -- role viewer -> select party_roles
+       (11, 21), -- project viewer -> select_projects
+       (12, 21), -- project manipulator -> select projects
+       (12, 22), -- project manipulator -> select project assignments
+       (2, 13),  -- personal context -> select accessor_roles
+       (2, 17),  -- personal context -> select parties
+       (2, 22);  -- personal context -> select project_assignments
+
+-- All of these are going to be assigned globally.  What this means is
+-- that everyone's role->role mappings are the same.  If we had
+-- context-specific role mappings, then each corp (or whatever) could
+-- define their roles differently.  Only do this if you need to: it
+-- makes things very confusing for an administrator.
+insert into veil2.role_roles
+       (primary_role_id, assigned_role_id,
+        context_type_id, context_id)
+values (7, 5, 1, 0),
+       (8, 5, 1, 0),
+       (8, 6, 1, 0),
+       (9, 5, 1, 0),
+       (9, 6, 1, 0),
+       (7, 11, 1, 0),
+       (10, 11, 1, 0),
+       (10, 12, 1, 0);
+
+-- STEP 4:
+-- Create FK links for veil2.accessors to the demo database tables.
+-- These ensure that veil2.accessors and veil2.authentication_details
+-- are kept in step with the demo parties_tbl table.
+--
+alter table veil2.accessors add constraint accessor__party_fk
+  foreign key (accessor_id) references demo.parties_tbl (party_id)
+  on delete cascade on update cascade;
+
+comment on constraint accessor__party_fk on veil2.accessors is
+'FK to parties_tbl.  This ensures that updates and deletes in parties_tbl are
+propagated to veil2.accessors.  This is to ensure that all users in
+parties_tbl are known to veil2 for the purpose of authentication, etc.';
+
+-- Create triggers on demo.parties_tbl to populate veil2.accessors
+create or replace
+function demo.parties_tbl_ai () returns trigger as
+$$
+begin
+  insert
+    into veil2.accessors
+        (accessor_id, username)
+  select new.party_id, new.party_name
+   where new.party_type_id = 1;
+
+  -- All authentication is currently done using plaintext.  This is
+  -- quite inadequate and *NOT* something you should do in a real
+  -- environment.
+  insert
+    into veil2.authentication_details
+        (accessor_id, authentication_type, authent_token)
+  select new.party_id, 'plaintext', new.password
+   where new.party_type_id = 1;
+   return new;
+end;
+$$
+language plpgsql volatile security definer;
+
+comment on function demo.parties_tbl_ai () is
+'Propagate inserts, of people, into demo.parties_tbl to veil2.accessors';
+
+create trigger parties_tbl_ait after insert on demo.parties_tbl
+  for each row
+  execute procedure demo.parties_tbl_ai();
+  
+comment on trigger parties_tbl_ait on demo.parties_tbl is
+'Ensure inserts into demo.parties_tbl, get propagated to veil2.accessors';
+  
+-- Create initial accessor records from current parties_tbl records
+insert into veil2.accessors
+      (accessor_id, username)
+select party_id, party_name
+  from demo.parties_tbl p
+ where p.party_type_id = 1
+   and not exists (
+   select null
+     from veil2.accessors a
+    where a.accessor_id = p.party_id);
+
+-- Create initial authentication_detail records from current parties_tbl records
+insert
+  into veil2.authentication_details
+      (accessor_id, authentication_type, authent_token)
+select party_id, 'plaintext', password
+  from demo.parties_tbl p
+ where p.party_type_id = 1
+   and not exists (
+   select null
+     from veil2.authentication_details a
+    where a.accessor_id = p.party_id);
+
+-- Deal with changes to passwords
+create or replace
+function demo.parties_tbl_au () returns trigger as
+$$
+begin
+  update veil2.authentication_details
+     set authent_token = new.password
+   where new.party_type_id = 1
+     and new.password != old.password
+     and accessor_id = new.party_id;
+   return new;
+end;
+$$
+language plpgsql volatile security definer;
+
+comment on function demo.parties_tbl_au () is
+'Propagate updates of passwords to veil2.authentication_details';
+
+create trigger parties_tbl_aut after update on demo.parties_tbl
+  for each row
+  when (new.password != old.password)
+  execute procedure demo.parties_tbl_au();
+  
+comment on trigger parties_tbl_aut on demo.parties_tbl is
+'Ensure password changes get propagated to veil2.authentication_details';
+
+-- STEP5:
+-- Link security_contexts back to the database being secured.
+
+-- 5.1 Parties:
+--     this handles corp and org contexts
+
+alter table veil2.security_contexts
+  add column party_id integer;
+
+comment on column veil2.security_contexts.party_id is
+'Foreign key column to parties_tbl for use in corp and org contexts.';
+
+alter table veil2.security_contexts
+  add constraint security_context__party_fk
+  foreign key (party_id)
+  references demo.parties_tbl(party_id)
+  on update cascade on delete cascade;
+
+comment on constraint security_context__party_fk on veil2.security_contexts is
+'FK to parties_tbl for contexts that are party-specific.';
+
+alter table veil2.security_contexts
+  add constraint security_context__check_fk_type
+  check (case when context_type_id in (3, 4) then
+              party_id is not null
+	 else true end);
+
+comment on constraint security_context__check_fk_type
+  on veil2.security_contexts is
+'Ensure that party-specific contexts have an FK.';
+
+-- Create initial security contexts
+insert
+  into veil2.security_contexts
+      (context_type_id, context_id, party_id)
+select 3, party_id, party_id  -- These are all corp contexts
+  from demo.parties_tbl
+ where party_type_id = 2  -- organisation
+   and corp_id = 100;     -- root corp or first level below root
+
+insert
+  into veil2.security_contexts
+      (context_type_id, context_id, party_id)
+select 4, party_id, party_id  -- These are all org contexts
+  from demo.parties_tbl
+ where party_type_id = 2;  -- This includes corps which are also orgs
+
+-- READER EXERCISE: create insert triggers on parties_tbl for new corps
+-- and orgs. 
+
+-- 5.2 Projects:
+--     this handles project context
+alter table veil2.security_contexts
+  add column project_id integer;
+
+comment on column veil2.security_contexts.project_id is
+'Foreign key column to projects for use in project context.';
+
+alter table veil2.security_contexts
+  add constraint security_context__project_fk
+  foreign key (project_id)
+  references demo.projects(project_id)
+  on update cascade on delete cascade;
+
+insert
+  into veil2.security_contexts
+      (context_type_id, context_id, project_id)
+select 5, project_id, project_id
+  from demo.projects;
+
+-- Now we redefine all_accessor_roles to include project assignments.
+-- With this done, the veil2.load_session_privs() function will see
+-- the project_assignments and add these to the set of privileges seen
+-- for a connected user.
+
+create or replace
+view veil2.all_accessor_roles (
+  accessor_id, role_id, context_type_id, context_id
+) as
+select accessor_id, role_id,
+       context_type_id, context_id
+  from veil2.accessor_roles
+ union
+select party_id, role_id, 5, project_id
+  from demo.project_assignments ;
+
+
+-- READER EXERCISE: create insert triggers on projects table for new
+-- projects. 
+
+
+
+-- STEP6:
+-- Deal with scope promotions
+
+-- Nothing to do here, as we do not need any scope promotions other
+-- than to global context which is already handled.
+
+-- STEP7:
+-- Add row level security on our objects.
+
+alter table demo.party_types enable row level security;
+
+create policy party_type__select
+    on demo.party_types
+   for select
+ using (veil2.i_have_global_priv(16));
+
+
+alter table demo.parties_tbl enable row level security;
+
+create policy parties_tbl__select
+    on demo.parties_tbl
+   for select
+ using (   veil2.i_have_global_priv(17)
+        or veil2.i_have_priv_in_scope(17, 3, corp_id)
+        or veil2.i_have_priv_in_scope(17, 4, org_id)
+        or veil2.i_have_priv_in_scope(17, 4, party_id) -- View the org itself
+        or veil2.i_have_personal_priv(17, party_id));
+
+-- READER EXERCISE: secure inserts, updates and deletes
+
+alter table demo.projects enable row level security;
+
+create policy projects__select
+    on demo.projects
+   for select
+ using (   veil2.i_have_global_priv(21)
+        or veil2.i_have_priv_in_scope(20, 3, corp_id)
+        or veil2.i_have_priv_in_scope(20, 4, org_id)
+        or veil2.i_have_priv_in_scope(20, 5, project_id));
+
+
+
+-- STEP 8:
+-- Create secured views into user-facing parts of Veil2
+-- ??????????
+-- These are:
+--   - roles
+--   - role_roles
+--   - accessor_roles
+-- If we were using context_roles, they would be incorporated into all
+-- of the views below to provide aliases for role names based upon our
+-- own context.  An exercise for the reader.
+
+create or replace
+view roles (
+    role_type,
+    role_name,
+    implicit,
+    immutable,
+    description) as
+select rt.role_type_name, r.role_name,
+       r.implicit, r.immutable,
+       r.description
+  from veil2.roles r
+ inner join veil2.role_types rt
+         on rt.role_type_id = r.role_type_id
+ where veil2.i_have_global_priv(18);
+
+-- WE SHOULD ALSO CREATE INSTEAD-OF TRIGGERS FOR THIS.  THAT IS LEFT
+-- AS AN EXERCISE FOR THE READER.
+
+create or replace
+view role_roles (
+    primary_role,
+    assigned_role,
+    context_type,
+    corp_context_id,
+    org_context_id) as
+select pr.role_name, ar.role_name,
+       ct.context_type_name,
+       case when rr.context_type_id = 3
+       then rr.context_id
+       else null
+       end,
+       case when rr.context_type_id = 4
+       then rr.context_id
+       else null
+       end 
+  from veil2.role_roles rr
+ inner join veil2.roles pr
+         on pr.role_id = rr.primary_role_id
+ inner join veil2.roles ar
+         on ar.role_id = rr.assigned_role_id
+ inner join veil2.security_context_types ct
+         on ct.context_type_id = rr.context_type_id
+ where veil2.i_have_global_priv(19)
+    or veil2.i_have_priv_in_scope(19, 3, context_id)
+    or veil2.i_have_priv_in_scope(19, 4, context_id);
+
+-- WE SHOULD ALSO CREATE INSTEAD-OF TRIGGERS FOR THIS.  THAT IS LEFT
+-- AS AN EXERCISE FOR THE READER.
+
+create or replace
+view party_roles (
+    party_id,
+    role_name,
+    context_type,
+    corp_context_id,
+    org_context_id) as
+select ar.accessor_id, r.role_name,
+       ct.context_type_name,
+       case when ar.context_type_id = 3
+       then ar.context_id
+       else null
+       end,
+       case when ar.context_type_id = 4
+       then ar.context_id
+       else null
+       end 
+  from veil2.accessor_roles ar
+ inner join veil2.roles r
+         on r.role_id = ar.role_id
+ inner join veil2.security_context_types ct
+         on ct.context_type_id = ar.context_type_id
+ where veil2.i_have_global_priv(20)
+    or veil2.i_have_priv_in_scope(20, 3, context_id)
+    or veil2.i_have_priv_in_scope(20, 4, context_id);
+
+
+-- Step 9
+-- Assigning roles.
+
+-- Give all persons the connect role
+insert
+  into veil2.accessor_roles
+      (accessor_id, role_id, context_type_id, context_id)
+select party_id, 0, 1, 0 
+  from demo.parties_tbl
+ where party_type_id = 1;
+
+-- Give Specific roles to users
+insert
+  into veil2.accessor_roles
+       (accessor_id, role_id, context_type_id, context_id)
+values (108, 1, 1, 0),     -- Alice is global superuser
+       (109, 1, 3, 101),   -- Bob is superuser for Secured Corp
+       (110, 1, 3, 102),   -- Carol is superuser for Protected Corp
+       (111, 1, 3, 101),   -- Eve is superuser for Secured Corp
+       (111, 1, 3, 102),   -- and for Protected Corp
+       (112, 1, 4, 105);   -- Sue is superuser for dept S.
+
+-- Assign project roles
+insert
+  into demo.project_assignments
+       (project_id, party_id, role_id)
+values (1, 114, 10),  -- S.1 Simon, pm
+       (2, 115, 10),  -- S2.1 Sara, pm
+       (1, 116, 7),   -- S.1 Stef, member (employee)
+       (1, 117, 7),   -- S.1 Steve, member (employee)
+       (2, 117, 7);   -- S2.1 Steve, member (employee)
+
+
+-- TESTS
+
+-- TODO:
+-- Check interleaving of sessions.
+-- Check sessions using bcrypt.
+-- Check sessions using multiple connections.
+-- Check sessions using database users.
+-- Check personal context access.
+
+select veil2.reset_session();
+
+select * from demo.parties;
+
+-- Convert Alice to use bcrypt.
+update veil2.authentication_details
+   set authent_token = veil2.bcrypt(authent_token),
+       authentication_type = 'bcrypt'
+ where accessor_id = 108;
+
+\c vpd demouser
+
+-- Log Alice in.
+select *
+  from veil2.create_session(108, 'bcrypt') c
+ cross join veil2.open_session(c.session_id, 1, 'passwd1');
+
+select 'Alice sees: ', * from demo.parties;
+
+-- Log Bob in.
+select *
+  from veil2.create_session(109, 'plaintext') c
+ cross join veil2.open_session(c.session_id, 1, 'passwd2') o1
+ cross join veil2.open_session(c.session_id, 2,
+             encode(digest(c.session_token || to_hex(2), 'sha1'),
+	     	    'base64')) o2;
+ 
+select 'Bob sees: ', * from demo.parties;
+
+-- Log Carol in.
+select *
+  from veil2.create_session(110, 'plaintext') c
+ cross join veil2.open_session(c.session_id, 1, 'passwd3') o1;
+
+select 'Carol sees: ', * from demo.parties;
+
+-- Log Eve in.
+select *
+  from veil2.create_session(111, 'plaintext') c
+ cross join veil2.open_session(c.session_id, 1, 'passwd4') o1;
+
+select 'Eve sees: ', * from demo.parties;
+
+
+-- Log Sue in.
+select *
+  from veil2.create_session(112, 'plaintext') c
+ cross join veil2.open_session(c.session_id, 1, 'passwd5') o1;
+
+select 'Sue sees: ', * from demo.parties;
+
+-- Log Simon in.
+select *
+  from veil2.create_session(114, 'plaintext') c
+ cross join veil2.open_session(c.session_id, 1, 'passwd7') o1;
+
+select 'Simon sees: ', * from demo.parties;
+select 'Simon sees: ', * from demo.projects;
+
+
+
+
+/*
+
+is a hash (sha-256) of the concatenation of:
+  - the session_token;
+  - the nonce as a lower-case hexadecimal string;
+  - the user''s authentication token for _authent_type, which must match
+    the value in veil2.authentication_details.
+
+This somewhat convoluted protocol is designed to protect the user''s
+authentication credentials (they are not sent over the connection in a
+way that they can be easily extracted), and to prevent replay attacks.';
+
+*/

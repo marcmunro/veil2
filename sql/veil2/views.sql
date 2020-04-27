@@ -111,20 +111,6 @@ with recursive assigned_roles (
     select role_id, role_id, 1, 0
       from veil2.roles
   ),
-  assigned_role_privs (
-    primary_role_id, assigned_role_id,
-    privileges, global_privileges,
-    promotable_privileges, context_type_id,
-    context_id) as
-  (
-    select aar.primary_role_id, aar.assigned_role_id,
-    	   drp.privileges, drp.global_privileges,
-	   drp.promotable_privileges, aar.context_type_id,
-	   aar.context_id
-      from all_assigned_roles aar
-     inner join veil2.direct_role_privileges drp
-        on drp.role_id = aar.assigned_role_id
-  ),
   superuser_roles (primary_role_id, assigned_role_id) as
   (
     select 1, role_id
@@ -134,7 +120,7 @@ with recursive assigned_roles (
   )
 select primary_role_id, assigned_role_id,
        context_type_id, context_id
-  from assigned_role_privs
+  from all_assigned_roles
  union all
 select primary_role_id, assigned_role_id,
        1, 0
@@ -174,8 +160,7 @@ select arr.primary_role_id,
        arr.context_id
   from veil2.all_role_roles arr
  inner join veil2.direct_role_privileges drp
-    on (   drp.role_id = arr.primary_role_id
-        or drp.role_id = arr.assigned_role_id)
+    on drp.role_id = arr.primary_role_id
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
 
 comment on view veil2.all_role_privs_v is
@@ -200,8 +185,7 @@ select arr.primary_role_id,
        arr.context_id
   from veil2.all_role_roles arr
  inner join veil2.direct_role_privileges_vv drp
-    on (   drp.role_id = arr.primary_role_id
-        or drp.role_id = arr.assigned_role_id)
+    on drp.role_id = arr.primary_role_id
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
 
 comment on view veil2.all_role_privs_vv is

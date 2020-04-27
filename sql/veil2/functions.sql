@@ -136,6 +136,8 @@ create or replace
 function veil2.create_session(
     accessor_id in integer,
     authent_type in text,
+    context_type_id in integer default 1,
+    context_id in integer default 0,
     session_id out integer,
     session_token out text,
     session_supplemental out text)
@@ -171,12 +173,16 @@ begin
   if valid then
     insert
       into veil2.sessions
-          (accessor_id, session_id, authent_type,
-	   has_authenticated, session_supplemental, expires,
+          (accessor_id, session_id,
+	   context_type_id, context_id,
+	   authent_type, has_authenticated,
+	   session_supplemental, expires,
 	   token)
-    select accessor_id, session_id, authent_type,
-      	   false, session_supplemental,
-	     now() + sp.parameter_value::interval, session_token
+    select accessor_id, session_id, 
+    	   context_type_id, context_id,
+	   authent_type, false,
+	   session_supplemental, now() + sp.parameter_value::interval,
+	   session_token
       from veil2.system_parameters sp
      where sp.parameter_name = 'timeout';
   end if;
@@ -186,14 +192,16 @@ begin
   -- indicate whether _accessor_id was valid;
   insert
     into session_parameters
-         (accessor_id, session_id, is_open)
-  values (accessor_id, session_id, false);
+         (accessor_id, session_id, context_type_id,
+	  context_id, is_open)
+  values (accessor_id, session_id, context_type_id,
+          context_id, false);
 end;
 $$
 language 'plpgsql' security definer volatile
 set client_min_messages = 'error';
 
-comment on function veil2.create_session(integer, text) is
+comment on function veil2.create_session(integer, text, integer, integer) is
 'Get session credentials for a new session.  If _accessor_id is not
 valid the function will appear to work but subsequent attempts to open
 the session will fail and no privileges will be loaded.  This makes it
@@ -299,8 +307,12 @@ begin
   if found then
     insert
       into session_parameters
-           (accessor_id, session_id, is_open)
-    values (_accessor_id, session_id, true);
+          (accessor_id, session_id, context_type_id,
+	   context_id, is_open)
+    select _accessor_id, load_session_privs.session_id, context_type_id,
+           context_id, true
+      from veil2.sessions s
+     where s.session_id = load_session_privs.session_id;
     return true;
   else
     return false;

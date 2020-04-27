@@ -585,6 +585,8 @@ create unlogged table veil2.sessions (
   session_id			integer not null
   				  default nextval('veil2.session_id_seq'),
   accessor_id			integer not null,
+  context_type_id		integer not null,
+  context_id			integer not null,
   authent_type			text not null,
   expires			timestamp with time zone,
   token				text not null,
@@ -649,5 +651,7 @@ comment on type veil2.session_privileges_t is
 create type veil2.session_params_t as (
   accessor_id			integer,
   session_id                    integer,
+  context_type_id		integer,
+  context_id			integer,
   is_open			boolean
 );

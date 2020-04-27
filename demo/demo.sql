@@ -1,9 +1,21 @@
 -- Create the veil2 demo app
 
 -- TODO:
--- SIMON HAS NO PROJECT PRIVS
+-- ADD CONTEXT FIELDS INTO SESSION PARAMETERS
+
+-- NEED UNIT TESTS FOR ROLE MAPPING IN DIFFERENT CONTEXTS
+
 
 -- PROBLEM: The context-based role->role mapping stuff does not work.
+-- DETAILS:
+--  - all accessor_privs is not showing project role privs.
+--    This is because there is an assumption that the context of any
+--    role->role assignments matches the context of whatever test we
+--    are doing, but they are different things.
+--
+
+
+
 
 --
 -- Continue checking different users' access to parties
@@ -103,6 +115,25 @@ values (100, 2, 100, 100, 'Veil Corp', null),
        (122, 1, 102, 102, 'Phil', 'passwd13'),
        (123, 1, 102, 102, 'Pete', 'passwd14'),
        (124, 1, 102, 102, 'Pam', 'passwd15');
+with all_role_privs (
+  role_id, roles,
+  privileges, global_privileges, 
+  promotable_privileges, context_type_id,
+  context_id
+) as
+(
+select arr.primary_role_id,
+       bitmap_of(arr.assigned_role_id),
+       union_of(drp.privileges),
+       union_of(drp.global_privileges),
+       union_of(drp.promotable_privileges),
+       arr.context_type_id,
+       arr.context_id
+  from veil2.all_role_roles arr
+ inner join veil2.direct_role_privileges drp
+    on drp.role_id = arr.primary_role_id
+ group by arr.primary_role_id, arr.context_type_id, arr.context_id)
+select * from all_role_privs;
 
 grant all on demo.parties_tbl to demouser;
 
@@ -479,6 +510,17 @@ select accessor_id, role_id,
 select party_id, role_id, 5, project_id
   from demo.project_assignments ;
 
+-- Ensure updates to project_assignments are reflected in the
+-- all_accessor_privs materialized view.
+
+create trigger project_assignment__aiudt
+  after insert or update or delete or truncate
+  on demo.project_assignments
+  for each statement
+  execute procedure veil2.refresh_accessor_privs();
+
+-- And update the matview now.
+refresh materialized view veil2.all_accessor_privs;
 
 -- READER EXERCISE: create insert triggers on projects table for new
 -- projects. 
@@ -521,9 +563,9 @@ create policy projects__select
     on demo.projects
    for select
  using (   veil2.i_have_global_priv(21)
-        or veil2.i_have_priv_in_scope(20, 3, corp_id)
-        or veil2.i_have_priv_in_scope(20, 4, org_id)
-        or veil2.i_have_priv_in_scope(20, 5, project_id));
+        or veil2.i_have_priv_in_scope(21, 3, corp_id)
+        or veil2.i_have_priv_in_scope(21, 4, org_id)
+        or veil2.i_have_priv_in_scope(21, 5, project_id));
 
 
 
@@ -729,5 +771,13 @@ is a hash (sha-256) of the concatenation of:
 This somewhat convoluted protocol is designed to protect the user''s
 authentication credentials (they are not sent over the connection in a
 way that they can be easily extracted), and to prevent replay attacks.';
+
+
+select *
+  from veil2.create_session(114, 'plaintext') c
+ cross join veil2.open_session(c.session_id, 1, 'passwd7') o1;
+
+
+
 
 */

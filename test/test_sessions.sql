@@ -99,6 +99,7 @@ select null
     or test.expect((session_id is null), false,
                    'There should be an actual session_id(2)');
 
+
 \echo .....open_session()...
 -- We have a created session from the last tests above.  Now we will try
 -- opening that session.  Given that the authentication method was

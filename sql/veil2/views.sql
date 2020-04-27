@@ -159,8 +159,9 @@ select arr.primary_role_id,
        arr.context_type_id,
        arr.context_id
   from veil2.all_role_roles arr
- inner join veil2.direct_role_privileges drp
-    on drp.role_id = arr.primary_role_id
+  left outer join veil2.direct_role_privileges drp
+    on (   drp.role_id = arr.assigned_role_id
+        or drp.role_id = arr.primary_role_id)
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
 
 comment on view veil2.all_role_privs_v is
@@ -184,8 +185,9 @@ select arr.primary_role_id,
        arr.context_type_id,
        arr.context_id
   from veil2.all_role_roles arr
- inner join veil2.direct_role_privileges_vv drp
-    on drp.role_id = arr.primary_role_id
+  left outer join veil2.direct_role_privileges_vv drp
+    on (   drp.role_id = arr.assigned_role_id
+        or drp.role_id = arr.primary_role_id)
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
 
 comment on view veil2.all_role_privs_vv is
@@ -433,34 +435,40 @@ grant select on veil2.all_accessor_roles to veil_user;
 
 
 \echo ......all_accessor_privs...
+
 create or replace
-view veil2.all_accessor_privs_v (
-  accessor_id, context_type_id, context_id, roles, privs)
-as
+view veil2.all_context_privs as
 with direct_privs(
-    accessor_id, context_type_id,
-    context_id, roles, privs,
-    global_privs, promotable_privs) as
+    -- We retrieve 2 distinct pairs of context keys: one for the
+    -- context of the role assignment to the role holder, and one for
+    -- the role->role mappings, which may be in a different context.
+    -- Note that global_privs below are those privs which automatically
+    -- promote to global scope regardless of the context in which they
+    -- are assigned.
+    accessor_id, assignment_context_type_id,
+    assignment_context_id, mapping_context_type_id,
+    mapping_context_id, roles,
+    privs, global_privs, promotable_privs) as
   (
     -- Identfies all accessor roles and privs in all contexts, without
     -- privilege promotion.
     select aar.accessor_id, aar.context_type_id,
-           aar.context_id, union_of(arp.roles),
-	   union_of(arp.privileges), union_of(arp.global_privileges),
-	   union_of(arp.promotable_privileges)
+           aar.context_id, arp.context_type_id,
+           arp.context_id, union_of(arp.roles),
+           union_of(arp.privileges),
+           union_of(arp.global_privileges),
+           union_of(arp.promotable_privileges)
       from veil2.all_accessor_roles aar
      inner join veil2.all_role_privs arp
         on arp.role_id = aar.role_id
-           -- Match on both context-specific role mapping and global mapping.
-       and (  (     arp.context_type_id = aar.context_type_id
-                and arp.context_id = aar.context_id)
-	    or (    arp.context_type_id = 1
-	        and arp.context_id = 0))
-     group by aar.accessor_id, aar.context_type_id, aar.context_id
+     group by aar.accessor_id, aar.context_type_id, aar.context_id,
+              arp.context_type_id, arp.context_id
   ),
 promotable_privs as
   (
-    select dp.accessor_id, dp.context_type_id, dp.context_id,
+    select dp.accessor_id, dp.assignment_context_type_id,
+           dp.assignment_context_id, dp.mapping_context_type_id,
+           dp.mapping_context_id, 
            bits(dp.promotable_privs) as privilege_id
       from direct_privs dp
      where promotable_privs is not null
@@ -468,41 +476,61 @@ promotable_privs as
 promoted_privs as
   (
     select pp.accessor_id, acp.promoted_context_type_id,
-           acp.promoted_context_id,
+           acp.promoted_context_id, pp.mapping_context_type_id,
+	   pp.mapping_context_id,
 	   bitmap_of(pp.privilege_id) as promoted_privs
       from promotable_privs pp
      inner join veil2.privileges p
         on p.privilege_id = pp.privilege_id
      inner join veil2.all_context_promotions acp
-       on acp.context_type_id = pp.context_type_id
-      and acp.context_id = pp.context_id
+       on acp.context_type_id = pp.assignment_context_type_id
+      and acp.context_id = pp.assignment_context_id
       and acp.promoted_context_type_id = p.promotion_context_type_id
       group by pp.accessor_id, acp.promoted_context_type_id,
-               acp.promoted_context_id
-  ),
-all_context_privs as
-  (
-    select accessor_id, context_type_id,
-           context_id, roles, privs,
-	   'direct' as source
-      from direct_privs
-     union all
-    select accessor_id, 1, 0,
-    	   case when context_type_id = 1 then roles else null end,
-           global_privs, 'global'
-      from direct_privs
-     union all
-    select accessor_id, promoted_context_type_id,
-           promoted_context_id, null, promoted_privs,
-	   'promoted'
-      from promoted_privs
+      	      acp.promoted_context_id, pp.mapping_context_type_id,
+	       pp.mapping_context_id
   )
-select accessor_id, context_type_id,
-       context_id, union_of(roles),
+select accessor_id, assignment_context_type_id,
+       assignment_context_id, mapping_context_type_id,
+       mapping_context_id, roles,
+	   privs, 'direct' as source
+  from direct_privs
+ union all
+       -- The following gives those privileges that have been
+	   -- promoted to global scope regardless of how they were
+	   -- assigned.
+select accessor_id, 1, 0, mapping_context_type_id,
+       mapping_context_id, 
+	   null,
+       global_privs, 'global'
+  from direct_privs
+ union all
+select accessor_id, promoted_context_type_id,
+       promoted_context_id, mapping_context_type_id,
+       mapping_context_id,
+	   null, promoted_privs,
+	   'promoted'
+  from promoted_privs;
+
+comment on view veil2.all_context_privs is
+'This is an internal view aimed to help development and debugging.
+There should be no need to give anyone other than developers any
+access to this.';
+
+create or replace
+view veil2.all_accessor_privs_v (
+  accessor_id, assignment_context_type_id,
+  assignment_context_id, mapping_context_type_id,
+  mapping_context_id, roles,
+  privs) as
+select accessor_id, assignment_context_type_id,
+       assignment_context_id, mapping_context_type_id,
+       mapping_context_id, union_of(roles),
        union_of(privs)
-  from all_context_privs
- group by accessor_id, context_type_id,
-          context_id;
+  from veil2.all_context_privs
+ group by accessor_id, assignment_context_type_id,
+          assignment_context_id, mapping_context_type_id,
+	  mapping_context_id;
 
 comment on view veil2.all_accessor_privs_v is
 'Show all roles and privileges assigned to all accessors in all

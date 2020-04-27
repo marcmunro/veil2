@@ -122,20 +122,23 @@ select null
 	     and aar.context_id = -3)::integer,
 	 1, 'Accessor -3 should have role 8 in corp context -3');
 
-
 -- Accessor -6 has been granted role 8 for project -61
 -- Check that role and priv assignments happen in the appropriate
 -- contexts, with proper handling of privilege promotion
 with all_roles as
   (
-    select context_type_id, context_id, bits(roles) role_id
+    select assignment_context_type_id as context_type_id,
+           assignment_context_id as context_id,
+    	   bits(roles) role_id
       from veil2.all_accessor_privs
      where accessor_id = -6
        and roles is not null
   ),
 expand_privs as
   (
-    select context_type_id, context_id, bits(privs) priv_id
+    select assignment_context_type_id as context_type_id,
+           assignment_context_id as context_id,
+           bits(privs) priv_id
       from veil2.all_accessor_privs
      where accessor_id = -6
   ),
@@ -251,14 +254,18 @@ select null
 -- contexts, with proper handling of privilege promotion
 with all_roles as
   (
-    select context_type_id, context_id, bits(roles) role_id
+    select assignment_context_type_id as context_type_id,
+           assignment_context_id as context_id,
+	   bits(roles) role_id
       from veil2.all_accessor_privs
      where accessor_id = -5
        and roles is not null
   ),
 expand_privs as
   (
-    select context_type_id, context_id, bits(privs) priv_id
+    select assignment_context_type_id as context_type_id,
+           assignment_context_id as context_id,
+           bits(privs) priv_id
       from veil2.all_accessor_privs
      where accessor_id = -5
   ),

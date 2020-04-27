@@ -276,8 +276,9 @@ begin
   ignore := veil2.reset_session();
   with all_session_privs as
     (
-      select session_id, context_type_id, context_id,
-      	   roles, privs
+      select session_id, assignment_context_type_id,
+             assignment_context_id, roles,
+	     privs
         from veil2.all_accessor_privs
        where accessor_id = _accessor_id
     ),
@@ -285,7 +286,7 @@ begin
     (
       select privs
         from all_session_privs
-       where context_type_id = 1
+       where assignment_context_type_id = 1
     )
   insert
     into session_privileges

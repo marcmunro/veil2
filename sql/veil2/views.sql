@@ -174,7 +174,8 @@ select arr.primary_role_id,
        arr.context_id
   from veil2.all_role_roles arr
  inner join veil2.direct_role_privileges drp
-    on drp.role_id = arr.primary_role_id
+    on (   drp.role_id = arr.primary_role_id
+        or drp.role_id = arr.assigned_role_id)
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
 
 comment on view veil2.all_role_privs_v is
@@ -199,7 +200,8 @@ select arr.primary_role_id,
        arr.context_id
   from veil2.all_role_roles arr
  inner join veil2.direct_role_privileges_vv drp
-    on drp.role_id = arr.primary_role_id
+    on (   drp.role_id = arr.primary_role_id
+        or drp.role_id = arr.assigned_role_id)
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
 
 comment on view veil2.all_role_privs_vv is

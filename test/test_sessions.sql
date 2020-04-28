@@ -408,6 +408,7 @@ select '##' as ignore,  -- Allows the output of this query to be filtered
 
 -- We should now be connected as veil2_alice, which is equivalent to
 -- accessor -2
+
 select null where not veil2.hello();  -- Establish our session
 
 \echo ......checking visibility of veil2 objects...

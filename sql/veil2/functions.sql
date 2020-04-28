@@ -282,13 +282,21 @@ declare
   ignore boolean;
 begin
   ignore := veil2.reset_session();
-  with all_session_privs as
+  with session_context as
     (
-      select session_id, assignment_context_type_id,
-             assignment_context_id, roles,
-	     privs
-        from veil2.all_accessor_privs
-       where accessor_id = _accessor_id
+      select context_type_id, context_id
+        from veil2.sessions s
+       where s.session_id = load_session_privs.session_id
+    ), all_session_privs as
+    (
+      select session_id, asp.assignment_context_type_id,
+             asp.assignment_context_id, asp.roles,
+	     asp.privs
+        from session_context c
+       inner join veil2.all_accessor_privs asp
+          on asp.mapping_context_type_id = c.context_type_id
+	 and asp.mapping_context_id = c.context_id
+       where asp.accessor_id = _accessor_id
     ),
   global_privs as
     (
@@ -507,7 +515,9 @@ that will need to be reconsidered.';
 
 \echo ......hello()...
 create or replace
-function veil2.hello()
+function veil2.hello(
+    context_type_id in integer default 1,
+    context_id in integer default 0)
   returns bool as
 $$
 declare
@@ -523,23 +533,37 @@ begin
     into _accessor_id
     from veil2.accessors
    where username = session_user;
- if found then
-   _session_id := nextval('veil2.session_id_seq');
+  if found then
+    _session_id := nextval('veil2.session_id_seq');
+
+    -- Need to create context information for session before we can
+    -- call load_session_privs().
+    insert
+       into veil2.sessions
+             (session_id, accessor_id,
+	      context_type_id, context_id,
+	      authent_type, expires,
+	      token, has_authenticated)
+      values (_session_id, _accessor_id,
+      	      hello.context_type_id, hello.context_id,
+      	     'dbuser', now(),
+	     'dbsession', false);
+
     success := veil2.load_session_privs(_session_id, _accessor_id);
 
     if not success then
       raise exception 'SECURITY: user % has no connect privilege.',
       	    	      session_user;
     else
-     insert
-       into veil2.sessions
-             (session_id, accessor_id, authent_type,
-	      expires, token, has_authenticated)
-      values (_session_id, _accessor_id, 'dbuser',
-              now() + '1 day'::interval, 'dbsession', true);
+      -- Update the permanent session record to show that we have
+      -- authenticated and give a reasonable expiry time.
+      update veil2.sessions
+         set expires = now() + '1 day'::interval,
+ 	    has_authenticated = true
+       where session_id = _session_id;
 
-      execute 'grant select on session_privileges to veil_user;';
-      execute 'grant select on session_parameters to veil_user;';
+       execute 'grant select on session_parameters to veil_user;';
+       execute 'grant select on session_privileges to veil_user;';
     end if;
   end if;
   return success;
@@ -547,7 +571,7 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
-comment on function veil2.hello() is
+comment on function veil2.hello(integer, integer) is
 'This is used to begin a veil2 session for a database user.';
 
 

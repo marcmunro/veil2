@@ -86,18 +86,20 @@ with recursive assigned_roles (
   (
     -- get all role->role assignments, both direct and indirect, in all contexts
     select primary_role_id, assigned_role_id,
-           context_type_id, context_id
+           context_type_id, context_id,
+	   bitmap(primary_role_id) + assigned_role_id as roles_encountered
       from veil2.role_roles
      union all
     select rr.primary_role_id, ar.assigned_role_id,
-           rr.context_type_id, rr.context_id
+           rr.context_type_id, rr.context_id,
+	   roles_encountered + ar.assigned_role_id
       from veil2.role_roles rr
      inner join assigned_roles ar
              on ar.primary_role_id = rr.assigned_role_id
 	    and (   ar.context_type_id = 1
 	         or (    ar.context_type_id = rr.context_type_id
 	             and ar.context_id = rr.context_id))
-     where rr.primary_role_id != ar.assigned_role_id -- avoid loops
+     where not ar.roles_encountered ?  ar.assigned_role_id
   ),
   all_assigned_roles (
     primary_role_id, assigned_role_id,
@@ -210,6 +212,40 @@ revoke all on veil2.all_role_privs_v from public;
 grant select on veil2.all_role_privs_v to veil_user;
 revoke all on veil2.all_role_privs_vv from public;
 grant select on veil2.all_role_privs_vv to veil_user;
+
+
+\echo ......accessor_contexts...
+create or replace
+view veil2.accessor_contexts (
+  accessor_id, context_type_id, context_id
+) as
+select accessor_id, 1, 0
+  from veil2.accessors;
+
+comment on view veil2.accessor_contexts is
+'This view lists the allowed session contexts for accessors.  When an
+accessor opens a session, they choose a session context.  This session
+context determines which set of role->role mappings are in play.
+Typically, there will only be one such set, as provided by the default
+implementation of this view.  If however, your application requires
+separate contexts to have different role->role mappings, you should
+modify this role to map your accessors with that context.
+
+Typically this will be used in a situation where your application
+serves a number of different clients, each of which have their own
+role definitions.  Each accessor will belong to one of those clients
+and this view should be modified to make that mapping apparent.
+
+A typical view definition might be:
+  select party_id, 3, client_id
+    from app_schema.parties
+   union all 
+  select party_id, 1, 0
+    from mycorp_schema.superusers;
+
+which would allow those defined in the superusers table to connect in
+the global context, and those defined in the parties table to connect
+in the context of the client that they work for.';
 
 
 \echo ......context_promotions...
@@ -550,6 +586,104 @@ revoke all on veil2.all_accessor_privs_v from public;
 grant select on veil2.all_accessor_privs_v to veil_user;
 
 
+\echo ......role_chains...
+create or replace
+view veil2.role_chains as
+with recursive role_chains
+as
+  (
+    select rr.primary_role_id, rr.assigned_role_id,
+    	   rr.primary_role_id::text || '->' ||
+	       rr.assigned_role_id::text as id_chain,
+	   r1.role_name || '->' || r2.role_name as name_chain,
+	   rr.context_type_id,
+	   rr.context_id,
+	   bitmap(rr.primary_role_id) + rr.assigned_role_id as roles_bitmap
+      from veil2.role_roles rr
+     inner join veil2.roles r1
+        on r1.role_id = rr.primary_role_id
+     inner join veil2.roles r2
+        on r2.role_id = rr.assigned_role_id
+     union all
+    select rc.primary_role_id, rr.assigned_role_id,
+           rc.id_chain || '->' || rr.assigned_role_id::text,
+	   rc.name_chain || '->' || r.role_name,
+	   rc.context_type_id,
+	   rc.context_id,
+	   rc.roles_bitmap + rr.assigned_role_id
+      from role_chains rc
+     inner join veil2.role_roles rr
+        on rr.primary_role_id = rc.assigned_role_id
+       and rr.context_type_id = rc.context_type_id
+       and rr.context_id = rc.context_id
+     inner join veil2.roles r
+        on r.role_id = rr.assigned_role_id
+     where not rc.roles_bitmap ? rr.assigned_role_id
+   ),
+  all_contexts as
+   (
+     select distinct context_type_id, context_id
+       from role_chains
+   ),
+  base_roles as
+   (
+     select r.role_id as primary_role_id, 
+            r.role_id as assigned_role_id, 
+            r.role_id::text as id_chain,
+            r.role_name as name_chain,
+            ac.context_type_id,
+            ac.context_id
+       from veil2.roles r
+      cross join all_contexts ac
+   )  
+select primary_role_id, assigned_role_id,
+       context_type_id,
+       context_id, id_chain, name_chain
+  from role_chains
+ union all
+select primary_role_id, assigned_role_id,
+       context_type_id,
+       context_id, id_chain, name_chain
+  from base_roles
+order by 3, 4, 1, 2;
+
+comment on view veil2.role_chains is
+'This is a developer view.  It is intended for development and
+debugging, and provides a way to view role mappings in a simple but
+complete way.  Try it, is should immediately make sense.';
+
+
+\echo ......privilege_assignments...
+create or replace
+view veil2.privilege_assignments as
+select aar.accessor_id, rp.privilege_id,
+       aar.context_type_id as assigned_context_type_id,
+       aar.context_id as assigned_context_id,
+       rp.role_id as assigned_role_id,
+       rc.assigned_role_id as priv_bearing_role_id,
+       rc.id_chain as role_id_mapping,
+       rc.name_chain as role_name_mapping,
+       rc.context_type_id as mapping_context_type_id,
+       rc.context_id as mapping_context_id
+  from veil2.role_privileges rp
+ inner join veil2.role_chains rc
+    on rc.assigned_role_id = rp.role_id
+ inner join veil2.all_accessor_roles aar
+    on aar.role_id = rc.primary_role_id;
+
+comment on view veil2.privilege_assignments is
+'Developer view that shows how accessors get privileges.  It shows the
+roles that the user is assigned, and the context in which they are
+assigned, as well as the mappings from role to role to privilege which
+give that resulting privilege to the accessor.
+
+If you are uncertain how accessor 999 has privilege 333, then simply
+run:
+
+select * from veil2.privilege_assignments where accessor_id = 999 and
+privilege_id = 333;';
+
+
 \echo ...creating materialized view refresh functions...
 
 \echo ...refresh_accessor_privs()...
@@ -681,5 +815,4 @@ this trigger may prove to be significant.  If so, you may choose to
 drop it and use other mechanisms to refresh the affected materialized
 views.  Note that this will mean that the materialzed views will not
 always be up to date, so this is a trade-off that must be evaluated.';
-
 

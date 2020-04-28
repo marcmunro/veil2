@@ -1,10 +1,10 @@
 -- Create the veil2 demo app
 
 -- TODO:
--- ADD CONTEXT FIELDS INTO SESSION PARAMETERS
-
+-- Need view to identify allowed login contexts
+-- Check whether role->role in global context is included in other
+-- role->role mappings.  It should not be.
 -- NEED UNIT TESTS FOR ROLE MAPPING IN DIFFERENT CONTEXTS
-
 
 -- PROBLEM: The context-based role->role mapping stuff does not work.
 -- DETAILS:
@@ -762,22 +762,15 @@ select 'Simon sees: ', * from demo.projects;
 
 /*
 
-is a hash (sha-256) of the concatenation of:
-  - the session_token;
-  - the nonce as a lower-case hexadecimal string;
-  - the user''s authentication token for _authent_type, which must match
-    the value in veil2.authentication_details.
 
-This somewhat convoluted protocol is designed to protect the user''s
-authentication credentials (they are not sent over the connection in a
-way that they can be easily extracted), and to prevent replay attacks.';
+How do I have a certain privilege?
 
+i_have_priv_how(priv)
 
-select *
-  from veil2.create_session(114, 'plaintext') c
- cross join veil2.open_session(c.session_id, 1, 'passwd7') o1;
-
-
+check in which contexts I have that priv.
+For each context
+  for each role assigned
+    
 
 
 */

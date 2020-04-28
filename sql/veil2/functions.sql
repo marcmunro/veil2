@@ -128,7 +128,7 @@ are not sent to the client.
 
 Note that the return type is not relevant but using bool rather than
 void makes formatting tests results easier as it makes it easier to
-write queries that call the function return no rows';
+write queries that call the function that return no rows';
 
 
 \echo ......create_session()...
@@ -364,6 +364,7 @@ declare
   _nonces bitmap;
   _has_authenticated boolean;
   _session_token text;
+  _context_type_id integer;
   authent_type text;
   expired bool;
   can_connect bool;
@@ -375,15 +376,24 @@ begin
      set is_open = false;
   select s.accessor_id, s.expires < now(),
          s.nonces, s.authent_type,
-	 has_authenticated, token
+	 ac.context_type_id,
+	 s.has_authenticated, s.token
     into _accessor_id, expired,
          _nonces, authent_type,
+	 _context_type_id,
 	 _has_authenticated, _session_token
     from veil2.sessions s
+    left outer join veil2.accessor_contexts ac
+      on ac.accessor_id = s.accessor_id
+     and ac.context_type_id = ac.context_type_id
+     and ac.context_id = ac.context_id
    where s.session_id = open_session.session_id;
 
   if not found then
     raise warning 'SECURITY: Login attempt with no session: %',  session_id;
+    errmsg = 'AUTHFAIL';
+  elsif _context_type_id is null then
+    raise warning 'SECURITY: Login attempt for invalid context: %',  session_id;
     errmsg = 'AUTHFAIL';
   elsif expired then
     errmsg = 'EXPIRED';

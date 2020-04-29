@@ -138,14 +138,17 @@ expand_privs as
   (
     select assignment_context_type_id as context_type_id,
            assignment_context_id as context_id,
+	   scope_type_id, scope_id, 
            bits(privs) priv_id
       from veil2.all_accessor_privs
      where accessor_id = -6
   ),
 all_privs as
   (
-    select ep.context_type_id, ep.context_id, ep.priv_id,
-           p.privilege_name
+    select distinct
+           ep.context_type_id, ep.context_id, 
+	   ep.scope_type_id, ep.scope_id, 
+           ep.priv_id, p.privilege_name
       from expand_privs ep
      inner join veil2.privileges p
         on p.privilege_id = ep.priv_id
@@ -189,13 +192,13 @@ select null
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = 1
+	   where scope_type_id = 1
 	     and privilege_name = 'test_privilege_5glob')::integer, 
 	 1, 'Expect priv5glob to be promoted to global context')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = 1
+	   where scope_type_id = 1
 	     and priv_id >= (select priv from min_test_priv)
                  -- ignore non-test privileges
 	 )::integer,
@@ -204,48 +207,48 @@ select null
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -3
-	     and context_id = -3 -- The owning corp of the project
+	   where scope_type_id = -3
+	     and scope_id = -3 -- The owning corp of the project
 	     and privilege_name = 'test_privilege_5corp')::integer, 
 	 1, 'Expect priv5corp to be promoted to corporate context')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -3
+	   where scope_type_id = -3
 	     and priv_id != 0)::integer, 
 	 1, 'Expect only priv5corp to be promoted to corporate context')
     -- Check that priv5div got promoted to div context
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -4
-	     and context_id = -41 -- The owning div of the project
+	   where scope_type_id = -4
+	     and scope_id = -41 -- The owning div of the project
 	     and privilege_name = 'test_privilege_5div')::integer, 
 	 1, 'Expect priv5div to be promoted to div context')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -4)::integer, 
+	   where scope_type_id = -4)::integer, 
 	 1, 'Expect only priv5div to be promoted to div context')
     -- Check that priv5dept got promoted to dept context
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -5
-	     and context_id = -52 -- The owning dept of the project
+	   where scope_type_id = -5
+	     and scope_id = -52 -- The owning dept of the project
 	     and privilege_name = 'test_privilege_5dept')::integer, 
 	 1, 'Expect priv5dept to be promoted to dept context')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -5)::integer, 
+	   where scope_type_id = -5)::integer, 
 	 1, 'Expect only priv5dept to be promoted to dept context')
     -- Finally check that priv5 appears in the appropriate proj context
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -6
-	     and context_id = -61 
+	   where scope_type_id = -6
+	     and scope_id = -61 
 	     and privilege_name = 'test_privilege_5')::integer, 
 	 1, 'Expect priv5 to exist in proj context');
 
@@ -265,14 +268,17 @@ expand_privs as
   (
     select assignment_context_type_id as context_type_id,
            assignment_context_id as context_id,
+	   scope_type_id, scope_id, 
            bits(privs) priv_id
       from veil2.all_accessor_privs
      where accessor_id = -5
   ),
 all_privs as
   (
-    select ep.context_type_id, ep.context_id, ep.priv_id,
-           p.privilege_name
+    select distinct
+           ep.context_type_id, ep.context_id,
+	   ep.scope_type_id, ep.scope_id, 
+           ep.priv_id, p.privilege_name
       from expand_privs ep
      inner join veil2.privileges p
         on p.privilege_id = ep.priv_id
@@ -316,70 +322,71 @@ select null
 	 2, 'Expect roles 8 and 9 for dept -54')
 
     -- Check that priv5glob got promoted to global context
+    -- The count is two as there are two distinct role assignments
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = 1
+	   where scope_type_id = 1
 	     and privilege_name = 'test_privilege_5glob')::integer, 
-	 1, 'Expect priv5glob to be promoted to global context')
+	 2, 'Expect priv5glob to be promoted to global context')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = 1)::integer, 
-	 1, 'Expect only priv 18 to be promoted to global context')
+	   where scope_type_id = 1)::integer, 
+	 2, 'Expect only priv 18 to be promoted to global context')
     -- Check that priv5corp got promoted to corp context
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -3
-	     and context_id = -3 -- The owning corp of the project
+	   where scope_type_id = -3
+	     and scope_id = -3 -- The owning corp of the project
 	     and privilege_name = 'test_privilege_5corp')::integer, 
 	 1, 'Expect priv5corp to be promoted to corporate context')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -3
-	     and context_id = -3)::integer, 
+	   where scope_type_id = -3
+	     and scope_id = -3)::integer, 
 	 1, 'Expect only priv5corp to be promoted for corporation -3')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -3
-	     and context_id = -31 -- The owning corp of the project
+	   where scope_type_id = -3
+	     and scope_id = -31 -- The owning corp of the project
 	     and privilege_name = 'test_privilege_5corp')::integer, 
 	 1, 'Expect priv5corp to be promoted to corporate context')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -3
-	     and context_id = -31)::integer, 
+	   where scope_type_id = -3
+	     and scope_id = -31)::integer, 
 	 1, 'Expect only priv5corp to be promoted for corporation -3')
     -- Check that priv5div got promoted to div context
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -4
-	     and context_id = -41 -- The owning div of the project
+	   where scope_type_id = -4
+	     and scope_id = -41 -- The owning div of the project
 	     and privilege_name = 'test_privilege_5div')::integer, 
 	 1, 'Expect priv5div to be promoted to div context for div -41')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -4
-	     and context_id = -41)::integer, 
+	   where scope_type_id = -4
+	     and scope_id = -41)::integer, 
 	 1, 'Expect only priv5div to be promoted to div context for div -41')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -4
-	     and context_id = -44 -- The owning div of the project
+	   where scope_type_id = -4
+	     and scope_id = -44 -- The owning div of the project
 	     and privilege_name = 'test_privilege_5div')::integer, 
 	 1, 'Expect priv5div to be promoted to div context for div -44')
     or test.expect(
          (select count(*)
 	    from all_privs
-	   where context_type_id = -4
-	     and context_id = -44)::integer, 
+	   where scope_type_id = -4
+	     and scope_id = -44)::integer, 
 	 1, 'Expect only priv5div to be promoted to div context for div -44')
     -- Ensure we have priv5dept in to dept context
     or test.expect(

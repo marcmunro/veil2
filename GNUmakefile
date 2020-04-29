@@ -27,6 +27,7 @@ drop:
 
 # You can run this using several target names.  It requires the VPD
 # database to exist and will create it if necessary.
+# TODO: COMMENT THIS: The grep below is used to eliminate lines...
 unit check test: db
 	@echo "Performing unit tests..."
 	@psql -v flags=$(FLAGS) -f test/test_veil2.sql -d vpd | grep -v '^##'

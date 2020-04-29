@@ -426,6 +426,8 @@ comment on trigger parties_tbl_aut on demo.parties_tbl is
 
 -- STEP5:
 -- Link security_contexts back to the database being secured.
+-- THIS SHOULD ALSO HANDLE UPDATES TO SOME OF THE CONTEXT VIEWS???
+
 
 -- 5.1 Parties:
 --     this handles corp and org contexts

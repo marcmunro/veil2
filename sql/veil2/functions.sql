@@ -289,20 +289,25 @@ begin
        where s.session_id = load_session_privs.session_id
     ), all_session_privs as
     (
-      select session_id, asp.assignment_context_type_id,
-             asp.assignment_context_id, asp.roles,
-	     asp.privs
+      select session_id,
+      	     asp.scope_type_id, asp.scope_id,
+	     union_of(asp.roles) as roles,
+	     union_of(asp.privs) as privs
         from session_context c
        inner join veil2.all_accessor_privs asp
-          on asp.mapping_context_type_id = c.context_type_id
-	 and asp.mapping_context_id = c.context_id
+          on asp.assignment_context_type_id = c.context_type_id
+	 and asp.assignment_context_id = c.context_id
+	 and (   asp.mapping_context_type_id is null
+              or (    asp.mapping_context_type_id = c.context_type_id
+	          and asp.mapping_context_id = c.context_id))
        where asp.accessor_id = _accessor_id
+       group by asp.scope_type_id, asp.scope_id
     ),
   global_privs as
     (
       select privs
         from all_session_privs
-       where assignment_context_type_id = 1
+       where scope_type_id = 1
     )
   insert
     into session_privileges
@@ -385,15 +390,15 @@ begin
     from veil2.sessions s
     left outer join veil2.accessor_contexts ac
       on ac.accessor_id = s.accessor_id
-     and ac.context_type_id = ac.context_type_id
-     and ac.context_id = ac.context_id
+     and ac.context_type_id = s.context_type_id
+     and ac.context_id = s.context_id
    where s.session_id = open_session.session_id;
 
   if not found then
     raise warning 'SECURITY: Login attempt with no session: %',  session_id;
     errmsg = 'AUTHFAIL';
   elsif _context_type_id is null then
-    raise warning 'SECURITY: Login attempt for invalid context: %',  session_id;
+    raise warning 'SECURITY: Login attempt for invalid context';
     errmsg = 'AUTHFAIL';
   elsif expired then
     errmsg = 'EXPIRED';
@@ -415,9 +420,9 @@ begin
         -- The session has already been opened.  From here on we 
 	-- use different authentication tokens for each open_session()
 	-- call in order to avoid replay attacks.
-	-- This will be the sha1 of the concatenation of
-	--   the session token
-	--   the nonce as a lower-case hexadecimal string
+	-- This will be the sha1 of the concatenation of:
+	--   - the session token
+	--   - the nonce as a lower-case hexadecimal string
 	if not veil2.check_continuation(nonce, _session_token,
 	       				authent_token) then
           raise warning 'SECURITY: incorrect continuation token for %, %',

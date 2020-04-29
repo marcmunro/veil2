@@ -1,5 +1,4 @@
 -- TODO:
--- Test session closure
 -- test privileges after failed open
 -- test i_have_priv_in_superior_scope()
 --      and access to veil2.context_roles in various contexts
@@ -162,6 +161,7 @@ select session_id from session_parameters;
 -- authentication mechanism.
 select null
  where not veil2.reset_session();
+
 with session as
   (
     select o.*, ms.session_id1
@@ -175,6 +175,8 @@ select null
  where test.expect(s.success, true, 'Authentication should have succeeded (2)')
     or test.expect(s.errmsg is null, true,
        		   'There should be no error message (2)');
+
+
 -- Create another valid session - this one for accessor -6
 with session as
   (
@@ -377,13 +379,16 @@ select null
 \echo ...close_session()...
 select null
   from veil2.create_session(-6, 'plaintext') c
- cross join veil2.open_session(c.session_id, 1, 'password6') o;
+ cross join veil2.open_session(c.session_id, 1, 'password6') o
+ where not o.success;   -- Ensure no rows returned
 
 select null
  where test.expect(veil2.i_have_global_priv(0), true,
        		   'Session should have connect privilege(2)');
 
-select null from veil2.close_session();
+select null
+  from veil2.close_session()
+ where not close_session;  -- Ensure no rows returned
 
 select null
  where test.expect(veil2.i_have_global_priv(0), false,
@@ -613,3 +618,62 @@ select null
 -- Reconnect as default user
 \echo :old_connector
 \c :old_connector
+
+\echo ...context in session handling...
+
+\echo .....create and open session(invalid context)...
+-- Invalid context.  Authentication will fail.
+with session as
+  (
+    select o.*
+      from veil2.create_session(-2, 'plaintext', -3, -31) c
+     cross join veil2.open_session(c.session_id, 1, 'password2') o
+  )
+select null
+  from session s
+ where test.expect(s.success, false, 'Authentication should have failed')
+    or test.expect(s.errmsg, 'AUTHFAIL',
+       		   'Authentication message should be AUTHFAIL(3)');
+
+-- Make the context a valid one
+create or replace
+view veil2.accessor_contexts (
+  accessor_id, context_type_id, context_id
+) as
+select accessor_id, 1, 0
+  from veil2.accessors
+ union all select -2, -3, -31;
+
+-- Context is valid but we have no connect privilege in this context.
+-- Authentication will still fail.
+with session as
+  (
+    select o.*
+      from veil2.create_session(-2, 'plaintext', -3, -31) c
+     cross join veil2.open_session(c.session_id, 1, 'password2') o
+  )
+select null
+  from session s
+ where test.expect(s.success, false, 'Authentication should have failed')
+    or test.expect(s.errmsg, 'AUTHFAIL',
+       		   'Authentication message should be AUTHFAIL(4)');
+
+insert -- Assign connect role to -2 in context -3,-31
+  into veil2.accessor_roles
+       (accessor_id, role_id, context_type_id, context_id)
+values (-2, 0, -3, -31);
+
+-- Now we should have connect privilege.  Authentication should succeed.
+with session as
+  (
+    select o.*
+      from veil2.create_session(-2, 'plaintext', -3, -31) c
+     cross join veil2.open_session(c.session_id, 1, 'password2') o
+  )
+select null
+  from session s
+ where test.expect(s.success, true, 'Authentication should not have failed');
+
+
+
+

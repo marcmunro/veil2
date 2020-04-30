@@ -35,7 +35,7 @@ values ('bcrypt', true,
 
 insert into veil2.privileges
        (privilege_id, privilege_name,
-        promotion_context_type_id, description)
+        promotion_scope_type_id, description)
 values (0, 'connect', 1,
         'May connect to the database to execute queries.'),
        (1, 'become user', null,

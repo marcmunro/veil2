@@ -10,9 +10,9 @@ select accessor_id, role_id,
   from veil2.accessor_roles;
 
 create or replace
-view veil2.context_promotions (
-  context_type_id, context_id,
-  promoted_context_type_id, promoted_context_id
+view veil2.scope_promotions (
+  scope_type_id, scope_id,
+  promoted_scope_type_id, promoted_scope_id
 ) as
 select null::integer, null::integer,
        null::integer, null::integer

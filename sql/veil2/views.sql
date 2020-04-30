@@ -29,11 +29,11 @@ with all_role_privileges (role_id, privilege_id) as
       from veil2.role_privileges
   )
 select arp.role_id, bitmap_of(p.privilege_id),
-       bitmap_of(case when p.promotion_context_type_id = 1
+       bitmap_of(case when p.promotion_scope_type_id = 1
        		 then p.privilege_id else null end),
        bitmap_of(case
-                 when p.promotion_context_type_id is null then null
-                 when p.promotion_context_type_id = 1 then null
+                 when p.promotion_scope_type_id is null then null
+                 when p.promotion_scope_type_id = 1 then null
                  else p.privilege_id end)
   from all_role_privileges arp
  inner join veil2.privileges p
@@ -250,17 +250,17 @@ the global context, and those defined in the parties table to connect
 in the context of the client that they work for.';
 
 
-\echo ......context_promotions...
+\echo ......scope_promotions...
 create or replace
-view veil2.context_promotions (
-  context_type_id, context_id,
-  promoted_context_type_id, promoted_context_id
+view veil2.scope_promotions (
+  scope_type_id, scope_id,
+  promoted_scope_type_id, promoted_scope_id
 ) as
 select null::integer, null::integer,
        null::integer, null::integer
 where false;
 
-comment on view veil2.context_promotions is
+comment on view veil2.scope_promotions is
 'This view lists all possible context promotions.  It is used for
 privilege promotion when a role that is assigned in a restricted
 security context has privileges that must be applied in a less
@@ -277,9 +277,9 @@ context which is a subcontext of it, you would redefine your view
 something like this:
 
 create or replace
-view veil2.context_promotions (
-  context_type_id, context_id,
-  promoted_context_type_id, promoted_context_id
+view veil2.scope_promotions (
+  scope_type_id, scope_id,
+  promoted_scope_type_id, promoted_scope_id
 ) as
 select 96, -- dept context type id
        department_id,
@@ -288,116 +288,116 @@ select 96, -- dept context type id
   from departments;
 
 Note that any multi-level context promotions will be handled by
-veil2.all_context_promotions which you should have no need to modify.';
+veil2.all_scope_promotions which you should have no need to modify.';
 
-revoke all on veil2.context_promotions from public;
-grant select on veil2.context_promotions to veil_user;
+revoke all on veil2.scope_promotions from public;
+grant select on veil2.scope_promotions to veil_user;
 
 
-\echo ......all_context_promotions...
+\echo ......all_scope_promotions...
 create or replace
-view veil2.all_context_promotions_v (
-  context_type_id, context_id,
-  promoted_context_type_id, promoted_context_id
+view veil2.all_scope_promotions_v (
+  scope_type_id, scope_id,
+  promoted_scope_type_id, promoted_scope_id
 ) as
-with recursive recursive_context_promotions as
+with recursive recursive_scope_promotions as
   (
-    select context_type_id, context_id,
-           promoted_context_type_id, promoted_context_id
-      from veil2.context_promotions
+    select scope_type_id, scope_id,
+           promoted_scope_type_id, promoted_scope_id
+      from veil2.scope_promotions
      union all
-    select cp.context_type_id, cp.context_id,
-           rcp.promoted_context_type_id, rcp.promoted_context_id
-      from veil2.context_promotions cp
-     inner join recursive_context_promotions rcp
-        on rcp.context_type_id = cp.promoted_context_type_id
-       and rcp.context_id = cp.promoted_context_id
+    select sp.scope_type_id, sp.scope_id,
+           rsp.promoted_scope_type_id, rsp.promoted_scope_id
+      from veil2.scope_promotions sp
+     inner join recursive_scope_promotions rsp
+        on rsp.scope_type_id = sp.promoted_scope_type_id
+       and rsp.scope_id = sp.promoted_scope_id
   )
 select *
-  from recursive_context_promotions;
+  from recursive_scope_promotions;
 
-comment on view veil2.all_context_promotions_v is
-'This takes the simple custom view veil2.context_promotions and makes it
-recursive so that if context a contains context b and context b contains
-context c, then this view will return rows for context c promoting to
-both context b and context a.  You should not need to modify this view
+comment on view veil2.all_scope_promotions_v is
+'This takes the simple custom view veil2.scope_promotions and makes it
+recursive so that if context a contains scope b and scope b contains
+scope c, then this view will return rows for scope c promoting to
+both scope b and scope a.  You should not need to modify this view
 when creating your custom VPD implementation.';
 
 create or replace
-view veil2.all_context_promotions_vv as
-select * from veil2.all_context_promotions_v;
+view veil2.all_scope_promotions_vv as
+select * from veil2.all_scope_promotions_v;
 
-comment on view veil2.all_context_promotions_vv is
-'Exactly as veil2.all_context_promotions_v.  The _vv suffix indicates
+comment on view veil2.all_scope_promotions_vv is
+'Exactly as veil2.all_scope_promotions_v.  The _vv suffix indicates
 that this is a true view, not relying on any materialized views.';
 
 create 
-materialized view veil2.all_context_promotions
-as select * from veil2.all_context_promotions_v;
+materialized view veil2.all_scope_promotions
+as select * from veil2.all_scope_promotions_v;
 
-comment on materialized view veil2.all_context_promotions is
-'This takes the simple custom view veil2.context_promotions and makes it
+comment on materialized view veil2.all_scope_promotions is
+'This takes the simple custom view veil2.scope_promotions and makes it
 recursive so that if context a contains context b and context b contains
 context c, then this view will return rows for context c promoting to
 both context b and context a.  You should not need to modify this view
 when creating your custom VPD implementation.';
 
-revoke all on veil2.all_context_promotions from public;
-grant select on veil2.all_context_promotions to veil_user;
-revoke all on veil2.all_context_promotions_v from public;
-grant select on veil2.all_context_promotions_v to veil_user;
-revoke all on veil2.all_context_promotions_vv from public;
-grant select on veil2.all_context_promotions_vv to veil_user;
+revoke all on veil2.all_scope_promotions from public;
+grant select on veil2.all_scope_promotions to veil_user;
+revoke all on veil2.all_scope_promotions_v from public;
+grant select on veil2.all_scope_promotions_v to veil_user;
+revoke all on veil2.all_scope_promotions_vv from public;
+grant select on veil2.all_scope_promotions_vv to veil_user;
 
 
-\echo ......context_tree...
+\echo ......scope_tree...
 create or replace
-view veil2.context_tree (context_tree) as
+view veil2.scope_tree (scope_tree) as
 with recursive
-  top_contexts as
+  top_scopes as
   (
     select distinct
-           promoted_context_id root_context_id,
-	   promoted_context_type_id root_context_type_id
-      from veil2.context_promotions
-     where promoted_context_id not in (
-        select context_id
-	  from veil2.context_promotions)
+           promoted_scope_id as root_scope_id,
+	   promoted_scope_type_id as root_scope_type_id
+      from veil2.scope_promotions
+     where promoted_scope_id not in (
+        select scope_id
+	  from veil2.scope_promotions)
   ),
-  recursive_context_tree as
+  recursive_scope_tree as
   (    
     select 1 as depth, 
-           '(' || cp.promoted_context_id::text || '.' ||
-	   cp.context_id || ').(' || cp.promoted_context_type_id ||
-	   '.' || cp.context_type_id || ')' as path,
-           cp.promoted_context_id, cp.context_id,
-	   cp.promoted_context_type_id, cp.context_type_id
-      from top_contexts tc
-     inner join veil2.context_promotions cp
-        on cp.promoted_context_id = tc.root_context_id
-       and cp.promoted_context_type_id = tc.root_context_type_id
+           '(' || sp.promoted_scope_id::text || '.' ||
+	   sp.scope_id || ').(' || sp.promoted_scope_type_id ||
+	   '.' || sp.scope_type_id || ')' as path,
+           sp.promoted_scope_id, sp.scope_id,
+	   sp.promoted_scope_type_id, sp.scope_type_id
+      from top_scopes ts
+     inner join veil2.scope_promotions sp
+        on sp.promoted_scope_id = ts.root_scope_id
+       and sp.promoted_scope_type_id = ts.root_scope_type_id
      union all
     select depth + 1, 
-    	   rct.path || '(' || cp.promoted_context_id ||
-	   '.' || cp.context_id || ')',
-           cp.promoted_context_id, cp.context_id,
-	   cp.promoted_context_type_id, cp.context_type_id
-      from recursive_context_tree rct
-     inner join veil2.context_promotions cp
-        on cp.promoted_context_id = rct.context_id
-       and cp.promoted_context_type_id = rct.context_type_id
+    	   rst.path || '(' || sp.promoted_scope_id ||
+	   '.' || sp.scope_id || ')',
+           sp.promoted_scope_id, sp.scope_id,
+	   sp.promoted_scope_type_id, sp.scope_type_id
+      from recursive_scope_tree rst
+     inner join veil2.scope_promotions sp
+        on sp.promoted_scope_id = rst.scope_id
+       and sp.promoted_scope_type_id = rst.scope_type_id
   ),
   format1 as
   (
     select sct1.context_type_name || ':' ||
-    	    promoted_context_id::text as parent,
-           sct2.context_type_name || ':' || context_id::text as child,
+    	    promoted_scope_id::text as parent,
+           sct2.context_type_name || ':' || scope_id::text as child,
 	   depth
-      from recursive_context_tree rct
+      from recursive_scope_tree rst
      inner join veil2.security_context_types sct1
-        on sct1.context_type_id = rct.promoted_context_type_id
+        on sct1.context_type_id = rst.promoted_scope_type_id
      inner join veil2.security_context_types sct2
-        on sct2.context_type_id = rct.context_type_id
+        on sct2.context_type_id = rst.scope_type_id
     order by path
   )
 select format('%' || ((depth)*16 - 14) || 's', '+-') ||
@@ -406,13 +406,13 @@ select format('%' || ((depth)*16 - 14) || 's', '+-') ||
        child 
   from format1;
 
-comment on view veil2.context_tree is
-'Provides a simple ascii-formatted tree representation of our context
+comment on view veil2.scope_tree is
+'Provides a simple ascii-formatted tree representation of our scope
 promotions tree.  This is simply an aid to data visualisation and is not
 used elsewhere in Veil2.';
 
-revoke all on veil2.context_tree from public;
-grant select on veil2.context_tree to veil_user;
+revoke all on veil2.scope_tree from public;
+grant select on veil2.scope_tree to veil_user;
 
 
 \echo ......promotable_privileges...
@@ -422,7 +422,7 @@ as
 select sct.context_type_id, bitmap_of(p.privilege_id)
   from veil2.security_context_types sct
  inner join veil2.privileges p
-    on p.promotion_context_type_id = sct.context_type_id
+    on p.promotion_scope_type_id = sct.context_type_id
 group by sct.context_type_id;
 
 comment on view veil2.promotable_privileges is
@@ -524,20 +524,20 @@ promoted_privs as
     select pp.accessor_id, pp.assignment_context_type_id,
            pp.assignment_context_id, pp.mapping_context_type_id,
 	   pp.mapping_context_id, pp.privilege_id,
-	   acp.promoted_context_type_id as promoted_scope_type_id,
-	   acp.promoted_context_id as promoted_scope_id,
+	   asp.promoted_scope_type_id as promoted_scope_type_id,
+	   asp.promoted_scope_id as promoted_scope_id,
 	   bitmap_of(pp.privilege_id) as promoted_privs
       from promotable_privs pp
      inner join veil2.privileges p
         on p.privilege_id = pp.privilege_id
-     inner join veil2.all_context_promotions acp
-       on acp.context_type_id = pp.assignment_context_type_id
-      and acp.context_id = pp.assignment_context_id
-      and acp.promoted_context_type_id = p.promotion_context_type_id
+     inner join veil2.all_scope_promotions asp
+       on asp.scope_type_id = pp.assignment_context_type_id
+      and asp.scope_id = pp.assignment_context_id
+      and asp.promoted_scope_type_id = p.promotion_scope_type_id
     group by pp.accessor_id, pp.assignment_context_type_id,
              pp.assignment_context_id, pp.mapping_context_type_id,
 	     pp.mapping_context_id, pp.privilege_id,
-	     acp.promoted_context_type_id, acp.promoted_context_id
+	     asp.promoted_scope_type_id, asp.promoted_scope_id
 )
 select accessor_id,
        -- The assignment fields give the context of the role
@@ -574,88 +574,11 @@ select accessor_id,
        null, promoted_privs, 'promoted'
   from promoted_privs;
 
-
-/* PREVIOUS VERSION
-
-with direct_privs(
-    accessor_id, assignment_context_type_id,
-    assignment_context_id, mapping_context_type_id,
-    mapping_context_id, roles,
-    privs, global_privs, promotable_privs) as
-  (
-    -- Identfies all accessor roles and privs in all contexts, without
-    -- privilege promotion, identifying the context of the original
-    -- role assignment, and the context of role->role mappings.  Note
-    -- that a null mapping context should be interpreted as meaning
-    -- that the mapping applies in all contexts.
-    select aar.accessor_id, aar.context_type_id,
-           aar.context_id, arp.context_type_id,
-           arp.context_id, union_of(arp.roles),
-           union_of(arp.privileges),
-           union_of(arp.global_privileges),
-           union_of(arp.promotable_privileges)
-      from veil2.all_accessor_roles aar
-     inner join veil2.all_role_privs arp
-        on arp.role_id = aar.role_id
-     group by aar.accessor_id, aar.context_type_id, aar.context_id,
-              arp.context_type_id, arp.context_id
-  ),
-promotable_privs as
-  (
-    -- Provides a row for each promotable privilege (ie privilege that
-    -- may be promoted).
-    select dp.accessor_id, dp.assignment_context_type_id,
-           dp.assignment_context_id, dp.mapping_context_type_id,
-           dp.mapping_context_id, 
-           bits(dp.promotable_privs) as privilege_id
-      from direct_privs dp
-     where promotable_privs is not null
-  ),
-promoted_privs as
-  (
-    select pp.accessor_id, acp.promoted_context_type_id,
-           acp.promoted_context_id, pp.mapping_context_type_id,
-	   pp.mapping_context_id,
-	   bitmap_of(pp.privilege_id) as promoted_privs
-      from promotable_privs pp
-     inner join veil2.privileges p
-        on p.privilege_id = pp.privilege_id
-     inner join veil2.all_context_promotions acp
-       on acp.context_type_id = pp.assignment_context_type_id
-      and acp.context_id = pp.assignment_context_id
-      and acp.promoted_context_type_id = p.promotion_context_type_id
-      group by pp.accessor_id, acp.promoted_context_type_id,
-      	      acp.promoted_context_id, pp.mapping_context_type_id,
-	       pp.mapping_context_id
-  )
-select accessor_id, assignment_context_type_id,
-       assignment_context_id, mapping_context_type_id,
-       mapping_context_id, roles,
-	   privs, 'direct' as source
-  from direct_privs
- union all
-       -- The following gives those privileges that have been
-	   -- promoted to global scope regardless of how they were
-	   -- assigned.
-select accessor_id, 1, 0, mapping_context_type_id,
-       mapping_context_id, 
-	   null,
-       global_privs, 'global'
-  from direct_privs
- union all
-select accessor_id, promoted_context_type_id,
-       promoted_context_id, mapping_context_type_id,
-       mapping_context_id,
-	   null, promoted_privs,
-	   'promoted'
-  from promoted_privs;
-
-*/
-
 comment on view veil2.all_context_privs is
 'This is an internal view aimed to help development and debugging.
 There should be no need to give anyone other than developers any
 access to this.';
+
 
 \echo ......all_accessor_privs...
 create or replace
@@ -828,21 +751,21 @@ comment on function veil2.refresh_accessor_privs() is
 data.';
 
 
-\echo ...refresh_context_promotions()...
+\echo ...refresh_scope_promotions()...
 create or replace
-function veil2.refresh_context_promotions()
+function veil2.refresh_scope_promotions()
   returns trigger
 as
 $$
 begin
-  refresh materialized view veil2.all_context_promotions;
+  refresh materialized view veil2.all_scope_promotions;
   refresh materialized view veil2.all_accessor_privs;
   return new;
 end;
 $$
 language 'plpgsql' security definer volatile leakproof;
 
-comment on function veil2.refresh_context_promotions() is
+comment on function veil2.refresh_scope_promotions() is
 'Trigger function to refresh materialized views that provide or use
 privilege promotion data.';
 
@@ -907,7 +830,7 @@ create trigger security_contexts__aiudt
   after insert or update or delete or truncate
   on veil2.security_contexts
   for each statement
-  execute procedure veil2.refresh_context_promotions();
+  execute procedure veil2.refresh_scope_promotions();
 
 comment on trigger security_contexts__aiudt on veil2.security_contexts is
 'Refresh materialized views that are constructed from the

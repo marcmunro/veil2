@@ -644,25 +644,6 @@ select accessor_id, 1, 0
   from veil2.accessors
  union all select -2, -3, -31;
 
--- Context is valid but we have no connect privilege in this context.
--- Authentication will still fail.
-with session as
-  (
-    select o.*
-      from veil2.create_session(-2, 'plaintext', -3, -31) c
-     cross join veil2.open_session(c.session_id, 1, 'password2') o
-  )
-select null
-  from session s
- where test.expect(s.success, false, 'Authentication should have failed')
-    or test.expect(s.errmsg, 'AUTHFAIL',
-       		   'Authentication message should be AUTHFAIL(4)');
-
-insert -- Assign connect role to -2 in context -3,-31
-  into veil2.accessor_roles
-       (accessor_id, role_id, context_type_id, context_id)
-values (-2, 0, -3, -31);
-
 -- Now we should have connect privilege.  Authentication should succeed.
 with session as
   (

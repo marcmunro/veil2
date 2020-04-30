@@ -174,12 +174,12 @@ create table projects (
   project_name	  text
 );
 
--- Redefine context_promotions view to show above org hierarchy and
+-- Redefine scope_promotions view to show above org hierarchy and
 -- proj->dept mapping
 create or replace
-view veil2.context_promotions (
-  context_type_id, context_id,
-  promoted_context_type_id, promoted_context_id
+view veil2.scope_promotions (
+  scope_type_id, scope_id,
+  promoted_scope_type_id, promoted_scope_id
 ) as
 select sc1.context_type_id, oh.org_id,
        sc2.context_type_id, oh.superior_org_id
@@ -197,13 +197,13 @@ create trigger org_hierarchy__aiudt
   after insert or update or delete or truncate
   on org_hierarchy
   for each statement
-  execute procedure veil2.refresh_context_promotions();
+  execute procedure veil2.refresh_scope_promotions();
 
 create trigger projects__aiudt
   after insert or update or delete or truncate
   on projects
   for each statement
-  execute procedure veil2.refresh_context_promotions();
+  execute procedure veil2.refresh_scope_promotions();
 
 \echo ...creating test parties...
 insert into veil2.accessors
@@ -403,7 +403,7 @@ with mp as (
 insert
   into veil2.privileges
        (privilege_id, privilege_name,
-        promotion_context_type_id)
+        promotion_scope_type_id)
 select * from rows;
 
 -- And role_privileges: assign test_priv_n* to test_role_n

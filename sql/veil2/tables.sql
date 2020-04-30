@@ -106,7 +106,7 @@ grant select on veil2.security_contexts to veil_user;
 create table veil2.privileges (
   privilege_id			integer not null,
   privilege_name		text not null,
-  promotion_context_type_id	integer,
+  promotion_scope_type_id	integer,
   description			text
 );
 
@@ -132,7 +132,7 @@ comment on column veil2.privileges.privilege_name is
 'A descriptive name for a privilege.  This should generally be enough to 
 figure out the purpose of the privilege.';
 
-comment on column veil2.privileges.promotion_context_type_id is
+comment on column veil2.privileges.promotion_scope_type_id is
 'Identfies a security context type to which this privileges scope
 should be promoted if possible.  This allows roles which will be
 assigned in a restricted security context to contain privileges which
@@ -154,7 +154,7 @@ alter table veil2.privileges add constraint privilege__pk
   primary key(privilege_id);
 
 alter table veil2.privileges add constraint privilege__promotion_context_type_fk
-  foreign key(promotion_context_type_id)
+  foreign key(promotion_scope_type_id)
   references veil2.security_context_types(context_type_id);
 
 revoke all on veil2.privileges from public;

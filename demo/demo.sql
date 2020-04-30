@@ -115,6 +115,8 @@ values (100, 2, 100, 100, 'Veil Corp', null),
        (122, 1, 102, 102, 'Phil', 'passwd13'),
        (123, 1, 102, 102, 'Pete', 'passwd14'),
        (124, 1, 102, 102, 'Pam', 'passwd15');
+
+/* ???
 with all_role_privs (
   role_id, roles,
   privileges, global_privileges, 
@@ -134,7 +136,7 @@ select arr.primary_role_id,
     on drp.role_id = arr.primary_role_id
  group by arr.primary_role_id, arr.context_type_id, arr.context_id)
 select * from all_role_privs;
-
+*/
 grant all on demo.parties_tbl to demouser;
 
 \echo ...parties...
@@ -259,7 +261,7 @@ values (3, 'corp context',
 
 insert into veil2.privileges
        (privilege_id, privilege_name,
-        promotion_context_type_id, description)
+        promotion_scope_type_id, description)
 values (16, 'select party_types',
         null, 'Allow select on demo.party_types'),
        (17, 'select parties',
@@ -728,6 +730,7 @@ select *
 	     	    'base64')) o2;
  
 select 'Bob sees: ', * from demo.parties;
+
 
 -- Log Carol in.
 select *

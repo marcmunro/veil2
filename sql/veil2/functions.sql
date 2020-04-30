@@ -295,9 +295,9 @@ begin
 	     union_of(asp.privs) as privs
         from session_context c
        inner join veil2.all_accessor_privs asp
-          on asp.assignment_context_type_id = c.context_type_id
+          on /*asp.assignment_context_type_id = c.context_type_id
 	 and asp.assignment_context_id = c.context_id
-	 and (   asp.mapping_context_type_id is null
+	 and */(   asp.mapping_context_type_id is null
               or (    asp.mapping_context_type_id = c.context_type_id
 	          and asp.mapping_context_id = c.context_id))
        where asp.accessor_id = _accessor_id
@@ -653,14 +653,14 @@ declare
 begin
   select true
     into have_priv
-    from veil2.all_context_promotions acp
+    from veil2.all_scope_promotions asp
    cross join session_parameters p
    inner join session_privileges sp
-      on sp.context_type_id = acp.promoted_context_type_id
-     and sp.context_id = acp.promoted_context_id
+      on sp.context_type_id = asp.promoted_context_type_id
+     and sp.context_id = asp.promoted_context_id
    where p.is_open
-     and acp.context_type_id = _context_type_id
-     and acp.context_id = _context_id
+     and asp.context_type_id = _context_type_id
+     and asp.context_id = _context_id
      and sp.privs ? priv;
   return found;
 end

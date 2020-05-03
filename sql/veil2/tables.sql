@@ -2,7 +2,7 @@
 
 \echo ......scope_types...
 create table veil2.scope_types (
-  scope_type_id	       	integer not null,
+  scope_type_id	       		integer not null,
   scope_type_name		text not null,
   description			text not null
 );
@@ -16,14 +16,13 @@ alter table veil2.scope_types
   unique(scope_type_name);
 
 comment on table veil2.scope_types is
-'Describes the security contexts for this VPD.  This is primarily for
+'Describes the security scopes for this VPD.  This is primarily for
 documentation purposes though also provides a foreign key for
 context-based role assignments.
 
-VPD Implementation Notes:
-Insert 1 record into this table for each type of security context that
-you wish to implement.  Veil2 comes with 2 built-in security contexts:
-global and personal.';
+VPD Implementation Notes: Insert 1 record into this table for each
+type of scope that you wish to implement.  Veil2 comes with 2 built-in
+scopes, for the security contexts global and personal.';
 
 revoke all on veil2.scope_types from public;
 grant select on veil2.scope_types to veil_user;
@@ -32,7 +31,7 @@ grant all on veil2.scope_types to demouser;
 
 \echo ......scopes...
 create table veil2.scopes (
-  scope_type_id	       	integer not null,
+  scope_type_id	       		integer not null,
   scope_id			integer not null
 );
 
@@ -46,13 +45,13 @@ alter table veil2.scopes
   references veil2.scope_types(scope_type_id);
 
 comment on table veil2.scopes is
-'A context identifies a type of access, or a reason for access.  For
-instance, personal context applies to data relating to a person.  It is
-that person''s data and they should have access to it because it is
-theirs.  Privileges assigned in personal context apply only to data that
-belongs to the accessor.
+'A scope or context identifies a type of access, or a reason for
+access.  For instance, personal context applies to data relating to a
+person.  It is that person''s data and they should have access to it
+because it is theirs.  Privileges applied in personal scope apply only
+to data that belongs to the accessor.
 
-Note that global context uses scope_id 0.  Ideally it would be null,
+Note that global scope uses scope_id 0.  Ideally it would be null,
 since it does not relate directly to any other entity but that makes
 defining foreign key relationships (to this table) difficult.  Using a 
 reserved value of zero is just simpler (though suckier).
@@ -86,13 +85,13 @@ You will, of course, also need to ensure that the corp_id field is
 populated.';
 
 comment on column veil2.scopes.scope_type_id is
-'Identifies the type of context that we are describing.';
+'Identifies the type of scope that we are describing.';
 
 comment on column veil2.scopes.scope_id is
-'This, in conjunction with the scope_type_id fully identifies a
-context.  For global context, this id is 0: ideally it would be null but
-as it needs to be part of the primary key of this table, that is not
-a good option.
+'This, in conjunction with the scope_type_id fully identifies a scope
+or context.  For global scope, this id is 0: ideally it would be null
+but as it needs to be part of the primary key of this table, that is
+not a good option.
 
 The scope_id provides a link back to the database we are protecting,
 and will usually be the key to some entity that can be said to ''own''
@@ -133,18 +132,18 @@ comment on column veil2.privileges.privilege_name is
 figure out the purpose of the privilege.';
 
 comment on column veil2.privileges.promotion_scope_type_id is
-'Identfies a security context type to which this privileges scope
-should be promoted if possible.  This allows roles which will be
-assigned in a restricted security context to contain privileges which
-necessarily must apply in a superior scope (ie as if they has been
-assigned in a superior context).
+'Identfies a security ccope type to which this privileges scope should
+be promoted if possible.  This allows roles which will be assigned in
+a restricted security context to contain privileges which necessarily
+must apply in a superior scope (ie as if they has been assigned in a
+superior context).
 
 For example a hypothetical ''select lookup'' privilege may be assigned
 in a team context (via a hypothetical ''team member'' role).  But if the
 lookups table is not in any way team-specific it makes no sense to apply
-that privilege in that context.  Instead, we will promote that privilege
+that privilege in that scope.  Instead, we will promote that privilege
 to a scope where it does make sense.  See the veil docs for more on
-privilege promotion.';
+privilege promotion and on the use of the terms scope and context.';
 
 comment on column veil2.privileges.description is
 'For any privilege whose purpose cannot easily be determined from the
@@ -153,7 +152,7 @@ name, a description of the privilege should appear here.';
 alter table veil2.privileges add constraint privilege__pk
   primary key(privilege_id);
 
-alter table veil2.privileges add constraint privilege__promotion_context_type_fk
+alter table veil2.privileges add constraint privilege__promotion_scope_type_fk
   foreign key(promotion_scope_type_id)
   references veil2.scope_types(scope_type_id);
 
@@ -165,7 +164,7 @@ grant select on veil2.privileges to veil_user;
 create table veil2.role_types (
   role_type_id		      integer not null,
   role_type_name	      text not null,
-  description			text
+  description		      text
 );
 
 comment on table veil2.role_types is
@@ -600,6 +599,16 @@ comment on table veil2.sessions is
 expired sessions and keep this table vacuumed.  Note that for
 performance reasons we may want to disable any foreign key constraints
 on this table.';
+
+comment on column veil2.sessions.context_type_id is
+'This, along with the context_id column describes the context used for
+authentication of this session.  This allows users to log in in
+specific contexts (eg for dept a, rather than dept b), within which
+role mappings may differ.  This context information allows the session
+to determine which role mappings to apply.';
+
+comment on column veil2.sessions.context_id is
+'See comment on veil2.sessions.context_type_id';
 
 alter table veil2.sessions add constraint session__pk
   primary key(session_id);

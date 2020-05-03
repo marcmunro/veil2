@@ -13,9 +13,7 @@ Custom docbook stylesheet for html for SAR docs.
                 exclude-result-prefixes="saxon lxslt redirect exsl doc"
                 extension-element-prefixes="saxon redirect lxslt exsl">
 
-  <xsl:import 
-      href="/usr/share/xml/docbook/stylesheet/docbook-xsl/html/chunkfast.xsl"/>
-
+  <xsl:import href="system-stylesheet.xsl"/>
 
   <xsl:param name="custom.css.source">veil2.css.xml</xsl:param>
 

@@ -17,14 +17,38 @@ all: db
 
 SUBDIRS = demo docs docs/parts sql sql/veil2 
 
+INTERMEDIATE_FILES =
+TARGET_FILES =
+TARGET_DIRS =
+
 ###
 # Docs
 # This section of the Makefile is all about building documentation.
 #
 
 DOC_SOURCES := $(wildcard docs/*.xml) $(wildcard docs/parts/*.xml) 
-BASE_STYLESHEET := $(DOCBOOK_STYLESHEETS)/html/chunkfast.xsl
-VEIL2_STYLESHEET := docs/html_stylesheet.xsl
+BASE_STYLESHEET = $(DOCBOOK_STYLESHEETS)/html/chunkfast.xsl
+VEIL2_STYLESHEET = docs/html_stylesheet.xsl
+STYLESHEET_IMPORTER = docs/system-stylesheet.xsl
+VERSION_FILE = docs/version.sgml
+
+INTERMEDIATE_FILES += $(STYLESHEET_IMPORTER) $(VERSION_FILE)
+TARGET_FILES += html/* 
+TARGET_DIRS += html
+
+# Create stylesheet to import base stylesheet from system
+#
+$(STYLESHEET_IMPORTER): Makefile.global
+	@echo "Creating importer for system base stylesheet for docs..."
+	@{ \
+	  echo "<?xml version='1.0'?>"; \
+	  echo "<xsl:stylesheet"; \
+	  echo "   xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\""; \
+	  echo "   version=\"1.0\">"; \
+	  echo "  <xsl:import"; \
+	  echo "     href=\"$(BASE_STYLESHEET)\"/>"; \
+	  echo "</xsl:stylesheet>"; \
+	} > $@
 
 # This is the phony target for the html documentation.  This target
 # builds the html documentation.
@@ -34,8 +58,9 @@ html: html/index.html
 # Build the version entity for the docbook documentation.  This is
 # included into the docbook source.
 #
-docs/version.sgml: VERSION configure
-	{ \
+$(VERSION_FILE): VERSION configure
+	@echo "Creating version entities for docs..."
+	@{ \
 	  echo "<!ENTITY version \"$(VERSION)\">"; \
 	  echo "<!ENTITY majorversion \"$(MAJOR_VERSION)\">"; \
 	} > $@
@@ -43,7 +68,8 @@ docs/version.sgml: VERSION configure
 
 # Do the legwork of building our html documentation from docbook
 # sources. 
-html/index.html: $(DOC_SOURCES) docs/version.sgml
+html/index.html: $(DOC_SOURCES) $(VERSION_FILE) $(VEIL2_STYLESHEET) \
+		 $(STYLESHEET_IMPORTER)
 	@[ -d html ] || mkdir html # Create the directory, if needed.
 	@echo XSLTPROC "<docbook sources>.xml -->" $@
 	$(XSLTPROC) $(XSLTPROCFLAGS) --output html/ \
@@ -63,9 +89,12 @@ built_dirs := html
 clean:
 	@echo $(SUBDIRS)
 	@for i in $(SUBDIRS); do \
-	   echo Cleaining $${i}...; \
-	   (cd $${i}; rm -f $(garbage_files)); \
-	done
+	   echo Cleaning $${i}...; \
+	   (cd $${i}; rm -f $(garbage_files)) 2>/dev/null; \
+	done || true
+	echo Cleaning intermediate and target files...
+	@rm -f $(INTERMEDIATE_FILES) $(TARGET_FILES) 2>/dev/null || true
+	@rmdir $(TARGET_DIRS) 2>/dev/null || true
 
 distclean: clean
 	rm -rf Makefile.global ./configure autom4te.cache config.log

@@ -1,0 +1,24 @@
+# ----------
+#  Makefile.global.in
+# 
+#       Autoconf input file for Makefile.global
+# 
+#       Copyright (c) 2020 Marc Munro
+#       Author:  Marc Munro
+# 	License: GLP V3
+#  
+#  ----------
+#
+
+# Version information
+PACKAGE_NAME=		@PACKAGE_NAME@
+VERSION=		@PACKAGE_VERSION@
+MAJOR_VERSION=		@MAJOR_VERSION@
+MINOR_VERSION=		@MINOR_VERSION@
+TARNAME=		@PACKAGE_TARNAME@__@MAJOR_VERSION@_@MINOR_VERSION@
+
+
+XSLTPROC = @XSLTPROC@
+DOCBOOK_ENTITIES = @DOCBOOKENT@
+DOCBOOK_STYLESHEETS = @DOCBOOKSS@
+

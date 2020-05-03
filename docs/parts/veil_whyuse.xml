@@ -1,0 +1,63 @@
+<sect1 id="why-use-veil2">
+  <title>Why Use <literal>Veil2</literal></title>
+  <para>
+    A <literal>Veil2</literal> based relational security implementation
+    has the following advantages over a more traditional security
+    implementation:
+  </para>
+  <orderedlist numeration="arabic">
+    <listitem>
+      <para>
+	by implementing data access controls in the database, your
+	data is protected even in the event of a breach of, or bugs
+	in, your application or its server;
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+	new functionality can be added to your application, without
+	risk of impact to the underlying data security;
+      </para>
+      </listitem>
+    <listitem>
+      <para>
+	if you have multiple applications, the same restrictions can
+	be applied universally, without having multiple
+	implementations;
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+	by building the security into the database relations
+	themselves, access controls can be managed in a more natural
+	way;
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+	fine degrees of access control can be implemented without
+	increasing the complexity of your application;
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+	you will be able to implement a security model that is
+	complete and about which you can reason;
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+	most of the details of the access controls can be hidden from
+	your application developers, potentially making their jobs
+	easier.
+      </para>
+    </listitem>
+  </orderedlist>
+  <para>
+    Note that even though you no longer <emphasis>have</emphasis> to
+    implement access controls in your applications, your application
+    should be written to avoid any access that the database would
+    prevent.  This is simply good practice.  You should not allow
+    <literal>Veil2</literal>'s presence to make your developers lazy.
+  </para>
+</sect1>

@@ -57,8 +57,8 @@ delete from veil2.accessor_roles where accessor_id in (-1, -2, -3);
 delete from veil2.accessors where accessor_id in (-1, -2, -3);
 
 -- Remove test context
-delete from veil2.security_contexts where context_type_id < 0;
-delete from veil2.security_context_types where context_type_id < 0;
+delete from veil2.scopes where scope_type_id < 0;
+delete from veil2.scope_types where scope_type_id < 0;
 
 
 -- Ensure plaintext auth is not enabled.

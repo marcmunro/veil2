@@ -1,0 +1,153 @@
+<sect1 id="how-difficult-is-this">
+  <title>How Difficult Is This?</title>
+  <para>
+    You could be forgiven for thinking, given
+    <literal>Veil2</literal>'s capability and sophistication, that it
+    would be difficult to set-up and use.  But this is not the case.
+    It is not trivial and it does require you to develop a deeper
+    understanding of your data than you might choose, but the process
+    is well documented and each individual step is simple enough.
+  </para>
+  <para>
+    The best way to get a grip on the complexity and amount of effort
+    that would be required is to look at the demo app.  TODO: Ref
+  </para>
+  <para>
+    In the spirit of expecting resistance, what follows is a list of
+    imagined criticisms of <literal>Veil2</literal> with appropriate
+    responses.  This is in place of a FAQ since, at the time of
+    writing, no-one has asked any questions.
+  </para>
+  <sect2 id="frequently-imagined-criticisms-fic">
+    <title>Frequently Imagined Criticisms (FIC)</title>
+    <para>
+      It’s easy to criticise relational security systems and
+      implementations as they are not widely used and can be difficult
+      to grasp. Here are a few criticisms that have been directed at
+      <literal>Veil2</literal>-like implementations.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          It’s too difficult for our application developers to
+          understand.
+        </para>
+        <para>
+          Actually, it’s easier for them than having to implement
+          application security for themselves.  For the most part, they
+          don’t need to understand the details.  And anyway, how dumb do
+          you think they are?
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The users won’t understand.
+        </para>
+        <para>
+          They don’t need to.  The security implementation is almost
+	  entirely hidden.  But they should be able to understand that
+	  assigning a role to a user in a given context, gives that
+	  user the ability to perform tasks appropriate to that role.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          We’ll need a database specialist to do this.
+        </para>
+        <para>
+          Yes, you will.  And they had better be good at what they do.
+	  But the time that your database specialist spends on setting
+	  up your security system with <literal>Veil2</literal> should
+	  be easily countered by the amount of time saved by your
+	  application developers who will no longer have to implement
+	  security mechanisms themselves.
+        </para>
+        <para>
+	  Furthermore, with a good database specialist available you
+	  should end up with a better overall database design as well
+	  as one that is well secured.
+        </para>
+        <para>
+	  If you’re not prepared to employ a database specialist then
+	  relational security is not for you.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          No-one else does it this way.
+        </para>
+        <para>
+          And how is that working out for them?  The track record of
+	  <emphasis>everyone else</emphasis> does not look too good
+	  when you start looking closely.
+        </para>
+        <para>
+	  But, if you don’t think you need to be secure, then you
+	  certainly don’t need to implement relational security.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          It’s going to be expensive.
+        </para>
+        <para>
+          Really?  Why?  Your application developers should have an easier
+          time of things.  You should end up with a higher-quality,
+          easier to maintain application.  There will be a need to do
+          some careful thinking about access controls, and you will need
+          to document your security model, but that is a good thing to
+	  do anyway.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          We will be held hostage by our database/security expert.
+        </para>
+        <para>
+          Only if you let them.  Documenting your security model is
+          essential.  Documenting your administration processes is
+          essential.  And you should be doing this anyway.
+        </para>
+        <para>
+          If you have the documentation, and you have access to good
+          developers who are prepared to read, then you should have no
+          problems.  You will need quality control but of course you
+	  have that anyway.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          How do we know it’s going to work?
+        </para>
+        <para>
+          Perhaps you could run some tests.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Won’t performance be a problem?
+        </para>
+        <para>
+          Not in the author's experience but you may find
+          otherwise. Try modelling your use-case and test it.  Find
+          your biggest tables and implement a minimal test database
+          that you aim to secure using <literal>Veil2</literal>.  If
+          the big tables perform adequately, then the rest should be a
+          breeze.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          There is no expertise available.
+        </para>
+        <para>
+	  Any postgres specialist who can read this documentation
+	  should be able to cope, and quickly become an expert.  The
+	  underlying principles are all documented.  The code is all
+	  documented.  There are documented examples.  And there are
+	  even contact links (TODO: reference)
+        </para>
+      </listitem>
+    </itemizedlist>
+  </sect2>
+</sect1>

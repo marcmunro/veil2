@@ -1,0 +1,327 @@
+<sect1 id="veil2-concepts">
+  <title><literal>Veil2</literal> Concepts</title>
+  <para>
+    The following concepts are crucial to understanding
+    <literal>Veil2</literal>.
+  </para>
+  <itemizedlist>
+    <listitem><link linkend="privileges">privileges</link>;</listitem>
+    <listitem><link linkend="scopes">scopes</link>;</listitem>
+    <listitem><link linkend="roles">roles</link>;</listitem>
+    <listitem><link linkend="assignments">assignments</link>;</listitem>
+    <listitem><link linkend="security-contexts">security
+    contexts</link>;</listitem> 
+    <listitem><link linkend="privilege-promotion">privilege
+    promotion</link>.</listitem> 
+  </itemizedlist>
+  <sect2 id="privileges">
+    <title>Privileges</title>
+    <para>
+      Privileges are the atomic units of access control, limiting
+      access to specific data or operations.  By convention, most
+      privileges are named <quote><literal>&lt;action&gt;
+      &lt;object&gt;</literal></quote>.  Actions will include:
+      <itemizedlist>
+	<listitem>select;</listitem>
+	<listitem>insert;</listitem>
+	<listitem>update;</listitem>
+	<listitem>delete;</listitem>
+	<listitem>execute.</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      Objects will usually be the names of tables and, for
+      <literal>execute</literal> actions, the names of specific pieces
+      of functionality.  Note that <literal>Veil2</literal> takes no
+      notice of privilege names, using only the
+      <literal>privilege_id</literal>.  It is up to the implementation
+      to ensure that each privilege is used in a manner consistent
+      with its name.
+    </para>
+    <para>
+      A typical privilege might be <literal>select parties</literal>
+      which we could assume would allow select access to the
+      <literal>parties</literal> table.  Note that every privilege
+      assigned in <literal>Veil2</literal> is assigned with a specific
+      <link linkend="scopes">scope</link>.
+    </para>
+    <para>
+      A <literal>Veil2</literal>-based security system is likely to
+      have tens or hundreds of distinct privileges.
+    </para>
+  </sect2>
+  <sect2 id="scopes">
+    <title>Scopes</title>
+    <para>
+      A scope describes the applicability of a <link
+      linkend="privilege">privilege</link>.  Scopes are mostly based
+      upon existing relationships in your data.
+    </para>
+    <para>
+      Some scopes will allow access to large subsets of data, and some
+      to very small subsets.  We refer to this as the scope level.  A
+      scope that is very restrictive is considered a low-level scope,
+      and one that is not, is a high-level scope.  When we talk about
+      <link linkend="privilege-promotion">promotion</link> of scope,
+      this is always from a lower level to a higher level, which is to
+      say that the scope becomes less restrictive, and likely to
+      return a larger set of data.
+    </para>
+    <para>
+      One scope that is particularly low-level is personal scope.
+      This limits access to data that specifically relates to the
+      privilege holder.  So if <literal>user X</literal> has the
+      <literal>select user</literal> privilege in personal scope,
+      they will be able to see their own <literal>users</literal>
+      record.  Whether they can see other <literal>users</literal>
+      records will depend on whether they have been assigned
+      <literal>select users</literal> in any other scopes.
+    </para>
+  </sect2>
+  <sect2 id="roles">
+    <title>Roles</title>
+    <para>
+      Roles exist to manage collections of <link
+      linkend="privileges">privileges</link>.  Because privileges
+      apply at such a low level, managing access by assigning
+      individual privileges is untenable.  Instead we manage groups of
+      privileges through roles.  Privileges are assigned to roles, and
+      roles are assigned to users.  See <link
+      linkend="assignments">assignments</link>; <link
+      linkend="security-contexts">security contexts</link>; and <link
+      linkend="privilege-promotion">privilege promotion</link>, for
+      information on how each privilege's <link
+      linkend="scope">scope</link> is managed.
+    </para>
+    <para>
+      To make roles more flexible, we allow roles to be assigned to
+      other roles.  This allows us to create low-level
+      <emphasis>functional</emphasis> roles that have the privileges
+      necessary to perform a specific task, and we then assign these
+      roles to higher-level <emphasis>user</emphasis> roles which can
+      then be assigned to users.  By doing this, we minimise the
+      number of different roles that we need to be able to assign to
+      users.
+    </para>
+    <para>
+      Typical functional roles might include <literal>view
+      order</literal>, <literal>create order</literal>,
+      <literal>approve order</literal>, etc.  These function level
+      roles might then be assigned to user roles such as
+      <literal>customer service rep</literal>, <literal>customer
+      service manager</literal>, <literal>product manager</literal>,
+      etc.  Typically you would only assign user level roles to users.
+    </para>
+    <para>
+      As the roles themselves do not care whether they are functional
+      or user level, there is no limit to how deeply role to role
+      mappings may be nested.  This can be useful when you want to
+      create a user-role that combines the abilities of 2 or more
+      existing user roles.
+    </para>
+    <para>
+      <literal>Veil2</literal> does not care how roles are mapped to
+      each other, in fact, you can map <literal>Role A</literal> to
+      <literal>Role B</literal> and then <literal>Role B</literal> to
+      <literal>Role A</literal>, and <literal>Veil2</literal> will
+      handle it just fine; it will just mean that the two roles are
+      equivalent - which is hardly useful.  You may want to implement
+      some policies around this for your own system.
+    </para> 
+  </sect2>
+  <sect2 id="assignments">
+    <title>Assignments</title>
+    <para>
+      Users are assigned <link linkend="roles">roles</link> in a
+      number of ways, and <literal>Veil2</literal> attempts to place
+      no limits on the mechanisms that an implementation may choose to
+      use.  Assignments may be explicit, implicit or even a
+      combination of the two.
+    </para>
+    <para>
+      An explicit role assignment would consist of a record
+      associating a role with the user being assigned the role, in a
+      specific context (see security contexts below).  This record
+      would be for the sole purpose of assigning the role.  This is
+      what makes it explicit.
+    </para>
+    <para>
+      Implicit assignments can be made in a number of ways.  In
+      <literal>Veil2</literal> each user, by default, is assigned the
+      <literal>personal context</literal> role.  This is done by
+      <literal>Veil2</literal> itself, and is not the result of any
+      record relating the role to the user.  Note that although the
+      role is assigned by default, it has no <link
+      linkend="privileges">privileges</link>.  What <literal>personal
+      context</literal> allows is up to you.
+    </para>
+    <para>
+      Other forms of implicit role assignment will be through existing
+      data relationships.  For instance, we might want project team
+      members to have certain privileges to the data for their
+      projects.  This would be done through their assignment to the
+      project as a team member.  It is possible that that membership
+      record has an explicit role associated with it, but it is
+      equally possible that <quote>membership</quote> is implied by
+      the simply existence of a <literal>team_member</literal> record
+      linking the user and the project.  In such a case we would
+      create a <literal>team member</literal> role, and assume that
+      team members have this role.  TODO: reference to the howto.
+    </para>
+  </sect2>
+  <sect2 id="security-contexts">
+    <title>Security Contexts</title>
+    <para>
+      A security context (or just <literal>context</literal>) applies
+      to a <link linkend="assignments">role assignment</link>.  It is
+      similar to a <link linkend="scopes">scope</link>, but where the 
+      scope applies to a <link linkend="privileges">privilege</link>, a
+      context applies to a <link linkend="roles">role</link>.  It is
+      the context within which the role was assigned.
+    </para>
+    <para>
+      For instance, if a member of a project team has the
+      <literal>team member</literal> role, it will have been assigned,
+      whether explicitly or implictly, in the context of that project.
+      Each privilege provided by the role will apply either in the
+      scope of that project or in a superior scope to which they have
+      been promoted (see <link linkend="privilege-promotion">privilege
+      promotion</link> below).
+    </para>
+    <para>
+      It is because privileges may apply in different scopes from the
+      role's assignment context, that contexts and scopes have
+      distinct terms.  While this may seem to be semantic pedantry,
+      the opportunities for confusion when discussing scopes and
+      contexts are such that the distinction is useful.  The author
+      has been there, and resents that he will never get those hours
+      back.
+    </para>
+    <para>
+      The key to a good relational security implementation is an
+      understanding of your relational security contexts.  In
+      particular, how you may need to perform some data
+      denormalisations in order to get good performance.
+      TODO: Reference that section.
+    </para>
+    <para>
+      <literal>Veil2</literal> provides 2 built-in security security
+      contexts:
+    </para>
+    <sect3 id="global-context">
+      <title>Global Context</title>
+      <para>
+	This is a non-relational context.  Privileges assigned in
+	global context apply without limitation.  If you are assigned
+	a role in global context, all of its privileges will apply in
+	global scope.  If you have been assigned the <literal>select
+	customer</literal> privilege (via a role) in global context, 
+        you will be able to see all <literal>customer</literal>
+	records.
+      </para>
+      <para>
+        Global Context is powerful and dangerous. It is the level of
+        access control provided by <link
+        linkend="Tradiional">traditional</link> security systems and
+        it should be used with great care.
+      </para>
+    </sect3>
+    <sect3 id="personal-context">
+      <title>Personal Context</title>
+      <para>
+	Personal context is an implied context.  Each user has an
+	implicit assignment of the <literal>personal context</literal>
+	role in this context. 
+      </para>
+      <para>
+        The personal context is all about the application user, ie the
+        person that is using your application. It applies to data that
+        is about that person.  This would include their authentication
+        credentials, contact information, etc. The purpose of the
+        personal context is to give you access to your data, and no-one
+        else’s.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id="privilege-promotion">
+    <title>Privilege Promotion</title>
+    <para>
+      <link linkend="privileges">Privileges</link> may give access to
+      rows in a table, or to specific functionality. Often, a
+      privilege that is needed for a particular <link
+      linkend="roles">role</link>, will apply to an object that exists
+      outside of the <link linkend="security-contexts">context</link>
+      of the <link linkend="assignments">role assignment</link>.  In
+      such cases, the privilege must be promoted from the context of
+      its assignment, to apply in a higher-level <link
+      linkend="scopes">scope</link>.
+    </para>
+    <para>
+      Consider a <link linkend="roles">role</link>
+      <literal>CSR</literal>, that has been assigned to a user in
+      <literal>customer context</literal> for <literal>customer
+      Z</literal>.  This hypothetical role assignment is supposed to
+      give the user the ability to manage <literal>customer
+      Z</literal> and no other customer.  Among the hypothetical
+      privileges for this role are:
+    </para>
+    <itemizedlist spacing="compact">
+      <listitem>
+        <literal>select customer</literal>;
+      </listitem>
+      <listitem>
+        <literal>update customer</literal>;
+      </listitem>
+      <listitem>
+        <literal>...</literal>
+      </listitem>
+      <listitem>
+        <literal>select lookups</literal>;
+      </listitem>
+      <listitem>
+        <literal>connect</literal>.
+      </listitem>
+    </itemizedlist>
+    <para>
+      If we assume that <literal>select lookups</literal> gives the
+      user the ability to view all lookup data, and
+      <literal>connect</literal> gives them the ability to actually
+      connect to the system and authenticate, we can see that they
+      don’t really apply to the <literal>customer
+      context</literal>.  They are not related to customer-specific
+      data, in fact they should apply the same regardless of who we
+      might be a <literal>CSR</literal> for.  These privileges should
+      be applied in the global scope, but they have been assigned in
+      the <literal>customer context</literal> for <literal>customer
+      Z</literal>.
+    </para>
+    <para>
+      The context for the role assignment makes no sense for these
+      privileges, so they must be promoted to a higher-level scope.
+      In this case, the scope would be that of the <literal>global
+      context</literal>.
+    </para>
+    <para>
+      As another example consider that a role that has been assigned
+      in <literal>project context</literal> provides the
+      <literal>select department</literal> privilege to view the
+      department details of the department that owns the project.  The
+      department details cannot be viewed in project scope, because
+      projects are lower-level things: the department owns the project
+      and not the other way around.  The solution is to promote the
+      <literal>select department</literal> privilege to operate in
+      department scope.  Note that if the <literal>select
+      project</literal> privilege were promoted in the same way, it
+      would allow the user to view all projects for the department.
+    </para>
+    <para>
+      The level of promotion required for each privilege is specific
+      to the object that the privilege exists to protect.  So, each
+      privilege identifies its target scope level.  If the privilege is
+      being assigned, via a role assignment, in a lower-level context,
+      then promotion to the higher target scope level will be performed.
+      TODO: Reference to how this is done.
+    </para>
+  </sect2>
+</sect1>
+

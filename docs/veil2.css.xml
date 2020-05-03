@@ -1,0 +1,155 @@
+<?xml version='1.0'?>
+<style>
+
+BODY {
+        color: #000000;
+	background: #FFFFFF;
+	font-family: verdana, sans-serif;
+}
+
+A:link		{ color:#0066A2; }
+A:visited	{ color:#004E66; }
+A:active	{ color:#0066A2; }
+A:hover		{ color:#000000; }
+
+H1 {
+	font-size: 1.6em;
+	font-weight: bold;
+	margin-top: 0em;
+	margin-bottom: 0em;
+	color: #EC5800;
+}
+
+H2 {
+	font-size: 1.4em;
+	margin: 1.2em 0em 1.2em 0em;
+	font-weight: bold;
+	color: #EC5800;
+}
+
+H3 {
+	font-size: 1.3em;
+	margin: 1.2em 0em 1.2em 0em;
+	font-weight: bold;
+	color: #EC5800;
+}
+
+H4 {
+	font-size: 1.2em;
+	margin: 1.2em 0em 1.2em 0em;
+	font-weight: bold;
+	color: #EC5800;
+}
+
+H5 {
+	font-size: 1.1em;
+	margin: 1.2em 0em 1.2em 0em;
+	font-weight: bold;
+	color: #000000;
+}
+
+H6 {
+	font-size: 0.85em;
+	margin: 1.2em 0em 1.2em 0em;
+	font-weight: normal;
+}
+
+[class="subtitle"] {
+        font-size: 0.85em;
+	margin-top: -1.2em;
+	margin-left: 2.0em;
+}
+
+
+/* center some titles */
+
+.BOOK .TITLE, .BOOK .CORPAUTHOR, .BOOK .COPYRIGHT {
+	text-align: center;
+}
+
+/* decoration for formal examples */
+
+DIV.EXAMPLE {
+	padding-left: 15px;
+	border-style: solid;
+	border-width: 0px;
+	border-left-width: 2px;
+	border-color: black;
+	margin: 0.5ex;
+}
+
+
+/* less dense spacing of TOC - MM */
+
+.toc DL DT {
+	padding-top: 0.8ex;
+	padding-bottom: 0.0ex;
+}
+
+.toc DL DL DT {
+	padding-top: 0.1ex;
+	padding-bottom: 0.0ex;
+}
+
+
+
+/* Make chrome display our tocs in a compact form. */
+dl {
+    -webkit-margin-before: 0ex;
+    -webkit-margin-after: 0ex;
+}
+
+/* miscellaneous */
+
+PRE.LITERALLAYOUT, .SCREEN, .SYNOPSIS, .PROGRAMLISTING {
+	margin-left: 4ex;
+}
+
+.COMMENT	{ color: red; }
+
+VAR		{ font-family: monospace; font-style: italic; }
+/* Konqueror's standard style for ACRONYM is italic. */
+ACRONYM		{ font-style: inherit; }
+
+/* Make lists with the compact attribute, truly compact. */
+ul[compact="compact"] li p{
+ margin: 0;
+}
+
+/* Give programlistings a nice appearance. */
+pre[class="programlisting"], div[class="footnote"] {
+	padding-left: 15px;
+	background: #E0E0E0;
+	border-radius: 15px;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+pre[class="programlisting"] {
+	padding-top: 15px;
+	padding-bottom: 15px;
+	font-family: monospace; 
+}
+div[class="footnote"] {
+	font-size: 0.75em;
+}
+
+div[class="author"] {
+	display: none
+}
+
+p[class="pubdate"] {
+	display: none
+}
+
+/* Draft sections shown in grey */
+div.sect1-draft {
+  color: #808080;
+}
+
+/* Document control div */
+div[class="releaseinfo"] {
+	font-size: 0.8em;
+	background: #F0F0F0;
+}
+</style>

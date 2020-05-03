@@ -389,15 +389,15 @@ with recursive
   ),
   format1 as
   (
-    select sct1.context_type_name || ':' ||
+    select st1.scope_type_name || ':' ||
     	    promoted_scope_id::text as parent,
-           sct2.context_type_name || ':' || scope_id::text as child,
+           st2.scope_type_name || ':' || scope_id::text as child,
 	   depth
       from recursive_scope_tree rst
-     inner join veil2.security_context_types sct1
-        on sct1.context_type_id = rst.promoted_scope_type_id
-     inner join veil2.security_context_types sct2
-        on sct2.context_type_id = rst.scope_type_id
+     inner join veil2.scope_types st1
+        on st1.scope_type_id = rst.promoted_scope_type_id
+     inner join veil2.scope_types st2
+        on st2.scope_type_id = rst.scope_type_id
     order by path
   )
 select format('%' || ((depth)*16 - 14) || 's', '+-') ||
@@ -417,13 +417,13 @@ grant select on veil2.scope_tree to veil_user;
 
 \echo ......promotable_privileges...
 create view veil2.promotable_privileges(
-  context_type_id, privilege_ids)
+  scope_type_id, privilege_ids)
 as
-select sct.context_type_id, bitmap_of(p.privilege_id)
-  from veil2.security_context_types sct
+select st.scope_type_id, bitmap_of(p.privilege_id)
+  from veil2.scope_types st
  inner join veil2.privileges p
-    on p.promotion_scope_type_id = sct.context_type_id
-group by sct.context_type_id;
+    on p.promotion_scope_type_id = st.scope_type_id
+group by st.scope_type_id;
 
 comment on view veil2.promotable_privileges is
 'Provide bitmaps of those privileges that may be promoted, mapped to the
@@ -825,19 +825,19 @@ views.  Note that this will mean that the materialzed views will not
 always be up to date, so this is a trade-off that must be evaluated.';
 
 
-\echo ......on security_contexts...
-create trigger security_contexts__aiudt
+\echo ......on scopes...
+create trigger scopes__aiudt
   after insert or update or delete or truncate
-  on veil2.security_contexts
+  on veil2.scopes
   for each statement
   execute procedure veil2.refresh_scope_promotions();
 
-comment on trigger security_contexts__aiudt on veil2.security_contexts is
+comment on trigger scopes__aiudt on veil2.scopes is
 'Refresh materialized views that are constructed from the
-security_contexts table.
+scopes table.
 
 VPD Implementation Notes:
-Although we expect that security_contexts will be modified relatively
+Although we expect that scopes will be modified relatively
 infrequently, this may not be the case in your application.  If the
 overhead of this trigger proves to be too significant it should be
 dropped, and other mechanisms used to refresh the affected materialized

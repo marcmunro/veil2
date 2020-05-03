@@ -3,7 +3,7 @@
 #
 #      Copyright (c) 2020 Marc Munro
 #      Author:  Marc Munro
-#      License: BSD
+#      License: GPL V3
 #
 # ----------
 #

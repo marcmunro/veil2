@@ -421,7 +421,7 @@ select null where not veil2.hello();  -- Establish our session
 with rowexists (x) as
   (
     select 1
-      from veil2.security_context_types
+      from veil2.scope_types
      limit 1),
 rowcount (x) as
   (
@@ -430,12 +430,12 @@ rowcount (x) as
   )
 select null
   from rowcount
- where test.expect(x, 1, 'Expect to see rows from security_context_types');
+ where test.expect(x, 1, 'Expect to see rows from scope_types');
 
 with rowexists (x) as
   (
     select 1
-      from veil2.security_contexts
+      from veil2.scopes
      limit 1),
 rowcount (x) as
   (
@@ -444,7 +444,7 @@ rowcount (x) as
   )
 select null
   from rowcount
- where test.expect(x, 1, 'Expect to see rows from security_contexts');
+ where test.expect(x, 1, 'Expect to see rows from scopes');
 
 with rowexists (x) as
   (

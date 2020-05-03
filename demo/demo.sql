@@ -120,7 +120,7 @@ values (100, 2, 100, 100, 'Veil Corp', null),
 with all_role_privs (
   role_id, roles,
   privileges, global_privileges, 
-  promotable_privileges, context_type_id,
+  promotable_privileges, scope_type_id,
   context_id
 ) as
 (
@@ -129,12 +129,12 @@ select arr.primary_role_id,
        union_of(drp.privileges),
        union_of(drp.global_privileges),
        union_of(drp.promotable_privileges),
-       arr.context_type_id,
+       arr.scope_type_id,
        arr.context_id
   from veil2.all_role_roles arr
  inner join veil2.direct_role_privileges drp
     on drp.role_id = arr.primary_role_id
- group by arr.primary_role_id, arr.context_type_id, arr.context_id)
+ group by arr.primary_role_id, arr.scope_type_id, arr.context_id)
 select * from all_role_privs;
 */
 grant all on demo.parties_tbl to demouser;
@@ -249,8 +249,8 @@ update veil2.authentication_types
 
 -- STEP 3:
 -- Define contexts, privileges and some initial roles.
-insert into veil2.security_context_types
-       (context_type_id, context_type_name,
+insert into veil2.scope_types
+       (scope_type_id, scope_type_name,
         description)
 values (3, 'corp context',
         'For access to data that is specific to corps.'),
@@ -427,51 +427,51 @@ comment on trigger parties_tbl_aut on demo.parties_tbl is
 'Ensure password changes get propagated to veil2.authentication_details';
 
 -- STEP5:
--- Link security_contexts back to the database being secured.
+-- Link scopes back to the database being secured.
 -- THIS SHOULD ALSO HANDLE UPDATES TO SOME OF THE CONTEXT VIEWS???
 
 
 -- 5.1 Parties:
 --     this handles corp and org contexts
 
-alter table veil2.security_contexts
+alter table veil2.scopes
   add column party_id integer;
 
-comment on column veil2.security_contexts.party_id is
+comment on column veil2.scopes.party_id is
 'Foreign key column to parties_tbl for use in corp and org contexts.';
 
-alter table veil2.security_contexts
-  add constraint security_context__party_fk
+alter table veil2.scopes
+  add constraint scope__party_fk
   foreign key (party_id)
   references demo.parties_tbl(party_id)
   on update cascade on delete cascade;
 
-comment on constraint security_context__party_fk on veil2.security_contexts is
+comment on constraint scope__party_fk on veil2.scopes is
 'FK to parties_tbl for contexts that are party-specific.';
 
-alter table veil2.security_contexts
-  add constraint security_context__check_fk_type
-  check (case when context_type_id in (3, 4) then
+alter table veil2.scopes
+  add constraint scope__check_fk_type
+  check (case when scope_type_id in (3, 4) then
               party_id is not null
 	 else true end);
 
-comment on constraint security_context__check_fk_type
-  on veil2.security_contexts is
+comment on constraint scope__check_fk_type
+  on veil2.scopes is
 'Ensure that party-specific contexts have an FK.';
 
 -- Create initial security contexts
 insert
-  into veil2.security_contexts
-      (context_type_id, context_id, party_id)
-select 3, party_id, party_id  -- These are all corp contexts
+  into veil2.scopes
+      (scope_type_id, scope_id, party_id)
+select 3, party_id, party_id  -- These are all corp scopes
   from demo.parties_tbl
  where party_type_id = 2  -- organisation
    and corp_id = 100;     -- root corp or first level below root
 
 insert
-  into veil2.security_contexts
-      (context_type_id, context_id, party_id)
-select 4, party_id, party_id  -- These are all org contexts
+  into veil2.scopes
+      (scope_type_id, scope_id, party_id)
+select 4, party_id, party_id  -- These are all org scopes
   from demo.parties_tbl
  where party_type_id = 2;  -- This includes corps which are also orgs
 
@@ -480,21 +480,21 @@ select 4, party_id, party_id  -- These are all org contexts
 
 -- 5.2 Projects:
 --     this handles project context
-alter table veil2.security_contexts
+alter table veil2.scopes
   add column project_id integer;
 
-comment on column veil2.security_contexts.project_id is
+comment on column veil2.scopes.project_id is
 'Foreign key column to projects for use in project context.';
 
-alter table veil2.security_contexts
-  add constraint security_context__project_fk
+alter table veil2.scopes
+  add constraint scope__project_fk
   foreign key (project_id)
   references demo.projects(project_id)
   on update cascade on delete cascade;
 
 insert
-  into veil2.security_contexts
-      (context_type_id, context_id, project_id)
+  into veil2.scopes
+      (scope_type_id, scope_id, project_id)
 select 5, project_id, project_id
   from demo.projects;
 
@@ -610,7 +610,7 @@ view role_roles (
     corp_context_id,
     org_context_id) as
 select pr.role_name, ar.role_name,
-       ct.context_type_name,
+       st.scope_type_name,
        case when rr.context_type_id = 3
        then rr.context_id
        else null
@@ -624,8 +624,8 @@ select pr.role_name, ar.role_name,
          on pr.role_id = rr.primary_role_id
  inner join veil2.roles ar
          on ar.role_id = rr.assigned_role_id
- inner join veil2.security_context_types ct
-         on ct.context_type_id = rr.context_type_id
+ inner join veil2.scope_types st
+         on st.scope_type_id = rr.context_type_id
  where veil2.i_have_global_priv(19)
     or veil2.i_have_priv_in_scope(19, 3, context_id)
     or veil2.i_have_priv_in_scope(19, 4, context_id);
@@ -641,7 +641,7 @@ view party_roles (
     corp_context_id,
     org_context_id) as
 select ar.accessor_id, r.role_name,
-       ct.context_type_name,
+       st.scope_type_name,
        case when ar.context_type_id = 3
        then ar.context_id
        else null
@@ -653,8 +653,8 @@ select ar.accessor_id, r.role_name,
   from veil2.accessor_roles ar
  inner join veil2.roles r
          on r.role_id = ar.role_id
- inner join veil2.security_context_types ct
-         on ct.context_type_id = ar.context_type_id
+ inner join veil2.scope_types st
+         on st.scope_type_id = ar.context_type_id
  where veil2.i_have_global_priv(20)
     or veil2.i_have_priv_in_scope(20, 3, context_id)
     or veil2.i_have_priv_in_scope(20, 4, context_id);

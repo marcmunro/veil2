@@ -1,21 +1,21 @@
 -- Create the VEIL2 schema tables
 
-\echo ......security_context_types...
-create table veil2.security_context_types (
-  context_type_id	       	integer not null,
-  context_type_name		text not null,
+\echo ......scope_types...
+create table veil2.scope_types (
+  scope_type_id	       	integer not null,
+  scope_type_name		text not null,
   description			text not null
 );
 
-alter table veil2.security_context_types
-  add constraint security_context_type__pk
-  primary key(context_type_id);
+alter table veil2.scope_types
+  add constraint scope_type__pk
+  primary key(scope_type_id);
 
-alter table veil2.security_context_types
-  add constraint security_context__name_uq
-  unique(context_type_name);
+alter table veil2.scope_types
+  add constraint scope__name_uq
+  unique(scope_type_name);
 
-comment on table veil2.security_context_types is
+comment on table veil2.scope_types is
 'Describes the security contexts for this VPD.  This is primarily for
 documentation purposes though also provides a foreign key for
 context-based role assignments.
@@ -25,34 +25,34 @@ Insert 1 record into this table for each type of security context that
 you wish to implement.  Veil2 comes with 2 built-in security contexts:
 global and personal.';
 
-revoke all on veil2.security_context_types from public;
-grant select on veil2.security_context_types to veil_user;
-grant all on veil2.security_context_types to demouser;
+revoke all on veil2.scope_types from public;
+grant select on veil2.scope_types to veil_user;
+grant all on veil2.scope_types to demouser;
 
 
-\echo ......security_contexts...
-create table veil2.security_contexts (
-  context_type_id	       	integer not null,
-  context_id			integer not null
+\echo ......scopes...
+create table veil2.scopes (
+  scope_type_id	       	integer not null,
+  scope_id			integer not null
 );
 
-alter table veil2.security_contexts
-  add constraint security_context__pk
-  primary key(context_type_id, context_id);
+alter table veil2.scopes
+  add constraint scope__pk
+  primary key(scope_type_id, scope_id);
 
-alter table veil2.security_contexts
-  add constraint security_context__type_fk
-  foreign key(context_type_id)
-  references veil2.security_context_types(context_type_id);
+alter table veil2.scopes
+  add constraint scope__type_fk
+  foreign key(scope_type_id)
+  references veil2.scope_types(scope_type_id);
 
-comment on table veil2.security_contexts is
+comment on table veil2.scopes is
 'A context identifies a type of access, or a reason for access.  For
 instance, personal context applies to data relating to a person.  It is
 that person''s data and they should have access to it because it is
 theirs.  Privileges assigned in personal context apply only to data that
 belongs to the accessor.
 
-Note that global context uses context_id 0.  Ideally it would be null,
+Note that global context uses scope_id 0.  Ideally it would be null,
 since it does not relate directly to any other entity but that makes
 defining foreign key relationships (to this table) difficult.  Using a 
 reserved value of zero is just simpler (though suckier).
@@ -67,39 +67,39 @@ and then add appropriate foreign key and check constraints.
 For example to implement a corp context with a foreign key back to your
 corporations table:
 
-alter table veil2.security_contexts 
+alter table veil2.scopes 
   add column corp_id integer;
 
-alter table veil2.security_contexts 
-  add constraint security_context__corp_fk
+alter table veil2.scopes 
+  add constraint scope__corp_fk
   foreign key (corp_id)
   references my_schema.corporations(corp_id);
 
 -- Ensure that for corp context types we have a corp_id
--- (assume corp_context has context_type_id = 3)
-alter table veil2.security_contexts 
-  add constraint security_context__corp_chk
-  check ((context_type_id != 3) 
-         or ((context_type_id = 3) and (corp_id is not null)));
+-- (assume corp_context has scope_type_id = 3)
+alter table veil2.scopes 
+  add constraint scope__corp_chk
+  check ((scope_type_id != 3) 
+         or ((scope_type_id = 3) and (corp_id is not null)));
 
 You will, of course, also need to ensure that the corp_id field is
 populated.';
 
-comment on column veil2.security_contexts.context_type_id is
+comment on column veil2.scopes.scope_type_id is
 'Identifies the type of context that we are describing.';
 
-comment on column veil2.security_contexts.context_id is
-'This, in conjunction with the context_type_id fully identifies a
+comment on column veil2.scopes.scope_id is
+'This, in conjunction with the scope_type_id fully identifies a
 context.  For global context, this id is 0: ideally it would be null but
 as it needs to be part of the primary key of this table, that is not
 a good option.
 
-The context_id provides a link back to the database we are protecting,
+The scope_id provides a link back to the database we are protecting,
 and will usually be the key to some entity that can be said to ''own''
 data.  This might be a party, or a project, or a department.';
 
-revoke all on veil2.security_contexts from public;
-grant select on veil2.security_contexts to veil_user;
+revoke all on veil2.scopes from public;
+grant select on veil2.scopes to veil_user;
 
 
 \echo ......privileges...
@@ -155,7 +155,7 @@ alter table veil2.privileges add constraint privilege__pk
 
 alter table veil2.privileges add constraint privilege__promotion_context_type_fk
   foreign key(promotion_scope_type_id)
-  references veil2.security_context_types(context_type_id);
+  references veil2.scope_types(scope_type_id);
 
 revoke all on veil2.privileges from public;
 grant select on veil2.privileges to veil_user;
@@ -267,7 +267,7 @@ alter table veil2.context_roles add constraint context_role__role_fk
 
 alter table veil2.context_roles add constraint context_role__context_fk
   foreign key(context_type_id, context_id)
-  references veil2.security_contexts(context_type_id, context_id)
+  references veil2.scopes(scope_type_id, scope_id)
   on delete cascade on update cascade;
 
 comment on constraint context_role__context_fk
@@ -367,7 +367,7 @@ alter table veil2.role_roles
 alter table veil2.role_roles
   add constraint role_role__context_fk
   foreign key(context_type_id, context_id)
-  references veil2.security_contexts(context_type_id, context_id);
+  references veil2.scopes(scope_type_id, scope_id);
 
 revoke all on veil2.role_roles from public;
 grant select on veil2.role_roles to veil_user;
@@ -563,7 +563,7 @@ Veil2.';
 alter table veil2.accessor_roles
   add constraint accessor_role__context_fk
   foreign key(context_type_id, context_id)
-   references veil2.security_contexts(context_type_id, context_id)
+   references veil2.scopes(scope_type_id, scope_id)
    on delete cascade on update cascade;
 
 comment on constraint accessor_role__context_fk

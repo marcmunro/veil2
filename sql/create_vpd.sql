@@ -1,13 +1,13 @@
 \set QUIET
 \set ON_ERROR_STOP
 
-\echo Creating VPD database
-create database vpd;
+\echo Creating VPD database :dbname
+create database :dbname;
 
 
-\c vpd
+\c :dbname
 
-comment on database vpd is 'Database for baseline VPD implementation.';
+comment on database :dbname is 'Database for baseline VPD implementation.';
 
 
 \echo creating extensions...

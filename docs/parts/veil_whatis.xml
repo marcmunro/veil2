@@ -1,0 +1,142 @@
+<sect1 id="whatis">
+  <title>What is <literal>Veil2</literal> And What Does It Provide?</title>
+  <para>
+    <literal>Veil2</literal> is a collection of database objects that
+    provides an implementation of roles, privileges, contexts, scopes
+    and session management that can be used with minimal extra
+    implementation work.
+  </para>
+  <para>
+    It links to your database through triggers and foreign keys, and
+    provides fast mechanisms to identify, load and test a user's
+    privileges.  Much of this is easily extensible through built-in
+    mechanisms but even where it is not, you should feel free to
+    modify the code yourself to match your needs.
+  </para>
+  <para>
+    There is various documentation to help you with this:
+    <itemizedlist>
+      <listitem>this document, especially the how-to section (TODO: ref);</listitem>
+      <listitem>comments in the database objects;</listitem>
+      <listitem>comments in the <literal>Veil2</literal> creation
+      scripts;</listitem> 
+      <listitem>the, commented, <literal>Veil2</literal> demo.</listitem>
+    </itemizedlist>
+  </para>
+  <para>
+    You should familiarize yourself with at least this document and
+    the demo before starting out on your implementation.
+  </para>
+  <sect2>
+    <title>The User-Facing parts of <literal>Veil2</literal></title>
+    <para>
+      Although users will not directly see any part of
+      <literal>Veil2</literal>, they will indirectly encounter it, in
+      two ways:
+      <itemizedlist>
+	<listitem>through session management;</listitem>
+	<listitem>through access limitations.</listitem>
+      </itemizedlist>
+    </para>
+    <sect3>
+      <title><literal>Veil2</literal> Session Management</title>
+      <para>
+	Since <literal>Veil2</literal> limits your access based on the
+	privileges you have been assigned, it needs to know who you
+	are.
+      </para>
+      <para>
+	Before web applications existed, users tended to connect
+	directly to databases using their own user-ids.  The
+	database knew who they were, and it was possible to limit
+	their access, to a degree, using database permissions.  With
+	web applications, connections to databases are from a web
+	server, and all database permissions apply to the web server
+	connection, and not to the user that is connected to that
+	web-server.
+      </para>
+      <para>
+	For users accessing a <literal>Veil2</literal> protected
+	database through a web server, we provide a session management
+	protocol that securely identifies the user, and creates a
+	<literal>Veil2</literal> database session for that user.  The
+	database session provides a compact, highly-performant copy
+	of the user's privileges that can be quickly reloaded each
+	time the user performs some new action.
+      </para>
+      <para>
+	Typically, the web server side of this session management
+	protocol is implemented within the database connection pooling
+	system of the application server.  Each time a connection is
+	taken from the connection pool the connection re-establishes
+	the user's session, and each time the connection is returned
+	to the pool the session is closed (to prevent the last user's
+	access rights being used by a subsequent user).
+      </para>
+      <para>
+	For users that are able to access the database directly, such
+	as users running reports, <literal>Veil2</literal> allows
+	a session to be based upon a database role.  This allows
+	access to the secured database to be managed with a minimum of
+	user effort.
+      </para>
+    </sect3>
+    <sect3>
+      <title><literal>Veil2</literal> Access Limitations</title>
+      <para>
+	Since most of the point of <literal>Veil2</literal> is to
+	limit a user's access to data, that limitation is necessarily
+	a part of the user experience, albeit an almost invisible one.
+      </para>
+      <para>
+	Data access is restricted using 2 mechanisms.
+      </para>
+      <para>
+	For access to tables, we use postgres' row-level security
+	policy mechanism.  This allows us to limit the rows that a
+	user can see using an SQL expression.  Using
+	<literal>Veil2</literal> that expression will be a call to one
+	or more of the built-in privilege testing functions.  As an
+	example, here is a definition from the demo:
+      </para>
+      <programlisting>
+alter table demo.party_types enable row level security;
+
+create policy party_type__select
+    on demo.party_types
+   for select
+ using (veil2.i_have_global_priv(16));
+      </programlisting>
+      <para>
+	For views, we have to do a little more work.  We create a
+	secured view using the same privilege testing functions that
+	we use for tables, but for insert, update and delete access,
+	we may have to use query rewite rules and/or instead-of
+	triggers.  A further complication is that we have to consider
+	whether to use postgres' security barriers, which may improve
+	security at the expense of performance.
+      </para>
+      <para>
+	For the most part, this is still quite simple though.  Here is
+	the secured view definition for roles, which gives read access
+	to the <literal>veil2.roles</literal> table:
+      </para>
+      <programlisting>
+create or replace
+view roles (
+    role_type,
+    role_name,
+    implicit,
+    immutable,
+    description) as
+select rt.role_type_name, r.role_name,
+       r.implicit, r.immutable,
+       r.description
+  from veil2.roles r
+ inner join veil2.role_types rt
+         on rt.role_type_id = r.role_type_id
+ where veil2.i_have_global_priv(18);
+      </programlisting>
+    </sect3>
+  </sect2>
+</sect1>

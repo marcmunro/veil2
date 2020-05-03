@@ -2,28 +2,28 @@
 -- This consists of enabling row-level security and only allowing
 -- select access to users with the approrpiate veil privileges.
 
-\echo ......security_context_types...
-alter table veil2.security_context_types enable row level security;
+\echo ......scope_types...
+alter table veil2.scope_types enable row level security;
 
--- Prevent modifications to security_context_types - the database owner
+-- Prevent modifications to scope_types - the database owner
 -- should be the only user doing this.
-create policy security_context_type__select
-    on veil2.security_context_types
+create policy scope_type__select
+    on veil2.scope_types
    for select
  using (veil2.i_have_global_priv(2));
 
 
-\echo ......security_contexts...
-alter table veil2.security_contexts enable row level security;
+\echo ......scopes...
+alter table veil2.scopes enable row level security;
 
-create policy security_context__select
-    on veil2.security_contexts
+create policy scope__select
+    on veil2.scopes
    for select
  using (   veil2.i_have_global_priv(3)
-        or veil2.i_have_priv_in_scope(3, context_type_id, context_id));
+        or veil2.i_have_priv_in_scope(3, scope_type_id, scope_id));
 
-comment on policy security_context__select on veil2.security_contexts is
-'Require privilege ''select security_contexts'' in global scope
+comment on policy scope__select on veil2.scopes is
+'Require privilege ''select scopes'' in global scope
 (assigned in global context), in order to see the data in this table.';
 
 

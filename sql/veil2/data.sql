@@ -1,7 +1,7 @@
 -- Create base meta-data for veil2 schema
 
-insert into veil2.security_context_types
-       (context_type_id, context_type_name, description)
+insert into veil2.scope_types
+       (scope_type_id, scope_type_name, description)
 values (1, 'global context',
         'Assignments made in the global context apply globally: that is ' ||
 	'there are no limitions based on data ownership applied to ' ||
@@ -18,8 +18,8 @@ values (1, 'global context',
 	'should not be assigned in any other context, and so ' ||
        	'is defined as not enabled.');
 
-insert into veil2.security_contexts
-       (context_type_id, context_id)
+insert into veil2.scopes
+       (scope_type_id, scope_id)
 values (1, 0);
 
 insert into veil2.authentication_types
@@ -41,10 +41,10 @@ values (0, 'connect', 1,
        (1, 'become user', null,
         'May execute the become_user function.  This should only ' ||
 	'be available to superusers'),
-       (2, 'select security_context_types', 1,
-        'May select from security_context_types.'),
-       (3, 'select security_contexts', null,
-        'May select from security_contexts.'),
+       (2, 'select scope_types', 1,
+        'May select from scope_types.'),
+       (3, 'select scopes', null,
+        'May select from scopes.'),
        (4, 'select privileges', 1,
         'May select from privileges.'),
        (5, 'select role_types', 1,

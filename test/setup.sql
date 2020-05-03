@@ -113,8 +113,8 @@ grant execute on function test.expect(text, text, text) to public;
 
 -- Create some context types
 \echo ......creating corp context type...
-insert into veil2.security_context_types
-       (context_type_id, context_type_name, description)
+insert into veil2.scope_types
+       (scope_type_id, scope_type_name, description)
 values (-3, 'corp', 'corporate context'),
        (-4, 'div', 'divisional context'),
        (-5, 'dept', 'department context'),
@@ -122,15 +122,15 @@ values (-3, 'corp', 'corporate context'),
 
 -- and a test corp
 \echo ......creating test corp...
-insert into veil2.security_contexts
-       (context_type_id, context_id)
+insert into veil2.scopes
+       (scope_type_id, scope_id)
 values (-3, -3),
        (-3, -31);
 
 -- and some test divisions
 \echo ......creating test corp...
-insert into veil2.security_contexts
-       (context_type_id, context_id)
+insert into veil2.scopes
+       (scope_type_id, scope_id)
 values (-4, -41),
        (-4, -42),
        (-4, -43),
@@ -138,8 +138,8 @@ values (-4, -41),
 
 -- and some test departments
 \echo ......creating test corp...
-insert into veil2.security_contexts
-       (context_type_id, context_id)
+insert into veil2.scopes
+       (scope_type_id, scope_id)
 values (-5, -51),
        (-5, -52),
        (-5, -53),
@@ -147,8 +147,8 @@ values (-5, -51),
 
 -- and some some projects
 \echo ......creating test corp...
-insert into veil2.security_contexts
-       (context_type_id, context_id)
+insert into veil2.scopes
+       (scope_type_id, scope_id)
 values (-6, -61),
        (-6, -62),
        (-6, -63),
@@ -181,13 +181,13 @@ view veil2.scope_promotions (
   scope_type_id, scope_id,
   promoted_scope_type_id, promoted_scope_id
 ) as
-select sc1.context_type_id, oh.org_id,
-       sc2.context_type_id, oh.superior_org_id
+select s1.scope_type_id, oh.org_id,
+       s2.scope_type_id, oh.superior_org_id
   from org_hierarchy oh
- inner join veil2.security_contexts sc1
-    on sc1.context_id = oh.org_id
- inner join veil2.security_contexts sc2
-    on sc2.context_id = oh.superior_org_id
+ inner join veil2.scopes s1
+    on s1.scope_id = oh.org_id
+ inner join veil2.scopes s2
+    on s2.scope_id = oh.superior_org_id
 union all
 select -6, p.project_id,
        -5, p.dept_id

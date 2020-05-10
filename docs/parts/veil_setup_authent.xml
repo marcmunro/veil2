@@ -1,0 +1,213 @@
+<sect1 id="setup_authent">
+  <title>Setting Up Authentication and Session Management</title>
+  <para>
+    <literal>Veil2</literal> provides built-in mechanisms for
+    authentication and session management.  You can choose to use
+    these as they are, extend them, or replace them entirely.
+  </para>
+  <para>
+    This section provides an introduction to what is needed,
+    references to more detailed explanations and a final, simple list,
+    of <link linkend="authent_what">actions</link> you need to take or
+    consider.
+  </para>
+  <para>
+    The demo does very little with this step, but you may find some
+    useful hints there.  Look for "STEP 2" in the file
+    <literal>demo/demo.sql</literal>. 
+  </para>
+  <sect2 id="authentication">
+    <title>Authentication</title>
+    <para>
+      Authenticating users is hard.  There are many different ways to
+      do it.  <literal>Veil2</literal> provides 2 default
+      password-based mechanisms for authentication, and a mechanism
+      for extensibility TODO: ref.  The built-in methods are:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    plaintext;
+	  </para>
+	  <para>
+	    This is provided simply for testing.  With plaintext
+	    authorization, a password is provided which is simply
+	    checked against a copy stored in
+	    <literal>veil2.authentication_details</literal>.
+	  </para>
+	  <para>
+	    By default, this authentication mechanism is disabled.  It
+	    is weak and insecure.  DO NOT USE IT.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    bcrypt.
+	  </para>
+	  <para>
+	    This is a password-based scheme, but the password is
+	    stored as a bcrypted hash.  Creating this hash is slow,
+	    which means that it is very difficult to determine, by
+	    brute-force, the password that matches the hash.  This
+	    mechanism should be be considered barely adequate from a
+	    security standpoint as it still requires the plaintext
+	    password to be sent to the database for checking.
+	  </para>
+	  <para>
+	    This is good enough for most systems but a long way from
+	    ideal.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+  <sect2 id="session_management">
+    <title>Session Management</title>
+    <para>
+      There are 2 distinct types of sessions provided:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    shared-connection sessions;
+	  </para>
+	  <para>
+	    These are used when a single database user account is used
+	    to handle multiple connected users.  Each database
+	    connection will typically be shared among many users
+	    through some sort of connection-pooling system.  This is
+	    the type of session generally used by web applications.
+	  </para>
+	  <para>
+	    It is important with such systems that we can reliably
+	    identify which user is connected, and that the privileges
+	    of one user are not inadvertantly transfered to another.
+	    This means that when the connection starts to be used by a
+	    new user there must be some form of secure identification
+	    of the user.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    dedicated sessions.
+	  </para>
+	  <para>
+	    These are typically used for reporting applications, where
+	    each reporting user will have their own database account.
+	    In this case, <literal>Veil2</literal> determines the
+	    user's access rights based upon database roles, and there
+	    is no need for further authentication - we assume that
+	    database authentication is sufficient.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+    <sect3>
+      <title>Shared-Connection Sessions</title>
+      <para>
+	Within a shared connection environment, such as provided by
+	most web applications, a database connection will be shared
+	amongst many users.  When the application needs to perform
+	some database action on behalf of a user, the connection will
+	be retrieved from the pool, and possibly re-initialised,
+	before executing one or more queries on the user's behalf.
+      </para>
+      <para>
+	Unless we provide the connection with extra information, the
+	database cannot know which user it is executing queries for.
+      </para>
+      <para>
+	<literal>Veil2</literal> provides 3 session management
+	functions to identify and keep track of users:
+	<itemizedlist>
+	  <listitem><literal>veil2.create_session()</literal>;</listitem>
+	  <listitem><literal>veil2.open_session()</literal>;</listitem>
+	  <listitem><literal>veil2.close_session()</literal>.</listitem>
+	</itemizedlist>
+	Your application server must call
+	<literal>create_session()</literal> to identify each new user,
+	and <literal>open_session()</literal> before the user begins
+	issuing queries.  <literal>close_session()</literal> should be
+	called before returning the database connection to the pool.
+      </para>
+      <para>
+	A detailed description of this can be found (TODO: ref), which
+	describes the functions, their parameters, and describes error
+	handling.
+      </para>
+      <para>
+	
+      </para>
+    </sect3>
+    <sect3>
+      <title>Dedicated Sessions</title>
+      <para>
+	If you have users that connect directly to your database,
+	perhaps through some reporting tool, you will want to set them
+	up as users of dedicated sessions.
+      </para>
+      <para>
+	This is done by providing the database username to a
+	<literal>veil2.accessors</literal> record TODO: ref.
+      </para>
+      <para>
+	To begin a dedicated session after connecting to the database,
+	the user must call <literal>veil2.hello()</literal>, which
+	will return true if <literal>Veil2</literal> has successfully
+	authenticated the user. 
+	<programlisting>
+select veil2.hello();
+	</programlisting>
+	If your reporting tool does not allow such function calls, you
+	will need to create a view that calls it, which the reporting
+	tool can call.  Something like this would work:
+	<programlisting>
+create or replace 
+view session_start as 
+select veil2.hello();
+	</programlisting>
+	  or, if you need the view to return no rows:
+	<programlisting>
+create or replace 
+view session_start as 
+  with session as (
+  select 1 as result from veil2.hello()
+  )
+select * from session where result = 0;
+	</programlisting>
+	<para>
+	  For an example of this, take a look at the
+	  <literal>Veil2</literal>unit tests.  The dataase user
+	  <literal>veil2_alice</literal> is set up as a dedicated
+	  session user (as well as a shared session user).
+	</para>
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id="authent_what">
+    <title>In Summary</title>
+    <itemizedlist>
+      <listitem>
+	<para>
+	  For shared-session use, choose an authentication system.
+	  You may need to implement it.  You should disable (TODO:
+	  ref) the authentication systems you do not want to use.
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  For shared-session use, figure out how to implement the
+	  shared session management protocol in your application
+	  server(s). 
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  For dedicated sessions users, create
+	  <literal>veil2.accessors</literal> records.  Maybe create a
+	  view that calls <literal>veil2.hello()</literal>.
+	</para>
+      </listitem>
+    </itemizedlist>
+  </sect2>
+</sect1>
+
+

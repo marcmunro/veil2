@@ -1,0 +1,46 @@
+<extract>
+<programlisting>
+create table veil2.roles (
+  role_id			integer not null,
+  role_type_id			integer not null default(1),
+  role_name			text not null,
+  implicit 			boolean not null default false,
+  immutable			boolean not null default false,
+  description			text
+);
+
+alter table veil2.roles add constraint role__pk
+  primary key(role_id);
+
+alter table veil2.roles add constraint role__name_uk
+  unique(role_name);
+
+alter table veil2.roles add constraint role__type_fk
+  foreign key(role_type_id)
+  references veil2.role_types(role_type_id);
+
+</programlisting>
+<para>
+A role is a way of collecting privileges (and other roles) into groups
+for easier management.
+</para>
+<para>
+Column <literal>role_id</literal>: Primary key for role.
+</para>
+<para>
+Column <literal>role_name</literal>: A descriptive name for a role.  This should generally be enough to 
+figure out the purpose of the role.
+</para>
+<para>
+Column <literal>implicit</literal>: Whether this role is implicitly assigned to all accessors.  Such roles
+may not be explicitly assigned.
+</para>
+<para>
+Column <literal>immutable</literal>: Whether this role is considered unmodifiable.  Such roles may not be
+the primary role in a role_role assignment.
+</para>
+<para>
+Column <literal>description</literal>: For any role whose purpose cannot easily be determined from the
+name, a description of the role should appear here.
+</para>
+</extract>

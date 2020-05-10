@@ -14,6 +14,24 @@
     modify the code yourself to match your needs.
   </para>
   <para>
+    It is important to realise at this point that
+    <literal>Veil2</literal> is not an application or a product.  It
+    is a framework for <emphasis>you</emphasis> to build on.  If there
+    are updates or bugfixes they will be to specific pieces of
+    functionality which you can choose to replace piecemeal or not at
+    all (this document will be updated to describe each such update
+    in detail).  There is no rolling-release or automated update
+    for you to worry about breaking, and all of its parts are
+    user-servicable.  You will not void your warranty by tweaking it
+    as there is no warranty.  Once you have taken it out of the box it
+    is yours and you can and should (subject to the terms of the GPL
+    V3) treat it as such.  You are expected to add columns to the
+    tables, and add new tables and new functionality.  You are
+    expected to add to the session management functions to meet your
+    own requirements (but if you want to distribute your changes,
+    they must be under the same license).  So have at it!
+  </para>
+  <para>
     There is various documentation to help you with this:
     <itemizedlist>
       <listitem>this document, especially the how-to section (TODO: ref);</listitem>
@@ -28,115 +46,279 @@
     the demo before starting out on your implementation.
   </para>
   <sect2>
-    <title>The User-Facing parts of <literal>Veil2</literal></title>
+    <title>How Does It Work?</title>
     <para>
-      Although users will not directly see any part of
-      <literal>Veil2</literal>, they will indirectly encounter it, in
-      two ways:
+      <literal>Veil2</literal> works by:
       <itemizedlist>
-	<listitem>through session management;</listitem>
-	<listitem>through access limitations.</listitem>
+	<listitem>
+	  ensuring the database knows which user is connected;
+	</listitem>
+	<listitem>
+	  providing a set of contextual privileges to each user;
+	</listitem>
+	<listitem>
+	  providing a fast means of testing a user's privileges;
+	</listitem>
+	<listitem>
+	  individually securing each accessible relation using
+	  privilege tests.
+	</listitem>
       </itemizedlist>
     </para>
+    <para>
+      What this means is that when Alice tries to select the user
+      record for Bob, Alice will only see that record if she has been
+      assigned the necessary privilege to view Bob's user record in an
+      approriate context.  As each user's privilege assignments will
+      be different, each user will see a different subset of data.
+    </para>
     <sect3>
-      <title><literal>Veil2</literal> Session Management</title>
+      <title>Knowing The User</title>
       <para>
-	Since <literal>Veil2</literal> limits your access based on the
-	privileges you have been assigned, it needs to know who you
-	are.
+	<literal>Veil2</literal> provides session management functions
+	for both dedicated and shared database connections.  It is up
+	to the user or the user's application to ensure that the
+	session protocols are followed.  If they are not, the user
+	will have access to no data.
       </para>
       <para>
-	Before web applications existed, users tended to connect
-	directly to databases using their own user-ids.  The
-	database knew who they were, and it was possible to limit
-	their access, to a degree, using database permissions.  With
-	web applications, connections to databases are from a web
-	server, and all database permissions apply to the web server
-	connection, and not to the user that is connected to that
-	web-server.
+	By calling the appropriate session management functions, with
+	appropriate authentication tokens, <literal>Veil2</literal>
+	session parameters will be set up in temporary tables.  These
+	session parameters include session privileges with one record
+	for each each scope in which the user has such privileges.
       </para>
       <para>
-	For users accessing a <literal>Veil2</literal> protected
-	database through a web server, we provide a session management
-	protocol that securely identifies the user, and creates a
-	<literal>Veil2</literal> database session for that user.  The
-	database session provides a compact, highly-performant copy
-	of the user's privileges that can be quickly reloaded each
-	time the user performs some new action.
+	The set of privileges in each scope is stored in a single
+	bitmap.  This is a space-efficient array of numbered bits,
+	with each bit indicating the presence or absence of a
+	privilege.  Tests for the presence of a privilege in a bitmap
+	are very fast.
       </para>
       <para>
-	Typically, the web server side of this session management
-	protocol is implemented within the database connection pooling
-	system of the application server.  Each time a connection is
-	taken from the connection pool the connection re-establishes
-	the user's session, and each time the connection is returned
-	to the pool the session is closed (to prevent the last user's
-	access rights being used by a subsequent user).
-      </para>
-      <para>
-	For users that are able to access the database directly, such
-	as users running reports, <literal>Veil2</literal> allows
-	a session to be based upon a database role.  This allows
-	access to the secured database to be managed with a minimum of
-	user effort.
+	At the start of each session, the users privileges are
+	determined.  This is based upon the roles that have been
+	assigned to them, and the contexts of those role assignments.
+	To make this process as fast as possible a number of
+	materialized views are used which map roles to their sets of
+	privileges in various contexts.  By loading from these
+	materialised views, the overhead of determining a large set of
+	potential privileges is much reduced, and since the
+	materialized views record sets of privileges in bitmaps,
+	rather than individual records, this overhead becomes quite
+	managable.  The materialized views are automatically updated
+	whenever role->role and role->privilege assignments are
+	modified which will tend to be relatively infrequently.
       </para>
     </sect3>
     <sect3>
-      <title><literal>Veil2</literal> Access Limitations</title>
+      <title>Contextual Privileges Per User</title>
       <para>
-	Since most of the point of <literal>Veil2</literal> is to
-	limit a user's access to data, that limitation is necessarily
-	a part of the user experience, albeit an almost invisible one.
+	Each privilege assigned to a user operates within a scope that
+	depends on the context in which it was assigned.  Some
+	scopes will allow all records in a table to be seen or
+	manipulated and some will allow large, small or smaller
+	subsets of data to be seen.  Once the concepts of scopes and
+	contexts are understood, the only challenge is in making the
+	privileges work with acceptable performance.
       </para>
       <para>
-	Data access is restricted using 2 mechanisms.
+	Getting the necessary peformance is all about using the
+	privilege bitmaps, and ensuring that they can be loaded and
+	tested as quickly as possible.
       </para>
+    </sect3>
+    <sect3>
+      <title>Fast Privilege Testing</title>
       <para>
-	For access to tables, we use postgres' row-level security
-	policy mechanism.  This allows us to limit the rows that a
-	user can see using an SQL expression.  Using
-	<literal>Veil2</literal> that expression will be a call to one
-	or more of the built-in privilege testing functions.  As an
-	example, here is a definition from the demo:
-      </para>
-      <programlisting>
-alter table demo.party_types enable row level security;
+	As stated above, the set of privileges in each scope is stored
+	in a bitmap, and tests for the presence of a privilege in the
+	bitmap are very fast.  The security rules for a relation will
+	typically be defined something like this (from the demo):
+	<programlisting>
+alter table demo.projects enable row level security;
 
-create policy party_type__select
-    on demo.party_types
+create policy projects__select
+    on demo.projects
    for select
- using (veil2.i_have_global_priv(16));
-      </programlisting>
-      <para>
-	For views, we have to do a little more work.  We create a
-	secured view using the same privilege testing functions that
-	we use for tables, but for insert, update and delete access,
-	we may have to use query rewite rules and/or instead-of
-	triggers.  A further complication is that we have to consider
-	whether to use postgres' security barriers, which may improve
-	security at the expense of performance.
+ using (   veil2.i_have_global_priv(21)
+        or veil2.i_have_priv_in_scope(21, 3, corp_id)
+        or veil2.i_have_priv_in_scope(21, 4, org_id)
+        or veil2.i_have_priv_in_scope(21, 5, project_id));
+	</programlisting>
       </para>
       <para>
-	For the most part, this is still quite simple though.  Here is
-	the secured view definition for roles, which gives read access
-	to the <literal>veil2.roles</literal> table:
+	Each of the test functions is checking whether the user has
+	the privilege, <literal>select projects</literal> to view the
+	current record.  Tests are made in global scope, then corp
+	scope of the owning corp, then org scope of the owning org,
+	and finally in project scope of the project itelf.  Each of 
+	thse tests, causes a different bitmap in the users session
+	privileges to be checked.
       </para>
-      <programlisting>
-create or replace
-view roles (
-    role_type,
-    role_name,
-    implicit,
-    immutable,
-    description) as
-select rt.role_type_name, r.role_name,
-       r.implicit, r.immutable,
-       r.description
-  from veil2.roles r
- inner join veil2.role_types rt
-         on rt.role_type_id = r.role_type_id
- where veil2.i_have_global_priv(18);
-      </programlisting>
+      <para>
+	Although having so many tests performed for each record
+	returned might seem like a siginifcant overhead, in fact it is
+	small compared with the cost of retrieving the record in the
+	first place and will often be effectively unmeasurable.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Individually Securing Each Relation</title>
+      <para>
+	Every table and view is given its own individual security
+	definition.  For tables, they will be much as shown above but
+	will include definitions for insert, update and delete as well
+	as select (which is shown above).
+      </para>
+      <para>
+	Views are secured in a similar way, but with the privilege
+	testing functions defined in the view itself.  Sometimes using
+	views can improve the performance of th privilege tests as
+	they can be incorporated more deeply within the view, meaning
+	that the tests do not have to be executed for every row
+	returned.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2>
+    <title>Refactoring Your Systems To Use <literal>Veil2</literal></title>
+    <para>
+      Integrating your systems with <literal>Veil2</literal> is not a
+      trivial task.
+    </para>
+    <para>
+      This section describes the major areas that you will need to
+      address in order to protect an existing system with
+      <literal>Veil2</literal>.  This is intended as an introduction
+      to the process solely in order to give you a feel for what is
+      required.  The process is covered in much more detail later
+      (TODO: REF).
+    </para>
+    <sect3>
+      <title>Web Session Management</title>
+      <para>
+	The <literal>Veil2</literal>-protected database needs to know
+	which user is accessing it all times.  It provides a
+	session-management protocol for use from web applications.
+	Your web application will have to provide handling of this
+	session management protocol.  Generally this will be handled
+	as triggers or hooks into the database connection pool
+	management.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Integration of Role Handling</title>
+      <para>
+	<literal>Veil2</literal> has its own view of what roles should
+	do and look like.  If your own system uses roles for its
+	existing access control purposes, you will have to somehow
+	integrate your system's role requirements with those of
+	<literal>Veil2</literal>.  You essentially have three choices:
+	<itemizedlist>
+	  <listitem>
+	    <para>
+	      Bring your roles to <literal>Veil2</literal>. 
+	    </para>
+	    <para>
+	      Make your roles the source of <literal>Veil2</literal>
+	      roles.  Use triggers and FK-constraints to make and
+	      maintain copies of your roles within
+	      <literal>Veil2</literal>.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Make <literal>Veil2</literal> the source of your
+	      system's roles.
+	    </para>
+	    <para>
+	      Update <literal>Veil2</literal>'s roles to handle whatever
+	      extra data your system needs, and replace your existing
+	      role objects with views onto the
+	      <literal>Veil2</literal> roles.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Refactor your system to only use
+	      <literal>Veil2</literal> roles. 
+	    </para>
+	    <para>
+	      As with the previous option you will probably need to
+	      extend the <literal>Veil2</literal> tables to add extra
+	      fields for the needs of your existsing system.  The
+	      advantage of this is that you will end up with a cleaner
+	      system, with fewer moving parts.  The downside is that
+	      your applications will probably require more refactoring.
+	    </para>
+	  </listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	This, depending on how it is tackled, has the potential to be
+	the most difficult and invasive of all the changes you will
+	need to make.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Integration of Security Contexts</title>
+      <para>
+	For every type of security context that you wish to provide,
+	you will need to provide a link from your existing tables back
+	to <literal>Veil2</literal>.  This will be handled with
+	triggers and FK-constraints.  There are good examples of how
+	this is done in the demo.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Integration of Users</title>
+      <para>
+	All of your users must be associated with
+	<literal>Veil2</literal> accessors, and any existing
+	credentials must be migrated.  Again this can be handled by
+	triggers and FK-constraints and, again, the demo provides
+	examples.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Performance Denormalizations</title>
+      <para>
+	You will be applying access control to each relation in your
+	system.  Some of them may benefit from data denormlization to
+	improve the performance of the security tests.  Typically you
+	may want to add ownership columns to some tables so that
+	ownsership can be determined without the need for extra joins.
+	If an access control function has to peform extra queries for
+	each row returned, performance may suffer.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Authentication</title>
+      <para>
+	You may need to implement a new authentication system for
+	users.  Or the built-in bcrypt implementation may be enough.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Development/Tightening of Access Controls</title>
+      <para>
+	Once you have everything integrated, you will be able to use
+	your system.  Create a super-role that allows all access and
+	assign it to all of your users in the global context: your
+	system will work exactly as it did before.  Now you can begin
+	tightening your access controls.
+      </para>
+      <para>
+	Create appropriate roles one function at a time and ensure
+	that they have sufficient access to get the job done.  Assign
+	these in the lowest security contexts possible and ensure that
+	they work.  Check that they work in higher contexts.  Remove
+	any existing code that implements access controls for that
+	functionality.  If all is well, remove those privileges from
+	your super-role and ensure that everyone can still do their
+	jobs.  Rinse and repeat.
+      </para>
     </sect3>
   </sect2>
 </sect1>

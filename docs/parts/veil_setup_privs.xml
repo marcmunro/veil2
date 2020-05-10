@@ -1,0 +1,40 @@
+<sect1 id="setup_privs">
+  <title>Create Initial Privileges</title>
+  <para>
+    This is a pretty simple step.  As a starting point, we should
+    create data access privileges for each table and view in our
+    application.  As a minimum you should provide select and modify
+    privileges but we recommend the full set of select, insert, update
+    and delete privileges for each.
+  </para>
+  <para>
+    You should aim to keep the range of privilege_ids that are in use
+    as small as possible.  You do not want unused ids, as this extends
+    the range and will lead to larger bitmaps being needed and,
+    slightly, reduced performance.  Always allocate privilege_ids
+    manually (do not use a sequence), and if you need to delete some
+    privileges, try to subsequently re-use the original ids.  Note
+    that <literal>Veil2</literal> defines a number of its own
+    privileges.  They should generally be left alone.
+  </para>
+  <para>
+    At this point you need to make the decision for each relation
+    (table or view) what the appropriate scope is for its privileges.
+    You may, at this point, discover scopes that you hadn't previously
+    considererd.  You can go back to the previous step if so.
+  </para>
+  <para>
+    You may find that you are unable to determine a suitable scope for
+    some relations.  If so, leave it as null.  When you test your
+    system, with an unprivileged use, you will probably have no access
+    to this relation, and the scope that it needs will become
+    apparent.
+  </para>
+  <sect2>
+    <title>In Summary</title>
+    <para>
+      Create records in <literal>veil2.privileges</literal>.  TODO:
+      ref
+    </para>
+  </sect2>
+</sect1>

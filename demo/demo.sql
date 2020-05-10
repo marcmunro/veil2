@@ -236,10 +236,16 @@ grant all on table demo.project_assignments to demouser;
 
 -- STEP 1 is installing Veil2
 
--- STEP 2 is defining authentication data and functions.
+-- STEP 2 is defining authentication data and functions (and session
+-- management)
 -- For the purpose of this demo, we will be using only plaintext and
 -- bcrypt so no new authentication methods have to be defined and
 -- implemented. 
+-- Furthermore as this demo is only for use in psql, we are doing no
+-- proper session authentication.  Instead we just call open_session()
+-- and create_session() manually and in a contrived manner.  This is
+-- not good practice.  Keep your open_session() and create_session()
+-- calls separate. 
 
 -- Enable plaintext authentication.  DO NOT DO THIS IN REAL LIFE!!!!
 
@@ -248,16 +254,27 @@ update veil2.authentication_types
  where shortname = 'plaintext';
 
 -- STEP 3:
--- Define contexts, privileges and some initial roles.
+-- Define scopes
+-- We create corp, org and project scope types.  Orgs are parts of an
+-- organisation in an organisational hierarchy.  Corps are the topmost
+-- elements.  Projects are projects, owned by orgs.
+
 insert into veil2.scope_types
        (scope_type_id, scope_type_name,
         description)
-values (3, 'corp context',
+values (3, 'corp scope',
         'For access to data that is specific to corps.'),
-       (4, 'org context',
+       (4, 'org scope',
         'For access to data that is specific to subdivisions (orgs) of a corp.'),
-       (5, 'project context',
+       (5, 'project scope',
         'For access to data that is specific to to project members.');
+
+
+
+
+
+-- STEP 4:
+-- Define initial privileges - TODO: provide the scopes
 
 insert into veil2.privileges
        (privilege_id, privilege_name,
@@ -276,6 +293,9 @@ values (16, 'select party_types',
         null, 'Allow select on the projects table'),
        (22, 'select project_assignments',
         null, 'Allow select on the project_assignments table');
+
+-- STEP 5:
+-- Link to/create initial roles
 
 insert
   into veil2.roles
@@ -329,7 +349,7 @@ values (7, 5, 1, 0),
        (10, 11, 1, 0),
        (10, 12, 1, 0);
 
--- STEP 4:
+-- STEP 6:
 -- Create FK links for veil2.accessors to the demo database tables.
 -- These ensure that veil2.accessors and veil2.authentication_details
 -- are kept in step with the demo parties_tbl table.
@@ -426,7 +446,7 @@ create trigger parties_tbl_aut after update on demo.parties_tbl
 comment on trigger parties_tbl_aut on demo.parties_tbl is
 'Ensure password changes get propagated to veil2.authentication_details';
 
--- STEP5:
+-- STEP7:
 -- Link scopes back to the database being secured.
 -- THIS SHOULD ALSO HANDLE UPDATES TO SOME OF THE CONTEXT VIEWS???
 

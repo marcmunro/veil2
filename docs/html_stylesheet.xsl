@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <!--
-Custom docbook stylesheet for html for SAR docs.
+Custom docbook stylesheet for html for Veil2 docs.
 -->
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -22,8 +22,8 @@ Custom docbook stylesheet for html for SAR docs.
     set         toc
     article     toc
   </xsl:param>
-  <xsl:param name="toc.max.depth">3</xsl:param>
-  <xsl:param name="toc.section.depth">3</xsl:param>
+  <xsl:param name="toc.max.depth">2</xsl:param>
+  <xsl:param name="toc.section.depth">2</xsl:param>
 
   <!-- Add some sensible header stuff so that things size properly on 
        small screens.  -->
@@ -31,7 +31,6 @@ Custom docbook stylesheet for html for SAR docs.
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
   </xsl:template>
 
-  
   <!-- Auto-numbering of sections -->
   <xsl:param name="section.autolabel" select="1"/>
   <xsl:param name="section.autolabel.max.depth" select="3"/>
@@ -231,5 +230,16 @@ Custom docbook stylesheet for html for SAR docs.
     </xsl:if>
   </xsl:template>
 
+  <xsl:template match="processing-instruction('sql-definition')">
+    <xsl:variable name="filename">
+      <xsl:value-of select="concat('extracts/',
+			            substring-before(
+                                        substring-after(., ' '), 
+                                        ' '),
+				   '.xml')"/>
+    </xsl:variable>
+    <xsl:apply-templates select="document($filename)/extract/*"/>
+  </xsl:template>
+  
 </xsl:stylesheet>
 

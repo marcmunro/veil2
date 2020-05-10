@@ -1,0 +1,61 @@
+<extract>
+<programlisting>
+create table veil2.accessors (
+  accessor_id			integer not null,
+  username			text,
+  notes				text
+);
+
+alter table veil2.accessors
+  add constraint accessor__user_fk
+  foreign key(accessor_id)
+  references my_schema.users(user_id);
+
+alter table veil2.accessors add constraint accessor__pk
+  primary key(accessor_id);
+
+alter table veil2.accessors add constraint accessor__username_uk
+  unique (username);
+
+</programlisting>
+<para>
+Identifies parties that may access our database.  If this is a party
+that should have direct database access (ie they are a database user),
+we record their username here.  This allows our security functions to
+associate the connected database user with their assigned privileges.
+</para>
+<para>
+VPD Implementation Notes:
+You are likely to want to implement a foreign-key relationship back to
+your users table in your protected database (each accessor is a user).
+It is likely that your accessor_id can simply be the same as the user_id
+(or party_id, or person_id...).  If this is not the case, you can add 
+columns to this table as needed and define FKs as needed.
+</para>
+<para>
+In the simple case you will do something like this:
+</para>
+<para>
+alter table veil2.accessors
+  add constraint accessor__user_fk
+  foreign key(accessor_id)
+  references my_schema.users(user_id);
+</para>
+<para>
+In the event that you have multiple types of accessors, with overlapping
+ranges of keys, you may have to extend this table to add an
+accessor_type, and other columns to provide the actual foreign-key
+values.  As accessor_id is heavily used by Veil2 you *must* ensure that
+this value is truly unique.
+</para>
+<para>
+Column <literal>username</literal>: If this is provided, it should match a database username.  This
+allows a database user to be associated with the accessor_id, and for
+their privileges to be determined.
+</para>
+<para>
+Column <literal>accessor_id</literal>: The id of the database accessor.  This is the id used throughout Veil2
+for determining access rights.  Idealy this will be the id of the user
+from the protected database
+</para>
+</extract>

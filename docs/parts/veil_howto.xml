@@ -1,18 +1,26 @@
 <sect1>
-  <title>Setting Up A <literal>Veil2</literal> Virtual Private Database</title>
+  <title>Setting Up A <literal>Veil2</literal> Virtual Private
+  Database - Overview</title>
   <para>
     Setting up your database to use <literal>Veil2</literal> is a
     fairly straightforward process, and can be done in the following
     stages:
     <orderedlist>
-      <listitem>install the <literal>Veil2</literal> scripts;</listitem>
-      <listitem>choose and implement your authentication mechanisms;</listitem>
-      <listitem>choose and implement your authentication mechanisms;</listitem>
-      <listitem>identify and define your security contexts;</listitem>
-      <listitem>create an initial set of privileges and roles;</listitem>
-      <listitem>create foreign key links for
-      <literal>veil2.accessors</literal>;</listitem>
-      <listitem>create links for security contexts;</listitem>
+      <listitem><link linkend="installation">install</link> the
+      <literal>Veil2</literal> scripts;</listitem> 
+      <listitem>choose and implement your <link
+      linkend="authentication">authentication</link> and <link
+      linkend="session_management">session management</link>
+      mechanisms;</listitem>
+      <listitem>identify and define your <link
+      linkend="setup_scope_types">scope types</link>;</listitem>
+      <listitem>create an initial set of <link
+      linkend="setup_privs">privileges;</link></listitem> 
+      <listitem>integrate and/or create <link
+      linkend="setup_roles">roles</link>;</listitem>
+      <listitem>create foreign key links for <link
+      linkend="setup_accessors"><literal>veil2.accessors</literal></link>;</listitem> 
+      <listitem>link your security contexts;</listitem>
       <listitem>create scope promotion mechanisms;</listitem>
       <listitem>secure your tables;</listitem>
       <listitem>secure your views;</listitem>
@@ -20,6 +28,9 @@
       <listitem>test</listitem>
     </orderedlist>
   </para>
-
+  <para>
+    Installation is covered in <link linkend="installation">this
+    previous section</link>.  The rest follows.
+  </para>
   
 </sect1>

@@ -1,0 +1,153 @@
+#! /usr/bin/env bash
+# erd2map
+#
+#      Create html map file from one of Marc's pretty ERDs
+#
+#      Copyright (c) 2020 Marc Munro
+#      Author:  Marc Munro
+#      License: GPL V3
+#
+# Usage:
+# erd2map <image-basename> <htmlroot>
+#
+# This requires the existence of files:
+# - <image_basename>.png    (created from dia source by dia and pstoimg)
+# - <image_basename>.coords (created from dia source by xsltproc)
+#
+# The coords file (see stylesheet dia_to_map.xsl) consists of a bunch
+# of entity and point definitions in dia gird coordinates.
+#
+
+# scale_factors()
+# From our coords file and the size of the image work out scale
+# factors and offsets, printing output lines for for each to stdout.
+# Usage: scale_factors <size> <coords-file>
+# 
+scale_factors () {
+    gawk -v SIZE=$1 'BEGIN {
+           min_x = 100000
+           min_y = 100000
+           max_x = 0
+           max_y = 0
+           x_pixels = gensub(/x.*/, "", "g", SIZE) + 0
+           y_pixels = gensub(/.*x/, "", "g", SIZE) + 0
+    }
+    /x=/ {
+    	x = gensub(/.*x=.([-0-9.]*).*/, "\\1", "g") + 0
+    	y = gensub(/.*y=.([-0-9.]*).*/, "\\1", "g") + 0
+    	if (x > max_x) max_x = x
+    	if (y > max_y) max_y = y
+    	if (x < min_x) min_x = x
+    	if (y < min_y) min_y = y
+    }
+    END	{
+    	x_range = max_x - min_x
+    	y_range = max_y - min_y
+    	x_scale = x_pixels / x_range
+    	y_scale = y_pixels / y_range
+    	x_offset = -min_x * x_scale
+    	y_offset = -min_y * y_scale
+    	print "SCALE:", x_scale, y_scale
+    	print "OFFSET:", x_offset, y_offset
+    }
+    ' $2
+}
+
+# Get html references for entities, printing the results to stdout.
+# Usage: cat entity_list | entity_refs <html-dir> 
+#
+entity_refs ()
+{
+    ( cd $1
+      while read line; do
+	  if files=`grep -l "entity_${line}" *html` 2>/dev/null; then
+	      file=`echo "${files}" | head -1`
+	      echo "ENTITY $line ${file}#entity_${line}"
+	  fi
+      done
+    )
+}
+
+# Create html area definitions for each entity based on scale factors
+# and the entities' html refs.
+#
+make_areas () {
+    (cat - $1) | gawk -v BASENAME="$2" '
+    # Read coordinates attributes from a coords file line.
+    function coords() {
+        x = int(gensub(/.*x=\"([^\"]*).*/, "\\1", "g") * x_scale + x_offset)
+        y = int(gensub(/.*y=\"([^\"]*).*/, "\\1", "g") * y_scale + y_offset)
+
+	#print $0, x, y
+	return x "," y
+    }
+    BEGIN {
+        printf("<div id=\"%s_div\">\n", BASENAME)
+        printf("  <map id=\"%s_map\">\n", BASENAME)
+    }
+    END {
+        printf("  </map>\n")
+	printf("  <img src=\"%s.png\" usemap=\"#%s_map\">\n", 
+	       BASENAME, BASENAME)
+	printf("</div>\n")
+    }
+    # Read x and y scale factors.
+    /^SCALE: / {
+        x_scale = $2 + 0
+        y_scale = $3 + 0
+	#print "SCALE:", x_scale, y_scale
+    }
+    # Read x and y pixel offsets
+    /^OFFSET: / {
+        x_offset = $2 + 0
+        y_offset = $3 + 0
+	#print "OFFSET:", x_offset, y_offset
+    }
+    # Create array (hash, really) of html_refs keyed by entities
+    /^ENTITY/ {
+        html_refs[$2] = gensub(/[^ ]* [^ ]* (.*)/, "\\1", "g")        
+    }
+    # Read entity name, and get html reference for it.
+    /<entity/ {
+        entity_name = gensub(/.*value=\"([^\"]*).*/, "\\1", "g")
+	if (entity_name in html_refs) {
+	    href = html_refs[entity_name]
+	}
+	else {
+	    href = ""
+	}
+    }
+    /<top-left/ {
+        top_left = coords()
+    }
+    /<bottom-right/ {
+        if (href != "") {
+ 	   bottom_right = coords()
+	   printf("    <area alt=\"%s entity\" title=\"%ss table\"\n",
+           	  entity_name, entity_name)
+	   printf("      target=\"_self\" shape=\"rect\"\n")
+	   printf("      coords=\"%s,%s\"\n", top_left, bottom_right)
+	   printf("      href=\"%s\">\n", href)
+       }
+    }' 
+}
+
+# Get entities from coords file
+# Usage: entities <coords_file>
+#
+entities ()
+{
+    gawk '/<entity/ { print gensub(/.*value=\"([^\"]*).*/, "\\1", "g") }' $1
+}
+
+thisdir=`basename $0`
+diagram_basename=`basename $1`
+
+# Get dimensions of image.
+size=`identify -format "%[w]x%[h]" $1.png`
+
+(
+  entities $1.coords | entity_refs $2
+  scale_factors ${size} $1.coords
+) | make_areas $1.coords ${diagram_basename}
+

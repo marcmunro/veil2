@@ -1,0 +1,34 @@
+<sect1 id="setup_scope_types">
+  <title>Identify and Define Your Scope Types</title>
+  <para>
+    You need to identify the types of scopes that your privileges will
+    have.  It may be easier to think in terms of relational contexts
+    rather than scopes.  The two things are very simliar but contexts
+    are more user-facing and scopes more implementation-facing.  Ask
+    yourself, in what contexts do I need to provide different access
+    rights based on user's relationships?
+  </para>
+  <para>
+    (You are not, at this stage going to be creating the scopes
+    themselves, just identifying and creating their types.  This is a
+    necessary precursor to creating privileges.)
+  </para>
+  <para>
+    Anywhere that you need context-based access controls, you should
+    be able to find a scope.
+  </para>
+  <para>
+    Note that <literal>Veil2</literal> provides 2 default scopes for
+    global and personal contexts.
+  </para>
+  <para>
+    The demo sets up 3 relational scopes.  Look for "STEP 3" in the
+    file <literal>demo/demo.sql</literal>. 
+  </para>
+  <sect2>
+    <title>In Summary</title>
+    <para>
+      Create records in <literal>veil2.scope_types</literal>.  TODO: ref
+    </para>
+  </sect2>
+</sect1>

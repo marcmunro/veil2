@@ -1,0 +1,92 @@
+<extract>
+<programlisting>
+create table veil2.scopes (
+  scope_type_id	       		integer not null,
+  scope_id			integer not null
+);
+
+alter table veil2.scopes
+  add constraint scope__pk
+  primary key(scope_type_id, scope_id);
+
+alter table veil2.scopes
+  add constraint scope__type_fk
+  foreign key(scope_type_id)
+  references veil2.scope_types(scope_type_id);
+
+alter table veil2.scopes 
+  add column corp_id integer;
+
+alter table veil2.scopes 
+  add constraint scope__corp_fk
+  foreign key (corp_id)
+  references my_schema.corporations(corp_id);
+
+alter table veil2.scopes 
+  add constraint scope__corp_chk
+  check ((scope_type_id != 3) 
+         or ((scope_type_id = 3) and (corp_id is not null)));
+
+</programlisting>
+<para>
+A scope or context identifies a type of access, or a reason for
+access.  For instance, personal context applies to data relating to a
+person.  It is that person's data and they should have access to it
+because it is theirs.  Privileges applied in personal scope apply only
+to data that belongs to the accessor.
+</para>
+<para>
+Note that global scope uses scope_id 0.  Ideally it would be null,
+since it does not relate directly to any other entity but that makes
+defining foreign key relationships (to this table) difficult.  Using a 
+reserved value of zero is just simpler (though suckier).
+</para>
+<para>
+VPD Implementation Notes:
+For each relational security context type that you create, you should
+create foreign key relationships back to your protected database.  There
+are a number of ways to do this.   Probably the simplest is to add
+nullable columns to this table for each type of relational context key
+and then add appropriate foreign key and check constraints.  
+</para>
+<para>
+For example to implement a corp context with a foreign key back to your
+corporations table:
+</para>
+<para>
+alter table veil2.scopes 
+  add column corp_id integer;
+</para>
+<para>
+alter table veil2.scopes 
+  add constraint scope__corp_fk
+  foreign key (corp_id)
+  references my_schema.corporations(corp_id);
+</para>
+<para>
+-- Ensure that for corp context types we have a corp_id
+-- (assume corp_context has scope_type_id = 3)
+alter table veil2.scopes 
+  add constraint scope__corp_chk
+  check ((scope_type_id != 3) 
+         or ((scope_type_id = 3) and (corp_id is not null)));
+</para>
+<para>
+You will, of course, also need to ensure that the corp_id field is
+populated.
+</para>
+<para>
+Column <literal>scope_type_id</literal>: Identifies the type of scope that we are describing.
+</para>
+<para>
+Column <literal>scope_id</literal>: This, in conjunction with the scope_type_id fully identifies a scope
+or context.  For global scope, this id is 0: ideally it would be null
+but as it needs to be part of the primary key of this table, that is
+not a good option.
+</para>
+<para>
+The scope_id provides a link back to the database we are protecting,
+and will usually be the key to some entity that can be said to 'own'
+data.  This might be a party, or a project, or a department.
+</para>
+</extract>

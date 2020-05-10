@@ -1,0 +1,112 @@
+<sect1 id="setup_accessors">
+  <title>Link Your Users To <literal>Veil2</literal>'s Accessors</title>
+  <para>
+    Unlike the situation with roles, <literal>Veil2</literal>'s
+    accessors are probably not going to be usable in place of your
+    system's users or parties tables.  Your system is likely to have a
+    lot of built-in sematics around the notion of user or party, and
+    keeping the <literal>Veil2</literal> accessor separate from this
+    is likely to be the simplest thing you can do.  This is the way
+    that the demo handles accessors and is our recommended practice.
+  </para>
+  <para id="accessors_steps">
+    The steps for this are:
+    <itemizedlist>
+      <listitem>
+	create foreign-key links to your users;
+      </listitem>
+      <listitem>
+	create insert triggers;
+      </listitem>
+      <listitem>
+	copy existing user records;
+      </listitem>
+      <listitem>
+	copy existing user authentication details;
+      </listitem>
+      <listitem>
+	ensure authentication changes are propagated.
+      </listitem>
+    </itemizedlist>
+  </para>
+  <sect2>
+    <title>Create Foreign-Key Links to Your Users</title>
+    <para>
+      For each user table that you have you will need to create a
+      foreign key link from <literal>veil2.accessors</literal>.  If
+      you have multiple users tables this will be more complex, but
+      the aim is to have a single accessor entry for each user.
+    </para>
+    <para>
+      You may be able to use the same id for
+      <literal>accessors</literal> as you currently use for for your
+      users table.  Do so if you can.  The demo does this.
+    </para>
+    <para>
+      You should use the <literal>on delete cascade</literal> and
+      <literal>on update cascade</literal> options on the foreign key
+      constraint so that updates and deletions on your users table are
+      reflected in <literal>veil2.accessors</literal>.
+    </para>
+    <para>
+      Take a look at the code for the demo (in
+      <literal>demo/demo.sql</literal>) for details (following the
+      comment <quote>STEP 6:</quote>).
+    </para>
+  </sect2>
+  <sect2>
+    <title>Create Insert Trigger</title>
+    <para>
+      When new users are created in your users table, we need
+      <literal>veil2.accessors</literal> records to also be created.
+      Insert triggers on your users tables will achieve this.  A fine
+      example can be found in the demo.
+    </para>
+  </sect2>
+  <sect2>
+    <title>Copy Existing User Records</title>
+    <para>
+      Create copies of the existing user records in
+      <literal>veil2.accessors</literal>.  See the demo.
+    </para>
+  </sect2>
+  <sect2>
+    <title>Copy Existing Authentication Details</title>
+    <para>
+      <literal>Veil2</literal> accessors may have multiple sets of
+      authentication details, 1 for each active authentication type
+      (eg bcrypt).  Existing authentication details will need to be
+      copied from your current users tables, possibly modified (eg
+      bcrypted), and stored in
+      <literal>veil2.authentication_details</literal>.
+    </para>
+    <para>
+      See the demo for an example but note that the demo uses
+      plaintext authentication which should not be used.
+    </para>
+    </sect2>
+  <sect2>
+    <title>Ensure Authentication Changes Are Propagated</title>
+    <para>
+      Ideally, on an ongoing basis, all authentication details will be
+      kept solely in <literal>veil2.authentication_details</literal>
+      and use of the original users tables for this will be
+      deprecated.  Until this can be completed though, you may still
+      be allowing passwords etc to be created in your original users
+      tables.
+    </para>
+    <para>
+      To ensure that password changes are propagated to
+      <literal>Veil2</literal>, triggers should be placed on the
+      source tables which will cause the appropriate modifications to
+      be made to <literal>veil2.authentication_details</literal>.
+      Again, examples can be found in the demo code.
+    </para>
+  </sect2>
+  <sect2>
+    <title>In Summary</title>
+    <para>
+      What the <link linkend="accessors_steps">above list</link> says.
+    </para>
+  </sect2>
+</sect1>

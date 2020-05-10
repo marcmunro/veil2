@@ -56,11 +56,11 @@
         </para>
         <para>
           Yes, you will.  And they had better be good at what they do.
-	  But the time that your database specialist spends on setting
-	  up your security system with <literal>Veil2</literal> should
-	  be easily countered by the amount of time saved by your
-	  application developers who will no longer have to implement
-	  security mechanisms themselves.
+          But the time that your database specialist spends on setting
+          up your security system with <literal>Veil2</literal> should
+          be matched by the amount of time saved by your application
+          developers who will no longer have to implement security
+          mechanisms themselves.
         </para>
         <para>
 	  Furthermore, with a good database specialist available you
@@ -106,13 +106,13 @@
         <para>
           Only if you let them.  Documenting your security model is
           essential.  Documenting your administration processes is
-          essential.  And you should be doing this anyway.
+          essential.  You should be doing this anyway.
         </para>
         <para>
           If you have the documentation, and you have access to good
           developers who are prepared to read, then you should have no
-          problems.  You will need quality control but of course you
-	  have that anyway.
+          problems.  You will need quality control but you have that
+          anyway.
         </para>
       </listitem>
       <listitem>
@@ -128,12 +128,18 @@
           Won’t performance be a problem?
         </para>
         <para>
-          Not in the author's experience but you may find
-          otherwise. Try modelling your use-case and test it.  Find
-          your biggest tables and implement a minimal test database
-          that you aim to secure using <literal>Veil2</literal>.  If
-          the big tables perform adequately, then the rest should be a
-          breeze.
+          Not in the author's experience but you may find otherwise.
+          You may need to perform some data denormalisations and you
+          will want to analyze some of your queries but there should
+          be little performance impact.  See TODO: ref to performance
+	  stuff. 
+        </para>
+        <para>
+	  If you are concerned, and you should be, try modelling your
+	  use-case and test it.  Find your biggest tables and
+	  implement a minimal test database that you aim to secure
+	  using <literal>Veil2</literal>.  If the big tables perform
+	  adequately, then the rest should be a breeze.
         </para>
       </listitem>
       <listitem>
@@ -142,7 +148,7 @@
         </para>
         <para>
 	  Any postgres specialist who can read this documentation
-	  should be able to cope, and quickly become an expert.  The
+	  should be able to cope and quickly become an expert.  The
 	  underlying principles are all documented.  The code is all
 	  documented.  There are documented examples.  And there are
 	  even contact links (TODO: reference)

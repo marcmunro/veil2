@@ -21,6 +21,13 @@
 <!ENTITY veil_starting 	SYSTEM "parts/veil_starting.xml">
 <!ENTITY veil_demo 	SYSTEM "parts/veil_demo.xml">
 <!ENTITY veil_howto 	SYSTEM "parts/veil_howto.xml">
+<!ENTITY veil_setup_authent   SYSTEM "parts/veil_setup_authent.xml">
+<!ENTITY veil_setup_contexts  SYSTEM "parts/veil_setup_contexts.xml">
+<!ENTITY veil_setup_privs     SYSTEM "parts/veil_setup_privs.xml">
+<!ENTITY veil_setup_roles     SYSTEM "parts/veil_setup_roles.xml">
+<!ENTITY veil_setup_accessors SYSTEM "parts/veil_setup_accessors.xml">
+<!ENTITY veil_context_links    SYSTEM "parts/veil_context_links.xml">
+<!ENTITY veil_dbobjects        SYSTEM "parts/veil_dbobjects.xml">
 
 
 ]>
@@ -76,181 +83,24 @@
   &veil_starting;
   &veil_demo;
   &veil_howto;
+  &veil_setup_authent;
+  &veil_setup_contexts;
+  &veil_setup_privs;
+  &veil_setup_roles;
+  &veil_setup_accessors;
+  &veil_context_links;
   
-  <sect1 id="setting-up-a-veil2-virtual-private-database">
-    <title>Setting Up A <literal>Veil2</literal> Virtual Private
-    Database</title>
-    <orderedlist numeration="arabic">
-      <listitem>
-        <para>
-          Install <literal>Veil2</literal>
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Define authentication data and functions
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Create <literal>contexts</literal>,
-          <literal>privileges</literal> and initial
-          <literal>roles</literal>
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Create Foreign Key Links For <literal>veil2.accessors</literal>
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Handle contexty stuff FKs, and redefinition of
-          all_accessor_roles
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Define Your Relational Context Promotions
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Build your secured things
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Assign roles to users
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          MOVE VIEW DEFINITIONS TO LOWER PRIVILEGED OWNER
-        </para>
-      </listitem>
-    </orderedlist>
-  </sect1>
-  <sect1 id="performance">
-    <title>Performance</title>
-    <para>
-    </para>
-  </sect1>
-  <sect1 id="configuration-and-maintenance">
-    <title>Configuration and Maintenance</title>
-    <para>
-      Set up expiry. Ensure sessions are cleaned-up.
-    </para>
-  </sect1>
-  <sect1 id="development-and-debugging">
-    <title>Development and Debugging</title>
-    <para>
-    </para>
-  </sect1>
-  <sect1 id="the-demo">
-    <title>The Demo</title>
-    <sect2 id="data-model">
-      <title>Data Model</title>
-      <para>
-      </para>
-    </sect2>
-    <sect2 id="security-contexts">
-      <title>Security Contexts</title>
-      <para>
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="under-the-hood">
-    <title>Under The Hood</title>
-    <para>
-      Veil2 tables. [Put in the diagram].
-    </para>
-    <para>
-      View naming conventions in veil2.
-    </para>
-    <para>
-      Implicit role assignments
-    </para>
-    <sect2 id="examining-session-privileges">
-      <title>Examining Session Privileges</title>
-      <sect3 id="view-veil2.all_accessor_roles">
-        <title>View veil2.all_accessor_roles</title>
-        <para>
-          THIS IS USER-MODIFIABLE.
-        </para>
-      </sect3>
-      <sect3 id="view-veil2.all_accessor_privs">
-        <title>View veil2.all_accessor_privs</title>
-        <para>
-        </para>
-      </sect3>
-    </sect2>
+  <sect1>
+    <title>Performance Notes</title>
+    <para/>
   </sect1>
   <sect1>
-    <title>STUFF TO ADD BACK IN</title>
-  <para>
-    This is not to say that you should only rely on the database for
-    security: your application should not attempt any access that the
-    database would prevent. This is partly because it is good security
-    practice, implementing multiple layers of security, but also
-    because:
-  </para>
-  <itemizedlist spacing="compact">
-    <listitem>
-      it is likely to improve performance;
-    </listitem>
-    <listitem>
-      it will tend to improve the user experience;
-    </listitem>
-    <listitem>
-      it will require the developer to think about security.
-    </listitem>
-  </itemizedlist>
-  <para>
-    For instance, a lazy developer implementing a view on user data
-    could simply implement:
-  </para>
-  <programlisting>
-select * from user_data;
-</programlisting>
-  <para>
-    with no where clause, relying on <literal>Veil2</literal> and the
-    database implementation to prevent any access to data that the
-    connected user is not authorised for. There are a number of
-    downsides to this:
-  </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        the query will run very slowly;
-      </para>
-      <para>
-        A full table scan will be performed against the table, even
-        though very few rows may be returned.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        security breaches become more difficult to identify;
-      </para>
-      <para>
-        We might choose to instrument our query filters so that attempts
-        to access data to which we are not entitled are logged. If
-        queries always attempt full access, such logs would become
-        bloated and close to useless.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        the developer will not learn how access controls are supposed to
-        work.
-      </para>
-      <para>
-        If you want to build a secure application, you should have
-        developers who understand the data model, and how to properly
-        use <literal>sql</literal>.
-      </para>
-    </listitem>
-  </itemizedlist>
+    <title>HOWTOs</title>
+    <para/>
   </sect1>
+  <sect1>
+    <title>Contact</title>
+    <para/>
+  </sect1>
+  &veil_dbobjects;
 </article>

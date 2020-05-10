@@ -1,0 +1,145 @@
+<sect1 id="setup_roles">
+  <title>Integrate And/Or Create Roles</title>
+  <sect2>
+    <title>Integrating Existing Roles</title>
+    <para>
+      If your existing system has roles of some sort that you wish to
+      keep using, you are going to have to find a way to integrate
+      them with the <literal>veil2.roles</literal> table.
+    </para>
+    <para>
+      There are essentially three options:
+    </para>
+    <sect3>
+      <title>Link <literal>Veil2</literal> To Your Existing Data</title> 
+      <para>
+	This is likely to be a reasonably complex process.  You are
+	going to need:
+	<itemizedlist>
+	  <listitem>
+	    <para>
+	      an id mapping mechanism;
+	    </para>
+	    <para>
+	      Your existing role keys are not going to work with
+	      <literal>Veil2</literal>, so we will need a way to map
+	      your role keys with <literal>Veil2</literal>'s
+	      <literal>role_ids</literal>.
+	    </para>
+	    <para>
+	      Probably the best way to do this is to add a column to
+	      <literal>veil2.roles</literal> which references your
+	      existing roles table.  Use a foreign key relationship to
+	      ensure that the <literal>Veil2</literal> table is kept
+	      in step with your existing table.  Use the <literal>on
+	      delete cascade</literal> and <literal>on update
+	      cascade</literal> clauses to the foreign key.
+	    </para>
+	    <para>
+	      You will also need an insert trigger on the existing
+	      roles table to populate <literal>veil2.roles</literal>
+	      when new roles are created.  This trigger needs to be
+	      smart enough to create contiguous
+	      <literal>role_id</literal>s and re-use any deleted ones
+	      in order to keep the role bitmaps reasonably small.
+	    </para>
+	    <para>
+	      For some examples of how the triggers can be constructed
+	      take a look at the demo.  In particular the way that the
+	      demo's <literal>parties</literal> table is linked to
+	      <literal>veil2.accessors</literal>. 
+	    </para>
+	  </listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Whether this will work, will depend on the semantics of your
+	existing role implementation.  If they are similar to
+	<literal>Veil2</literal>'s role semantics, this may work.  You
+	will have to do some careful thinking about this.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Make <literal>Veil2</literal>'s Roles Provide Your Role
+      Data</title>
+      <para>
+	In this option, we replace your roles implementation with that
+	from <literal>Veil2</literal> but make it look like your
+	existing implementation is still in place.
+      </para>
+      <para>
+	The key to this is to use views and instead-of triggers to
+	make the <literal>Veil2</literal> table function in the same
+	way as your existing table.  You will probably need to add
+	columns to <literal>veil2.roles</literal> and you will need to
+	change many existing foreign key relationships.
+      </para>
+      <para>
+	As with the previous option, this will require some serious
+	thinking, but it will probably give you a simpler system than
+	the previous option.  Roles and privileges are complex enough
+	without adding an extra level of redirection.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Update Your Application <literal>Veil2</literal>'s Roles</title>
+      <para>
+	This is conceptually the simplest approach but the amount of
+	work will very much depend on your existing system and its
+	needs.  Remember: you can add whatever columns you need to
+	<literal>veil2.roles</literal>.
+      </para>
+      <para>
+	The demo chooses to use <literal>Veil2</literal>'s
+	implementation of roles, rather than integrating any existing
+	role implementation.  Since the demo was built with
+	<literal>Veil2</literal> in mind this makes a lot of sense as
+	it keeps the implementation much cleaner and simpler.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2>
+    <title>Create New Roles</title>
+    <para>
+      If your application has user-level roles (roles that are
+      assigned to users), you may be able to re-use them.  You will
+      probably not have function-level roles however, and you will
+      need to at least create a minimal set of these.
+    </para>
+    <para>
+      The minimal set of user-level roles shold be enough to give you
+      2 or more pieces of functionality that you can then use to test
+      your access control mechanisms.  To these roles, you will
+      assign privileges by creating records in
+      <literal>veil2.role_privileges</literal>.
+    </para>
+    <para>
+      You will then need to create role->role mappings, making your
+      function-level roles available to your user-level roles.  You
+      will do this by creating records in
+      <literal>veil2.role_roles</literal>. 
+    </para>
+    <para>
+      As with privileges, you should keep the range of
+      <literal>role_ids</literal> as small as possible, allcating them
+      contiguously and re-use ids for records that get deleted.
+    </para>
+  </sect2>
+      <para>
+      Create records in <literal>veil2.scope_types</literal>.  TODO: ref
+    </para>
+  <sect2>
+    <title>In Summary</title>
+    <itemizedlist>
+      <listitem>integrate with any existing roles;</listitem>
+      <listitem>create function-level roles in
+      <literal>veil2.roles</literal>;</listitem> 
+      <listitem>assign privileges to function-level roles (in
+      <literal>veil2.role_privileges</literal>);</listitem>
+      <listitem>create user-level roles (in
+      <literal>veil2.roles</literal>);</listitem> 
+      <listitem>assign function-level roles to user-level roles (in
+      <literal>veil2.role_roles</literal>).</listitem>
+    </itemizedlist>
+  </sect2>
+</sect1>

@@ -54,7 +54,7 @@
     <title>Scopes</title>
     <para>
       A scope describes the applicability of a <link
-      linkend="privilege">privilege</link>.  Scopes are mostly based
+      linkend="privileges">privilege</link>.  Scopes are mostly based
       upon existing relationships in your data.
     </para>
     <para>
@@ -91,7 +91,7 @@
       linkend="security-contexts">security contexts</link>; and <link
       linkend="privilege-promotion">privilege promotion</link>, for
       information on how each privilege's <link
-      linkend="scope">scope</link> is managed.
+      linkend="scopes">scope</link> is managed.
     </para>
     <para>
       To make roles more flexible, we allow roles to be assigned to
@@ -222,7 +222,7 @@
       <para>
         Global Context is powerful and dangerous. It is the level of
         access control provided by <link
-        linkend="Tradiional">traditional</link> security systems and
+        linkend="Traditional">traditional</link> security systems and
         it should be used with great care.
       </para>
     </sect3>

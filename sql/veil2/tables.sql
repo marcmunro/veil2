@@ -16,13 +16,12 @@ alter table veil2.scope_types
   unique(scope_type_name);
 
 comment on table veil2.scope_types is
-'Describes the security scopes for this VPD.  This is primarily for
-documentation purposes though also provides a foreign key for
-context-based role assignments.
+'Identifies the types of security scope for your VPD.  This can be
+thought of as the ''level'' of a scope.
 
-VPD Implementation Notes: Insert 1 record into this table for each
-type of scope that you wish to implement.  Veil2 comes with 2 built-in
-scopes, for the security contexts global and personal.';
+Insert one record into this table for each type of scope that you wish
+to implement.  Veil2 comes with 2 built-in scope types: for global and
+personal contexts.';
 
 revoke all on veil2.scope_types from public;
 grant select on veil2.scope_types to veil_user;
@@ -45,44 +44,47 @@ alter table veil2.scopes
   references veil2.scope_types(scope_type_id);
 
 comment on table veil2.scopes is
-'A scope or context identifies a type of access, or a reason for
-access.  For instance, personal context applies to data relating to a
-person.  It is that person''s data and they should have access to it
-because it is theirs.  Privileges applied in personal scope apply only
-to data that belongs to the accessor.
+'A scope, or context, identifies a limit to access.  It is a
+scope_type applied to a specific instance.  For example, if access
+controls are placed in in project scopes, there will be one scopes
+record for each project that we wish to manage access to.  So for
+three projects A, B and C, there would be 3 scopes with scope_types of
+project.  This table as created by the Veil2 database creation scripts
+is incomplete.  It needs additional columns to link itself with the
+scopes it is protecting.
 
-Note that global scope uses scope_id 0.  Ideally it would be null,
-since it does not relate directly to any other entity but that makes
-defining foreign key relationships (to this table) difficult.  Using a 
-reserved value of zero is just simpler (though suckier).
-
-VPD Implementation Notes:
-For each relational security context type that you create, you should
-create foreign key relationships back to your protected database.  There
-are a number of ways to do this.   Probably the simplest is to add
-nullable columns to this table for each type of relational context key
-and then add appropriate foreign key and check constraints.  
+For each relational scope type that you create, you should create
+foreign key relationships from this table back to your protected
+database.  There are a number of ways to do this.  Probably the
+simplest is to add nullable columns to this table for each type of
+relational context key and then add appropriate foreign key and check
+constraints.
 
 For example to implement a corp context with a foreign key back to your
 corporations table:
 
-alter table veil2.scopes 
-  add column corp_id integer;
+    alter table veil2.scopes 
+      add column corp_id integer;
 
-alter table veil2.scopes 
-  add constraint scope__corp_fk
-  foreign key (corp_id)
-  references my_schema.corporations(corp_id);
+    alter table veil2.scopes 
+      add constraint scope__corp_fk
+      foreign key (corp_id)
+      references my_schema.corporations(corp_id);
 
--- Ensure that for corp context types we have a corp_id
--- (assume corp_context has scope_type_id = 3)
-alter table veil2.scopes 
-  add constraint scope__corp_chk
-  check ((scope_type_id != 3) 
-         or ((scope_type_id = 3) and (corp_id is not null)));
+    -- Ensure that for corp context types we have a corp_id
+    -- (assume corp_context has scope_type_id = 3)
+    alter table veil2.scopes 
+      add constraint scope__corp_chk
+      check ((scope_type_id != 3) 
+          or ((scope_type_id = 3) and (corp_id is not null)));
 
 You will, of course, also need to ensure that the corp_id field is
-populated.';
+populated.
+
+Note that global scope uses scope_id 0.  Ideally it would be null,
+since it does not relate directly to any other entity but that makes
+defining foreign key relationships (to this table) difficult.  Using a 
+reserved value of zero is just simpler (though suckier).';
 
 comment on column veil2.scopes.scope_type_id is
 'Identifies the type of scope that we are describing.';
@@ -91,7 +93,7 @@ comment on column veil2.scopes.scope_id is
 'This, in conjunction with the scope_type_id fully identifies a scope
 or context.  For global scope, this id is 0: ideally it would be null
 but as it needs to be part of the primary key of this table, that is
-not a good option.
+not possible.
 
 The scope_id provides a link back to the database we are protecting,
 and will usually be the key to some entity that can be said to ''own''
@@ -110,8 +112,9 @@ create table veil2.privileges (
 );
 
 comment on table veil2.privileges is
-'The set of privileges used by our VPD.  There should be no need for
-anyone other administrators having any access to this table.
+'This provides all privileges used by our VPD.  There should be no
+need for anyone other than administrators to have any access to this
+table.
 
 A privilege is the lowest level of access control.  It should be used to
 allow the holder of that privilege to do exactly one thing, for example
@@ -119,20 +122,31 @@ allow the holder of that privilege to do exactly one thing, for example
 select from the privileges table.  It should not be used for any other
 purpose.
 
-Note that the name of the privilege is only a clue to its usage.  We use
-the privilege ids and not the names to manage access.'; 
+Note that the name of the privilege is only a clue to its usage.  We
+use the privilege ids and not the names to manage access.  It is the
+responsibility of the implementor to ensure that a privilege''s name
+matches the purpose to which it is put.';
 
 comment on column veil2.privileges.privilege_id is
 'Primary key for privilege.  This is the integer that will be used as a
 key into our privilege bitmaps.  It is not generated from a sequence as
-we want to have very tight control of the privilege_ids.';
+we want to have very tight control of the privilege_ids.
+
+The range of privilege_ids in use should be kept as small as
+possible.  If privileges become deprecated, you should (once you have
+ensured that the old privilege_id is not in use *anywhere*) try to
+re-use the old privilege_ids rather than extending the range of
+privilege_ids by allocating new ones.
+
+This will keep your privilege bitmaps smaller, which should in turn
+improve performance.';
 
 comment on column veil2.privileges.privilege_name is
 'A descriptive name for a privilege.  This should generally be enough to 
 figure out the purpose of the privilege.';
 
 comment on column veil2.privileges.promotion_scope_type_id is
-'Identfies a security ccope type to which this privileges scope should
+'Identfies a security scope type to which this privileges scope should
 be promoted if possible.  This allows roles which will be assigned in
 a restricted security context to contain privileges which necessarily
 must apply in a superior scope (ie as if they has been assigned in a
@@ -169,7 +183,12 @@ create table veil2.role_types (
 
 comment on table veil2.role_types is
 'A role type is used to classify roles so that they may be shown and
-used in different ways.   This is mostly a VPD implementation choice.';
+used in different ways.   This is mostly a VPD implementation choice.
+
+For instance you may choose to distinguish between user and
+function-level roles so that you can prevent role assignments to
+user-level roles.  In such a case you might add columns to this table
+to identify specific properties of specific role_types.';
 
 alter table veil2.role_types add constraint role_type__pk
   primary key(role_type_id);
@@ -453,7 +472,7 @@ comment on column veil2.authentication_types.authent_fn is
 authentication token is correct.
 
 The signature for this function is:
-  fn(accessor_id integer, token text) returns bool;
+      fn(accessor_id integer, token text) returns bool;
 It will return true if the supplied token is what is expected.';
 
 comment on column veil2.authentication_types.supplemental_fn is
@@ -461,9 +480,9 @@ comment on column veil2.authentication_types.supplemental_fn is
 for create_session.
 
 The signature for this function is:
-  fn(accessor_id in integer, 
-     session_token in out text,
-     session_supplemental out text) 
+    fn(accessor_id in integer, 
+       session_token in out text,
+       session_supplemental out text) 
     returns record;
 
 The provided session_token is a random value, that may be returned
@@ -654,7 +673,10 @@ create type veil2.session_privileges_t as (
 );
 
 comment on type veil2.session_privileges_t is
-'Records the privileges for active sessions in each assigned context.';
+'Records the privileges for active sessions in each assigned context.
+
+This type is used for the generation of a session_privileges temporary
+table which is populated by Veil2''s session management functions.';
  
 \echo ......session_params_t(type)...
 create type veil2.session_params_t as (

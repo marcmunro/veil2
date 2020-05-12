@@ -1,0 +1,76 @@
+<sect1 id="scope_promotions">
+  <title>Create Scope Promotions</title>
+  <para>
+    Determining which scopes may be promoted to which other scopes is
+    done through the <literal><link
+    linkend="view_scope_promotions">scope_promotions</link></literal>
+    view.  This identifies, for each scope, what directly superior
+    scopes exist.  It does not identify global scope, and does not
+    require a recursive query to identify grandparent scopes etc.
+    These are handled elsewhere.  Also, there is no need for this view
+    to be materialized for performance, as this is a base view, used
+    by <literal>Veil2</literal> to populate more sophisticated,
+    recursively defined and materialized views.
+  </para>
+  <sect2>
+    <title>Creating The View</title>
+    <para>
+      You will need to completely redefine the <literal><link
+      linkend="view_scope_promotions">scope_promotions</link></literal>
+      view.  The provided <literal>Veil2</literal> version of this
+      view is simply a placeholder.
+    </para>
+    <para>
+      You will define this view as the union of a number of queries.
+      Each query will represent a single type of scope promotion.  The
+      following example is from the demo.  See STEP 8 in the file
+      <literal>demo/demo.sql</literal>.
+      <programlisting>
+create or replace
+view veil2.scope_promotions (
+  scope_type_id, scope_id,
+  promoted_scope_type_id, promoted_scope_id
+) as
+select 4, party_id,  -- Promote org to corp scope
+       3, corp_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+union all
+select 3, party_id,  -- Promotion of org to higher org
+       3, org_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+select 5, s.scope_id,   -- Project to corp promotions
+       3, p.corp_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id
+union all
+select 5, s.scope_id,   -- Project to org promotions
+       4, p.org_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id;
+      </programlisting>
+    </para>
+    <para>
+      Note that if you have something like an organizational hierarchy
+      in which you want someone that is assigned a role in an
+      organizational context, to automatically have those rights in
+      all subordinate organizational contexts, you will need to define
+      scope promotions within that hierarchy.  This is done by the
+      second query in the above union.
+    </para>
+  </sect2>
+  <sect2>
+    <title>In Summary</title>
+    <para>
+      For each type of context promotion that is possible, including
+      those within a hierarchy of the same scope types (eg the org
+      hierarchy from the demo), create a query that is part of a union
+      that defines the <literal><link
+      linkend="view_scope_promotions">scope_promotions</link></literal>
+      view.
+    </para>
+  </sect2>
+</sect1>

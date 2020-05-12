@@ -12,9 +12,9 @@
     consider.
   </para>
   <para>
-    The demo does very little with this step, but you may find some
-    useful hints there.  Look for "STEP 2" in the file
-    <literal>demo/demo.sql</literal>. 
+    The demo does very little in performing this step, but you may
+    find some useful hints there.  Look for "STEP 2" in the file
+    <literal>demo/demo.sql</literal>.
   </para>
   <sect2 id="authentication">
     <title>Authentication</title>
@@ -22,7 +22,7 @@
       Authenticating users is hard.  There are many different ways to
       do it.  <literal>Veil2</literal> provides 2 default
       password-based mechanisms for authentication, and a mechanism
-      for extensibility TODO: ref.  The built-in methods are:
+      for extensibility.  The built-in methods are:
       <itemizedlist>
 	<listitem>
 	  <para>
@@ -32,7 +32,7 @@
 	    This is provided simply for testing.  With plaintext
 	    authorization, a password is provided which is simply
 	    checked against a copy stored in
-	    <literal>veil2.authentication_details</literal>.
+	    <link linkend="entity_authentication_detail"><literal>veil2.authentication_details</literal></link>.
 	  </para>
 	  <para>
 	    By default, this authentication mechanism is disabled.  It
@@ -59,6 +59,11 @@
 	</listitem>
       </itemizedlist>
     </para>
+    <para>
+      New authentication methods should be created by creating new
+      authentication functions and new records in <link
+      linkend="entity_authentication_type"><literal>veil2.authentication_types</literal></link>.
+    </para>
   </sect2>
   <sect2 id="session_management">
     <title>Session Management</title>
@@ -79,7 +84,7 @@
 	  <para>
 	    It is important with such systems that we can reliably
 	    identify which user is connected, and that the privileges
-	    of one user are not inadvertantly transfered to another.
+	    of one user are not inadvertently transferred to another.
 	    This means that when the connection starts to be used by a
 	    new user there must be some form of secure identification
 	    of the user.
@@ -107,7 +112,7 @@
 	most web applications, a database connection will be shared
 	amongst many users.  When the application needs to perform
 	some database action on behalf of a user, the connection will
-	be retrieved from the pool, and possibly re-initialised,
+	be retrieved from the pool, and possibly re-initialized,
 	before executing one or more queries on the user's behalf.
       </para>
       <para>
@@ -146,7 +151,8 @@
       </para>
       <para>
 	This is done by providing the database username to a
-	<literal>veil2.accessors</literal> record TODO: ref.
+	<literal><link linkedn="entity_accessor">veil2.accessors</link></literal>
+	record.
       </para>
       <para>
 	To begin a dedicated session after connecting to the database,
@@ -175,7 +181,7 @@ select * from session where result = 0;
 	</programlisting>
 	<para>
 	  For an example of this, take a look at the
-	  <literal>Veil2</literal>unit tests.  The dataase user
+	  <literal>Veil2</literal>unit tests.  The database user
 	  <literal>veil2_alice</literal> is set up as a dedicated
 	  session user (as well as a shared session user).
 	</para>
@@ -188,8 +194,9 @@ select * from session where result = 0;
       <listitem>
 	<para>
 	  For shared-session use, choose an authentication system.
-	  You may need to implement it.  You should disable (TODO:
-	  ref) the authentication systems you do not want to use.
+	  You may need to implement it.  You should disable (in
+	  <literal><link linkend="entity_authentication_type">veil2.authentication_types</link></literal>
+	  the authentication systems you do not want to use. 
 	</para>
       </listitem>
       <listitem>

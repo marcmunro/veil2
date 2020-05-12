@@ -1,5 +1,12 @@
 <sect1 id="setup_roles">
   <title>Integrate And/Or Create Roles</title>
+  <para>
+    The demo chooses to use only <literal>Veil2</literal>'s role
+    tables for its roles implementation.  This makes things very
+    simple, but may be unhelpful as an example.  The author apologises
+    but there are some things you will have to do for yourselves.
+    Look for  STEP 5 in the file <literal>demo/demo.sql</literal>.
+  </para>
   <sect2>
     <title>Integrating Existing Roles</title>
     <para>
@@ -24,7 +31,10 @@
 	      Your existing role keys are not going to work with
 	      <literal>Veil2</literal>, so we will need a way to map
 	      your role keys with <literal>Veil2</literal>'s
-	      <literal>role_ids</literal>.
+	      <literal>role_ids</literal>.  Note that you need to keep
+	      the range of <literal>role_id</literal>s as small as
+	      possible in order to keep their bitmap representations
+	      small.
 	    </para>
 	    <para>
 	      Probably the best way to do this is to add a column to
@@ -107,7 +117,7 @@
       need to at least create a minimal set of these.
     </para>
     <para>
-      The minimal set of user-level roles shold be enough to give you
+      The minimal set of user-level roles should be enough to give you
       2 or more pieces of functionality that you can then use to test
       your access control mechanisms.  To these roles, you will
       assign privileges by creating records in
@@ -121,7 +131,7 @@
     </para>
     <para>
       As with privileges, you should keep the range of
-      <literal>role_ids</literal> as small as possible, allcating them
+      <literal>role_ids</literal> as small as possible, allocating them
       contiguously and re-use ids for records that get deleted.
     </para>
   </sect2>

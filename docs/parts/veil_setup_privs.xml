@@ -21,7 +21,7 @@
     At this point you need to make the decision for each relation
     (table or view) what the appropriate scope is for its privileges.
     You may, at this point, discover scopes that you hadn't previously
-    considererd.  You can go back to the previous step if so.
+    considered.  You can go back to the previous step if so.
   </para>
   <para>
     You may find that you are unable to determine a suitable scope for
@@ -29,6 +29,10 @@
     system, with an unprivileged use, you will probably have no access
     to this relation, and the scope that it needs will become
     apparent.
+  </para>
+  <para>
+    The demo sets a (very) minimal set of privileges.  Look for STEP 4
+    in the file <literal>demo/demo.sql</literal>.
   </para>
   <sect2>
     <title>In Summary</title>

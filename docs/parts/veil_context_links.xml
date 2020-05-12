@@ -1,6 +1,104 @@
-<sect1 id="link_contexts">
-  <title>Link Your Security Contexts</title>
+<sect1 id="link_scopes">
+  <title>Link Your Scopes and Security Contexts</title>
   <para>
-    
+    The <literal>Veil2 <link
+    linkend="entity_scope">scopes</link></literal> table is the most
+    important link between <literal>Veil2</literal> and the database
+    that it is protecting.  It provides the semantic link between
+    <link linkend="scopes">scopes</link> as understood by the security
+    model, and the <link linkend="security-contexts">security
+    contexts</link> provided or implied by the data model.
   </para>
+  <para>
+    The simplest, and recommended, way to implement these links is by
+    adding foreign-key columns and relationships to the <literal>Veil2
+    <link linkend="entity_scope">scopes</link></literal> table.
+  </para>
+  <para>
+    Look for STEP 7 in the file <literal>demo/demo.sql</literal>.
+  </para>
+  <sect2>
+    <title>Create Foreign Key Links</title>
+    <para>
+      For each relational security context, you will add columns to
+      the <literal>scopes</literal> table.  For instance if you have a
+      project context based on a user's membership of projects, and
+      you <literal>project</literal> table has an integer
+      <literal>project_id</literal> field as its primary key, you
+      would do the following:
+      <programlisting>
+alter table veil2.scopes
+  add column project_id integer;
+
+alter table veil2.scopes
+  add constraint scope__project_fk
+  foreign key (project_id)
+  references projects(project_id)
+  on update cascade on delete cascade;
+      </programlisting>
+    </para>
+    <para>
+      Using the cascade options ensures that deletions and updates of
+      the primary keys in the <literal>projects</literal> table are
+      propagated to <literal>scopes</literal>.  This saves us from
+      having to implement our own triggers for updates and deletions.
+    </para>
+    <para>
+      It is wise to also ensure that project_id fields are only used
+      with the appropriate scope type.  A check constraint like the
+      following should be used:
+      <programlisting>
+alter table veil2.scopes
+  add constraint scope__check_project_fk_type
+  check (case when scope_type_id = 6 then
+              project_id is not null
+	 else project_id is null end);
+      </programlisting>
+      Where, we assume, a <literal>scope_type_id</literal> of
+      <literal>6</literal> means project scope.
+    </para>
+  </sect2>
+  <sect2>
+    <title>Create Insertion Triggers</title>
+    <para>
+      Next, we want to ensure that new <literal>projects</literal>
+      records are automatically recorded in the
+      <literal>scopes</literal> table.  You will add an on insert
+      trigger to do this, the details of which are left to the reader.
+    </para>
+  </sect2>
+  <sect2>
+    <title>Link Existing Records</title>
+    <para>
+      The final step is to populate scope records for your existing
+      projects.  Something like this:
+      <programlisting>
+insert 
+  into veil2.scopes
+      (scope_type_id, scope_id, project_id)
+select 6, nextval('veil2.scope_id_seq'), project_id
+  from projects p
+ where not exists (
+    select null
+      from veil2.scopes s
+     where s.project_id = p.project_id);
+      </programlisting>
+      Note that you would have to create the sequence used above as
+      this is not provided for you by default.
+    </para>
+    <para>
+      The not-exists clause is worth using as you will be able to
+      safely re-run this insert at any time if your tables get out of
+      step.
+    </para>
+  </sect2>
+  <sect2>
+    <title>In Summary</title>
+    <para>
+      For each relational context you will add foreign key columns,
+      create foreign key and check constraints, create an insert
+      trigger and populate the <literal>scopes</literal> table
+      records.
+    </para>
+  </sect2>
 </sect1>

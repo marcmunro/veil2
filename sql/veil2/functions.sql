@@ -59,7 +59,7 @@ $$
 language 'sql' security definer stable leakproof;
 
 comment on function veil2.authenticate_bcrypt(integer, text) is
-'Authentication predicate for bcrypt authentication.  Return true iff
+'Authentication predicate for bcrypt authentication.  Return true if
 running bcrypt on the supplied token, using the salt from the
 stored authentication token for the accessor, matches that stored
 authentication token.';
@@ -94,7 +94,7 @@ $$
 language 'plpgsql' security definer stable leakproof;
 
 comment on function veil2.authenticate(integer, text, text) is
-'For the given ACCESSOR_ID and AUTHENTICATION_TYPE check whether TOKEN
+'For the given accessor_id and authentication_type check whether token
 is an appropriate authentication.';
 
 
@@ -335,8 +335,8 @@ $$
 language 'plpgsql' security definer volatile;
 
 comment on function veil2.load_session_privs(integer, integer) is
-'Load the temporary table session_privileges for SESSION_ID, with the
-privileges for _ACCESSOR_ID.  The temporary table is queried by
+'Load the temporary table session_privileges for session_id, with the
+privileges for _accessor_id.  The temporary table is queried by
 security functions in order to determine what access rights the
 connected user has.';
 
@@ -480,11 +480,15 @@ cannot be used.
 TODO: MORE HELPFUL (AND CORRECT) COMMENT
 
 Failures may be for several reasons with errmsg as described below:
+
  - non-existence of session [errmsg: ''AUTHFAIL''];
- - expiry of session (while session record still exists - has not been
-   cleaned away) [errmsg: ''EXPIRED''];
+
+ - expiry of session (while session record still exists - has not been cleaned away) [errmsg: ''EXPIRED''];
+
  - incorrect credentials being used [errmsg: ''AUTHFAIL''];
+
  - invalid nonce being provided [errmsg: ''NONCEFAIL''];
+
  - the user has no connect privilege [errmsg: ''AUTHFAIL''].
 
 The _nonce is a number that may only be used once per session, and is
@@ -672,15 +676,8 @@ function veil2.i_have_priv_in_superior_scope(integer, integer, integer) is
 'Predicate to determine whether the connected user has the given
 privilege a scope that is superior to the given scope.  This does not
 check for the privilege in a global scope as it is assumed that such a
-test will have already been performed.   As this function necessarily
-performs a recursive query, it may add considerable overhead.  Whenever
-possible, alternative mechanisms should be used for determining access
-rights.
-
-VPD Implementation Notes:
-You may want to rewrite this function for your application, making use
-of application-specific data structures in order to reduce its
-overhead.';
+test will have already been performed.  Note that due to the join on
+all_scope_promotions this function may incur measurable overhead.';
 
 
 \echo ......i_have_personal_priv()...

@@ -45,10 +45,10 @@
       For the purpose of subsequent discussion, we are going to define
       a <emphasis>Traditional Application Security</emphasis> approach
       below.  The terminology in this section is necessarily somewhat
-      vague as it is a fairly gross generalisation of typical
+      vague as it is a fairly gross generalization of typical
       practices.  Many existing systems will do better than is
       suggested below, but the underlying mechanisms described should
-      be easily recognisable and familiar.
+      be easily recognizable and familiar.
     </para>
     <para>
       In traditionally implemented database systems:
@@ -79,16 +79,16 @@
         <para>
           Some access controls <emphasis>will</emphasis> be contextual:
           there will be explicit checks to determine whether in the
-          context of this team/department/organisation/customer/whatever
+          context of this team/department/organization/customer/whatever
           you have the right to perform a specific action.
         </para>
         <para>
           This is typically still a functional rather than a relational
-          access control as there is the perceived function
+          access control as there is the implied function
           <literal>do-x-if-I-am-a-member-of-something</literal>, rather
           than the more general <literal>do-x</literal>. Often the
-	  general <literal>do-x</literal> function is reserved for
-	  some sort of administrator.
+	  general <literal>do-x</literal> function will be reserved for
+	  administrator use only.
         </para>
         <para>
           Sometimes such functions will do some moderately sophisticated
@@ -110,7 +110,7 @@
         </para>
         <para>
           Users will typically be explicitly assigned roles, such as
-          Customer Service Rep (<literal>CSR</literal>), Product
+          Customer Service Rep (CSR), Product
           Manager, Senior CSR, Administrator, etc.
         </para>
         <para>
@@ -161,7 +161,7 @@
         </para>
         <para>
           Users can be given default roles. This is a little like the
-          default acess rights in our traditional system, but:
+          default access rights in our traditional system, but:
         </para>
         <itemizedlist spacing="compact">
           <listitem>
@@ -282,7 +282,7 @@
       interested in.  Note that the permission tests are contextual:
       whether you have permission to execute some project management
       function depends on which project you want to apply it to.  You
-      may be able to perform different functions in different
+      may be able to access different functions in different
       projects.
     </para>
     <para>
@@ -319,7 +319,7 @@
     </para>
     <para>
       With a relational security model, access to data is limited
-      primarily within the database server.  No application code is
+      primarily by the database server itself.  No application code is
       required to limit a user's access to data, the database just
       does it.  Furthermore the application does not need the
       <emphasis>smarts</emphasis> to determine what a user can do.  It
@@ -329,7 +329,7 @@
     </para>
     <para>
       What this means is that <emphasis>all</emphasis> of the access
-      control rules are built from a common framework, using a single
+      control rules are built from a common framework using a single
       set of guiding principles.  Although it is possible to implement
       <emphasis>special cases</emphasis> there is rarely any need.
       This is because the access control mechanisms are based on the
@@ -370,12 +370,12 @@
       changing some privilege assignments.  No code needs to be
       touched and once the change has been tested we can be sure that
       it will apply throughout the application: there will not be some
-      obsure screen somewhere that someone created by copy and paste
+      obscure screen somewhere that someone created by copy and paste
       that gets forgotten and that does not get updated to implement
       the new access control.
     </para>
     <para>
-      By having only one fundamental security mechansim, and by
+      By having only one fundamental security mechanism, and by
       linking it with the data that it is intended to protect, a
       relational security system will be more complete and more
       robust, and by building this into the database we can ensure

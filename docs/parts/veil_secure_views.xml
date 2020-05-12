@@ -1,0 +1,67 @@
+<sect1 id="secure_views">
+  <title>Secure Your Views</title>
+  <para>
+    Just as with tables, user-facing views should be secured.  You can
+    do this either explicitly, by adding privilege testing functions to
+    the view definitions, or implicitly by building the views on
+    tables that have already been secured.  In this latter case, the
+    views will need to be owned by a separate database role from that
+    which owns the tables as views are processed with the access
+    rights of their owners.
+  </para>
+  <sect2>
+    <title>Doing It</title>
+    <para>
+      This is best explained by example.  Here is an example from the
+      demo:
+      <programlisting>
+create or replace
+view party_roles (
+    party_id,
+    role_name,
+    context_type,
+    corp_context_id,
+    org_context_id) as
+select ar.accessor_id, r.role_name,
+       st.scope_type_name,
+       case when ar.context_type_id = 3
+       then ar.context_id
+       else null
+       end,
+       case when ar.context_type_id = 4
+       then ar.context_id
+       else null
+       end 
+  from veil2.accessor_roles ar
+ inner join veil2.roles r
+         on r.role_id = ar.role_id
+ inner join veil2.scope_types st
+         on st.scope_type_id = ar.context_type_id
+ where veil2.i_have_global_priv(20)
+    or veil2.i_have_priv_in_scope(20, 3, context_id)
+    or veil2.i_have_priv_in_scope(20, 4, context_id);
+      </programlisting>
+    </para>
+    <para>
+      Note that if the view is updatable you will also need to build
+      instead-of triggers or some equivalent, that take into account
+      update, insert and delete privileges.  One wrinkle with
+      updatable views is that they should not allow modifications of
+      rows that they would not be allowed to see, so the select
+      privilege must usually be explicitly tested in addition to the
+      select, insert or update privilege.
+    </para>
+    <para>
+      Views do provide some interesting possibilities though.  One is
+      to use the privilege testing functions on specific columns to
+      make access controls even more fine-grained.
+    </para>
+  </sect2>
+  <sect2>
+    <title>In Summary</title>
+    <para>
+      Add privilege testing functions to each user-facing view
+      definition.
+    </para>
+  </sect2>
+</sect1>

@@ -20,10 +20,14 @@
       linkend="setup_roles">roles</link>;</listitem>
       <listitem>create foreign key links for <link
       linkend="setup_accessors"><literal>veil2.accessors</literal></link>;</listitem> 
-      <listitem>link your security contexts;</listitem>
-      <listitem>create scope promotion mechanisms;</listitem>
-      <listitem>secure your tables;</listitem>
-      <listitem>secure your views;</listitem>
+      <listitem><link linkend="link_scopes">link your scopes and
+      security contexts</link>;</listitem>
+      <listitem>create <link linkend="scope_promotions">scope
+      promotion</link> mechanisms;</listitem>
+      <listitem><link linkend="secure_tables">secure your
+      tables</link>;</listitem> 
+      <listitem><link linkend="secure_views">secure your
+      views</link>;</listitem>
       <listitem>assign initial roles to users;</listitem>
       <listitem>test</listitem>
     </orderedlist>

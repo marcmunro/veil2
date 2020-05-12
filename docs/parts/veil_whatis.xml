@@ -14,15 +14,15 @@
     modify the code yourself to match your needs.
   </para>
   <para>
-    It is important to realise at this point that
+    It is important to realize at this point that
     <literal>Veil2</literal> is not an application or a product.  It
     is a framework for <emphasis>you</emphasis> to build on.  If there
-    are updates or bugfixes they will be to specific pieces of
+    are updates or bug-fixes they will be to specific pieces of
     functionality which you can choose to replace piecemeal or not at
     all (this document will be updated to describe each such update
     in detail).  There is no rolling-release or automated update
     for you to worry about breaking, and all of its parts are
-    user-servicable.  You will not void your warranty by tweaking it
+    user-serviceable.  You will not void your warranty by tweaking it
     as there is no warranty.  Once you have taken it out of the box it
     is yours and you can and should (subject to the terms of the GPL
     V3) treat it as such.  You are expected to add columns to the
@@ -69,7 +69,7 @@
       What this means is that when Alice tries to select the user
       record for Bob, Alice will only see that record if she has been
       assigned the necessary privilege to view Bob's user record in an
-      approriate context.  As each user's privilege assignments will
+      appropriate context.  As each user's privilege assignments will
       be different, each user will see a different subset of data.
     </para>
     <sect3>
@@ -102,11 +102,11 @@
 	To make this process as fast as possible a number of
 	materialized views are used which map roles to their sets of
 	privileges in various contexts.  By loading from these
-	materialised views, the overhead of determining a large set of
+	materialized views, the overhead of determining a large set of
 	potential privileges is much reduced, and since the
 	materialized views record sets of privileges in bitmaps,
 	rather than individual records, this overhead becomes quite
-	managable.  The materialized views are automatically updated
+	manageable.  The materialized views are automatically updated
 	whenever role->role and role->privilege assignments are
 	modified which will tend to be relatively infrequently.
       </para>
@@ -123,7 +123,7 @@
 	privileges work with acceptable performance.
       </para>
       <para>
-	Getting the necessary peformance is all about using the
+	Getting the necessary performance is all about using the
 	privilege bitmaps, and ensuring that they can be loaded and
 	tested as quickly as possible.
       </para>
@@ -149,16 +149,16 @@ create policy projects__select
       </para>
       <para>
 	Each of the test functions is checking whether the user has
-	the privilege, <literal>select projects</literal> to view the
+	the privilege, <literal>select projects</literal>, to view the
 	current record.  Tests are made in global scope, then corp
 	scope of the owning corp, then org scope of the owning org,
-	and finally in project scope of the project itelf.  Each of 
-	thse tests, causes a different bitmap in the users session
+	and finally in project scope of the project itself.  Each of 
+	these tests, causes a different bitmap in the users session
 	privileges to be checked.
       </para>
       <para>
 	Although having so many tests performed for each record
-	returned might seem like a siginifcant overhead, in fact it is
+	returned might seem like a significant overhead, in fact it is
 	small compared with the cost of retrieving the record in the
 	first place and will often be effectively unmeasurable.
       </para>
@@ -169,12 +169,12 @@ create policy projects__select
 	Every table and view is given its own individual security
 	definition.  For tables, they will be much as shown above but
 	will include definitions for insert, update and delete as well
-	as select (which is shown above).
+	as select (shown above).
       </para>
       <para>
 	Views are secured in a similar way, but with the privilege
 	testing functions defined in the view itself.  Sometimes using
-	views can improve the performance of th privilege tests as
+	views can improve the performance of the privilege tests as
 	they can be incorporated more deeply within the view, meaning
 	that the tests do not have to be executed for every row
 	returned.
@@ -247,7 +247,7 @@ create policy projects__select
 	    <para>
 	      As with the previous option you will probably need to
 	      extend the <literal>Veil2</literal> tables to add extra
-	      fields for the needs of your existsing system.  The
+	      fields for the needs of your existing system.  The
 	      advantage of this is that you will end up with a cleaner
 	      system, with fewer moving parts.  The downside is that
 	      your applications will probably require more refactoring.
@@ -267,8 +267,8 @@ create policy projects__select
 	For every type of security context that you wish to provide,
 	you will need to provide a link from your existing tables back
 	to <literal>Veil2</literal>.  This will be handled with
-	triggers and FK-constraints.  There are good examples of how
-	this is done in the demo.
+	triggers and FK-constraints.  There are examples of how this
+	may be done in the demo.
       </para>
     </sect3>
     <sect3>
@@ -288,8 +288,8 @@ create policy projects__select
 	system.  Some of them may benefit from data denormlization to
 	improve the performance of the security tests.  Typically you
 	may want to add ownership columns to some tables so that
-	ownsership can be determined without the need for extra joins.
-	If an access control function has to peform extra queries for
+	ownership can be determined without the need for extra joins.
+	If an access control function has to perform extra queries for
 	each row returned, performance may suffer.
       </para>
     </sect3>

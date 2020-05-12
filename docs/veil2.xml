@@ -12,23 +12,27 @@
 <!ENTITY % version SYSTEM "version.sgml">
 %version;
 
-<!ENTITY relsec	 	SYSTEM "parts/relsec.xml">
-<!ENTITY relsecdiff    	SYSTEM "parts/relsecdiff.xml">
-<!ENTITY veil_concepts 	SYSTEM "parts/veil_concepts.xml">
-<!ENTITY veil_whatis 	SYSTEM "parts/veil_whatis.xml">
-<!ENTITY veil_whyuse 	SYSTEM "parts/veil_whyuse.xml">
-<!ENTITY veil_howhard 	SYSTEM "parts/veil_howhard.xml">
-<!ENTITY veil_starting 	SYSTEM "parts/veil_starting.xml">
-<!ENTITY veil_demo 	SYSTEM "parts/veil_demo.xml">
-<!ENTITY veil_howto 	SYSTEM "parts/veil_howto.xml">
-<!ENTITY veil_setup_authent   SYSTEM "parts/veil_setup_authent.xml">
-<!ENTITY veil_setup_contexts  SYSTEM "parts/veil_setup_contexts.xml">
-<!ENTITY veil_setup_privs     SYSTEM "parts/veil_setup_privs.xml">
-<!ENTITY veil_setup_roles     SYSTEM "parts/veil_setup_roles.xml">
-<!ENTITY veil_setup_accessors SYSTEM "parts/veil_setup_accessors.xml">
+<!ENTITY relsec	 	       SYSTEM "parts/relsec.xml">
+<!ENTITY relsecdiff    	       SYSTEM "parts/relsecdiff.xml">
+<!ENTITY veil_whyuse 	       SYSTEM "parts/veil_whyuse.xml">
+<!ENTITY veil_concepts 	       SYSTEM "parts/veil_concepts.xml">
+<!ENTITY veil_whatis 	       SYSTEM "parts/veil_whatis.xml">
+<!ENTITY veil_howhard 	       SYSTEM "parts/veil_howhard.xml">
+<!ENTITY veil_starting 	       SYSTEM "parts/veil_starting.xml">
+<!ENTITY veil_demo 	       SYSTEM "parts/veil_demo.xml">
+<!ENTITY veil_howto 	       SYSTEM "parts/veil_howto.xml">
+<!ENTITY veil_setup_authent    SYSTEM "parts/veil_setup_authent.xml">
+<!ENTITY veil_setup_contexts   SYSTEM "parts/veil_setup_contexts.xml">
+<!ENTITY veil_setup_privs      SYSTEM "parts/veil_setup_privs.xml">
+<!ENTITY veil_setup_roles      SYSTEM "parts/veil_setup_roles.xml">
+<!ENTITY veil_setup_accessors  SYSTEM "parts/veil_setup_accessors.xml">
 <!ENTITY veil_context_links    SYSTEM "parts/veil_context_links.xml">
-<!ENTITY veil_dbobjects        SYSTEM "parts/veil_dbobjects.xml">
-
+<!ENTITY veil_scope_promotions SYSTEM "parts/veil_scope_promotions.xml">
+<!ENTITY veil_secure_tables    SYSTEM "parts/veil_secure_tables.xml">
+<!ENTITY veil_secure_views     SYSTEM "parts/veil_secure_views.xml">
+<!ENTITY veil_dbtables         SYSTEM "parts/veil_dbtables.xml">
+<!ENTITY veil_dbviews          SYSTEM "parts/veil_dbviews.xml">
+<!ENTITY veil_dbfuncs          SYSTEM "parts/veil_dbfuncs.xml">
 
 ]>
 
@@ -44,9 +48,8 @@
       A <link linkend="what-is-relational-security">relational
       security system</link> Is one in which access to data is
       determined, at least partly, by a user’s relationships to that
-      data.  Access controls are therefore more implicit than
-      explicit, and by being built in to the database are difficult to
-      bypass.
+      data.  Many access controls may therefore be implicit rather
+      than explicit.
     </para>
     <para>
       The primary aims of a relational security system are to make the
@@ -62,12 +65,20 @@
       database in a matter of hours.
     </para>
     <para>
+      With <literal>Veil2</literal> we secure the database itself and
+      not just applications that use it.  This means that even if your
+      application server is compromised, an attacker's ability to
+      access data will be limited to the data for which they can steal
+      access credentials.  This gives them little more access than
+      the application itself would give them.
+    </para>
+    <para>
       The security of database applications is more usually managed by
       building the access control rules into application servers, and
       typically these access control rules offer a fairly coarse level
       of granularity.  This is often because reasoning about access
       controls at the level of functionality is difficult.  With
-      relaitional security modelling, it can be much easier to reason
+      relational security modelling, it can be much easier to reason
       about what sort of user needs what sort of access, and using
       <literal>Veil2</literal> the implementation of access control
       rules becomes trivial.
@@ -89,6 +100,9 @@
   &veil_setup_roles;
   &veil_setup_accessors;
   &veil_context_links;
+  &veil_scope_promotions;
+  &veil_secure_tables;
+  &veil_secure_views;
   
   <sect1>
     <title>Performance Notes</title>
@@ -102,5 +116,18 @@
     <title>Contact</title>
     <para/>
   </sect1>
-  &veil_dbobjects;
+  <appendix>
+    <title><literal>Veil2</literal> ERD and Database Tables</title>
+    <mediaobject>
+      <imageobject>
+	<imagedata
+	    id="veil2_erd_div"
+	    fileref="veil2_erd.png"
+	    format="PNG"/>
+      </imageobject>
+    </mediaobject>
+    &veil_dbtables;
+    &veil_dbviews;
+    &veil_dbfuncs;
+  </appendix>
 </article>

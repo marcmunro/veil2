@@ -1,10 +1,9 @@
 <sect1 id="what-is-relational-security">
-  <!-- TODO: Add References to privs and scopes??? -->
   <title>What Is A Relational Security System?</title>
   <para>
     A Relational Security System is one in which each assigned
-    privilege has a relational scope, which limits the extent to
-    which the privilege applies.
+    privilege has a scope, which limits the extent to which the
+    privilege applies.
   </para>
   <para>
     The scope of an assigned privilege is related to a specific subset
@@ -19,7 +18,7 @@
     data.  Mostly they are based on the relationships of your users
     with their data, though they need not be.  Typically, scopes are
     defined in terms of parties and their relationships either to
-    other parties, or to specific artefacts described by your
+    other parties, or to specific artifacts described by your
     database.  For example, a person's relationship to the company
     they work for, or their membership of a project team.
   </para>
@@ -31,8 +30,9 @@
   </para>
   <para>
     Instead of having privileges which imply conditional rule checks,
-    such as the privilege to <emphasis>maintain a project if the user
-    is a member of the project team</emphasis>, privileges can
-    effectively contain their conditionality through their scope.
+    such as the privilege to
+    <emphasis>maintain-a-project-if-the-user-is-a-member-of-the-project-team</emphasis>,
+    privileges can effectively contain their conditionality through
+    their scope. 
   </para>
 </sect1>

@@ -71,7 +71,7 @@ comment on column demo.parties_tbl.corp_id is
 employee of corp X, your party record will have the party_id of corp X
 as its corp_id.  This is a data denormalisation for performance
 reasons, allowing faster tests for permissions in corp context.  Note
-that the corp_id could be determined by ascending the org_hierarchy
+that the corp_id could be determined by ascending the org hierarchy
 from org_id.  The top-most parent of org will be the corp.';
 
 comment on column demo.parties_tbl.org_id is
@@ -116,27 +116,6 @@ values (100, 2, 100, 100, 'Veil Corp', null),
        (123, 1, 102, 102, 'Pete', 'passwd14'),
        (124, 1, 102, 102, 'Pam', 'passwd15');
 
-/* ???
-with all_role_privs (
-  role_id, roles,
-  privileges, global_privileges, 
-  promotable_privileges, scope_type_id,
-  context_id
-) as
-(
-select arr.primary_role_id,
-       bitmap_of(arr.assigned_role_id),
-       union_of(drp.privileges),
-       union_of(drp.global_privileges),
-       union_of(drp.promotable_privileges),
-       arr.scope_type_id,
-       arr.context_id
-  from veil2.all_role_roles arr
- inner join veil2.direct_role_privileges drp
-    on drp.role_id = arr.primary_role_id
- group by arr.primary_role_id, arr.scope_type_id, arr.context_id)
-select * from all_role_privs;
-*/
 grant all on demo.parties_tbl to demouser;
 
 \echo ...parties...
@@ -171,30 +150,6 @@ grant all on demo.parties to demouser;
 reset session authorization;
 revoke create on schema demo from demouser;
 
-
-\echo ...org_hierarchy...
-create table demo.org_hierarchy (
-  org_id     		integer not null,
-  parent_org_id		integer not null,
-    primary key (org_id, parent_org_id),
-    foreign key (org_id)
-      references demo.parties_tbl (party_id),
-    foreign key (parent_org_id)
-      references demo.parties_tbl (party_id)
-);
-
-insert
-  into demo.org_hierarchy
-       (parent_org_id, org_id)
-values (100, 101),  -- Veil Corp -> Sec. Corp
-       (101, 103),  --              Sec. Corp -> Sec. Top Div
-       (103, 105),  --                           Sec. Top Div -> Dept S
-       (103, 106),  --                           Sec. Top Div -> Dept S2
-       (101, 104),  --              Sec. Corp -> Sec. 2nd Div
-       (104, 105),  --                           Sec. 2nd Div -> Dept s (lower)
-       (100, 102),  -- Veil Corp -> Prot. Corp
-       (102, 118),  --              Prot. Corp -> Dept P
-       (102, 119);  --              Prot. Corp -> Dept P2
 
 \echo ...projects...
 create table demo.projects (
@@ -244,8 +199,10 @@ grant all on table demo.project_assignments to demouser;
 -- Furthermore as this demo is only for use in psql, we are doing no
 -- proper session authentication.  Instead we just call open_session()
 -- and create_session() manually and in a contrived manner.  This is
--- not good practice.  Keep your open_session() and create_session()
--- calls separate. 
+-- not good practice.  Keep your create_session() and open_session()
+-- calls separate.  Your client should use the result of
+-- create_session() to determine the parameters for subsequent
+-- open_session() calls.
 
 -- Enable plaintext authentication.  DO NOT DO THIS IN REAL LIFE!!!!
 
@@ -479,6 +436,8 @@ comment on constraint scope__check_fk_type
   on veil2.scopes is
 'Ensure that party-specific contexts have an FK.';
 
+
+
 -- Create initial security contexts
 insert
   into veil2.scopes
@@ -486,7 +445,7 @@ insert
 select 3, party_id, party_id  -- These are all corp scopes
   from demo.parties_tbl
  where party_type_id = 2  -- organisation
-   and corp_id = 100;     -- root corp or first level below root
+   and org_id = 100;     -- root corp or first level below root
 
 insert
   into veil2.scopes
@@ -551,13 +510,39 @@ refresh materialized view veil2.all_accessor_privs;
 
 
 
--- STEP6:
+-- STEP 8:
 -- Deal with scope promotions
+-- Note that the second part of the union below allows scope promotion
+-- within the organizational hierarchy.
 
--- Nothing to do here, as we do not need any scope promotions other
--- than to global context which is already handled.
+create or replace
+view veil2.scope_promotions (
+  scope_type_id, scope_id,
+  promoted_scope_type_id, promoted_scope_id
+) as
+select 4, party_id,  -- Promote org to corp scope
+       3, corp_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+union all
+select 3, party_id,  -- Promotion of org to higher org
+       3, org_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+select 5, s.scope_id,   -- Project to corp promotions
+       3, p.corp_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id
+union all
+select 5, s.scope_id,   -- Project to org promotions
+       4, p.org_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id;
 
--- STEP7:
+
+-- STEP 9:
 -- Add row level security on our objects.
 
 alter table demo.party_types enable row level security;
@@ -593,7 +578,7 @@ create policy projects__select
 
 
 
--- STEP 8:
+-- STEP 10:
 -- Create secured views into user-facing parts of Veil2
 -- ??????????
 -- These are:
@@ -680,7 +665,7 @@ select ar.accessor_id, r.role_name,
     or veil2.i_have_priv_in_scope(20, 4, context_id);
 
 
--- Step 9
+-- Step 11
 -- Assigning roles.
 
 -- Give all persons the connect role
@@ -717,10 +702,8 @@ values (1, 114, 10),  -- S.1 Simon, pm
 
 -- TODO:
 -- Check interleaving of sessions.
--- Check sessions using bcrypt.
 -- Check sessions using multiple connections.
 -- Check sessions using database users.
--- Check personal context access.
 
 select veil2.reset_session();
 

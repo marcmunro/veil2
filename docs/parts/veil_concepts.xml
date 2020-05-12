@@ -70,12 +70,13 @@
     <para>
       One scope that is particularly low-level is personal scope.
       This limits access to data that specifically relates to the
-      privilege holder.  So if <literal>user X</literal> has the
-      <literal>select user</literal> privilege in personal scope,
-      they will be able to see their own <literal>users</literal>
-      record.  Whether they can see other <literal>users</literal>
-      records will depend on whether they have been assigned
-      <literal>select users</literal> in any other scopes.
+      accessor (privilege holder).  So if <literal>user X</literal>
+      has the <literal>select user</literal> privilege in personal
+      scope, they will be able to see their own
+      <literal>users</literal> record.  Whether they can see other
+      <literal>users</literal> records will depend on whether they
+      have been assigned <literal>select users</literal> in any other
+      scopes.
     </para>
   </sect2>
   <sect2 id="roles">
@@ -99,7 +100,7 @@
       <emphasis>functional</emphasis> roles that have the privileges
       necessary to perform a specific task, and we then assign these
       roles to higher-level <emphasis>user</emphasis> roles which can
-      then be assigned to users.  By doing this, we minimise the
+      then be assigned to users.  By doing this, we minimize the
       number of different roles that we need to be able to assign to
       users.
     </para>
@@ -174,34 +175,42 @@
     <para>
       A security context (or just <literal>context</literal>) applies
       to a <link linkend="assignments">role assignment</link>.  It is
-      similar to a <link linkend="scopes">scope</link>, but where the 
-      scope applies to a <link linkend="privileges">privilege</link>, a
-      context applies to a <link linkend="roles">role</link>.  It is
-      the context within which the role was assigned.
+      similar to a <link linkend="scopes">scope</link>, but where the
+      scope applies to a <link linkend="privileges">privilege</link>,
+      a context applies to a <link linkend="roles">role</link>.  It is
+      the context within which the role was assigned.  Another way to
+      look at it, is that a security context is user-facing and
+      relates to the underlying data model of your database, and a
+      scope is an internal detail and relates primarily to the
+      <literal>Veil2</literal>-based security model.
     </para>
     <para>
-      For instance, if a member of a project team has the
-      <literal>team member</literal> role, it will have been assigned,
-      whether explicitly or implictly, in the context of that project.
-      Each privilege provided by the role will apply either in the
-      scope of that project or in a superior scope to which they have
-      been promoted (see <link linkend="privilege-promotion">privilege
+      The distinction between scope and context becomes more clear
+      when we consider that a role may be assigned in a context that
+      has no meaning for that role's privileges.  Consider a
+      hypothetical <literal>team-member</literal> role assigned in the
+      context of a specific project that contains the <literal>select
+      lookups</literal> privilege.  This privilege allows the accessor
+      select-access to lookup data which is not project-specific.
+      This privilege *needs* to operate in a different scope from the
+      context of its assignment, and so its operating scope will need
+      to be promoted (see <link linkend="privilege-promotion">privilege
       promotion</link> below).
     </para>
     <para>
-      It is because privileges may apply in different scopes from the
-      role's assignment context, that contexts and scopes have
-      distinct terms.  While this may seem to be semantic pedantry,
-      the opportunities for confusion when discussing scopes and
-      contexts are such that the distinction is useful.  The author
-      has been there, and resents that he will never get those hours
-      back.
+      It is largely because privileges may apply in different scopes
+      from their role's assignment context, that contexts and scopes
+      have distinct terms.  While this may seem to be semantic
+      pedantry, the opportunities for confusion when discussing scopes
+      and contexts are such that the distinction is useful.  The
+      author has been there and resents that he will never get those
+      hours back.
     </para>
     <para>
       The key to a good relational security implementation is an
       understanding of your relational security contexts.  In
       particular, how you may need to perform some data
-      denormalisations in order to get good performance.
+      denormalizations in order to get good performance.
       TODO: Reference that section.
     </para>
     <para>
@@ -257,7 +266,7 @@
       linkend="scopes">scope</link>.
     </para>
     <para>
-      Consider a <link linkend="roles">role</link>
+      Consider a <link linkend="roles">role</link>,
       <literal>CSR</literal>, that has been assigned to a user in
       <literal>customer context</literal> for <literal>customer
       Z</literal>.  This hypothetical role assignment is supposed to
@@ -289,7 +298,7 @@
       connect to the system and authenticate, we can see that they
       don’t really apply to the <literal>customer
       context</literal>.  They are not related to customer-specific
-      data, in fact they should apply the same regardless of who we
+      data.  In fact they should apply the same regardless of who we
       might be a <literal>CSR</literal> for.  These privileges should
       be applied in the global scope, but they have been assigned in
       the <literal>customer context</literal> for <literal>customer

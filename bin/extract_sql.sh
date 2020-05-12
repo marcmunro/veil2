@@ -25,17 +25,37 @@ extract_definition ()
 	  BEGIN {
 	      started = 0
 	  }
-	  /^create '$1'.*'$2'/ { start_reading() }
-          /^alter '$1'.*'$2'/ { start_reading() }
-	  (reading)
+	  /^create '$1'.*'$2'$/ { start_reading() }
+	  /^create '$1'.*'$2' / { start_reading() }
+          /^alter '$1'.*'$2' / { start_reading() }
+          /^'$1'.*'$2'[\( ]/ { start_reading() }
+          /^materialized '$1'.*'$2' / { start_reading() }
+          /^materialized '$1'.*'$2'$/ { start_reading() }
+	  (reading) { 
+	      gsub(/&/, "\\&amp;")
+	      gsub(/</, "\\&lt;")
+	      gsub(/>/, "\\&gt;")
+	      print
+	  }
 	  /;/ { 
-	      if (reading) printf("\n")
-	      reading = 0 
+	      if ("'$1'" == "function") {
+	          # This is terrible code, irretrievably tied to
+		  # Marc''s sql coding style.  Oh well.
+	          if (($0 ~ /^language/) ||
+		      ($0 ~ /^set /)) {
+	              if (reading) printf("\n")
+	      	      reading = 0
+		  }
+	      }
+	      else {
+	         if (reading) printf("\n")
+	      	 reading = 0
+	      }
 	  }
 	  END {
-	     if (started) {
+	      if (started) {
 	         printf("</programlisting>\n")
-	     }
+	      }
 	  }
 ' $3
 }
@@ -88,7 +108,10 @@ extract_comments ()
 		 }
 	     }
           }
-    	  /^comment on '$1'.*'$2'/ {
+    	  /^comment on '$1'.*'$2'[\( ]/ {
+	      start_reading()
+	  }
+    	  /^comment on materialized '$1'.*'$2' / {
 	      start_reading()
 	  }
           /^comment on column.*'$2'/ {
@@ -133,8 +156,8 @@ extract_comments ()
 ' $3
 }
 
-#extract_definition table veil2.scope_types sql/veil2/tables.sql
-#extract_comments table veil2.scope_types sql/veil2/tables.sql
+#extract_definition trigger accessor_roles__aiudt sql/veil2/views.sql
+#extract_comments trigger accessor_roles__aiudt sql/veil2/views.sql
 #exit 1
 
 if [ "x$1" = "x-D" ]; then

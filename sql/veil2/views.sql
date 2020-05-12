@@ -44,13 +44,15 @@ comment on view veil2.direct_role_privileges_v is
 'Returns all privileges, along with some basic privilege promotion data,
 that are assigned directly to each role, including the implied
 privileges for the superuser role.  This does not show privileges
-arising from role to role assignments';
+arising from role to role assignments.
+
+Note the use of bitmap_of() to aggregate privilege_ids.';
 
 create or replace
 view veil2.direct_role_privileges_vv as
 select * from veil2.direct_role_privileges_v;
 
-comment on view veil2.direct_role_privileges_v is
+comment on view veil2.direct_role_privileges_vv is
 'Exactly as veil2.direct_role_privileges_v.  The _vv suffix indicates
 that this is a true view, not relying on any materialized views.
 As it happens, direct_role_privileges_v also does not rely on any
@@ -73,7 +75,6 @@ revoke all on veil2.direct_role_privileges_v from public;
 grant select on veil2.direct_role_privileges_v to veil_user;
 revoke all on veil2.direct_role_privileges_vv from public;
 grant select on veil2.direct_role_privileges_vv to veil_user;
-
 
 \echo ......all_role_roles...
 create or replace
@@ -135,8 +136,9 @@ comment on view veil2.all_role_roles is
 are implied and those that are indirect.
 
 Implied mappings are:
- 1 - the superuser role is assigned all non-implicit roles except
-     connect;
+
+ 1 - the superuser role is assigned all non-implicit roles except connect;
+
  2 - all roles implicitly map to themselves.
 
 Indirect mappings occur through other mappings (ie mappings are
@@ -203,10 +205,7 @@ materialized view veil2.all_role_privs
 as select * from veil2.all_role_privs_v;
 
 comment on materialized view veil2.all_role_privs is
-'This is simply the aggregation of all role->role mappings as provided
-by veil2.all_role_roles and the role_privileges as provided by
-veil2.direct_role_privileges.  See the comments on those views for more
-information.';
+'Materialized version of veil2.all_role_privs_v.';
 
 revoke all on veil2.all_role_privs from public;
 grant select on veil2.all_role_privs to veil_user;
@@ -261,31 +260,32 @@ select null::integer, null::integer,
 where false;
 
 comment on view veil2.scope_promotions is
-'This view lists all possible context promotions.  It is used for
-privilege promotion when a role that is assigned in a restricted
+'This view lists all possible direct scope promotions.  It is used
+for privilege promotion when a role that is assigned in a restricted
 security context has privileges that must be applied in a less
-restricted context.  Note that promotion to global context is always
+restricted scope.  Note that promotion to global scope is always
 possible and is not managed through this view.
 
 VPD Implementation Notes:
-If you have restricted contexts which are sub-contexts of less
+If you have restricted scopes which are sub-scopes of less
 restricted ones, and you need privilege promotion for privileges
 assigned in the restricted context to the less restricted one, you
-should redefine this view to show which contexts may be promoted to
-which other contexts.  For example if you have a corp context and a dept
-context which is a subcontext of it, you would redefine your view
-something like this:
+should redefine this view to show which scopes may be promoted to
+which other scopes.  For example if you have a corp scope type and a
+dept scope type which is a sub-scope of it, and your departments table
+identifies the corp_id for each deprtment, you would redefine your
+view something like this:
 
-create or replace
-view veil2.scope_promotions (
-  scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id
-) as
-select 96, -- dept context type id
-       department_id,
-       95, -- corp context type id
-       corp_id
-  from departments;
+    create or replace
+    view veil2.scope_promotions (
+      scope_type_id, scope_id,
+      promoted_scope_type_id, promoted_scope_id
+    ) as
+    select 96, -- dept scope type id
+           department_id,
+           95, -- corp scope type id
+           corp_id
+      from departments;
 
 Note that any multi-level context promotions will be handled by
 veil2.all_scope_promotions which you should have no need to modify.';
@@ -320,8 +320,11 @@ comment on view veil2.all_scope_promotions_v is
 'This takes the simple custom view veil2.scope_promotions and makes it
 recursive so that if context a contains scope b and scope b contains
 scope c, then this view will return rows for scope c promoting to
-both scope b and scope a.  You should not need to modify this view
-when creating your custom VPD implementation.';
+both scope b and scope a.  
+
+
+You should not need to modify this view when creating your custom VPD
+implementation.';
 
 create or replace
 view veil2.all_scope_promotions_vv as
@@ -339,8 +342,12 @@ comment on materialized view veil2.all_scope_promotions is
 'This takes the simple custom view veil2.scope_promotions and makes it
 recursive so that if context a contains context b and context b contains
 context c, then this view will return rows for context c promoting to
-both context b and context a.  You should not need to modify this view
-when creating your custom VPD implementation.';
+both context b and context a.  
+
+It is automatically refreshed when the veil2.scopes table is modified.
+
+You should not need to modify this view when creating your custom VPD
+implementation.'; 
 
 revoke all on veil2.all_scope_promotions from public;
 grant select on veil2.all_scope_promotions to veil_user;
@@ -408,15 +415,15 @@ select format('%' || ((depth)*16 - 14) || 's', '+-') ||
 
 comment on view veil2.scope_tree is
 'Provides a simple ascii-formatted tree representation of our scope
-promotions tree.  This is simply an aid to data visualisation and is not
-used elsewhere in Veil2.';
+promotions tree.  This is an aid to data visualisation for data
+designers and administrators and is not used elsewhere in Veil2.';
 
 revoke all on veil2.scope_tree from public;
 grant select on veil2.scope_tree to veil_user;
 
 
 \echo ......promotable_privileges...
-create view veil2.promotable_privileges(
+create view veil2.promotable_privileges (
   scope_type_id, privilege_ids)
 as
 select st.scope_type_id, bitmap_of(p.privilege_id)
@@ -449,24 +456,24 @@ not provide the personal_context role.  This view is used by the veil2
 access control functions, and when adding new security context types,
 this view is all that should usually need to be modified.
 
-VPD Implementation Notes:
-If you have any explicitly assigned roles that are not granted through
-accessor_role, you will want to redefine this view.  For example if you
-have a project context that is dependent on an accessor being assigned
-to a project you might redefine the view as follows:
+VPD Implementation Notes: If you have any explicitly assigned roles
+that are not granted through the veil2.accessor_role table, you will
+need to redefine this view.  For example if you have a project context
+that is dependent on an accessor being assigned to a project you might
+redefine the view as follows:
 
-create or replace
-view veil2.all_accessor_roles (
-  accessor_id, role_id, context_type_id, context_id
-) as
-select accessor_id, role_id,
-       context_type_id, context_id
-  from veil2.accessor_roles
- union all
-select party_id, role_id,
-       99,  -- id for project context_type
-       project_id
-  from project_parties;';
+    create or replace
+    view veil2.all_accessor_roles (
+      accessor_id, role_id, context_type_id, context_id
+    ) as
+    select accessor_id, role_id,
+           context_type_id, context_id
+      from veil2.accessor_roles
+     union all
+    select party_id, role_id,
+           99,  -- id for project context_type
+           project_id
+      from project_parties;';
 
 revoke all on veil2.all_accessor_roles from public;
 grant select on veil2.all_accessor_roles to veil_user;
@@ -602,6 +609,13 @@ comment on view veil2.all_accessor_privs_v is
 'Show all roles and privileges assigned to all accessors in all
 contexts, excepting the implied personal context.';
 
+create or replace 
+view veil2.all_accessor_privs_vv as
+select * from veil2.all_accessor_privs_v;
+
+comment on view veil2.all_accessor_privs_vv is
+'As veil2.all_accessor_privs_v';
+
 create
 materialized view veil2.all_accessor_privs
   as select * from veil2.all_accessor_privs_v;
@@ -680,7 +694,7 @@ order by 3, 4, 1, 2;
 comment on view veil2.role_chains is
 'This is a developer view.  It is intended for development and
 debugging, and provides a way to view role mappings in a simple but
-complete way.  Try it, is should immediately make sense.';
+complete way.  Try it, it should immediately make sense.';
 
 
 
@@ -727,8 +741,10 @@ give that resulting privilege to the accessor.
 If you are uncertain how accessor 999 has privilege 333, then simply
 run:
 
-select * from veil2.privilege_assignments where accessor_id = 999 and
-privilege_id = 333;';
+    select * 
+      from veil2.privilege_assignments 
+     where accessor_id = 999 
+       and privilege_id = 333;';
 
 
 \echo ...creating materialized view refresh functions...

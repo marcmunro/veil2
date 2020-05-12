@@ -4,7 +4,7 @@
     Unlike the situation with roles, <literal>Veil2</literal>'s
     accessors are probably not going to be usable in place of your
     system's users or parties tables.  Your system is likely to have a
-    lot of built-in sematics around the notion of user or party, and
+    lot of built-in semantics around the notion of user or party, and
     keeping the <literal>Veil2</literal> accessor separate from this
     is likely to be the simplest thing you can do.  This is the way
     that the demo handles accessors and is our recommended practice.
@@ -28,6 +28,9 @@
 	ensure authentication changes are propagated.
       </listitem>
     </itemizedlist>
+  </para>
+  <para>
+    Look for STEP 6 in the file <literal>demo/demo.sql</literal>.
   </para>
   <sect2>
     <title>Create Foreign-Key Links to Your Users</title>

@@ -43,7 +43,7 @@
 	</para>
       </sect4>
       <sect4>
-	<title>Packages Required</title>
+	<title>Software Required</title>
 	<para>
 	  If you want to install from git and build the documentation
 	  from source, you will need the following:
@@ -52,6 +52,7 @@
 	    <listitem><literal>libxslt1.1;</literal></listitem>
 	    <listitem><literal>libxml2;</literal></listitem>
 	    <listitem><literal>dia;</literal></listitem>
+	    <listitem><literal>gawk;</literal></listitem>
 	    <listitem><literal>make;</literal></listitem>
 	    <listitem>docbook 4.5 stylesheets.</listitem>
 	  </itemizedlist>
@@ -194,8 +195,7 @@ $ make drop TESTDB=whateverdbnameyoulike
 	manually.  Take a look in <literal>GNUmakefile</literal> for
 	the <literal>db</literal> and <literal>unit</literal>
 	targets.  You will see <literal>psql</literal> commands
-	there.  You can run these directly though the output from the
-	unit test will be kinda ugly.
+	there.  You can run these directly.
       </para>
     </sect3>
   </sect2>

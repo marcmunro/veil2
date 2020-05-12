@@ -3,10 +3,10 @@
   <para>
     You need to identify the types of scopes that your privileges will
     have.  It may be easier to think in terms of relational contexts
-    rather than scopes.  The two things are very simliar but contexts
+    rather than scopes.  The two things are very similar but contexts
     are more user-facing and scopes more implementation-facing.  Ask
     yourself, in what contexts do I need to provide different access
-    rights based on user's relationships?
+    rights based on users' relationships?
   </para>
   <para>
     (You are not, at this stage going to be creating the scopes
@@ -28,7 +28,8 @@
   <sect2>
     <title>In Summary</title>
     <para>
-      Create records in <literal>veil2.scope_types</literal>.  TODO: ref
+      Create records in <literal><link
+      linkend="entity_scope_type">veil2.scope_types</link></literal>.
     </para>
   </sect2>
 </sect1>

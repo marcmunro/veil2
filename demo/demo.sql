@@ -99,8 +99,8 @@ values (100, 2, 100, 100, 'Veil Corp', null),
        (106, 2, 101, 103, 'Department S2', null),
        (107, 2, 101, 104, 'Department s (lower)', null),
        (108, 1, 100, 100, 'Alice', 'passwd1'),   -- superuser
-       (109, 1, 100, 101, 'Bob', 'passwd2'),     -- superuser for Secured Corp
-       (110, 1, 100, 102, 'Carol', 'passwd3'),   -- superuser for Protected Corp
+       (109, 1, 101, 101, 'Bob', 'passwd2'),     -- superuser for Secured Corp
+       (110, 1, 102, 102, 'Carol', 'passwd3'),   -- superuser for Protected Corp
        (111, 1, 100, 100, 'Eve', 'passwd4'),     -- superuser for both corps
        (112, 1, 101, 105, 'Sue', 'passwd5'),     -- superuser for dept s
        (113, 1, 101, 105, 'Sharon', 'passwd6'),  -- vp for dept s
@@ -209,6 +209,38 @@ grant all on table demo.project_assignments to demouser;
 update veil2.authentication_types
    set enabled = true
  where shortname = 'plaintext';
+
+-- Create get_accessor so that we can map from usernames in context to
+-- accessor_ids.  This is used by create_session().
+create or replace
+function veil2.get_accessor(
+    username in text,
+    context_type_id in integer,
+    context_id in integer)
+  returns integer as
+$$
+declare
+  _result integer;
+begin
+  select party_id
+    into _result
+    from demo.parties_tbl p
+   where p.party_name = get_accessor.username
+     and p.org_id = context_id
+     and context_type_id = 4;  -- Logins are in org context
+   return _result;
+end;
+$$
+language plpgsql security definer stable leakproof;
+
+
+create or replace
+view veil2.accessor_contexts (
+  accessor_id, context_type_id, context_id
+) as
+select party_id, 4, org_id
+  from demo.parties_tbl where party_type_id = 1;
+
 
 -- STEP 3:
 -- Define scopes
@@ -529,6 +561,7 @@ select 3, party_id,  -- Promotion of org to higher org
        3, org_id
   from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
  where party_type_id = 2
+union all
 select 5, s.scope_id,   -- Project to corp promotions
        3, p.corp_id
   from demo.projects p
@@ -541,6 +574,7 @@ select 5, s.scope_id,   -- Project to org promotions
  inner join veil2.scopes s
     on s.project_id = p.project_id;
 
+refresh materialized view veil2.all_scope_promotions;
 
 -- STEP 9:
 -- Add row level security on our objects.
@@ -576,6 +610,15 @@ create policy projects__select
         or veil2.i_have_priv_in_scope(21, 4, org_id)
         or veil2.i_have_priv_in_scope(21, 5, project_id));
 
+alter table demo.project_assignments enable row level security;
+
+create policy project_assignments__select
+    on demo.project_assignments
+   for select
+ using (   veil2.i_have_global_priv(22)
+        or veil2.i_have_priv_in_scope(22, 2, party_id)
+        or veil2.i_have_priv_in_scope(21, 5, project_id)
+	or veil2.i_have_priv_in_superior_scope(21, 5, project_id));
 
 
 -- STEP 10:
@@ -719,14 +762,14 @@ update veil2.authentication_details
 
 -- Log Alice in.
 select *
-  from veil2.create_session(108, 'bcrypt') c
+  from veil2.create_session('Alice', 'bcrypt', 4, 100) c
  cross join veil2.open_session(c.session_id, 1, 'passwd1');
 
 select 'Alice sees: ', * from demo.parties;
 
 -- Log Bob in.
 select *
-  from veil2.create_session(109, 'plaintext') c
+  from veil2.create_session('Bob', 'plaintext', 4, 101) c
  cross join veil2.open_session(c.session_id, 1, 'passwd2') o1
  cross join veil2.open_session(c.session_id, 2,
              encode(digest(c.session_token || to_hex(2), 'sha1'),
@@ -737,14 +780,14 @@ select 'Bob sees: ', * from demo.parties;
 
 -- Log Carol in.
 select *
-  from veil2.create_session(110, 'plaintext') c
+  from veil2.create_session('Carol', 'plaintext', 4, 102) c
  cross join veil2.open_session(c.session_id, 1, 'passwd3') o1;
 
 select 'Carol sees: ', * from demo.parties;
 
 -- Log Eve in.
 select *
-  from veil2.create_session(111, 'plaintext') c
+  from veil2.create_session('Eve', 'plaintext', 4, 100) c
  cross join veil2.open_session(c.session_id, 1, 'passwd4') o1;
 
 select 'Eve sees: ', * from demo.parties;
@@ -752,14 +795,14 @@ select 'Eve sees: ', * from demo.parties;
 
 -- Log Sue in.
 select *
-  from veil2.create_session(112, 'plaintext') c
+  from veil2.create_session('Sue', 'plaintext', 4, 105) c
  cross join veil2.open_session(c.session_id, 1, 'passwd5') o1;
 
 select 'Sue sees: ', * from demo.parties;
 
 -- Log Simon in.
 select *
-  from veil2.create_session(114, 'plaintext') c
+  from veil2.create_session('Simon', 'plaintext', 4, 105) c
  cross join veil2.open_session(c.session_id, 1, 'passwd7') o1;
 
 select 'Simon sees: ', * from demo.parties;

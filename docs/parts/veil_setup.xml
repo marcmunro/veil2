@@ -28,7 +28,8 @@
       tables</link>;</listitem> 
       <listitem><link linkend="secure_views">secure your
       views</link>;</listitem>
-      <listitem>assign initial roles to users;</listitem>
+      <listitem><link linkend="assign_roles">assign initial
+      roles</link> to users;</listitem>
       <listitem>test</listitem>
     </orderedlist>
   </para>

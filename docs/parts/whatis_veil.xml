@@ -13,7 +13,7 @@
     mechanisms but even where it is not, you should feel free to
     modify the code yourself to match your needs.
   </para>
-  <para>
+  <para id="hack-it-yourself">
     It is important to realize at this point that
     <literal>Veil2</literal> is not an application or a product.  It
     is a framework for <emphasis>you</emphasis> to build on.  If there

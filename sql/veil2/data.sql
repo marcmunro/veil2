@@ -120,29 +120,8 @@ values (4, 2),
        (4, 15);
 
 
-/*
-with recursive assigned_roles (
-  primary_role_id, assigned_role_id) as
-  (
-    select primary_role_id, assigned_role_id
-      from veil2.global_role_roles
-     union
-    select grr.primary_role_id, ar.assigned_role_id
-      from veil2.global_role_roles grr
-     inner join assigned_roles ar
-             on ar.primary_role_id = grr.assigned_role_id
-     where grr.primary_role_id != ar.assigned_role_id
-  )
-select *
-  from assigned_roles ar
-union all
-select 1, role_id
-  from veil2.roles
- where not implicit
-   and role_id != 1;
-*/     
-
 -- system parameters
 insert into veil2.system_parameters
        (parameter_name, parameter_value)
-values ('timeout', '20 mins');
+values ('shared session timeout', '20 mins'),
+       ('mapping context target scope type', '1');

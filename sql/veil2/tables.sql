@@ -603,8 +603,10 @@ create unlogged table veil2.sessions (
   session_id			integer not null
   				  default nextval('veil2.session_id_seq'),
   accessor_id			integer not null,
-  context_type_id		integer not null,
-  context_id			integer not null,
+  login_context_type_id		integer not null,
+  login_context_id		integer not null,
+  mapping_context_type_id	integer not null,
+  mapping_context_id		integer not null,
   authent_type			text not null,
   expires			timestamp with time zone,
   token				text not null,
@@ -617,17 +619,28 @@ comment on table veil2.sessions is
 'Records active sessions.  There should be a background task to delete
 expired sessions and keep this table vacuumed.  Note that for
 performance reasons we may want to disable any foreign key constraints
-on this table.';
+on this table.
 
-comment on column veil2.sessions.context_type_id is
-'This, along with the context_id column describes the context used for
-authentication of this session.  This allows users to log in in
-specific contexts (eg for dept a, rather than dept b), within which
+Note that access to this table should not be granted to normal users.
+This table can be used to determine whether a create_session() call
+successfully created a session, and so can aid in username fishing.';
+
+comment on column veil2.sessions.login_context_type_id is
+'This, along with the login_context_id column describes the context
+used for authentication of this session.  This allows users to log in
+in specific contexts (eg for dept a, rather than dept b), within which
 role mappings may differ.  This context information allows the session
 to determine which role mappings to apply.';
 
-comment on column veil2.sessions.context_id is
-'See comment on veil2.sessions.context_type_id';
+comment on column veil2.sessions.login_context_id is
+'See comment on veil2.sessions.login_context_type_id';
+
+comment on column veil2.sessions.mapping_context_type_id is
+'This, along with the mapping_context_id column describes the context
+used for role->role mapping by this session.';
+
+comment on column veil2.sessions.mapping_context_id is
+'See comment on veil2.sessions.mapping_context_type_id';
 
 alter table veil2.sessions add constraint session__pk
   primary key(session_id);
@@ -666,8 +679,8 @@ grant select on veil2.system_parameters to veil_user;
 \echo ......session_privileges_t...
 create type veil2.session_privileges_t as (
   session_id			integer,
-  context_type_id		integer,
-  context_id			integer,
+  scope_type_id			integer,
+  scope_id			integer,
   roles                         bitmap,
   privs				bitmap
 );
@@ -682,7 +695,9 @@ table which is populated by Veil2''s session management functions.';
 create type veil2.session_params_t as (
   accessor_id			integer,
   session_id                    integer,
-  context_type_id		integer,
-  context_id			integer,
+  login_context_type_id		integer,
+  login_context_id		integer,
+  mapping_context_type_id	integer,
+  mapping_context_id		integer,
   is_open			boolean
 );

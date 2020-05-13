@@ -1,4 +1,146 @@
 <sect1 id="veil_demo">
   <title>Exploring The <literal>Veil2</literal> Demo</title>
-
+  <para>
+    DO NOT USE A PRIVILEGED ACCOUNT!  You may want to grant veil_user
+    to it.
+  </para>
+  <sect2>
+    <title>The Security Contexts</title>
+    <para>
+    </para>
+  </sect2>
+  <sect2>
+    <title>The Organizational Hierarchy</title>
+    <para>
+    </para>
+  </sect2>
+  <sect2>
+    <title>Users</title>
+    <para>
+    </para>
+    <sect3>
+      <title>Alice</title>
+      <para>
+	Alice is a global superuser.  She works for Veil Corp (corp
+	100).   She authenticates using bcrypt.  You can connect as
+	Alice using this query: 
+	<programlisting>
+select *
+  from veil2.create_session('Alice', 'bcrypt', 4, 100) c
+ cross join veil2.open_session(c.session_id, 1, 'passwd1');
+	</programlisting>
+      </para>
+      <para>
+	Because she has global superuser privilege, Alice can see all
+	records.  
+      </para>
+      <para>
+	To see which privileges she has, and how she has arrived at
+	them, run the following query:
+	<programlisting>
+select *
+  from veil2.privilege_assignments
+ where accessor_id = 108;
+	</programlisting>
+      </para>
+    </sect3>
+    <sect3>
+      <title>Bob</title>
+      <para>
+	Bob is a superuser in corp context for Secured Corp.  He works
+	for Secured Corp (corp 101).  He authenticates using
+	plaintext.  You can connect as Bob using this query:
+	<programlisting>
+select *
+  from veil2.create_session('Bob', 'plaintext', 4, 101) c
+ cross join veil2.open_session(c.session_id, 1, 'passwd2') o1;
+	</programlisting>
+      </para>
+      <para>
+	Because he has superuser privilege for Secured Corp, Bob can
+	see all records associated with SecuredCorp.  
+      </para>
+      <para>
+	If you compare Bob's <literal>privilege_assignments</literal>
+	with Alice's, you will see that Bob has all of the same
+	privileges that Alice has, but assigned in different
+	contexts.  This is why Bob sees fewer records than Alice.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Carol</title>
+      <para>
+	Carol is a superuser in corp context for Protected Corp.  She
+	works for Protected Corp (corp 102).  She authenticates using
+	plaintext.  You can connect as Carol using this query:
+	<programlisting>
+select *
+  from veil2.create_session('Carol', 'plaintext', 4, 102) c
+ cross join veil2.open_session(c.session_id, 1, 'passwd3') o1;
+	</programlisting>
+      </para>
+      <para>
+	Unlike Bob, Carol can see no projects.  That is because
+	Protected Corp has no projects.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Eve</title>
+      <para>
+	Eve is a superuser in corp context for both Secure Corp and
+	Protected Corp.  She
+	works for Veil Corp (corp 100).  She authenticates using
+	plaintext.  You can connect as Eve using this query:
+	<programlisting>
+select *
+  from veil2.create_session('Eve', 'plaintext', 4, 100) c
+ cross join veil2.open_session(c.session_id, 1, 'passwd4') o1;
+	</programlisting>
+      </para>
+      <para>
+	Eve sees all parties in corps 101 and 102, which is more than
+	Bob and Carol, but fewer than Alice.  She sees all projects
+	and project assignments.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Sue</title>
+      <para>
+	Sue is a superuser in org context for Department S.  She
+	works for Department S (org 105).  She authenticates using
+	plaintext.  You can connect as Sue using this query:
+	<programlisting>
+select *
+  from veil2.create_session('Sue', 'plaintext', 4, 105) c
+ cross join veil2.open_session(c.session_id, 1, 'passwd5') o1;
+	</programlisting>
+      </para>
+      <para>
+	Sue sees only those party, party_assignment and project
+	records for Department S.  Of particular interest are the
+	<literal>project_assignment</literal> records for which Sue
+	gets the appropriate privilege in a scope superior to the
+	context of the project itself.  Try executing these 2 queries:
+	<programlisting>
+select veil2.i_have_priv_in_scope(21, 5, 1);
+select veil2.i_have_priv_in_superior_scope(21, 5, 1);
+	</programlisting>
+      </para>
+    </sect3>
+    <sect3>
+      <title>Simon</title>
+      <para>
+	Simon is a project manager for project S.1.  He works for
+	Department S (org 105).  He authenticates using plaintext.
+	You can connect as Simon using this query:
+	<programlisting>
+select *
+  from veil2.create_session('Simon', 'plaintext', 4, 105) c
+ cross join veil2.open_session(c.session_id, 1, 'passwd7') o1;
+	</programlisting>
+      </para>
+      <para>
+      </para>
+    </sect3>
+  </sect2>
 </sect1>

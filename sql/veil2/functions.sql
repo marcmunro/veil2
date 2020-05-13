@@ -113,6 +113,7 @@ begin
   create temporary table if not exists session_privileges
     of veil2.session_privileges_t;
   truncate table session_privileges;
+
   execute 'grant select on session_privileges to veil_user;';
   execute 'grant select on session_parameters to veil_user;';
   return true;
@@ -130,11 +131,62 @@ Note that the return type is not relevant but using bool rather than
 void makes formatting tests results easier as it makes it easier to
 write queries that call the function that return no rows';
 
+create or replace
+function veil2.get_accessor(
+    username in text,
+    context_type_id in integer,
+    context_id in integer)
+  returns integer as
+$$
+begin
+  return 0;
+end;
+$$
+language plpgsql security definer stable leakproof;
+
+comment on function veil2.get_accessor(text, integer, integer) is
+'Retrieve accessor_id based on username and context.  This function
+must be implemented.';
+
+\echo ......promoted_context_id()...
+create or replace
+function veil2.promoted_login_context_id(
+    context_type_id integer,
+    context_id integer,
+    target_context_type_id integer)
+  returns integer as
+$$
+declare
+  _result integer;
+begin
+  if (target_context_type_id = 1) then
+    -- Promoting to global context
+    return 0;
+  else
+    select promoted_scope_id
+      into _result
+      from veil2.all_scope_promotions asp
+     where asp.scope_type_id = context_type_id
+       and asp.scope_id = context_id
+       and asp.promoted_scope_type_id = target_context_type_id
+     order by asp.promotion_steps desc
+     limit 1;
+     return _result;
+  end if;
+end;
+$$
+language plpgsql security definer stable leakproof;
+
+comment on function veil2.promoted_login_context_id(
+    integer, integer, integer) is
+'Idetify the mapping_context_id for a given login context and target
+scope_type.';
+
 
 \echo ......create_session()...
 create or replace
 function veil2.create_session(
-    accessor_id in integer,
+    username in text,
     authent_type in text,
     context_type_id in integer default 1,
     context_id in integer default 0,
@@ -147,17 +199,21 @@ declare
   valid bool;
   ignore bool;
   supplemental_fn text;
+  _accessor_id integer;
+  mapping_context_type_id integer;
+  mapping_context_id integer;
 begin
   ignore := veil2.reset_session();  -- ignore result
   -- Generate session_id and session_token and establish whether
-  -- accessor_id was valid.
+  -- username was valid.
+  _accessor_id := veil2.get_accessor(username, context_type_id, context_id);
   select nextval('veil2.session_id_seq'),
          encode(digest(random()::text || now()::text,
 	               'sha256'),
 		'base64'),
-	 coalesce((select true
-	  	     from veil2.accessors a
-		    where a.accessor_id = create_session.accessor_id), false),
+	 exists (select null
+	  	   from veil2.accessors a
+		  where a.accessor_id = _accessor_id),
 	 (select t.supplemental_fn
 	    from veil2.authentication_types t
 	   where shortname = authent_type)
@@ -167,24 +223,39 @@ begin
 	 supplemental_fn;
   if supplemental_fn is not null then
     execute format('select * from %s(%s, %L)',
-                   supplemental_fn, accessor_id, session_token)
+                   supplemental_fn, _accessor_id, session_token)
        into session_token, session_supplemental;
   end if;
   if valid then
+    -- Figure out the mapping context that this session will require.
+    select parameter_value::integer
+      into mapping_context_type_id
+      from veil2.system_parameters
+     where parameter_name = 'mapping context target scope type';
+    if found then
+      mapping_context_id := veil2.promoted_login_context_id(
+            	 context_type_id, context_id, mapping_context_type_id);
+    end if;
+    if mapping_context_id is null then
+      mapping_context_type_id := context_type_id;
+      mapping_context_id := context_id;
+    end if;
     insert
       into veil2.sessions
           (accessor_id, session_id,
-	   context_type_id, context_id,
+	   login_context_type_id, login_context_id,
+	   mapping_context_type_id, mapping_context_id,
 	   authent_type, has_authenticated,
 	   session_supplemental, expires,
 	   token)
-    select accessor_id, session_id, 
+    select _accessor_id, session_id, 
     	   context_type_id, context_id,
+    	   mapping_context_type_id, mapping_context_id,
 	   authent_type, false,
 	   session_supplemental, now() + sp.parameter_value::interval,
 	   session_token
       from veil2.system_parameters sp
-     where sp.parameter_name = 'timeout';
+     where sp.parameter_name = 'shared session timeout';
   end if;
     
 
@@ -192,20 +263,37 @@ begin
   -- indicate whether _accessor_id was valid;
   insert
     into session_parameters
-         (accessor_id, session_id, context_type_id,
-	  context_id, is_open)
-  values (accessor_id, session_id, context_type_id,
-          context_id, false);
+         (accessor_id, session_id,
+	  login_context_type_id, login_context_id,
+	  mapping_context_type_id, mapping_context_id,
+	  is_open)
+  values (_accessor_id, session_id,
+          context_type_id, context_id,
+          context_type_id, context_id,
+	  false);
 end;
 $$
 language 'plpgsql' security definer volatile
 set client_min_messages = 'error';
 
-comment on function veil2.create_session(integer, text, integer, integer) is
-'Get session credentials for a new session.  If _accessor_id is not
-valid the function will appear to work but subsequent attempts to open
-the session will fail and no privileges will be loaded.  This makes it
-harder to fish for valid accessor_ids.
+comment on function veil2.create_session(text, text, integer, integer) is
+'Get session credentials for a new session.  
+
+Returns session_id, authent_token and session_supplemental.
+
+session_id is used to uniquely identify this user''s session.  It will
+be needed for subsequent open_session() calls.
+
+session_token is randomly generated.  Depending on the authentication
+method chosen, the client may need to use this when generating their
+authentication token for the subsequent open_session() call.
+session_supplemental is an authentication method specific set of
+data.  Depending upon the authentication method, the client may need
+to use this in generating subsequent authetntication tokens,
+
+If username is not valid the function will appear to work but
+subsequent attempts to open the session will fail and no privileges
+will be loaded.  This makes it harder to fish for valid usernames.
 
 The authent_type parameter identifies what type of authentication will
 be used, and therefore determines the authentication protocol.  All
@@ -284,7 +372,7 @@ begin
   ignore := veil2.reset_session();
   with session_context as
     (
-      select context_type_id, context_id
+      select mapping_context_type_id, mapping_context_id
         from veil2.sessions s
        where s.session_id = load_session_privs.session_id
     ), all_session_privs as
@@ -298,8 +386,8 @@ begin
           on /*asp.assignment_context_type_id = c.context_type_id
 	 and asp.assignment_context_id = c.context_id
 	 and */(   asp.mapping_context_type_id is null
-              or (    asp.mapping_context_type_id = c.context_type_id
-	          and asp.mapping_context_id = c.context_id))
+              or (    asp.mapping_context_type_id = c.mapping_context_type_id
+	          and asp.mapping_context_id = c.mapping_context_id))
        where asp.accessor_id = _accessor_id
        group by asp.scope_type_id, asp.scope_id
     ),
@@ -311,7 +399,7 @@ begin
     )
   insert
     into session_privileges
-        (session_id, context_type_id, context_id,
+        (session_id, scope_type_id, scope_id,
   	 roles, privs)
   select *
     from all_session_privs
@@ -320,10 +408,14 @@ begin
   if found then
     insert
       into session_parameters
-          (accessor_id, session_id, context_type_id,
-	   context_id, is_open)
-    select _accessor_id, load_session_privs.session_id, context_type_id,
-           context_id, true
+          (accessor_id, session_id,
+	   login_context_type_id, login_context_id,
+	   mapping_context_type_id, mapping_context_id,
+	   is_open)
+    select _accessor_id, load_session_privs.session_id,
+           login_context_type_id, login_context_id,
+           mapping_context_type_id, mapping_context_id,
+	   true
       from veil2.sessions s
      where s.session_id = load_session_privs.session_id;
     return true;
@@ -390,8 +482,8 @@ begin
     from veil2.sessions s
     left outer join veil2.accessor_contexts ac
       on ac.accessor_id = s.accessor_id
-     and ac.context_type_id = s.context_type_id
-     and ac.context_id = s.context_id
+     and ac.context_type_id = s.login_context_type_id
+     and ac.context_id = s.login_context_id
    where s.session_id = open_session.session_id;
 
   if not found then
@@ -464,7 +556,7 @@ begin
 	   has_authenticated = has_authenticated or success
         from veil2.system_parameters sp
        where s.session_id = open_session.session_id
-         and sp.parameter_name = 'timeout'
+         and sp.parameter_name = 'shared session timeout'
     returning nonces into _nonces;
   end if;
 end;
@@ -560,10 +652,12 @@ begin
     insert
        into veil2.sessions
              (session_id, accessor_id,
-	      context_type_id, context_id,
+	      login_context_type_id, login_context_id,
+	      mapping_context_type_id, mapping_context_id,
 	      authent_type, expires,
 	      token, has_authenticated)
       values (_session_id, _accessor_id,
+      	      hello.context_type_id, hello.context_id,
       	      hello.context_type_id, hello.context_id,
       	     'dbuser', now(),
 	     'dbsession', false);
@@ -613,7 +707,7 @@ $$
     from session_privileges v
    cross join session_parameters p
    where p.is_open
-     and v.context_type_id = 1), false);
+     and v.scope_type_id = 1), false);
 $$
 language 'sql' security definer stable leakproof;
 
@@ -626,16 +720,18 @@ privilege in the global context.  This always returns a record.';
 create or replace
 function veil2.i_have_priv_in_scope(
     priv integer,
-    _context_type_id integer,
-    _context_id integer)
+    _scope_type_id integer,
+    _scope_id integer)
   returns bool as
 $$
+select coalesce((
   select privs ? priv
     from session_privileges v
    cross join session_parameters p
    where p.is_open
-     and v.context_type_id = _context_type_id
-     and v.context_id = _context_id;
+     and v.scope_type_id = _scope_type_id
+     and v.scope_id = _scope_id),
+   false);
 $$
 language 'sql' security definer stable leakproof;
 
@@ -648,8 +744,8 @@ privilege in the given scope.';
 create or replace
 function veil2.i_have_priv_in_superior_scope(
     priv integer,
-    _context_type_id integer,
-    _context_id integer)
+    _scope_type_id integer,
+    _scope_id integer)
   returns bool as
 $$
 declare
@@ -660,12 +756,13 @@ begin
     from veil2.all_scope_promotions asp
    cross join session_parameters p
    inner join session_privileges sp
-      on sp.context_type_id = asp.promoted_context_type_id
-     and sp.context_id = asp.promoted_context_id
+      on sp.scope_type_id = asp.promoted_scope_type_id
+     and sp.scope_id = asp.promoted_scope_id
    where p.is_open
-     and asp.context_type_id = _context_type_id
-     and asp.context_id = _context_id
-     and sp.privs ? priv;
+     and asp.scope_type_id = _scope_type_id
+     and asp.scope_id = _scope_id
+     and sp.privs ? priv
+   limit 1;
   return found;
 end
 $$

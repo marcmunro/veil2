@@ -1,0 +1,181 @@
+<appendix>
+  <title><literal>Veil2</literal> Authentication Protocols</title>
+  <sect1>
+    <title>Shared Session Authentication</title>
+    <sect2>
+      <title>The Problem Space</title>
+      <para>
+	Shared sessions are database connections that are shared
+	amongst many users.  Typically these are used by web
+	application servers.  When a user does something that requires
+	a database interaction, a database connection is released from
+	the pool, temporarily assigned to that user's session, and
+	when the interaction is complete, returned to the pool.
+      </para>
+      <para>
+	A further complication is that many applications will perform
+	multiple parallel database operations for a page, each
+	requiring its own connection.
+      </para>
+      <para>
+	What this means is that:
+	<itemizedlist>
+	  <listitem>
+	    database connections are not dedicated to individual users;
+	  </listitem>
+	  <listitem>
+	    each user may use a different connection for each interaction;
+	  </listitem>
+	  <listitem>
+	    multiple connections may be in use simultaneously for a user;
+	  </listitem>
+	  <listitem>
+	    usage of connections for a given user is not serialized.
+	  </listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	What the last item means is that the order of requests ariving
+	at the database server may not, due to network lag and
+	application task handling, be the same order in which the user
+	session initiated those requests.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Requirements</title>
+      <para>
+	There is only one fundamental requirement of a session
+	management protocol.  That is, that the session should know at
+	all times which user is accessing the system.
+      </para>
+      <para>
+	Wha this means is:
+	<itemizedlist>
+	  <listitem>
+	    it must identify and authenticate each user;
+	  </listitem>
+	  <listitem>
+	    it must know when the user is finished;
+	  </listitem>
+	  <listitem>
+	    it must make it as difficult as possible to impersonate a
+	    user, or otherwise gain their access rights.
+	  </listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	A further requirement is that it must all be done with as
+	little overhead as possible.
+      </para>
+    </sect2>
+    <sect2>
+      <title>The Threat Space</title>
+      <para>
+	Ordinarily, web systems aim to protect themselves from
+	user-space only.  It is assumed that we are protected from bad
+	actors in the network layer by appropriate use of TLS, and
+	that if the server is compromised the game is over anyway.
+      </para>
+      <para>
+       However, by placing our primary security in the database
+       server, and the database server in a secured part of our
+       network, we can actually hope to protect ourselves against
+       compromised application servers.
+      </para>
+      <para>
+	If this sounds paranoid, then consider this:
+	<itemizedlist>
+	  <listitem>
+	    it is the job of a security implementor to be paranoid;
+	  </listitem>
+	  <listitem>
+	    many data breaches have arisen from hackers having
+	    long-term access to compromised servers;
+	  </listitem>
+	  <listitem>
+	    even the paranoid may have enemies.
+	  </listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	So, given that we <emphasis>can</emphasis> attempt to protect
+	ourselves from a compromised server, we will try to do so.
+      </para>
+     </sect2>
+    <sect2>
+      <title>Properties of the Solution Space</title>
+      <para>
+	We are not going to claim that <literal>Veil2</literal>'s
+	session management is perfect or even adequate, but we believe
+	it does	provide a good framework and starting point from which
+	you can build something truly secure.  Remember, that you are
+	<link linkend="hack-it-yourself">encouraged</link> to extend
+	and build-on what <literal>Veil2</literal> provides.
+      </para>
+      <para>
+	This is what <literal>Veil2</literal> provides for session
+	managament:
+	<itemizedlist>
+	  <listitem>
+	    a default authentication system that is not terrible (bcrypt);
+	  </listitem>
+	  <listitem>
+	    extensible authentication methods (build your own);
+	  </listitem>
+	  <listitem>
+	    minimal transmission of authentication tokens;
+	  </listitem>
+	  <listitem>
+	    resistance to fishing for user-ids;
+	  </listitem>
+	  <listitem>
+	    a replay attack-resistant protocol.
+	  </listitem>
+	</itemizedlist>
+      </para>
+    </sect2>
+    <sect2>
+      <title>The Protocol</title>
+      <para>
+	There are 3 functions that your application server's session
+	management must call:
+	<itemizedlist>
+	  <listitem>
+	    <literal>
+	      <link linkend="func_create_session">create_session();</link>
+	    </literal>
+	  </listitem>
+	  <listitem>
+	    <literal>
+	      <link linkend="func_open_session">open_session();</link>
+	    </literal>
+	  </listitem>
+	  <listitem>
+	    <literal>
+	      <link linkend="func_close_session">close_session().</link>
+	    </literal>
+	  </listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	When a user first connects to the application, the application
+	will create a new session for them using
+	<literal>create_session();</literal>.  This returns a session
+	data which will be needed for subsequent calls to
+	<literal>open_session().</literal>  This function will always
+	succeed, regardless of the validity of the provided user
+
+HERE HERE HERE
+	
+      </para>
+      <sect3>
+	<title>Create Session</title>
+	<para>
+	</para>
+      </sect3>
+    </sect2>
+    <sect2>
+      <title>Known Deficiencies And Potential Mitigations</title>
+    </sect2>
+  </sect1>
+</appendix>

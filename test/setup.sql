@@ -215,6 +215,37 @@ values (-1, null),
        (-5, null),
        (-6, 'veil2_alice');
 
+create table persons (accessor_id integer, username text);
+insert
+  into persons
+       (accessor_id, username)
+values (-6, 'alice'),
+       (-5, 'bob'),
+       (-4, 'carol'),
+       (-3, 'dave'),
+       (-2, 'eve'),
+       (-1, 'fred');
+
+create or replace
+function veil2.get_accessor(
+    username in text,
+    context_type_id in integer,
+    context_id in integer)
+  returns integer as
+$$
+declare
+  result integer;
+begin
+  select accessor_id
+    into result
+    from persons p
+   where p.username = get_accessor.username;
+   return result;
+end;
+$$
+language plpgsql security definer stable leakproof;
+
+
 insert into veil2.authentication_details
        (accessor_id, authentication_type, authent_token)
 values (-1, 'plaintext', 'password'),

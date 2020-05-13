@@ -135,9 +135,19 @@
       contiguously and re-use ids for records that get deleted.
     </para>
   </sect2>
-      <para>
-      Create records in <literal>veil2.scope_types</literal>.  TODO: ref
+  <sect2 id="connect_role">
+    <title>Create a <literal>connect</literal> Role</title>
+    <para>
+      All of your users will need the <literal>connect</literal>
+      privilege.  This gives them the ability to authenticate.
+      Without this they will have no access to protected functionality
+      or data, so being able to assign and revoke this privilege
+      separately is a good way of being able to manage and revoke
+      access.  We recommend that a <literal>connect</literal> role is
+      created that has just this single privilege, and that no other
+      roles are given this privilege.
     </para>
+  </sect2>
   <sect2>
     <title>In Summary</title>
     <itemizedlist>
@@ -149,7 +159,8 @@
       <listitem>create user-level roles (in
       <literal>veil2.roles</literal>);</listitem> 
       <listitem>assign function-level roles to user-level roles (in
-      <literal>veil2.role_roles</literal>).</listitem>
+      <literal>veil2.role_roles</literal>);</listitem>
+      <listitem>create a <literal>connect</literal> role.</listitem>
     </itemizedlist>
   </sect2>
 </sect1>

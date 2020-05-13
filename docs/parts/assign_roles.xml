@@ -1,0 +1,24 @@
+<sect1 id="assign_roles">
+  <title>Assign Initial Roles</title>
+  <para>
+    Finally, we assign some initial roles to users.  See STEP 11 in
+    file <literal>demo/demo.sql</literal>.
+  </para>
+  <sect2>
+    <title>Roles</title>
+    <para>
+      Firtly you will need to give the <literal><link
+      linkend="connect_role">connect</link></literal> role to all of
+      your users.
+    </para>
+    <para>
+      After this, you will assign user-level roles to your users based
+      on need.  For testing and development you will also need to
+      assign superuser roles so that you have <quote>control</quote>
+      users whose access is not restricted.  If you find something
+      that is not working as you expect, try it using one of these
+      control users.  If it works for them, then you have an access
+      control problem.  If not, the bug lies elsewhere.
+    </para>
+  </sect2>
+</sect1>

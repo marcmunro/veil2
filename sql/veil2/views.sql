@@ -14,7 +14,6 @@
 
 
 \echo ......direct_role_privileges...
-
 create or replace
 view veil2.direct_role_privileges_v (
     role_id, privileges, global_privileges,
@@ -49,6 +48,19 @@ arising from role to role assignments.
 Note the use of bitmap_of() to aggregate privilege_ids.';
 
 create or replace
+view veil2.direct_role_privileges_v_info (
+    role_id, privileges, global_privileges,
+    promotable_privileges) as
+select role_id, to_array(privileges),
+       to_array(global_privileges), to_array(promotable_privileges)
+  from veil2.direct_role_privileges_v;
+
+comment on view veil2.direct_role_privileges_v_info is
+'As veil2.direct_role_privileges_v with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
+
+create or replace
 view veil2.direct_role_privileges_vv as
 select * from veil2.direct_role_privileges_v;
 
@@ -58,6 +70,19 @@ that this is a true view, not relying on any materialized views.
 As it happens, direct_role_privileges_v also does not rely on any
 materialized views, so this view exists only to be consistent with other
 such sets of views.';
+
+create or replace
+view veil2.direct_role_privileges_vv_info (
+    role_id, privileges, global_privileges,
+    promotable_privileges) as
+select role_id, to_array(privileges),
+       to_array(global_privileges), to_array(promotable_privileges)
+  from veil2.direct_role_privileges_vv;
+
+comment on view veil2.direct_role_privileges_vv_info is
+'As veil2.direct_role_privileges_vv with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
 
 create 
 materialized view veil2.direct_role_privileges
@@ -69,12 +94,32 @@ comment on materialized view veil2.direct_role_privileges is
  privileges for the superuser role.  This does not show privileges
  arising from role to role assignments';
 
+create or replace
+view veil2.direct_role_privileges_info (
+    role_id, privileges, global_privileges,
+    promotable_privileges) as
+select role_id, to_array(privileges),
+       to_array(global_privileges), to_array(promotable_privileges)
+  from veil2.direct_role_privileges;
+
+comment on view veil2.direct_role_privileges_info is
+'As veil2.direct_role_privileges with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
+
+
 revoke all on veil2.direct_role_privileges from public;
 grant select on veil2.direct_role_privileges to veil_user;
+revoke all on veil2.direct_role_privileges_info from public;
+grant select on veil2.direct_role_privileges_info to veil_user;
 revoke all on veil2.direct_role_privileges_v from public;
 grant select on veil2.direct_role_privileges_v to veil_user;
+revoke all on veil2.direct_role_privileges_v_info from public;
+grant select on veil2.direct_role_privileges_v_info to veil_user;
 revoke all on veil2.direct_role_privileges_vv from public;
 grant select on veil2.direct_role_privileges_vv to veil_user;
+revoke all on veil2.direct_role_privileges_vv_info from public;
+grant select on veil2.direct_role_privileges_vv_info to veil_user;
 
 \echo ......all_role_roles...
 create or replace
@@ -177,6 +222,25 @@ veil2.direct_role_privileges.  See the comments on those views for more
 information.';
 
 create or replace
+view veil2.all_role_privs_v_info (
+  role_id, roles,
+  privileges, global_privileges, 
+  promotable_privileges, context_type_id,
+  context_id
+) as
+select role_id, to_array(roles),
+  to_array(privileges), to_array(global_privileges), 
+  to_array(promotable_privileges), context_type_id,
+  context_id
+from veil2.all_role_privs_v;
+
+comment on view veil2.all_role_privs_v_info is
+'As veil2.all_role_privs_v with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
+
+
+create or replace
 view veil2.all_role_privs_vv (
   role_id, roles,
   privileges, global_privileges, 
@@ -200,6 +264,24 @@ comment on view veil2.all_role_privs_vv is
 'Exactly as veil2.all_role_privs_v.  The _vv suffix indicates
 that this is a true view, not relying on any materialized views.';
 
+create or replace
+view veil2.all_role_privs_vv_info (
+  role_id, roles,
+  privileges, global_privileges, 
+  promotable_privileges, context_type_id,
+  context_id
+) as
+select role_id, to_array(roles),
+  to_array(privileges), to_array(global_privileges), 
+  to_array(promotable_privileges), context_type_id,
+  context_id
+from veil2.all_role_privs_vv;
+
+comment on view veil2.all_role_privs_vv_info is
+'As veil2.all_role_privs_vv with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
+
 create 
 materialized view veil2.all_role_privs
 as select * from veil2.all_role_privs_v;
@@ -207,12 +289,36 @@ as select * from veil2.all_role_privs_v;
 comment on materialized view veil2.all_role_privs is
 'Materialized version of veil2.all_role_privs_v.';
 
+create or replace
+view veil2.all_role_privs_info (
+  role_id, roles,
+  privileges, global_privileges, 
+  promotable_privileges, context_type_id,
+  context_id
+) as
+select role_id, to_array(roles),
+  to_array(privileges), to_array(global_privileges), 
+  to_array(promotable_privileges), context_type_id,
+  context_id
+from veil2.all_role_privs;
+
+comment on view veil2.all_role_privs_info is
+'As veil2.all_role_privs with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
+
 revoke all on veil2.all_role_privs from public;
 grant select on veil2.all_role_privs to veil_user;
+revoke all on veil2.all_role_privs_info from public;
+grant select on veil2.all_role_privs_info to veil_user;
 revoke all on veil2.all_role_privs_v from public;
 grant select on veil2.all_role_privs_v to veil_user;
+revoke all on veil2.all_role_privs_v_info from public;
+grant select on veil2.all_role_privs_v_info to veil_user;
 revoke all on veil2.all_role_privs_vv from public;
 grant select on veil2.all_role_privs_vv to veil_user;
+revoke all on veil2.all_role_privs_vv_info from public;
+grant select on veil2.all_role_privs_vv_info to veil_user;
 
 
 \echo ......accessor_contexts...
@@ -298,20 +404,25 @@ grant select on veil2.scope_promotions to veil_user;
 create or replace
 view veil2.all_scope_promotions_v (
   scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id
+  promoted_scope_type_id, promoted_scope_id,
+  promotion_steps
 ) as
 with recursive recursive_scope_promotions as
   (
     select scope_type_id, scope_id,
-           promoted_scope_type_id, promoted_scope_id
+           promoted_scope_type_id, promoted_scope_id,
+	   1 as steps
       from veil2.scope_promotions
      union all
-    select sp.scope_type_id, sp.scope_id,
-           rsp.promoted_scope_type_id, rsp.promoted_scope_id
-      from veil2.scope_promotions sp
-     inner join recursive_scope_promotions rsp
-        on rsp.scope_type_id = sp.promoted_scope_type_id
-       and rsp.scope_id = sp.promoted_scope_id
+    select rsp.scope_type_id, rsp.scope_id,
+           sp.promoted_scope_type_id, sp.promoted_scope_id,
+	   rsp.steps + 1
+      from recursive_scope_promotions rsp
+     inner join veil2.scope_promotions sp
+        on sp.scope_type_id = rsp.promoted_scope_type_id
+       and sp.scope_id = rsp.promoted_scope_id
+     where not (    sp.promoted_scope_type_id = rsp.promoted_scope_type_id
+                and sp.promoted_scope_id = rsp.promoted_scope_id)
   )
 select *
   from recursive_scope_promotions;
@@ -437,8 +548,21 @@ comment on view veil2.promotable_privileges is
 context types to which they should promote.  This is not used elsewhere
 in veil2 but may be useful for visualising data.';
 
+create view veil2.promotable_privileges_info (
+  scope_type_id, privilege_ids)
+as
+select scope_type_id, to_array(privilege_ids)
+  from veil2.promotable_privileges;
+
+comment on view veil2.promotable_privileges_info is
+'As veil2.promotable_privileges with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
+
 revoke all on veil2.promotable_privileges from public;
 grant select on veil2.promotable_privileges to veil_user;
+revoke all on veil2.promotable_privileges_info from public;
+grant select on veil2.promotable_privileges_info to veil_user;
 
 
 \echo ......all_accessor_roles...
@@ -586,6 +710,30 @@ comment on view veil2.all_context_privs is
 There should be no need to give anyone other than developers any
 access to this.';
 
+create or replace
+view veil2.all_context_privs_info (
+  accessor_id, assignment_context_type_id,
+  assignment_context_id, mapping_context_type_id,
+  mapping_context_id, scope_type_id,
+  scope_id, roles,
+  privs, source) as
+select accessor_id, assignment_context_type_id,
+       assignment_context_id, mapping_context_type_id,
+       mapping_context_id, scope_type_id,
+       scope_id, to_array(roles),
+       to_array(privs), source
+  from veil2.all_context_privs;
+  
+comment on view veil2.all_context_privs_info is
+'As veil2.direct_role_privileges_v with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
+
+revoke all on veil2.all_context_privs from public;
+grant select on veil2.all_context_privs to veil_user;
+revoke all on veil2.all_context_privs_info from public;
+grant select on veil2.all_context_privs_info to veil_user;
+
 
 \echo ......all_accessor_privs...
 create or replace
@@ -609,12 +757,50 @@ comment on view veil2.all_accessor_privs_v is
 'Show all roles and privileges assigned to all accessors in all
 contexts, excepting the implied personal context.';
 
+create or replace
+view veil2.all_accessor_privs_v_info (
+  accessor_id,
+  assignment_context_type_id, assignment_context_id,
+  mapping_context_type_id, mapping_context_id,
+  scope_type_id, scope_id,
+  roles,  privs) as
+select accessor_id,
+       assignment_context_type_id, assignment_context_id,
+       mapping_context_type_id, mapping_context_id,
+       scope_type_id, scope_id,
+       to_array(roles),  to_array(privs)
+  from veil2.all_accessor_privs_v;
+
+comment on view veil2.all_accessor_privs_v_info is
+'As veil2.all_accessor_privs_v with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
+
 create or replace 
 view veil2.all_accessor_privs_vv as
 select * from veil2.all_accessor_privs_v;
 
 comment on view veil2.all_accessor_privs_vv is
 'As veil2.all_accessor_privs_v';
+
+create or replace
+view veil2.all_accessor_privs_vv_info (
+  accessor_id,
+  assignment_context_type_id, assignment_context_id,
+  mapping_context_type_id, mapping_context_id,
+  scope_type_id, scope_id,
+  roles,  privs) as
+select accessor_id,
+       assignment_context_type_id, assignment_context_id,
+       mapping_context_type_id, mapping_context_id,
+       scope_type_id, scope_id,
+       to_array(roles),  to_array(privs)
+  from veil2.all_accessor_privs_vv;
+
+comment on view veil2.all_accessor_privs_vv_info is
+'As veil2.all_accessor_privs_vv with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
 
 create
 materialized view veil2.all_accessor_privs
@@ -624,10 +810,37 @@ comment on materialized view veil2.all_accessor_privs is
 'Show all roles and privileges assigned to all accessors in all
 contexts, excepting the implied personal context.';
 
+create or replace
+view veil2.all_accessor_privs_info (
+  accessor_id,
+  assignment_context_type_id, assignment_context_id,
+  mapping_context_type_id, mapping_context_id,
+  scope_type_id, scope_id,
+  roles,  privs) as
+select accessor_id,
+       assignment_context_type_id, assignment_context_id,
+       mapping_context_type_id, mapping_context_id,
+       scope_type_id, scope_id,
+       to_array(roles),  to_array(privs)
+  from veil2.all_accessor_privs;
+
+comment on view veil2.all_accessor_privs_info is
+'As veil2.all_accessor_privs with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.';
+
 revoke all on veil2.all_accessor_privs from public;
 grant select on veil2.all_accessor_privs to veil_user;
+revoke all on veil2.all_accessor_privs_info from public;
+grant select on veil2.all_accessor_privs_info to veil_user;
 revoke all on veil2.all_accessor_privs_v from public;
 grant select on veil2.all_accessor_privs_v to veil_user;
+revoke all on veil2.all_accessor_privs_v_info from public;
+grant select on veil2.all_accessor_privs_v_info to veil_user;
+revoke all on veil2.all_accessor_privs_vv from public;
+grant select on veil2.all_accessor_privs_vv to veil_user;
+revoke all on veil2.all_accessor_privs_vv_info from public;
+grant select on veil2.all_accessor_privs_vv_info to veil_user;
 
 
 \echo ......role_chains...
@@ -696,6 +909,8 @@ comment on view veil2.role_chains is
 debugging, and provides a way to view role mappings in a simple but
 complete way.  Try it, it should immediately make sense.';
 
+revoke all on veil2.role_chains from public;
+grant select on veil2.role_chains to veil_user;
 
 
 \echo ......all_accessor_roles_plus...
@@ -713,6 +928,9 @@ comment on view veil2.all_accessor_roles_plus is
 accessor.  This is a developer view, aimed at development and
 debugging.';
 
+revoke all on veil2.all_accessor_roles_plus from public;
+grant select on veil2.all_accessor_roles_plus to veil_user;
+
 
 \echo ......privilege_assignments...
 create or replace
@@ -726,7 +944,13 @@ select aar.accessor_id, rp.privilege_id,
        rc.name_chain as role_name_mapping,
        rc.context_type_id as mapping_context_type_id,
        rc.context_id as mapping_context_id
-  from veil2.role_privileges rp
+  from (
+    select role_id, privilege_id
+      from veil2.role_privileges
+    union all
+    select 1, privilege_id
+      from veil2.privileges
+       ) rp
  inner join veil2.role_chains rc
     on rc.assigned_role_id = rp.role_id
  inner join veil2.all_accessor_roles_plus aar
@@ -745,6 +969,10 @@ run:
       from veil2.privilege_assignments 
      where accessor_id = 999 
        and privilege_id = 333;';
+
+
+revoke all on veil2.privilege_assignments from public;
+grant select on veil2.privilege_assignments to veil_user;
 
 
 \echo ...creating materialized view refresh functions...

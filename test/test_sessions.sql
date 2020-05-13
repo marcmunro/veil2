@@ -38,9 +38,9 @@ select null where test.expect(
 
 
 \echo .....create_session()...
--- Invalid accessor_id and authentication type, still yields
+-- Invalid username and authentication type, still yields
 -- result data that looks feasible.
-with session as (select * from veil2.create_session(9999, 'wibble'))
+with session as (select * from veil2.create_session('gerry', 'wibble'))
 select null
   from session
  where test.expect((session.session_id is not null),
@@ -69,9 +69,9 @@ select null
     or test.expect((session_id is null), true,
                    'There should not be an actual session_id');
 
--- Invalid authentication type with vailid accessor_id yields
+-- Invalid authentication type with vailid accessor yields
 -- a valid session that will subsequently not open
-with session as (select * from veil2.create_session(-2, 'wibble'))
+with session as (select * from veil2.create_session('eve', 'wibble'))
 select null
   from session
  where test.expect((session.session_id is not null),
@@ -126,7 +126,7 @@ select null
 with session as
   (
     select o.*
-      from veil2.create_session(-1, 'plaintext') c
+      from veil2.create_session('fred', 'plaintext') c
      cross join veil2.open_session(c.session_id, 1, 'password') o
   )
 select null
@@ -140,7 +140,7 @@ select null
 with session as
   (
     select o.*
-      from veil2.create_session(-2, 'plaintext') c
+      from veil2.create_session('eve', 'plaintext') c
      cross join veil2.open_session(c.session_id, 1, 'password2') o
   )
 select null
@@ -181,7 +181,7 @@ select null
 with session as
   (
     select o.*
-      from veil2.create_session(-6, 'plaintext') c
+      from veil2.create_session('alice', 'plaintext') c
      cross join veil2.open_session(c.session_id, 1, 'password6') o
   )
 select null
@@ -378,7 +378,7 @@ select null
 
 \echo ...close_session()...
 select null
-  from veil2.create_session(-6, 'plaintext') c
+  from veil2.create_session('alice', 'plaintext') c
  cross join veil2.open_session(c.session_id, 1, 'password6') o
  where not o.success;   -- Ensure no rows returned
 
@@ -626,7 +626,7 @@ select null
 with session as
   (
     select o.*
-      from veil2.create_session(-2, 'plaintext', -3, -31) c
+      from veil2.create_session('eve', 'plaintext', -3, -31) c
      cross join veil2.open_session(c.session_id, 1, 'password2') o
   )
 select null
@@ -648,7 +648,7 @@ select accessor_id, 1, 0
 with session as
   (
     select o.*
-      from veil2.create_session(-2, 'plaintext', -3, -31) c
+      from veil2.create_session('eve', 'plaintext', -3, -31) c
      cross join veil2.open_session(c.session_id, 1, 'password2') o
   )
 select null

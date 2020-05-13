@@ -12,28 +12,31 @@
 <!ENTITY % version SYSTEM "version.sgml">
 %version;
 
-<!ENTITY relsec	 	       SYSTEM "parts/relsec.xml">
-<!ENTITY relsecdiff    	       SYSTEM "parts/relsecdiff.xml">
-<!ENTITY veil_whyuse 	       SYSTEM "parts/veil_whyuse.xml">
-<!ENTITY veil_concepts 	       SYSTEM "parts/veil_concepts.xml">
-<!ENTITY veil_whatis 	       SYSTEM "parts/veil_whatis.xml">
-<!ENTITY veil_howhard 	       SYSTEM "parts/veil_howhard.xml">
-<!ENTITY veil_starting 	       SYSTEM "parts/veil_starting.xml">
-<!ENTITY veil_demo 	       SYSTEM "parts/veil_demo.xml">
-<!ENTITY veil_howto 	       SYSTEM "parts/veil_howto.xml">
-<!ENTITY veil_setup_authent    SYSTEM "parts/veil_setup_authent.xml">
-<!ENTITY veil_setup_contexts   SYSTEM "parts/veil_setup_contexts.xml">
-<!ENTITY veil_setup_privs      SYSTEM "parts/veil_setup_privs.xml">
-<!ENTITY veil_setup_roles      SYSTEM "parts/veil_setup_roles.xml">
-<!ENTITY veil_setup_accessors  SYSTEM "parts/veil_setup_accessors.xml">
-<!ENTITY veil_context_links    SYSTEM "parts/veil_context_links.xml">
-<!ENTITY veil_scope_promotions SYSTEM "parts/veil_scope_promotions.xml">
-<!ENTITY veil_secure_tables    SYSTEM "parts/veil_secure_tables.xml">
-<!ENTITY veil_secure_views     SYSTEM "parts/veil_secure_views.xml">
-<!ENTITY veil_dbtables         SYSTEM "parts/veil_dbtables.xml">
-<!ENTITY veil_dbviews          SYSTEM "parts/veil_dbviews.xml">
-<!ENTITY veil_dbfuncs          SYSTEM "parts/veil_dbfuncs.xml">
-
+<!ENTITY whatisrelsec	       	SYSTEM "parts/whatisrelsec.xml">
+<!ENTITY relsecdiff    	       	SYSTEM "parts/relsecdiff.xml">
+<!ENTITY whyuse_veil 	       	SYSTEM "parts/whyuse_veil.xml">
+<!ENTITY veil_concepts 	       	SYSTEM "parts/veil_concepts.xml">
+<!ENTITY whatis_veil 	       	SYSTEM "parts/whatis_veil.xml">
+<!ENTITY how_difficult 	       	SYSTEM "parts/how_difficult.xml">
+<!ENTITY get_started 	       	SYSTEM "parts/get_started.xml">
+<!ENTITY veil_demo 	       	SYSTEM "parts/veil_demo.xml">
+<!ENTITY veil_setup 	       	SYSTEM "parts/veil_setup.xml">
+<!ENTITY setup_authent         	SYSTEM "parts/setup_authent.xml">
+<!ENTITY setup_contexts        	SYSTEM "parts/setup_contexts.xml">
+<!ENTITY setup_privs           	SYSTEM "parts/setup_privs.xml">
+<!ENTITY setup_roles           	SYSTEM "parts/setup_roles.xml">
+<!ENTITY setup_accessors       	SYSTEM "parts/setup_accessors.xml">
+<!ENTITY setup_context_links   	SYSTEM "parts/setup_context_links.xml">
+<!ENTITY setup_scope_promotions SYSTEM "parts/setup_scope_promotions.xml">
+<!ENTITY secure_tables          SYSTEM "parts/secure_tables.xml">
+<!ENTITY secure_views           SYSTEM "parts/secure_views.xml">
+<!ENTITY assign_roles           SYSTEM "parts/assign_roles.xml">
+<!ENTITY veil_dbtables          SYSTEM "parts/veil_dbtables.xml">
+<!ENTITY veil_dbviews           SYSTEM "parts/veil_dbviews.xml">
+<!ENTITY veil_dbfuncs           SYSTEM "parts/veil_dbfuncs.xml">
+<!ENTITY veil_dbfuncs           SYSTEM "parts/veil_dbfuncs.xml">
+<!ENTITY authent_protocols      SYSTEM "parts/authent_protocols.xml">
+         
 ]>
 
 <article id="Veil2">
@@ -85,39 +88,32 @@
     </para>
   </sect1>
 
-  &relsec;
+  &whatisrelsec;
   &relsecdiff;
-  &veil_whyuse;
+  &whyuse_veil;
   &veil_concepts;
-  &veil_whatis;
-  &veil_howhard;
-  &veil_starting;
+  &whatis_veil;
+  &how_difficult;
+  &get_started;
   &veil_demo;
-  &veil_howto;
-  &veil_setup_authent;
-  &veil_setup_contexts;
-  &veil_setup_privs;
-  &veil_setup_roles;
-  &veil_setup_accessors;
-  &veil_context_links;
-  &veil_scope_promotions;
-  &veil_secure_tables;
-  &veil_secure_views;
+  &veil_setup;
+  &setup_authent;
+  &setup_contexts;
+  &setup_privs;
+  &setup_roles;
+  &setup_accessors;
+  &setup_context_links;
+  &setup_scope_promotions;
+  &secure_tables;
+  &secure_views;
+  &assign_roles;
   
-  <sect1>
-    <title>Performance Notes</title>
-    <para/>
-  </sect1>
-  <sect1>
-    <title>HOWTOs</title>
-    <para/>
-  </sect1>
   <sect1>
     <title>Contact</title>
     <para/>
   </sect1>
   <appendix>
-    <title><literal>Veil2</literal> ERD and Database Tables</title>
+    <title><literal>Veil2</literal> ERD and Database Objects</title>
     <mediaobject>
       <imageobject>
 	<imagedata
@@ -130,4 +126,5 @@
     &veil_dbviews;
     &veil_dbfuncs;
   </appendix>
+  &authent_protocols;
 </article>

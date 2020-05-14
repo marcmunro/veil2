@@ -124,13 +124,13 @@
 	functions to identify and keep track of users:
 	<itemizedlist>
 	  <listitem><literal>veil2.create_session()</literal>;</listitem>
-	  <listitem><literal>veil2.open_session()</literal>;</listitem>
-	  <listitem><literal>veil2.close_session()</literal>.</listitem>
+	  <listitem><literal>veil2.open_connection()</literal>;</listitem>
+	  <listitem><literal>veil2.close_connection()</literal>.</listitem>
 	</itemizedlist>
 	Your application server must call
 	<literal>create_session()</literal> to identify each new user,
-	and <literal>open_session()</literal> before the user begins
-	issuing queries.  <literal>close_session()</literal> should be
+	and <literal>open_connection()</literal> before the user begins
+	issuing queries.  <literal>close_connection()</literal> should be
 	called before returning the database connection to the pool.
       </para>
       <para>

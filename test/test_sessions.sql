@@ -99,7 +99,7 @@ select null
                    'There should be an actual session_id(2)');
 
 
-\echo .....open_session()...
+\echo .....open_connection()...
 -- We have a created session from the last tests above.  Now we will try
 -- opening that session.  Given that the authentication method was
 -- invalid, we expect appropriate failures.
@@ -113,7 +113,7 @@ session as
   (
     select os.*
       from session_parameters sp
-     cross join veil2.open_session(sp.session_id, 1, 'wibble') os
+     cross join veil2.open_connection(sp.session_id, 1, 'wibble') os
   )
 select null
   from session s
@@ -127,7 +127,7 @@ with session as
   (
     select o.*
       from veil2.create_session('fred', 'plaintext') c
-     cross join veil2.open_session(c.session_id, 1, 'password') o
+     cross join veil2.open_connection(c.session_id, 1, 'password') o
   )
 select null
   from session s
@@ -141,7 +141,7 @@ with session as
   (
     select o.*
       from veil2.create_session('eve', 'plaintext') c
-     cross join veil2.open_session(c.session_id, 1, 'password2') o
+     cross join veil2.open_connection(c.session_id, 1, 'password2') o
   )
 select null
   from session s
@@ -167,7 +167,7 @@ with session as
     select o.*, ms.session_id1
       from mytest_session ms
      inner join veil2.sessions s on s.session_id = ms.session_id1 
-     cross join veil2.open_session(ms.session_id1, 2,
+     cross join veil2.open_connection(ms.session_id1, 2,
         encode(digest(s.token || to_hex(2), 'sha1'), 'base64')) o
   )
 select null
@@ -182,7 +182,7 @@ with session as
   (
     select o.*
       from veil2.create_session('alice', 'plaintext') c
-     cross join veil2.open_session(c.session_id, 1, 'password6') o
+     cross join veil2.open_connection(c.session_id, 1, 'password6') o
   )
 select null
   from session s
@@ -200,7 +200,7 @@ with session as
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
      inner join veil2.sessions s on s.session_id = ms.session_id1 
-     cross join veil2.open_session(ms.session_id1, 3,
+     cross join veil2.open_connection(ms.session_id1, 3,
         encode(digest(s.token || to_hex(3), 'sha1'), 'base64')) o
   )
 select null
@@ -216,7 +216,7 @@ with session as
     select o.*, ms.session_id2 as session_id
       from mytest_session ms
      inner join veil2.sessions s on s.session_id = ms.session_id2 
-     cross join veil2.open_session(ms.session_id2, 2,
+     cross join veil2.open_connection(ms.session_id2, 2,
         encode(digest(s.token || to_hex(2), 'sha1'), 'base64')) o
   )
 select null
@@ -226,13 +226,13 @@ select null
     or test.expect(s.errmsg is null, true,
        		   'There should be no error message (4)');
 
-\echo .....open_session(checking nonce handling)...
+\echo .....open_connection(checking nonce handling)...
 -- Attempt to switch to the original session with a reused nonce
 with session as
   (
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
-     cross join veil2.open_session(ms.session_id1, 3, 'password2') o
+     cross join veil2.open_connection(ms.session_id1, 3, 'password2') o
   )
 select null
   from session s
@@ -247,7 +247,7 @@ with session as
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
      inner join veil2.sessions s on s.session_id = ms.session_id1 
-     cross join veil2.open_session(ms.session_id1, 5,
+     cross join veil2.open_connection(ms.session_id1, 5,
         encode(digest(s.token || to_hex(5), 'sha1'), 'base64')) o
   )
 select null
@@ -263,7 +263,7 @@ with session as
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
      inner join veil2.sessions s on s.session_id = ms.session_id1 
-     cross join veil2.open_session(ms.session_id1, 4,
+     cross join veil2.open_connection(ms.session_id1, 4,
         encode(digest(s.token || to_hex(4), 'sha1'), 'base64')) o
   )
 select null
@@ -278,7 +278,7 @@ with session as
   (
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
-     cross join veil2.open_session(ms.session_id1, 300, 'password2') o
+     cross join veil2.open_connection(ms.session_id1, 300, 'password2') o
   )
 select null
   from session s
@@ -294,7 +294,7 @@ with session as
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
      inner join veil2.sessions s on s.session_id = ms.session_id1 
-     cross join veil2.open_session(ms.session_id1, 364,
+     cross join veil2.open_connection(ms.session_id1, 364,
         encode(digest(s.token || to_hex(364), 'sha1'), 'base64')) o
   )
 select null
@@ -310,7 +310,7 @@ with session as
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
      inner join veil2.sessions s on s.session_id = ms.session_id1 
-     cross join veil2.open_session(ms.session_id1, 427,
+     cross join veil2.open_connection(ms.session_id1, 427,
         encode(digest(s.token || to_hex(427), 'sha1'), 'base64')) o
   )
 select null
@@ -326,7 +326,7 @@ with session as
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
      inner join veil2.sessions s on s.session_id = ms.session_id1 
-     cross join veil2.open_session(ms.session_id1, 480,
+     cross join veil2.open_connection(ms.session_id1, 480,
         encode(digest(s.token || to_hex(480), 'sha1'), 'base64')) o
   )
 select null
@@ -347,7 +347,7 @@ with session as
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
      inner join veil2.sessions s on s.session_id = ms.session_id1 
-     cross join veil2.open_session(ms.session_id1, 540,
+     cross join veil2.open_connection(ms.session_id1, 540,
         encode(digest(s.token || to_hex(540), 'sha1'), 'base64')) o
   )
 select null
@@ -362,7 +362,7 @@ with session as
   (
     select o.*, ms.session_id1 as session_id
       from mytest_session ms
-     cross join veil2.open_session(ms.session_id1, 17, 'password2') o
+     cross join veil2.open_connection(ms.session_id1, 17, 'password2') o
   )
 select null
   from session s
@@ -376,10 +376,10 @@ select null
  where test.expect(veil2.i_have_global_priv(0), false,
        		   'Session should not have connect privilege');
 
-\echo ...close_session()...
+\echo ...close_connection()...
 select null
   from veil2.create_session('alice', 'plaintext') c
- cross join veil2.open_session(c.session_id, 1, 'password6') o
+ cross join veil2.open_connection(c.session_id, 1, 'password6') o
  where not o.success;   -- Ensure no rows returned
 
 select null
@@ -387,8 +387,8 @@ select null
        		   'Session should have connect privilege(2)');
 
 select null
-  from veil2.close_session()
- where not close_session;  -- Ensure no rows returned
+  from veil2.close_connection()
+ where not close_connection;  -- Ensure no rows returned
 
 select null
  where test.expect(veil2.i_have_global_priv(0), false,
@@ -627,7 +627,7 @@ with session as
   (
     select o.*
       from veil2.create_session('eve', 'plaintext', -3, -31) c
-     cross join veil2.open_session(c.session_id, 1, 'password2') o
+     cross join veil2.open_connection(c.session_id, 1, 'password2') o
   )
 select null
   from session s
@@ -649,7 +649,7 @@ with session as
   (
     select o.*
       from veil2.create_session('eve', 'plaintext', -3, -31) c
-     cross join veil2.open_session(c.session_id, 1, 'password2') o
+     cross join veil2.open_connection(c.session_id, 1, 'password2') o
   )
 select null
   from session s

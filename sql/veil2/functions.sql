@@ -282,11 +282,11 @@ comment on function veil2.create_session(text, text, integer, integer) is
 Returns session_id, authent_token and session_supplemental.
 
 session_id is used to uniquely identify this user''s session.  It will
-be needed for subsequent open_session() calls.
+be needed for subsequent open_connection() calls.
 
 session_token is randomly generated.  Depending on the authentication
 method chosen, the client may need to use this when generating their
-authentication token for the subsequent open_session() call.
+authentication token for the subsequent open_connection() call.
 session_supplemental is an authentication method specific set of
 data.  Depending upon the authentication method, the client may need
 to use this in generating subsequent authetntication tokens,
@@ -465,9 +465,9 @@ each call, and that the caller has access to the session_token
 returned from the original (subsequently authenticated) create
 session() call.';
 
-\echo ......open_session()...
+\echo ......open_connection()...
 create or replace
-function veil2.open_session(
+function veil2.open_connection(
     session_id in integer,
     nonce in integer,
     authent_token in text,
@@ -503,7 +503,7 @@ begin
       on ac.accessor_id = s.accessor_id
      and ac.context_type_id = s.login_context_type_id
      and ac.context_id = s.login_context_id
-   where s.session_id = open_session.session_id;
+   where s.session_id = open_connection.session_id;
 
   if not found then
     raise warning 'SECURITY: Login attempt with no session: %',  session_id;
@@ -529,7 +529,7 @@ begin
     if success then
       if _has_authenticated then
         -- The session has already been opened.  From here on we 
-	-- use different authentication tokens for each open_session()
+	-- use different authentication tokens for each open_connection()
 	-- call in order to avoid replay attacks.
 	-- This will be the sha1 of the concatenation of:
 	--   - the session token
@@ -578,7 +578,7 @@ begin
            nonces = veil2.update_nonces(nonce, _nonces),
 	   has_authenticated = has_authenticated or success
         from veil2.system_parameters sp
-       where s.session_id = open_session.session_id
+       where s.session_id = open_connection.session_id
          and sp.parameter_name = 'shared session timeout'
     returning nonces into _nonces;
   end if;
@@ -587,7 +587,7 @@ $$
 language 'plpgsql' security definer volatile
 set client_min_messages = 'error';
 
-comment on function veil2.open_session(integer, integer, text) is
+comment on function veil2.open_connection(integer, integer, text) is
 'Attempt to open or re-open a session.  This is used to authenticate
 or re-authenticate a connection, and until this is done a session
 cannot be used.  
@@ -607,7 +607,7 @@ Failures may be for several reasons with errmsg as described below:
  - the user has no connect privilege [errmsg: ''AUTHFAIL''].
 
 The _nonce is a number that may only be used once per session, and is
-used to prevent replay attacks.  Each open_session() call should provide
+used to prevent replay attacks.  Each open_connection() call should provide
 a new nonce ascending in value from the last.  As connections may be
 asynchronous, we do not require a strictly ascending order but nonces
 may not be out of sequence by a value of more than 64.  This allows us
@@ -624,9 +624,9 @@ client, even if client_min_messages is modified for the session.  This
 is deliberate, for security reasons.';
 
 
-\echo ......close_session()...
+\echo ......close_connection()...
 create or replace
-function veil2.close_session() returns boolean as
+function veil2.close_connection() returns boolean as
 $$
 begin
   update session_parameters
@@ -636,7 +636,7 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
-comment on function veil2.close_session() is
+comment on function veil2.close_connection() is
 'Close the current session.  We use this to ensure that a shared
 database connection cannot be used with our privileges once we have
 finished with it.  There is no authentication or verification done to

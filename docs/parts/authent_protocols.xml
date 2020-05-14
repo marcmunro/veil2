@@ -148,12 +148,12 @@
 	  </listitem>
 	  <listitem>
 	    <literal>
-	      <link linkend="func_open_session">open_session();</link>
+	      <link linkend="func_open_connection">open_connection();</link>
 	    </literal>
 	  </listitem>
 	  <listitem>
 	    <literal>
-	      <link linkend="func_close_session">close_session().</link>
+	      <link linkend="func_close_connection">close_connection().</link>
 	    </literal>
 	  </listitem>
 	</itemizedlist>
@@ -175,7 +175,7 @@
 	    Having created a session and been given a
 	    <literal>session_id</literal> by
 	    <literal>create_session()</literal>, we authenticate and open
-	    the session by calling <literal>open_session()</literal>
+	    the session by calling <literal>open_connection()</literal>
 	    with parameters appropriate to the chosen authentication
 	    method.  If this succeeds, our connection is considered
 	    open and we can start executing queries.
@@ -197,7 +197,7 @@
 	will create a new session for them using
 	.  This returns a session
 	data which will be needed for subsequent calls to
-	<literal>open_session().</literal>  This function will always
+	<literal>open_connection().</literal>  This function will always
 	succeed, regardless of the validity of the provided user.
 	This is to ensure that you cannot tell the difference between
 	a valid and invalid user simply by calling this function.  If

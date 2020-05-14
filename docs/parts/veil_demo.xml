@@ -117,7 +117,7 @@ $ make db; psql -d vpd -f demo/demo.sql
 	  <programlisting>
 select *
   from veil2.create_session('Alice', 'bcrypt', 4, 100) c
- cross join veil2.open_session(c.session_id, 1, 'passwd1');
+ cross join veil2.open_connection(c.session_id, 1, 'passwd1');
 	  </programlisting>
 	</para>
 	<para>
@@ -143,7 +143,7 @@ select *
 	  <programlisting>
 select *
   from veil2.create_session('Bob', 'plaintext', 4, 101) c
- cross join veil2.open_session(c.session_id, 1, 'passwd2') o1;
+ cross join veil2.open_connection(c.session_id, 1, 'passwd2') o1;
 	  </programlisting>
 	</para>
 	<para>
@@ -167,7 +167,7 @@ select *
 	  <programlisting>
 select *
   from veil2.create_session('Carol', 'plaintext', 4, 102) c
- cross join veil2.open_session(c.session_id, 1, 'passwd3') o1;
+ cross join veil2.open_connection(c.session_id, 1, 'passwd3') o1;
 	  </programlisting>
 	</para>
 	<para>
@@ -185,7 +185,7 @@ select *
 	  <programlisting>
 select *
   from veil2.create_session('Eve', 'plaintext', 4, 100) c
- cross join veil2.open_session(c.session_id, 1, 'passwd4') o1;
+ cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
 	  </programlisting>
 	</para>
 	<para>
@@ -203,7 +203,7 @@ select *
 	  <programlisting>
 select *
   from veil2.create_session('Sue', 'plaintext', 4, 105) c
- cross join veil2.open_session(c.session_id, 1, 'passwd5') o1;
+ cross join veil2.open_connection(c.session_id, 1, 'passwd5') o1;
 	  </programlisting>
 	</para>
 	<para>
@@ -228,7 +228,7 @@ select veil2.i_have_priv_in_superior_scope(21, 5, 1);
 	  <programlisting>
 select *
   from veil2.create_session('Simon', 'plaintext', 4, 105) c
- cross join veil2.open_session(c.session_id, 1, 'passwd7') o1;
+ cross join veil2.open_connection(c.session_id, 1, 'passwd7') o1;
 	  </programlisting>
 	</para>
 	<para>

@@ -174,12 +174,12 @@ grant all on table demo.project_assignments to demouser;
 -- bcrypt so no new authentication methods have to be defined and
 -- implemented. 
 -- Furthermore as this demo is only for use in psql, we are doing no
--- proper session authentication.  Instead we just call open_session()
+-- proper session authentication.  Instead we just call open_connection()
 -- and create_session() manually and in a contrived manner.  This is
--- not good practice.  Keep your create_session() and open_session()
+-- not good practice.  Keep your create_session() and open_connection()
 -- calls separate.  Your client should use the result of
 -- create_session() to determine the parameters for subsequent
--- open_session() calls.
+-- open_connection() calls.
 
 -- Enable plaintext authentication.  DO NOT DO THIS IN REAL LIFE!!!!
 
@@ -751,15 +751,15 @@ update veil2.authentication_details
 -- Log Alice in.
 select *
   from veil2.create_session('Alice', 'bcrypt', 4, 100) c
- cross join veil2.open_session(c.session_id, 1, 'passwd1');
+ cross join veil2.open_connection(c.session_id, 1, 'passwd1');
 
 select 'Alice sees: ', * from demo.parties;
 
 -- Log Bob in.
 select *
   from veil2.create_session('Bob', 'plaintext', 4, 101) c
- cross join veil2.open_session(c.session_id, 1, 'passwd2') o1
- cross join veil2.open_session(c.session_id, 2,
+ cross join veil2.open_connection(c.session_id, 1, 'passwd2') o1
+ cross join veil2.open_connection(c.session_id, 2,
              encode(digest(c.session_token || to_hex(2), 'sha1'),
 	     	    'base64')) o2;
  
@@ -769,14 +769,14 @@ select 'Bob sees: ', * from demo.parties;
 -- Log Carol in.
 select *
   from veil2.create_session('Carol', 'plaintext', 4, 102) c
- cross join veil2.open_session(c.session_id, 1, 'passwd3') o1;
+ cross join veil2.open_connection(c.session_id, 1, 'passwd3') o1;
 
 select 'Carol sees: ', * from demo.parties;
 
 -- Log Eve in.
 select *
   from veil2.create_session('Eve', 'plaintext', 4, 100) c
- cross join veil2.open_session(c.session_id, 1, 'passwd4') o1;
+ cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
 
 select 'Eve sees: ', * from demo.parties;
 
@@ -784,14 +784,14 @@ select 'Eve sees: ', * from demo.parties;
 -- Log Sue in.
 select *
   from veil2.create_session('Sue', 'plaintext', 4, 105) c
- cross join veil2.open_session(c.session_id, 1, 'passwd5') o1;
+ cross join veil2.open_connection(c.session_id, 1, 'passwd5') o1;
 
 select 'Sue sees: ', * from demo.parties;
 
 -- Log Simon in.
 select *
   from veil2.create_session('Simon', 'plaintext', 4, 105) c
- cross join veil2.open_session(c.session_id, 1, 'passwd7') o1;
+ cross join veil2.open_connection(c.session_id, 1, 'passwd7') o1;
 
 select 'Simon sees: ', * from demo.parties;
 select 'Simon sees: ', * from demo.projects;

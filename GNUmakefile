@@ -27,7 +27,7 @@ include extracts.d
 
 all: db html
 
-SUBDIRS = demo docs docs/extracts docs/parts sql sql/veil2 diagrams
+SUBDIRS = demo docs docs/extracts docs/parts sql sql/veil2 diagrams test
 
 INTERMEDIATE_FILES =
 TARGET_FILES =

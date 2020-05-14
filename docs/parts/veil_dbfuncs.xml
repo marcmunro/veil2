@@ -70,13 +70,13 @@
     <title><literal>load_session_privs()</literal></title>
     <?sql-definition function veil2.load_session_privs sql/veil2/functions.sql ?>
   </sect2>
-  <sect2 id="func_open_session">
-    <title><literal>open_session()</literal></title>
-    <?sql-definition function veil2.open_session sql/veil2/functions.sql ?>
+  <sect2 id="func_open_connection">
+    <title><literal>open_connection()</literal></title>
+    <?sql-definition function veil2.open_connection sql/veil2/functions.sql ?>
   </sect2>
-  <sect2 id="func_close_session">
-    <title><literal>close_session()</literal></title>
-    <?sql-definition function veil2.close_session sql/veil2/functions.sql ?>
+  <sect2 id="func_close_connection">
+    <title><literal>close_connection()</literal></title>
+    <?sql-definition function veil2.close_connection sql/veil2/functions.sql ?>
   </sect2>
   <sect2 id="func_hello">
     <title><literal>hello()</literal></title>

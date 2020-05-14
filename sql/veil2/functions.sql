@@ -36,10 +36,10 @@ $$
 language 'sql' security definer stable leakproof;
 
 comment on function veil2.authenticate_plaintext(integer, text) is
-'Authentication predicate for plaintext authentication.  Return true iff
+'Authentication predicate for plaintext authentication.  Return true if
 the supplied token matches the stored authentication token for the
 accessor.  This authentication mechanism exists primarily for demo
-purposes.  Do not use it in a real application!';
+purposes.  DO NOT USE IT IN A REAL APPLICATION!';
 
 
 \echo ......authenticate_bcrypt()...
@@ -396,6 +396,15 @@ begin
       select privs
         from all_session_privs
        where scope_type_id = 1
+    ),
+  personal_privs as
+    (
+      select session_id,
+      	     2, _accessor_id,  -- Personal context scope type
+	     roles,
+	     privileges
+        from veil2.all_role_privs
+       where role_id = 2      -- Personal context role
     )
   insert
     into session_privileges
@@ -403,7 +412,9 @@ begin
   	 roles, privs)
   select *
     from all_session_privs
-   where (select privs from global_privs) ? 0; -- Test connect priv
+  union all
+  select * from personal_privs
+   where (select privs from global_privs) ? 0; -- Tests for connect priv
   
   if found then
     insert
@@ -445,6 +456,14 @@ select encode(digest(session_token || to_hex(nonce), 'sha1'),
 $$
 language 'sql' security definer stable;
 
+comment on function
+veil2.check_continuation(integer, text, text) is
+'Checks whether the combination of nonce, session_token and
+authent_token is valid.  This is used to continue sessions that have
+already been authenticated.  It ensures that new tokens are used on
+each call, and that the caller has access to the session_token
+returned from the original (subsequently authenticated) create
+session() call.';
 
 \echo ......open_session()...
 create or replace
@@ -466,7 +485,7 @@ declare
   expired bool;
   can_connect bool;
 begin
-  success = false;
+  success := false;
   update session_parameters  -- If anything goes wrong from here on, 
   	 		     -- the session will be have no access
 			     -- rights.
@@ -543,6 +562,10 @@ begin
       end if;
     end if;
     
+    if not success then
+      delete from session_privileges;
+      delete from session_parameters;
+    end if;
     -- Regardless of the success of the preceding checks we record the
     -- use of the latest nonce.  If all validations succeeded, we
     -- extend the expiry time of the session.
@@ -784,11 +807,14 @@ function veil2.i_have_personal_priv(
     _accessor_id integer)
   returns bool as
 $$
-  select (sp.accessor_id = _accessor_id) and (arp.privileges ? priv)
-    from veil2.all_role_privs arp
-   cross join session_parameters sp
-   where arp.role_id = 2
-     and sp.is_open;
+select coalesce((
+  select privs ? priv
+    from session_privileges v
+   cross join session_parameters p
+   where p.is_open
+     and v.scope_type_id = 2
+     and v.scope_id = _accessor_id),
+   false);
 $$
 language 'sql' security definer stable leakproof;
 

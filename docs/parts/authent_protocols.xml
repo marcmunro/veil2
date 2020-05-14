@@ -98,8 +98,9 @@
 	</itemizedlist>
       </para>
       <para>
-	So, given that we <emphasis>can</emphasis> attempt to protect
-	ourselves from a compromised server, we will try to do so.
+	Given that with <literal>Veil2</literal> we
+	<emphasis>can</emphasis> attempt to protect ourselves from a
+	compromised server, we will try to do so.
       </para>
      </sect2>
     <sect2>
@@ -158,12 +159,49 @@
 	</itemizedlist>
       </para>
       <para>
+	And the calling protocol goes like this:
+	<sect4>
+	  <title>Begin New Session</title>
+	  <para>
+	    We call <literal>create_session()</literal>.  This returns
+	    a <literal>session_id</literal> and
+	    <literal>session_token</literal> which we must record and
+	    use on subequent calls.
+	  </para>
+	</sect4>
+	<sect4>
+	  <title>Authenticate New Session</title>
+	  <para>
+	    Having created a session and been given a
+	    <literal>session_id</literal> by
+	    <literal>create_session()</literal>, we authenticate and open
+	    the session by calling <literal>open_session()</literal>
+	    with parameters appropriate to the chosen authentication
+	    method.  If this succeeds, our connection is considered
+	    open and we can start executing queries.
+	  </para>
+	</sect4>
+	<sect4>
+	  <title>Close Connection</title>
+	  <para>
+	    When we are done and are ready to return the database
+	    connection to the pool for use by another user, we 
+	  </para>
+	</sect4>
+       
+      </para>
+
+      
+      <para>
 	When a user first connects to the application, the application
 	will create a new session for them using
-	<literal>create_session();</literal>.  This returns a session
+	.  This returns a session
 	data which will be needed for subsequent calls to
 	<literal>open_session().</literal>  This function will always
-	succeed, regardless of the validity of the provided user
+	succeed, regardless of the validity of the provided user.
+	This is to ensure that you cannot tell the difference between
+	a valid and invalid user simply by calling this function.  If
+	the user was not valid, the 
 
 HERE HERE HERE
 	

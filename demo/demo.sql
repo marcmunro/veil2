@@ -1,28 +1,5 @@
 -- Create the veil2 demo app
 
--- TODO:
--- Need view to identify allowed login contexts
--- Check whether role->role in global context is included in other
--- role->role mappings.  It should not be.
--- NEED UNIT TESTS FOR ROLE MAPPING IN DIFFERENT CONTEXTS
-
--- PROBLEM: The context-based role->role mapping stuff does not work.
--- DETAILS:
---  - all accessor_privs is not showing project role privs.
---    This is because there is an assumption that the context of any
---    role->role assignments matches the context of whatever test we
---    are doing, but they are different things.
---
-
-
-
-
---
--- Continue checking different users' access to parties
--- Provide a how-do-I-have priv function
--- supplement superior_scope thingy with privilege inheritence (with
--- filtering)
-
 
 create role demouser with login password 'pass';
 grant veil_user to demouser;
@@ -263,13 +240,14 @@ values (3, 'corp scope',
 
 
 -- STEP 4:
--- Define initial privileges - TODO: provide the scopes
+-- Define privileges.  Note that priv_ids below 16 are used for veil2
+-- objects.
 
 insert into veil2.privileges
        (privilege_id, privilege_name,
         promotion_scope_type_id, description)
 values (16, 'select party_types',
-        null, 'Allow select on demo.party_types'),
+        1, 'Allow select on demo.party_types'),
        (17, 'select parties',
         null, 'Allow select on demo.parties'),
        (18, 'select roles',
@@ -281,7 +259,13 @@ values (16, 'select party_types',
        (21, 'select projects',
         null, 'Allow select on the projects table'),
        (22, 'select project_assignments',
-        null, 'Allow select on the project_assignments table');
+        null, 'Allow select on the project_assignments table'),
+       (23, 'select orgs',
+        4, 'Allow select on parties that are orgs');
+
+-- Priv 23 is intended to allow project members to see the org that
+-- owns the project even if they have not been given select-party
+-- privilege in any other context.
 
 -- STEP 5:
 -- Link to/create initial roles
@@ -314,6 +298,8 @@ values (5, 16),  -- party viewer -> select_party_types
        (6, 18),  -- role viewer -> select_roles
        (6, 19),  -- role viewer -> select role_roles
        (6, 20),  -- role viewer -> select party_roles
+       (11, 16), -- project viewer -> select_party_types
+       (11, 23), -- project viewer -> select_orgs
        (11, 21), -- project viewer -> select_projects
        (12, 21), -- project manipulator -> select projects
        (12, 22), -- project manipulator -> select project assignments
@@ -557,8 +543,8 @@ select 4, party_id,  -- Promote org to corp scope
   from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
  where party_type_id = 2
 union all
-select 3, party_id,  -- Promotion of org to higher org
-       3, org_id
+select 4, party_id,  -- Promotion of org to higher org
+       4, org_id
   from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
  where party_type_id = 2
 union all
@@ -596,7 +582,9 @@ create policy parties_tbl__select
         or veil2.i_have_priv_in_scope(17, 3, corp_id)
         or veil2.i_have_priv_in_scope(17, 4, org_id)
         or veil2.i_have_priv_in_scope(17, 4, party_id) -- View the org itself
-        or veil2.i_have_personal_priv(17, party_id));
+        or veil2.i_have_personal_priv(17, party_id)
+	or (    party_type_id = 2    -- View an org that owns a project
+	    and veil2.i_have_priv_in_scope(23, 4, party_id)));
 
 -- READER EXERCISE: secure inserts, updates and deletes
 
@@ -807,6 +795,8 @@ select *
 
 select 'Simon sees: ', * from demo.parties;
 select 'Simon sees: ', * from demo.projects;
+select 'Simon sees: ', * from demo.project_assignments;
+select 'Simon sees: ', * from demo.party_types;
 
 
 

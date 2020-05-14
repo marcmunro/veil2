@@ -389,7 +389,7 @@ view something like this:
     ) as
     select 96, -- dept scope type id
            department_id,
-           95, -- corp scope type id
+           95, -- corp scope type id 
            corp_id
       from departments;
 
@@ -405,18 +405,18 @@ create or replace
 view veil2.all_scope_promotions_v (
   scope_type_id, scope_id,
   promoted_scope_type_id, promoted_scope_id,
-  promotion_steps
+  is_type_promotion
 ) as
 with recursive recursive_scope_promotions as
   (
     select scope_type_id, scope_id,
            promoted_scope_type_id, promoted_scope_id,
-	   1 as steps
+	   scope_type_id != promoted_scope_type_id
       from veil2.scope_promotions
-     union all
+     union
     select rsp.scope_type_id, rsp.scope_id,
            sp.promoted_scope_type_id, sp.promoted_scope_id,
-	   rsp.steps + 1
+	   sp.scope_type_id != sp.promoted_scope_type_id
       from recursive_scope_promotions rsp
      inner join veil2.scope_promotions sp
         on sp.scope_type_id = rsp.promoted_scope_type_id
@@ -665,6 +665,7 @@ promoted_privs as
        on asp.scope_type_id = pp.assignment_context_type_id
       and asp.scope_id = pp.assignment_context_id
       and asp.promoted_scope_type_id = p.promotion_scope_type_id
+      and asp.is_type_promotion
     group by pp.accessor_id, pp.assignment_context_type_id,
              pp.assignment_context_id, pp.mapping_context_type_id,
 	     pp.mapping_context_id, pp.privilege_id,
@@ -936,14 +937,18 @@ grant select on veil2.all_accessor_roles_plus to veil_user;
 create or replace
 view veil2.privilege_assignments as
 select aar.accessor_id, rp.privilege_id,
-       aar.context_type_id as assigned_context_type_id,
-       aar.context_id as assigned_context_id,
-       rp.role_id as assigned_role_id,
+       aar.context_type_id as ass_cntxt_type_id,
+       aar.context_id as ass_cntxt_id,
+       coalesce(p.promotion_scope_type_id,
+                aar.context_type_id) as scope_type_id,
+       coalesce(asp.promoted_scope_id,
+	        aar.context_id) as scope_id,
+       rc.primary_role_id as ass_role_id,
        rc.assigned_role_id as priv_bearing_role_id,
        rc.id_chain as role_id_mapping,
        rc.name_chain as role_name_mapping,
-       rc.context_type_id as mapping_context_type_id,
-       rc.context_id as mapping_context_id
+       rc.context_type_id as map_cntxt_type_id,
+       rc.context_id as map_cntxt_id
   from (
     select role_id, privilege_id
       from veil2.role_privileges
@@ -951,10 +956,17 @@ select aar.accessor_id, rp.privilege_id,
     select 1, privilege_id
       from veil2.privileges
        ) rp
+ inner join veil2.privileges p
+    on p.privilege_id = rp.privilege_id
  inner join veil2.role_chains rc
     on rc.assigned_role_id = rp.role_id
  inner join veil2.all_accessor_roles_plus aar
-    on aar.role_id = rc.primary_role_id;
+    on aar.role_id = rc.primary_role_id
+  left outer join veil2.all_scope_promotions asp
+    on asp.scope_type_id = aar.context_type_id
+   and asp.scope_id = aar.context_id
+   and asp.promoted_scope_type_id = p.promotion_scope_type_id
+   and asp.is_type_promotion;
 
 comment on view veil2.privilege_assignments is
 'Developer view that shows how accessors get privileges.  It shows the

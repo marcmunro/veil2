@@ -96,13 +96,13 @@
     </para>
     <para>
       To make roles more flexible, we allow roles to be assigned to
-      other roles.  This allows us to create low-level
-      <emphasis>functional</emphasis> roles that have the privileges
-      necessary to perform a specific task, and we then assign these
-      roles to higher-level <emphasis>user</emphasis> roles which can
-      then be assigned to users.  By doing this, we minimize the
-      number of different roles that we need to be able to assign to
-      users.
+      other roles.  We often call this, role mapping.  This allows us
+      to create low-level <emphasis>functional</emphasis> roles that
+      have the privileges necessary to perform a specific task, and we
+      then assign these roles to higher-level
+      <emphasis>user</emphasis> roles which can then be assigned to
+      users.  By doing this, we minimize the number of different roles
+      that we need to be able to assign to users.
     </para>
     <para>
       Typical functional roles might include <literal>view
@@ -128,7 +128,37 @@
       handle it just fine; it will just mean that the two roles are
       equivalent - which is hardly useful.  You may want to implement
       some policies around this for your own system.
-    </para> 
+    </para>
+    <sect3>
+      <title>Contextual Role Mapping</title>
+      <para>
+	One of the possible use-cases for <literal>Veil2</literal>, is
+	to provide Virtual Private Databases in a
+	<ulink
+	    url="https://en.wikipedia.org/wiki/Software_as_a_service">SaaS</ulink> 
+	environment.  As such, it is possible that different clients
+	of such a service might want different user-level roles, and
+	different mappings between them and the base function-level
+	roles.
+      </para>
+      <para>
+	<literal>Veil2</literal> provides the means to do this, by
+	making each role->role mapping depend on a scope, which
+	describes the context in which the role->role mapping applies.
+	Each user is authenticated within a specific context (which,
+	incidentally, allows each context to have its own distinct set
+	of usernames), and that context determines which set of
+	role->role mappings apply.  The actual mapping context that
+	will be used may be the login context itself, or a higher
+	level context to which it can be promoted.  This concept of
+	promotion is similar to privilege promotion as described <link
+	linkend="privilege-promotion">below</link>.  The target scope
+	level for this promotion is identified in the
+	<literal>system_parameter</literal> named
+	<quote><literal>mapping context target scope
+	type</literal></quote>.
+      </para>
+    </sect3>
   </sect2>
   <sect2 id="assignments">
     <title>Assignments</title>

@@ -1,146 +1,469 @@
 <sect1 id="veil_demo">
   <title>Exploring The <literal>Veil2</literal> Demo</title>
   <para>
-    DO NOT USE A PRIVILEGED ACCOUNT!  You may want to grant veil_user
-    to it.
+    The <literal>Veil2</literal> demo exists to demonstrate a
+    <link linkend="what-is-relational-security">Relational Security
+    System</link>, show its capabilities and provide an example of 
+    <literal>Veil2</literal> in use.  It is a trivial, simple and
+    incomplete example but provides enough of a foundation to explore
+    and understand what <literal>Veil2</literal> is capable of.
+  </para>
+  <para>
+    Just as with <literal>Veil2</literal> itself, you are encouraged
+    to dissect, play with, and hack on, the demo.  There is much that
+    has not been implemented.  Feel free to implement the missing
+    parts.
   </para>
   <sect2>
     <title>The Security Contexts</title>
     <para>
+      The demo provides 3 relational contexts:
+      <itemizedlist>
+	<listitem>corp context;</listitem>
+	<listitem>org context;</listitem>
+	<listitem>project context</listitem>
+      </itemizedlist>
     </para>
+    <sect3>
+      <title>Corp Context</title>
+      <para>
+	The demo uses the <literal>parties</literal> table to identfiy
+	organizations and persons.  There is a tree structured
+	organizational hierarchy of organizations.  The top-level of
+	the each organizational tree is called a corp, or corporation.
+	The corp context applies to all data owned by the corp, by all
+	organizations within it.  Many tables contain a
+	<literal>corp_id</literal> field as a data denormalization to
+	make privilege testing in corp context easier and faster.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Org Context</title>
+      <para>
+	Within each corp there is a tree of organisational parts, or
+	orgs.  Privileges applied in org contexts apply in all
+	subordinate orgs.  Technically, there is little to
+	distinguish between corp context and a top-level org context,
+	but corp context provides faster privilege checks in this
+	implementation.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Project Context</title>
+      <para>
+	Projects have their own contexts.  Assignment to a project
+	uses a different mechanism from the more explicit role
+	assignments made in the other contexts.
+      </para>
+    </sect3>
   </sect2>
   <sect2>
     <title>The Organizational Hierarchy</title>
     <para>
+      See the above descriptions of corp and org contexts for an
+      introduction to this.   Persons work for specific orgs in the
+      org hierarchy.  The company they work for provides their login
+      context.  There are comments in the
+      <literal>demo/demo.sql</literal> file that should help it all
+      make sense.  Take a look at them.
     </para>
   </sect2>
   <sect2>
-    <title>Users</title>
+    <title>Exploring It</title>
     <para>
+      You can install the demo to a database that already had
+      <literal>Veil2</literal> objects installed by running the file
+      <literal>demo/demo.sql</literal> against it.  To create a clean
+      veil2-enabled database you could use <literal>make</literal>.
+      The following command, run from the <literal>Veil2</literal>
+      root directory would create a new database called
+      <literal>vpd</literal> with the demo installed:
+      <programlisting>
+$ make db; psql -d vpd -f demo/demo.sql	
+      </programlisting>
+    </para>
+    <para>
+      The setup script creates an unprivileged demouser account, which
+      you should use to explore the demo.  Using a privileged account
+      will bypass the security which would be pointless and
+      uninteresting.
     </para>
     <sect3>
-      <title>Alice</title>
+      <title>Users</title>
       <para>
-	Alice is a global superuser.  She works for Veil Corp (corp
-	100).   She authenticates using bcrypt.  You can connect as
-	Alice using this query: 
-	<programlisting>
+	This section describes a number of the users defined for the
+	demo.  These users are mostly assigned the same roles, but
+	they each see different subsets of data.  This should be a
+	pretty convincing demonstration of the power of relational
+	security contexts.  Note that although the users are
+	connecting in a number of different login contexts, their role
+	mapping contexts are all the same (the global context).
+	TODO: ref.  TODO: refs for view, etc below.
+      </para>
+      <para>
+	The code that follows uses a shortcut single query
+	authentication process.  Do not do this real life.  Create the
+	session in one statement, record the results in your
+	application server (or cookies, or memcache, or whatever) and
+	then subsequently open and re-open the session by properly
+	following the authentication protocol.  TODO: link
+      </para>
+      <sect4>
+	<title>Alice</title>
+	<para>
+	  Alice is a global superuser.  She works for Veil Corp (corp
+	  100).  She authenticates using bcrypt.  You can connect as
+	  Alice using this query:
+	  <programlisting>
 select *
   from veil2.create_session('Alice', 'bcrypt', 4, 100) c
  cross join veil2.open_session(c.session_id, 1, 'passwd1');
-	</programlisting>
-      </para>
-      <para>
-	Because she has global superuser privilege, Alice can see all
-	records.  
-      </para>
-      <para>
-	To see which privileges she has, and how she has arrived at
-	them, run the following query:
+	  </programlisting>
+	</para>
+	<para>
+	  Because she has global superuser privilege, Alice can see
+	  all records.
+	</para>
+	<para>
+	  To see which privileges she has, and how she has arrived at
+	  them, run the following query:
 	<programlisting>
 select *
   from veil2.privilege_assignments
  where accessor_id = 108;
 	</programlisting>
-      </para>
-    </sect3>
-    <sect3>
-      <title>Bob</title>
-      <para>
-	Bob is a superuser in corp context for Secured Corp.  He works
-	for Secured Corp (corp 101).  He authenticates using
-	plaintext.  You can connect as Bob using this query:
-	<programlisting>
+	</para>
+      </sect4>
+      <sect4>
+	<title>Bob</title>
+	<para>
+	  Bob is a superuser in corp context for Secured Corp.  He
+	  works for Secured Corp (corp 101).  He authenticates using
+	  plaintext.  You can connect as Bob using this query:
+	  <programlisting>
 select *
   from veil2.create_session('Bob', 'plaintext', 4, 101) c
  cross join veil2.open_session(c.session_id, 1, 'passwd2') o1;
-	</programlisting>
-      </para>
-      <para>
-	Because he has superuser privilege for Secured Corp, Bob can
-	see all records associated with SecuredCorp.  
-      </para>
-      <para>
-	If you compare Bob's <literal>privilege_assignments</literal>
-	with Alice's, you will see that Bob has all of the same
-	privileges that Alice has, but assigned in different
-	contexts.  This is why Bob sees fewer records than Alice.
-      </para>
-    </sect3>
-    <sect3>
-      <title>Carol</title>
-      <para>
-	Carol is a superuser in corp context for Protected Corp.  She
-	works for Protected Corp (corp 102).  She authenticates using
-	plaintext.  You can connect as Carol using this query:
-	<programlisting>
+	  </programlisting>
+	</para>
+	<para>
+	  Because he has superuser privilege for Secured Corp, Bob can
+	  see all records associated with SecuredCorp.  
+	</para>
+	<para>
+	  If you compare Bob's
+	  <literal>privilege_assignments</literal> with Alice's, you
+	  will see that Bob has all of the same privileges that Alice
+	  has, but assigned in different contexts.  This is why Bob
+	  sees fewer records than Alice.
+	</para>
+      </sect4>
+      <sect4>
+	<title>Carol</title>
+	<para>
+	  Carol is a superuser in corp context for Protected Corp.
+	  She works for Protected Corp (corp 102).  She authenticates
+	  using plaintext.  You can connect as Carol using this query:
+	  <programlisting>
 select *
   from veil2.create_session('Carol', 'plaintext', 4, 102) c
  cross join veil2.open_session(c.session_id, 1, 'passwd3') o1;
-	</programlisting>
-      </para>
-      <para>
-	Unlike Bob, Carol can see no projects.  That is because
-	Protected Corp has no projects.
-      </para>
-    </sect3>
-    <sect3>
-      <title>Eve</title>
-      <para>
-	Eve is a superuser in corp context for both Secure Corp and
-	Protected Corp.  She
-	works for Veil Corp (corp 100).  She authenticates using
-	plaintext.  You can connect as Eve using this query:
-	<programlisting>
+	  </programlisting>
+	</para>
+	<para>
+	  Unlike Bob, Carol can see no projects.  That is because
+	  Protected Corp has no projects.
+	</para>
+      </sect4>
+      <sect4>
+	<title>Eve</title>
+	<para>
+	  Eve is a superuser in corp context for both Secure Corp and
+	  Protected Corp.  She works for Veil Corp (corp 100).  She
+	  authenticates using plaintext.  You can connect as Eve using
+	  this query:
+	  <programlisting>
 select *
   from veil2.create_session('Eve', 'plaintext', 4, 100) c
  cross join veil2.open_session(c.session_id, 1, 'passwd4') o1;
-	</programlisting>
-      </para>
-      <para>
-	Eve sees all parties in corps 101 and 102, which is more than
-	Bob and Carol, but fewer than Alice.  She sees all projects
-	and project assignments.
-      </para>
-    </sect3>
-    <sect3>
-      <title>Sue</title>
-      <para>
-	Sue is a superuser in org context for Department S.  She
-	works for Department S (org 105).  She authenticates using
-	plaintext.  You can connect as Sue using this query:
-	<programlisting>
+	  </programlisting>
+	</para>
+	<para>
+	  Eve sees all parties in corps 101 and 102, which is more
+	  than Bob and Carol, but fewer than Alice.  She sees all
+	  projects and project assignments.
+	</para>
+      </sect4>
+      <sect4>
+	<title>Sue</title>
+	<para>
+	  Sue is a superuser in org context for Department S.  She
+	  works for Department S (org 105).  She authenticates using
+	  plaintext.  You can connect as Sue using this query:
+	  <programlisting>
 select *
   from veil2.create_session('Sue', 'plaintext', 4, 105) c
  cross join veil2.open_session(c.session_id, 1, 'passwd5') o1;
-	</programlisting>
-      </para>
-      <para>
-	Sue sees only those party, party_assignment and project
-	records for Department S.  Of particular interest are the
-	<literal>project_assignment</literal> records for which Sue
-	gets the appropriate privilege in a scope superior to the
-	context of the project itself.  Try executing these 2 queries:
-	<programlisting>
+	  </programlisting>
+	</para>
+	<para>
+	  Sue sees only those party, party_assignment and project
+	  records for Department S.  Of particular interest are the
+	  <literal>project_assignment</literal> records for which Sue
+	  gets the appropriate privilege in a scope superior to the
+	  context of the project itself.  Try executing these 2
+	  queries:
+	  <programlisting>
 select veil2.i_have_priv_in_scope(21, 5, 1);
 select veil2.i_have_priv_in_superior_scope(21, 5, 1);
-	</programlisting>
-      </para>
-    </sect3>
-    <sect3>
-      <title>Simon</title>
-      <para>
-	Simon is a project manager for project S.1.  He works for
-	Department S (org 105).  He authenticates using plaintext.
-	You can connect as Simon using this query:
-	<programlisting>
+	  </programlisting>
+	</para>
+      </sect4>
+      <sect4>
+	<title>Simon</title>
+	<para>
+	  Simon is a project manager for project S.1.  He works for
+	  Department S (org 105).  He authenticates using plaintext.
+	  You can connect as Simon using this query:
+	  <programlisting>
 select *
   from veil2.create_session('Simon', 'plaintext', 4, 105) c
  cross join veil2.open_session(c.session_id, 1, 'passwd7') o1;
-	</programlisting>
-      </para>
-      <para>
-      </para>
+	  </programlisting>
+	</para>
+	<para>
+	  Simon's only assigned roles, are <literal>connect</literal>,
+	  assigned in global context in
+	  <literal>veil2.accessor_roles</literal>, and <literal>project
+	  manager</literal> assigned in the context of project 1 in
+	  <literal>demo.project_assignments</literal>.
+	</para>
+	<para>
+	  This limits what Simon can see to data about project 1, and
+	  data about himself through privileges assigned in personal
+	  context.  What is interesting, and cool, is that Simon is
+	  able to see the <literal>demo.parties</literal> record for
+	  the org that owns project 1:
+	  <programlisting>
+vpd=> select * from demo.parties;
+ party_id | party_type_id | corp_id | org_id |  party_name  |   password   
+----------+---------------+---------+--------+--------------+--------------
+      105 |             2 |     101 |    103 | Department S | 
+      114 |             1 |     101 |    105 | Simon        | xxxxxxxxxxxx
+(2 rows)
+vpd=> 
+	  </programlisting>
+	</para>
+	<para>
+	  His access to the record for Department S arises from the
+	  <literal>project viewer</literal> role, which has been
+	  assigned the <literal>select orgs</literal> privilege.  This
+	  privilege allows the privilege holder to select from parties
+	  that are organizations (not persons), and when assigned in a
+	  lesser context (like project context) promotes to apply in
+	  org scope.  Simon has the <literal>project viewer</literal>
+	  role indirectly as it has been assigned to the
+	  <literal>project manager</literal> role.
+	</para>
+	<para>
+	  Understanding how a user gains their privileges, and the
+	  contexts in which they apply, can be tricky.  This is where
+	  the developer views, and general postgres expertise come in.
+	</para>
+	<para>
+	  Let's begin by understanding what privileges could be giving
+	  us access to <literal>demo.parties</literal>.  The
+	  <literal>psql \d</literal> command can be used to describe a
+	  relation:
+	  <programlisting>
+vpd=> \d demo.parties
+                   View "demo.parties"
+    Column     |  Type   | Collation | Nullable | Default 
+---------------+---------+-----------+----------+---------
+ party_id      | integer |           |          | 
+ party_type_id | integer |           |          | 
+ corp_id       | integer |           |          | 
+ org_id        | integer |           |          | 
+ party_name    | text    |           |          | 
+ password      | text    |           |          | 
+	  </programlisting>
+	</para>
+	<para>
+	  Ok, that wan't much help.  Let's try the enhanced version,
+	  <literal>\d+</literal>
+	  <programlisting>
+vpd=> \d+ demo.parties
+                               View "demo.parties"
+    Column     |  Type   | Collation | Nullable | Default | Storage  | Description 
+---------------+---------+-----------+----------+---------+----------+-------------
+ party_id      | integer |           |          |         | plain    | 
+ party_type_id | integer |           |          |         | plain    | 
+ corp_id       | integer |           |          |         | plain    | 
+ org_id        | integer |           |          |         | plain    | 
+ party_name    | text    |           |          |         | extended | 
+ password      | text    |           |          |         | extended | 
+View definition:
+ SELECT parties_tbl.party_id,
+    parties_tbl.party_type_id,
+    parties_tbl.corp_id,
+    parties_tbl.org_id,
+    parties_tbl.party_name,
+        CASE
+            WHEN parties_tbl.password IS NOT NULL THEN 'xxxxxxxxxxxx'::text
+            ELSE NULL::text
+        END AS password
+   FROM demo.parties_tbl;
+	  </programlisting>
+	</para>
+	<para>
+	  Well, that explains it.  <literal>demo.parties</literal> is
+	  a view, not a table.  It appears to not have any security
+	  restrictions on it (calls to <literal>Veil2</literal>
+	  privilege testing functions), so let's take a look at the
+	  underlying table: <literal>demo.parties_tbl</literal>:
+	  <programlisting>
+vpd=> \d demo.parties_tbl
+                 Table "demo.parties_tbl"
+    Column     |  Type   | Collation | Nullable | Default 
+---------------+---------+-----------+----------+---------
+ party_id      | integer |           | not null | 
+ party_type_id | integer |           | not null | 
+ corp_id       | integer |           | not null | 
+ org_id        | integer |           | not null | 
+ party_name    | text    |           | not null | 
+ password      | text    |           |          | 
+Indexes:
+    "parties_tbl_pkey" PRIMARY KEY, btree (party_id)
+Foreign-key constraints:
+    "parties_tbl_corp_id_fkey" FOREIGN KEY (corp_id) REFERENCES demo.parties_tbl(party_id)
+    "parties_tbl_org_id_fkey" FOREIGN KEY (org_id) REFERENCES demo.parties_tbl(party_id)
+    "parties_tbl_party_type_id_fkey" FOREIGN KEY (party_type_id) REFERENCES demo.party_types(party_type_id)
+Referenced by:
+    TABLE "veil2.accessors" CONSTRAINT "accessor__party_fk" FOREIGN KEY (accessor_id) REFERENCES demo.parties_tbl(party_id) ON UPDATE CASCADE ON DELETE CASCADE
+    TABLE "demo.parties_tbl" CONSTRAINT "parties_tbl_corp_id_fkey" FOREIGN KEY (corp_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "demo.parties_tbl" CONSTRAINT "parties_tbl_org_id_fkey" FOREIGN KEY (org_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "demo.project_assignments" CONSTRAINT "project_assignments_party_id_fkey" FOREIGN KEY (party_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "demo.projects" CONSTRAINT "projects_corp_id_fkey" FOREIGN KEY (corp_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "demo.projects" CONSTRAINT "projects_org_id_fkey" FOREIGN KEY (org_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "veil2.scopes" CONSTRAINT "scope__party_fk" FOREIGN KEY (party_id) REFERENCES demo.parties_tbl(party_id) ON UPDATE CASCADE ON DELETE CASCADE
+Policies:
+    POLICY "parties_tbl__select" FOR SELECT
+      USING ((veil2.i_have_global_priv(17) OR veil2.i_have_priv_in_scope(17, 3, corp_id) OR veil2.i_have_priv_in_scope(17, 4, org_id) OR veil2.i_have_priv_in_scope(17, 4, party_id) OR veil2.i_have_personal_priv(17, party_id) OR ((party_type_id = 2) AND veil2.i_have_priv_in_scope(23, 4, party_id))))
+Triggers:
+    parties_tbl_ait AFTER INSERT ON demo.parties_tbl FOR EACH ROW EXECUTE PROCEDURE demo.parties_tbl_ai()
+    parties_tbl_aut AFTER UPDATE ON demo.parties_tbl FOR EACH ROW WHEN (new.password &lt;> old.password) EXECUTE PROCEDURE demo.parties_tbl_au()
+	  </programlisting>
+	</para>
+	<para>
+	  The part of interest to us, is the <literal>POLICY</literal>
+	  stuff.  We see that we can be given select access via
+	  privilege 17 in various scopes, or 23 in in org scope for
+	  the party.  If we look at the privileges table we can see
+	  that these privileges are <literal>select parties</literal>
+	  and <literal>select orgs</literal>.  Note that to view the
+	  contents of the <literal>veil2.privileges</literal> table
+	  you will need to connect to a more privileged user -
+	  <literal>demouser</literal> has no select privilege on that
+	  table.
+	</para>
+	<para>
+	  So, does Simon have privileges 17 and/or 23?  Let's try
+	  running the privilege testing functions directly.  We can
+	  see <literal>party</literal> records 114 and 105.  It seems
+	  likley that we can see record 114 because its our record (we
+	  are being Simon at this point).  And maybe we can see record
+	  105 because its the owner or project 1, for which we have
+	  the <literal>project manager</literal> role.
+	  <programlisting>
+vpd=> select veil2.i_have_personal_priv(17, 114);
+ i_have_personal_priv 
+----------------------
+ t
+(1 row)
+
+vpd=> select veil2.i_have_priv_in_scope(23, 4, 105);
+ i_have_priv_in_scope 
+----------------------
+ t
+(1 row)
+	  </programlisting>
+	  Well, that appears to explain it, but it required a few
+	  assumptions.  We can discover the full set of Simon's
+	  privileges by selecting from session_privileges.  Since this
+	  contains bitmaps, which are difficult to read, we use
+	  <literal>to_array()</literal> to show the individual
+	  privileges:
+	  <programlisting>
+vpd=> select scope_type_id, scope_id, to_array(roles), to_array(privs)
+vpd->  from session_privileges;
+ scope_type_id | scope_id |  to_array  |   to_array    
+---------------+----------+------------+---------------
+             5 |        1 | {10,11,12} | {16,21,22,23}
+             1 |        0 | {0}        | {0,16}
+             4 |      105 |            | {23}
+             2 |      114 | {2}        | {10,13,17,22}
+(4 rows)
+	  </programlisting>
+	</para>
+	<para>
+	  This shows us that we have:
+	  <itemizedlist>
+	    <listitem>
+	      roles 10, 11, 12 and privileges 16, 21, 22 and 23 in
+	      project scope for project 1;
+	    </listitem>
+	    <listitem>
+	      role 0 and privileges 0 and 16 in global scope;
+	    </listitem>
+	    <listitem>
+	      privilege 23 in org scope for org 105;
+	    </listitem>
+	    <listitem>
+	      role 2 and privileges 10, 13, 17 and 22 in personal
+	      scope for accessor 114 (Simon).
+	    </listitem>
+	  </itemizedlist>
+	</para>
+	<para>
+	  This tells us which privileges we have in which scopes, as
+	  well as which roles we have been assigned, directly or
+	  indirectly, in which contexts.  What it doesn't tell us is
+	  which roles gave us which privileges, and whether roles were
+	  assigned directly or indirectly.
+	</para>
+	<para>
+	  We can get more detailed information about privilege
+	  assignments from the
+	  <literal>veil2.privilege_assignments</literal> view:
+	  <programlisting>
+vpd=> select privilege_id as priv_id, ass_cntxt_type_id as cntxt_type,
+vpd->        ass_cntxt_id as cntxt_id, scope_type_id as scope_type,
+vpd->        scope_id, ass_role_id as role_id,
+vpd->        priv_bearing_role_id as priv_role_id,
+vpd->        role_id_mapping
+vpd->   from veil2.privilege_assignments
+vpd->  where accessor_id = 114 and privilege_id in (17, 23);
+ priv_id | cntxt_type | cntxt_id | scope_type | scope_id | role_id | priv_role_id | role_id_mapping 
+---------+------------+----------+------------+----------+---------+--------------+-----------------
+      17 |          1 |      114 |          1 |      114 |       2 |            2 | 2
+      23 |          5 |        1 |          4 |      105 |      10 |           11 | 10->11
+(2 rows)
+	  </programlisting>
+	</para>
+	<para>
+	  This gives us pretty much the whole story.  We get privilege
+	  17 in personal scope from role 2 (<literal>personal
+	  context</literal> assigned in personal context.  And
+	  privilege 23 in org scope for org 105, from role 11, mapped
+	  from role 10 assigned to us in project scope of project 1.
+	</para>
+	<para>
+	  You are encouraged to become familiar with the developer
+	  views.  There is more there than this quick tour shows, and
+	  they can provide invaluable information to help you debug
+	  and understand your security model.
+	</para>
+      </sect4>
     </sect3>
   </sect2>
 </sect1>

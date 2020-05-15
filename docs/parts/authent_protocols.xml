@@ -100,7 +100,7 @@
       <para>
 	Given that with <literal>Veil2</literal> we
 	<emphasis>can</emphasis> attempt to protect ourselves from a
-	compromised server, we will try to do so.
+	compromised server, we should try to do so.
       </para>
      </sect2>
     <sect2>
@@ -114,8 +114,8 @@
 	and build-on what <literal>Veil2</literal> provides.
       </para>
       <para>
-	This is what <literal>Veil2</literal> provides for session
-	managament:
+	This is what <literal>Veil2</literal> provides,
+	out-of-the-box, for session managament:
 	<itemizedlist>
 	  <listitem>
 	    a default authentication system that is not terrible (bcrypt);
@@ -130,7 +130,9 @@
 	    resistance to fishing for user-ids;
 	  </listitem>
 	  <listitem>
-	    a replay attack-resistant protocol.
+	    a <ulink
+	    url="https://en.wikipedia.org/wiki/Replay_attackhttps://en.wikipedia.org/wiki/Replay_attack">replay
+	    attack</ulink>-resistant protocol.
 	  </listitem>
 	</itemizedlist>
       </para>
@@ -159,61 +161,477 @@
 	</itemizedlist>
       </para>
       <para>
-	And the calling protocol goes like this:
-	<sect4>
-	  <title>Begin New Session</title>
-	  <para>
-	    We call <literal>create_session()</literal>.  This returns
-	    a <literal>session_id</literal> and
-	    <literal>session_token</literal> which we must record and
-	    use on subequent calls.
-	  </para>
-	</sect4>
-	<sect4>
-	  <title>Authenticate New Session</title>
-	  <para>
-	    Having created a session and been given a
-	    <literal>session_id</literal> by
-	    <literal>create_session()</literal>, we authenticate and open
-	    the session by calling <literal>open_connection()</literal>
-	    with parameters appropriate to the chosen authentication
-	    method.  If this succeeds, our connection is considered
-	    open and we can start executing queries.
-	  </para>
-	</sect4>
-	<sect4>
-	  <title>Close Connection</title>
-	  <para>
-	    When we are done and are ready to return the database
-	    connection to the pool for use by another user, we 
-	  </para>
-	</sect4>
-       
+	And the calling protocol has four distinct stages.
       </para>
-
-      
-      <para>
-	When a user first connects to the application, the application
-	will create a new session for them using
-	.  This returns a session
-	data which will be needed for subsequent calls to
-	<literal>open_connection().</literal>  This function will always
-	succeed, regardless of the validity of the provided user.
-	This is to ensure that you cannot tell the difference between
-	a valid and invalid user simply by calling this function.  If
-	the user was not valid, the 
-
-HERE HERE HERE
-	
-      </para>
-      <sect3>
-	<title>Create Session</title>
+      <sect4>
+	<title>Begin New Session</title>
+	<para>
+	  We begin a session by calling
+	  <literal>create_session()</literal>.  This returns a
+	  <literal>session_id</literal> and
+	  <literal>session_token</literal> which we must record and
+	  use on subequent calls.
+	</para>
+	<para>
+	  Sessions remain active, with minimal overhead, until they
+	  time-out.  The timeout period is defined in the
+	  <literal>veil2.system_parameters</literal> table, in the
+	  parameter called <literal>shared session timeout</literal>.
+	  Each time a connection is opened, the timeout is reset.  If
+	  a session times-out while a connection is active, the
+	  connection will be unaffected, but reconnections will no
+	  longer be possible.
+	</para>
 	<para>
 	</para>
-      </sect3>
+      </sect4>
+      <sect4>
+	<title>Authenticate New Session</title>
+	<para>
+	  Having created a session and been given a
+	  <literal>session_id</literal> by
+	  <literal>create_session()</literal>, we authenticate and
+	  open the session by calling
+	  <literal>open_connection()</literal> with parameters
+	  appropriate to the chosen authentication method.  If this
+	  succeeds, our connection is considered open and we can start
+	  executing queries.
+	</para>
+	<para>
+	  What this means is that it takes 2 database round-trips
+	  before we can begin executing queries on the user's behalf.
+	  While this may seem an unreasonable overhead, it only occurs
+	  when we first create a session.  Subsequent usage requires
+	  only a single round-trip, which, given that the database has
+	  to be informed of which user is connected, seems like a
+	  pretty reasonable and unavoidable overhead.
+	</para>
+      </sect4>
+      <sect4>
+	<title>Close Connection</title>
+	<para>
+	  When we are done and are ready to return the database
+	  connection to the pool for use by another user, we call
+	  <literal>close_connection()</literal>.  This is important.
+	  If you do not do this everything will continue to work, but
+	  the connection can be taken over by another user, thereby
+	  inheriting the previous user's access rights.
+	</para>
+      </sect4>
+      <sect4>
+	<title>Re-open Connection</title>
+	<para>
+	  As long as a session has not timed-out, new connections can
+	  be opened using it.  These re-opened connections do not
+	  require re-authentication using the original credentials.
+	  Instead we use a proof that the session is being used by the
+	  original authenticator.  This may be computationally cheaper
+	  than providing the original credentials, but more
+	  importantly it means that those credentials are not being
+	  continualy retransmitted.  And to prevent replay attacks we
+	  use a <ulink
+	  url="https://en.wikipedia.org/wiki/Cryptographic_nonce">nonce</ulink>
+	  as part of the authentication token.  Any attempt to re-use
+	  a nonce will be noticed and the connection attempt will
+	  fail.
+	</para>
+	<para>
+	  Note that multiple simultaneous connections can be opened on
+	  the same session.  The only requirement is that each is
+	  opened with its own nonce, and that the nonces are
+	  more-or-less sequentially numbered.
+	</para>
+      </sect4>
     </sect2>
     <sect2>
-      <title>Known Deficiencies And Potential Mitigations</title>
+      <title>Function Calling Minutiae</title>
+      <sect3>
+	<title><literal>create_session()</literal></title>
+	<para>
+	  We provide the following parameters to
+	  <literal>create_session()</literal>:
+	  <itemizedlist>
+	    <listitem>
+	      <para>
+		<literal>username</literal>;
+	      </para>
+	      <para>
+		This is a string that uniquely identifies the user
+		within the context provided by the context
+		parameters.  This is converted into an
+		<literal>accessor_id</literal> by the function
+		<literal>veil2.get_accessor()</literal> which you must
+		create.  TODO: refs
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>authent_type</literal>;
+	      </para>
+	      <para>
+		This is the name of an authentication method recorded
+		in <literal>veil2.authentication_types</literal>, and
+		for which an authentication function has been
+		provided.  TODO: refs
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>context_type_id</literal>;
+	      </para>
+	      <para>
+		This is an integer identifying the type of context
+		that the user is authenticating within.  See the demo
+		TODO: ref for how this is used to enable different
+		users to belong to different companies.
+	      </para>
+	      <para>
+		This will match a scope_type as defined in
+		<literal>veil2.scope_types</literal>.  TODO refs
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>context_id</literal>.
+	      </para>
+	      <para>
+		This is an integer identifying, in combination with
+		<literal>context_type_id</literal>,  the context
+		that the user is authenticating within.  See the demo
+		TODO: ref for how this is used to enable different
+		users to belong to different companies.
+	      </para>
+	    </listitem>
+	  </itemizedlist>
+	</para>
+	<para>
+	  The function always appears to succeed, and it returns the
+	  following result columns: 
+	  <itemizedlist>
+	    <listitem>
+	      <para>
+		<literal>session_id;</literal>.
+	      </para>
+	      <para>
+		This is an integer that identifies the session for
+		your connections.  If your parameters successfully
+		identified a legitimate user, a record with this key
+		will have been inserted into
+		<literal>veil2.sessions</literal>.  The user will not
+		be able to see this record, or determine that it is
+		absent.
+	      </para>
+	      <para>
+		The caller will need to provide this value as a
+		parameter in subsequent calls to
+		<literal>open_connection()</literal>.
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>session_token;</literal>.
+	      </para>
+	      <para>
+		This is a randomly generated
+		<ulink
+		    url="https://en.wikipedia.org/wiki/Base64">base64</ulink>
+		text value that the caller must use in subsequent,
+		continuation, calls to
+		<literal>open_connection()</literal>.
+	      </para>
+	      <para>
+		Posession of this token is assumed to be proof that
+		the holder is the same user that authenticated
+		themselves to us.
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>session_supplemental.</literal>.
+	      </para>
+	      <para>
+		This is a string containing extra information that
+		some user-provided authentication methods may
+		require.  This is for your use.  Be imaginative.
+	      </para>
+	    </listitem>
+	  </itemizedlist>
+	</para>
+      </sect3>
+      <sect3>
+	<title><literal>open_connection()</literal>
+	Authentication</title>
+	<para>
+	  This call is used to authenticate a user to a previously
+	  created session.  It must be the next database call after
+	  <literal>create_session()</literal> has returned.
+	</para>
+	<para>
+	  You may wonder why this is not simply rolled into the
+	  <literal>create_session()</literal> call, thereby reducing
+	  the number of round trips.  The answer is that some
+	  authentication methods will require initial tokens to be
+	  created before allowing authentication to proceed.  An
+	  example of this would be <ulink
+	  url="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">a
+	  Diffie–Hellman Key Exchange</ulink>-based protocol.  If you
+	  implement such a thing please contact (TODO: ref) the author
+	  who would love to see it.
+	</para>
+	<para>
+	  The parameters to this function are:
+	  <itemizedlist>
+	    <listitem>
+	      <para>
+		<literal>session_id</literal>;
+	      </para>
+	      <para>
+		This will be the value returned from
+		<literal>create_session()</literal>. 
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>nonce</literal>;
+	      </para>
+	      <para>
+		This will be an integer value.  You should
+		allocate this sequentially for each session, though it
+		does not need to start at 1.
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>authent_token</literal>.
+	      </para>
+	      <para>
+		This is a string value.  Its value will depend on the
+		authentication method being used.  Ideally that
+		authentication method will not require a plaintext
+		password to be sent.  Note that the bcrypt
+		authentication method <emphasis>does</emphasis>
+		require the plaintext password.  The only advantage of
+		this over the plaintext authentication method is that
+		the password cannot be easily extracted from the
+		database.
+	      </para>
+	    </listitem>
+	  </itemizedlist>
+	</para>
+	<para>
+	  This function returns the following result columns:
+	  <itemizedlist>
+	    <listitem>
+	      <para>
+		<literal>success;</literal>.
+	      </para>
+	      <para>
+		A boolean.  The meaning should be obvious.
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>errmsg</literal>.
+	      </para>
+	      <para>
+		If authentication failed, this provides additional
+		information to the caller.  The possible values are:
+		<itemizedlist>
+		  <listitem>
+		    <para>
+		      <literal>AUTHFAIL</literal>;
+		    </para>
+		    <para>
+		      This means that the user could not be
+		      authenticated.  This might be because the user
+		      and context for the session were invalid or
+		      because <literal>authent_token</literal> was
+		      invalid.  It could even mean that you haven't
+		      called <literal>create_session()</literal> but
+		      if not, where did you get teh value for
+		      <literal>session_id</literal>?
+		    </para>
+		    <para>
+		      More information about the failure is recorded
+		      in the postgres logs, but this is not available
+		      to the user session.
+		    </para>
+		    <para>
+		      If <literal>authent_token</literal> was invalid,
+		      at least for the <literal>bcrypt</literal>
+		      authentication method, you can retry with the
+		      correct token.
+		    </para>
+		  </listitem>
+		  <listitem>
+		    <para>
+		      <literal>EXPIRED</literal>;
+		    </para>
+		    <para>
+		      This means that the session has timed-out.  You
+		      will need to create a new session using
+		      <literal>create_session()</literal>.
+		    </para>
+		  </listitem>
+		  <listitem>
+		    <para>
+		      <literal>NONCEFAIL.</literal>;
+		    </para>
+		    <para>
+		      This should not be possible in this, the
+		      authentication call.
+		    </para>
+		  </listitem>
+		</itemizedlist>
+	      </para>
+	    </listitem>
+	  </itemizedlist>
+	</para>
+      </sect3>
+      <sect3>
+	<title><literal>open_connection()</literal> Continuation</title>
+	<para>
+	  Once a session has been successfully authenticated,
+	  subsequent calls to <literal>open_connection()</literal> are
+	  considered to be continuations.  Mutiple open connections
+	  for a session may be used simultaneously, but they must each
+	  use their own nonce values.
+	</para>
+	<para>
+	  The parameters to this function are:
+	  <itemizedlist>
+	    <listitem>
+	      <para>
+		<literal>session_id</literal>;
+	      </para>
+	      <para>
+		This is just as for the Authentication version of this
+		function call.
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>nonce</literal>;
+	      </para>
+	      <para>
+		This integer must be peviously unused for this
+		session, and should be allocated sequentially in
+		ascending order.  They may arrive out of sequence but
+		not by more than a value of 32.
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>authent_token</literal>.
+	      </para>
+	      <para>
+		This is created from the value of
+		<literal>authent_token</literal> returned from the
+		<literal>create_session()</literal> call that created
+		the session, along with the nonce.  It should be
+		created as follows:
+		<itemizedlist>
+		  <listitem>
+		    <para>
+		      Concatenate <literal>authent_token</literal>
+		      with the lower-case hexadecimal representation
+		      of the nonce parameter.
+		    </para>
+		  </listitem>
+		  <listitem>
+		    <para>
+		      Create a <ulink
+		      url="https://en.wikipedia.org/wiki/SHA-1">sha-1</ulink> 
+		      hash of the concatenated string.
+		    </para>
+		  </listitem>
+		  <listitem>
+		    <para>
+		      Encode the hash as a base64 string.
+		    </para>
+		  </listitem>
+		</itemizedlist>
+	      </para>
+	      <para>
+		The <literal>open_connection()</literal> function will
+		create the same encoded hash internally and check that
+		it matches.  If it does, we can be sure that the
+		caller is in posession of the original
+		<literal>authent_token</literal> from the creation of
+		the session.
+	      </para>
+	    </listitem>
+	  </itemizedlist>
+	</para>
+	<para>
+	  This function returns the following result columns:
+	  <itemizedlist>
+	    <listitem>
+	      <para>
+		<literal>success;</literal>.
+	      </para>
+	      <para>
+		A boolean.  The meaning should be obvious.
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		<literal>errmsg</literal>.
+	      </para>
+	      <para>
+		This provides similar results to those for
+		authentication.
+		<itemizedlist>
+		  <listitem>
+		    <para>
+		      <literal>AUTHFAIL</literal>;
+		    </para>
+		    <para>
+		      Assuming your session was previously valid, you
+		      got the value of
+		      <literal>authent_token</literal> wrong.  You can
+		      retry, but you will need a new nonce value.
+		    </para>
+		    <para>
+		      More information about the failure is recorded
+		      in the postgres logs, but this is not available
+		      to the user session.
+		    </para>
+		  </listitem>
+		  <listitem>
+		    <para>
+		      <literal>EXPIRED</literal>;
+		    </para>
+		    <para>
+		      This means that the session has timed-out.  You
+		      will need to create a new session using
+		      <literal>create_session()</literal>.
+		    </para>
+		  </listitem>
+		  <listitem>
+		    <para>
+		      <literal>NONCEFAIL.</literal>;
+		    </para>
+		    <para>
+		      You have attempted to re-use a nonce that was
+		      previously used.  Try again with a new nonce.
+		      Try adding 4 or more to the latest
+		      successfully-used value.
+		    </para>
+		  </listitem>
+		</itemizedlist>
+	      </para>
+	    </listitem>
+	  </itemizedlist>
+	</para>
+      </sect3>
+      <sect3>
+	<title><literal>close_connection()</literal></title>
+	<para>
+	  This function has no parameters and always returns a boolean
+	  true.
+	</para>
+      </sect3>
     </sect2>
   </sect1>
 </appendix>

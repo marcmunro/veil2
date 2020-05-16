@@ -249,7 +249,7 @@ Custom docbook stylesheet for html for Veil2 docs.
 
   <!-- MM: The following hack is to ensure a DOCTYPE header in each
        chunk.  There ought to be a better way to do this but I haven't
-       found it.  Copied from chunk-common.xsl -->
+       found it.  Template copied from chunk-common.xsl -->
   <xsl:template name="process-chunk">
     <xsl:param name="prev" select="."/>
     <xsl:param name="next" select="."/>

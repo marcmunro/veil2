@@ -1,6 +1,6 @@
-<appendix>
+<appendix id="authent_protocols">
   <title><literal>Veil2</literal> Authentication Protocols</title>
-  <sect1>
+  <sect1 id="shared_session_management">
     <title>Shared Session Authentication</title>
     <sect2>
       <title>The Problem Space</title>
@@ -257,11 +257,12 @@
 	      </para>
 	      <para>
 		This is a string that uniquely identifies the user
-		within the context provided by the context
-		parameters.  This is converted into an
+		within the context provided by the context parameters.
+		This is converted into an
 		<literal>accessor_id</literal> by the function
-		<literal>veil2.get_accessor()</literal> which you must
-		create.  TODO: refs
+		<literal><link
+		linkend="func_get_accessor">veil2.get_accessor()</link></literal>
+		which you must define as part of your implementation.
 	      </para>
 	    </listitem>
 	    <listitem>
@@ -633,5 +634,9 @@
 	</para>
       </sect3>
     </sect2>
+  </sect1>
+  <sect1 id="dedicated_session_management">
+    <title>Dedicated Database Sessions</title>
+    <para/>
   </sect1>
 </appendix>

@@ -54,6 +54,10 @@
     <title><literal>reset_session()</literal></title>
     <?sql-definition function veil2.reset_session sql/veil2/functions.sql ?>
   </sect2>
+  <sect2 id="func_get_accessor">
+    <title><literal>get_accessor()</literal></title>
+    <?sql-definition function veil2.get_accessor sql/veil2/functions.sql ?>
+  </sect2>
   <sect2 id="func_create_session">
     <title><literal>create_session()</literal></title>
     <?sql-definition function veil2.create_session sql/veil2/functions.sql ?>

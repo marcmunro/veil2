@@ -36,7 +36,8 @@
     <title>Create Foreign-Key Links to Your Users</title>
     <para>
       For each user table that you have you will need to create a
-      foreign key link from <literal>veil2.accessors</literal>.  If
+      foreign key link from <literal><link
+      linkend="entity_accessor">veil2.accessors</link></literal>.  If
       you have multiple users tables this will be more complex, but
       the aim is to have a single accessor entry for each user.
     </para>
@@ -64,6 +65,11 @@
       <literal>veil2.accessors</literal> records to also be created.
       Insert triggers on your users tables will achieve this.  A fine
       example can be found in the demo.
+    </para>
+    <para>
+      Note that you do not need update and delete triggers as long as
+      you create your FK with the <literal>on delete cascade</literal>
+      and <literal>on update cascade</literal> options.
     </para>
   </sect2>
   <sect2>

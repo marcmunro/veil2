@@ -49,7 +49,21 @@
       <para>
 	most of the details of the access controls can be hidden from
 	your application developers, potentially making their jobs
-	easier.
+	easier
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+	with <literal>Veil2</literal> much of the hard work of dealing
+	with scopes, contexts, roles and privileges has already been
+	developed for you;
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+	with <literal>Veil2</literal> you have complete control of
+	your security implementation: you can customize and extend it
+	in any way you see fit.
       </para>
     </listitem>
   </orderedlist>

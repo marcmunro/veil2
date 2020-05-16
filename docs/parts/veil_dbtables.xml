@@ -93,7 +93,7 @@
   </sect2>
   <sect2 id="entity_session_privilege">
     <title>Session Privileges Type and Table</title>
-    <?sql-definition type veil2.session_privileges sql/veil2/tables.sql ?>
+    <?sql-definition type session_privileges_t sql/veil2/tables.sql ?>
     <para>
       <link linkend="veil2_erd_div">back to ERD</link>.
     </para>

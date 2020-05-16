@@ -18,18 +18,50 @@
     be able to find a scope.
   </para>
   <para>
-    Note that <literal>Veil2</literal> provides 2 default scopes for
+    Note that <literal>Veil2</literal> provides 2 default scopes: for
     global and personal contexts.
   </para>
   <para>
-    The demo sets up 3 relational scopes.  Look for "STEP 3" in the
-    file <literal>demo/demo.sql</literal>. 
+    Consider also your <link
+    linkend="authentication_context">authentication contexts</link>
+    and <link linkend="role_mapping">role mapping</link> contexts.
+    You need to work out whether all of your users will be logging in
+    to the system as if they were all using the same system within the
+    same copmany, or whether they exist in mutually independent
+    spaces.  Similarly you need to consider whether some of those
+    independent spaces will need to separately manage their own
+    role->role mappings or whether a single set of mappings that apply
+    equally to all users is enough.  If you need multiple role->role
+    mapping contexts, you need to define <quote><literal>mapping context
+    target scope type</literal></quote> in the <literal><link
+    linkend="entity_system_parameter">system_parameters</link></literal>
+    table.
+  </para>
+  <para>
+    The demo sets up 3 relational scopes.  Look for "STEP 2" in the
+    file <literal>demo/demo.sql</literal>.  It uses distinct
+    authentication contexts (based on org and corp contexts) but keeps
+    a single common role mapping implementation.
   </para>
   <sect2>
     <title>In Summary</title>
     <para>
-      Create records in <literal><link
-      linkend="entity_scope_type">veil2.scope_types</link></literal>.
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    Create records in <literal><link
+	    linkend="entity_scope_type">veil2.scope_types</link></literal>.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Define how your role mapping context is promoted from
+	    authentication contexts in the <literal>system
+	    parameter</literal>: <quote><literal>mapping context
+	    target scope type</literal></quote>.
+	  </para>
+	</listitem>
+      </itemizedlist>
     </para>
   </sect2>
 </sect1>

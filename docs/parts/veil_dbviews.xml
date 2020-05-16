@@ -101,6 +101,13 @@
       <?sql-definition view veil2.scope_promotions sql/veil2/views.sql ?>
     </sect3>
   </sect2>
+  <sect2 id="view_accessor_contexts">
+    <title>Accessor Contexts View</title>
+    <sect3>
+      <title><literal>scope_promotions</literal></title>
+      <?sql-definition view veil2.accessor_contexts sql/veil2/views.sql ?>
+    </sect3>
+  </sect2>
   <sect2 id="view_all_scope_promotions">
     <title>All Scope Promotions Views</title>
     <sect3>

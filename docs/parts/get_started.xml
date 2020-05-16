@@ -181,7 +181,8 @@ RUNNING TEARDOWN
 	problem.  This will either mean that your extensions are not
 	properly installed, or that you have found a bug.  Start by
 	carefully reading the output and see if you can figure it out
-	for yourself.  If not, see reporting bugs TODO.
+	for yourself.  If not, see <link
+	linkend="reporting_bugs">reporting bugs</link>.
       </para>
       <para>
 	When you wish to remove the databse you can do:

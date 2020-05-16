@@ -12,7 +12,9 @@
     <listitem><link linkend="security-contexts">security
     contexts</link>;</listitem> 
     <listitem><link linkend="privilege-promotion">privilege
-    promotion</link>.</listitem> 
+    promotion</link>;</listitem> 
+    <listitem><link linkend="authenticationcontext">authentication
+    contexts</link>.</listitem>
   </itemizedlist>
   <sect2 id="privileges">
     <title>Privileges</title>
@@ -129,11 +131,11 @@
       equivalent - which is hardly useful.  You may want to implement
       some policies around this for your own system.
     </para>
-    <sect3>
+    <sect3 id="role_mapping">
       <title>Contextual Role Mapping</title>
       <para>
 	One of the possible use-cases for <literal>Veil2</literal>, is
-	to provide Virtual Private Databases in a
+	to provide virtual private databases in a
 	<ulink
 	    url="https://en.wikipedia.org/wiki/Software_as_a_service">SaaS</ulink> 
 	environment.  As such, it is possible that different clients
@@ -145,13 +147,15 @@
 	<literal>Veil2</literal> provides the means to do this, by
 	making each role->role mapping depend on a scope, which
 	describes the context in which the role->role mapping applies.
-	Each user is authenticated within a specific context (which,
-	incidentally, allows each context to have its own distinct set
-	of usernames), and that context determines which set of
-	role->role mappings apply.  The actual mapping context that
-	will be used may be the login context itself, or a higher
-	level context to which it can be promoted.  This concept of
-	promotion is similar to privilege promotion as described <link
+	As described below in <link
+	linkend="authentication_context">Authentication
+	Contexts</link> each user is authenticated within a specific
+	context.  The user's authentication context will determine
+	which set of (scope-based) role->role mappings apply.  The
+	actual mapping context that will be used may be the
+	authentication context itself, or a higher level context to
+	which it can be promoted.  This concept of promotion is
+	similar to privilege promotion as described <link
 	linkend="privilege-promotion">below</link>.  The target scope
 	level for this promotion is identified in the
 	<literal>system_parameter</literal> named
@@ -184,20 +188,20 @@
       record relating the role to the user.  Note that although the
       role is assigned by default, it has no <link
       linkend="privileges">privileges</link>.  What <literal>personal
-      context</literal> allows is up to you.
+      context</literal> allows is up to your implementation.
     </para>
     <para>
       Other forms of implicit role assignment will be through existing
       data relationships.  For instance, we might want project team
       members to have certain privileges to the data for their
       projects.  This would be done through their assignment to the
-      project as a team member.  It is possible that that membership
-      record has an explicit role associated with it, but it is
-      equally possible that <quote>membership</quote> is implied by
-      the simply existence of a <literal>team_member</literal> record
-      linking the user and the project.  In such a case we would
-      create a <literal>team member</literal> role, and assume that
-      team members have this role.  TODO: reference to the howto.
+      project as a team member.  It is possible that such a membership
+      record would have an explicit role associated with it, but it is
+      equally possible that <quote>membership</quote> is implied
+      simply by the existence of a <literal>team_member</literal>
+      record linking the user and the project.  In such a case we
+      would create a <literal>team member</literal> role, and assume
+      that team members have this role.
     </para>
   </sect2>
   <sect2 id="security-contexts">
@@ -292,7 +296,7 @@
       outside of the <link linkend="security-contexts">context</link>
       of the <link linkend="assignments">role assignment</link>.  In
       such cases, the privilege must be promoted from the context of
-      its assignment, to apply in a higher-level <link
+      its assignment to apply in a higher-level <link
       linkend="scopes">scope</link>.
     </para>
     <para>
@@ -356,10 +360,36 @@
     <para>
       The level of promotion required for each privilege is specific
       to the object that the privilege exists to protect.  So, each
-      privilege identifies its target scope level.  If the privilege is
-      being assigned, via a role assignment, in a lower-level context,
-      then promotion to the higher target scope level will be performed.
-      TODO: Reference to how this is done.
+      privilege identifies its target scope level.  If the privilege
+      is being assigned, via a role assignment, in a lower-level
+      context, then promotion to the higher target scope level will
+      automatically be performed when the user's privileges are first
+      loaded.
+    </para>
+  </sect2>
+  <sect2 id="authentication_context">
+    <title>Authentication Contexts</title>
+    <para>
+      Each accessor (database user) is associated with a specific
+      context within which they authenticate.  Typically, this context
+      would represent the organisation they work for.  When
+      authenticating an accessor, their authentication context must be
+      provided along with their username or other identifier.
+    </para>
+    <para>
+      What this means is that usernames, etc do not have to be
+      globally unique, but only unique within each authentication
+      context.
+    </para>
+    <para>
+      You can choose to allow all accessors to authenticate within the
+      same context if you wish.  This would usually be the global
+      context.
+    </para>
+    <para>
+      As described in <link linkend="role_mapping">Contextual Role
+      Mapping</link> above, the role names and role->role mappings
+      that an accessor sees may depend on their authentication context.
     </para>
   </sect2>
 </sect1>

@@ -62,7 +62,29 @@ comment on function veil2.authenticate_bcrypt(integer, text) is
 'Authentication predicate for bcrypt authentication.  Return true if
 running bcrypt on the supplied token, using the salt from the
 stored authentication token for the accessor, matches that stored
-authentication token.';
+authentication token.
+
+Bcrypt is generally considered a step up from traditional hash-based
+password authentication, though it is essentially the same thing.  In
+a hash-based authentication system, a user''s password is stored as a,
+possibly salted, hash on the plaintext.  Since hashes are one-way
+algorithms it is impossible to retrieve the original password from the
+hash.  However, as computers have become more powerful, brute-force
+approaches have become more feasible.  With a simple hash, it is is
+now possible to try every possible password until one matches the
+hash, whether salted or not in a matter of hours.  Bcrypt makes
+brute-forcing difficult by using a compuatationally inefficient hash
+algorithm, which makes brute force attacks a very expensive
+proposition.  Note that in attacks on hash-based passwords it is
+assumed that the hashed password has been compromised.  Whether this
+is likely in database protected by Veil2 is moot, however there may be
+more likely avenues for attack as the hashed passwords can be pretty
+well locked down.
+
+The current bcrypt implementation''s biggest down-side, in common with
+traditional hash-based approaches, is that the user''s password is
+sent to the server in plaintext before it is tested by bcrypting it.
+A better authentication method would avoid this.';
 
 
 \echo ......authenticate()...
@@ -146,7 +168,7 @@ language plpgsql security definer stable leakproof;
 
 comment on function veil2.get_accessor(text, integer, integer) is
 'Retrieve accessor_id based on username and context.  This function
-must be implemented.';
+must be customized specifically for your application.';
 
 \echo ......promoted_context_id()...
 create or replace

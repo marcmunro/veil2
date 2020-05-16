@@ -61,16 +61,38 @@ select 5, s.scope_id,   -- Project to org promotions
       scope promotions within that hierarchy.  This is done by the
       second query in the above union.
     </para>
+    <para>
+      Once you have redefined the view, you should refresh the
+      <literal><link
+      linkend="view_all_scope_promotions">veil2.all_scope_promotions</link></literal>
+      materialized view.  This should automatically refresh when
+      <literal>scopes</literal> records are updated, but not when
+      <literal>scope_promotions</literal>, the view it is based, is
+      redefined.
+    </para>
   </sect2>
   <sect2>
     <title>In Summary</title>
     <para>
-      For each type of context promotion that is possible, including
-      those within a hierarchy of the same scope types (eg the org
-      hierarchy from the demo), create a query that is part of a union
-      that defines the <literal><link
-      linkend="view_scope_promotions">scope_promotions</link></literal>
-      view.
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    For each type of context promotion that is possible,
+	    including those within a hierarchy of the same scope types
+	    (eg the org hierarchy from the demo), create a query that
+	    is part of a union that defines the <literal><link
+	    linkend="view_scope_promotions">scope_promotions</link></literal>
+	    view.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Refreshthe <literal><link
+	    linkend="view_all_scope_promotions">veil2.all_scope_promotions</link></literal>
+	    materialized view.
+	  </para>
+	</listitem>
+      </itemizedlist>
     </para>
   </sect2>
 </sect1>

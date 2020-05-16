@@ -37,8 +37,8 @@
   <sect2>
     <title>In Summary</title>
     <para>
-      Create records in <literal>veil2.privileges</literal>.  TODO:
-      ref
+      Create records in <link
+      linkend="entity_privilege"><literal>veil2.privileges</literal></link>.
     </para>
   </sect2>
 </sect1>

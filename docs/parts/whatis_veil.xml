@@ -7,11 +7,11 @@
     implementation work.
   </para>
   <para>
-    It links to your database through triggers and foreign keys, and
-    provides fast mechanisms to identify, load and test a user's
-    privileges.  Much of this is easily extensible through built-in
-    mechanisms but even where it is not, you should feel free to
-    modify the code yourself to match your needs.
+    It links to your database through functions, triggers and foreign
+    keys, and provides fast mechanisms to identify, load and test a
+    user's privileges.  Much of this is easily extensible through
+    built-in mechanisms but even where it is not, you should feel free
+    to modify the code yourself to match your needs.
   </para>
   <para id="hack-it-yourself">
     It is important to realize at this point that
@@ -34,7 +34,8 @@
   <para>
     There is various documentation to help you with this:
     <itemizedlist>
-      <listitem>this document, especially the how-to section (TODO: ref);</listitem>
+      <listitem>this document, especially the setup sections starting
+      <link linkend="setup">here</link>;</listitem>
       <listitem>comments in the database objects;</listitem>
       <listitem>comments in the <literal>Veil2</literal> creation
       scripts;</listitem> 
@@ -43,7 +44,8 @@
   </para>
   <para>
     You should familiarize yourself with at least this document and
-    the demo before starting out on your implementation.
+    the <link linkend="veil_demo">demo</link> before starting out on
+    your implementation.
   </para>
   <sect2>
     <title>How Does It Work?</title>
@@ -76,17 +78,19 @@
       <title>Knowing The User</title>
       <para>
 	<literal>Veil2</literal> provides session management functions
-	for both dedicated and shared database connections.  It is up
-	to the user or the user's application to ensure that the
-	session protocols are followed.  If they are not, the user
-	will have access to no data.
+	for both <link
+	linkend="dedicated_session_management">dedicated</link> and
+	<link linkend="shared_session_management">shared</link>
+	database connections.  It is up to the user or the user's
+	application to ensure that the session protocols are followed.
+	If they are not, the user will have access to no data.
       </para>
       <para>
 	By calling the appropriate session management functions, with
 	appropriate authentication tokens, <literal>Veil2</literal>
 	session parameters will be set up in temporary tables.  These
 	session parameters include session privileges with one record
-	for each each scope in which the user has such privileges.
+	for each scope in which the user has such privileges.
       </para>
       <para>
 	The set of privileges in each scope is stored in a single
@@ -96,7 +100,7 @@
 	are very fast.
       </para>
       <para>
-	At the start of each session, the users privileges are
+	At the start of each session, the user's privileges are
 	determined.  This is based upon the roles that have been
 	assigned to them, and the contexts of those role assignments.
 	To make this process as fast as possible a number of
@@ -118,14 +122,7 @@
 	depends on the context in which it was assigned.  Some
 	scopes will allow all records in a table to be seen or
 	manipulated and some will allow large, small or smaller
-	subsets of data to be seen.  Once the concepts of scopes and
-	contexts are understood, the only challenge is in making the
-	privileges work with acceptable performance.
-      </para>
-      <para>
-	Getting the necessary performance is all about using the
-	privilege bitmaps, and ensuring that they can be loaded and
-	tested as quickly as possible.
+	subsets of data to be seen.
       </para>
     </sect3>
     <sect3>
@@ -169,7 +166,7 @@ create policy projects__select
 	Every table and view is given its own individual security
 	definition.  For tables, they will be much as shown above but
 	will include definitions for insert, update and delete as well
-	as select (shown above).
+	as select, as shown above.
       </para>
       <para>
 	Views are secured in a similar way, but with the privilege
@@ -192,8 +189,8 @@ create policy projects__select
       address in order to protect an existing system with
       <literal>Veil2</literal>.  This is intended as an introduction
       to the process solely in order to give you a feel for what is
-      required.  The process is covered in much more detail later
-      (TODO: REF).
+      required.  The process is covered in much more detail <link
+      linkend="setup">later</link>.
     </para>
     <sect3>
       <title>Web Session Management</title>

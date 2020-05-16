@@ -1,7 +1,4 @@
 <sect1 id="how-is-relational-security-different">
-  <!-- TODO: Rewrite based on new understanding of relational
-       security. -->
-
   <title>How Is Relational Security Different?</title>
   <para>
     A relational security implementation differs from the typical access
@@ -225,10 +222,10 @@
       Perhaps more important, is how easy it is to change a user's
       access rights.  If we decide that a certain class of user should
       no longer have access to certain data, this can usually be
-      implemented by simply changing various mappings in the data.
-      Normally no code ever has to be written or modified as every
-      single test for a user's access rights is implemented the same
-      way, based upon relationships between data.
+      implemented by simply changing role to role or role to
+      privileges mappings.  Normally no code ever has to be written or
+      modified as every single test for a user's access rights is
+      implemented the same way, based upon relationships between data.
     </para>
   </sect2>
   <sect2 id="Where-Implemented">
@@ -362,17 +359,17 @@
     <title>Comprehensiveness</title>
     <para>
       Earlier we stated that <link linkend="implicit_rights">implicit
-      access rights</link> are often managed by simply not implementing
-      them.  In a relational security system, every piece of data is
-      protected by the same underlying mechanism of privilege and
-      scope, which means is that if something which once was viewed as
-      public data needs to be secured, it is simply a matter of
-      changing some privilege assignments.  No code needs to be
-      touched and once the change has been tested we can be sure that
-      it will apply throughout the application: there will not be some
-      obscure screen somewhere that someone created by copy and paste
-      that gets forgotten and that does not get updated to implement
-      the new access control.
+      access rights</link>, in traditional applications, are often
+      managed by simply not implementing them.  In a relational
+      security system, every piece of data is protected by the same
+      underlying mechanism of privilege and scope, which means is that
+      if something which once was viewed as public data needs to be
+      secured, it is simply a matter of changing some privilege
+      assignments.  No code needs to be touched and once the change
+      has been tested we can be sure that it will apply throughout the
+      application: there will not be some obscure screen somewhere
+      that someone created by copy and paste that gets forgotten and
+      that does not get updated to implement the new access control.
     </para>
     <para>
       By having only one fundamental security mechanism, and by

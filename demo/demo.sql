@@ -168,7 +168,29 @@ grant all on table demo.project_assignments to demouser;
 
 -- STEP 1 is installing Veil2
 
--- STEP 2 is defining authentication data and functions (and session
+-- STEP 2:
+-- Define scopes
+-- We create corp, org and project scope types.  Orgs are parts of an
+-- organisation in an organisational hierarchy.  Corps are the topmost
+-- elements.  Projects are projects, owned by orgs.
+--
+-- Note that all role->role mapping is done in the same, global,
+-- context, so we do not need to change the "mapping context target
+-- scope type" system parameter.
+
+insert into veil2.scope_types
+       (scope_type_id, scope_type_name,
+        description)
+values (3, 'corp scope',
+        'For access to data that is specific to corps.'),
+       (4, 'org scope',
+        'For access to data that is specific to subdivisions (orgs) of a corp.'),
+       (5, 'project scope',
+        'For access to data that is specific to to project members.');
+
+
+
+-- STEP 3 is defining authentication data and functions (and session
 -- management)
 -- For the purpose of this demo, we will be using only plaintext and
 -- bcrypt so no new authentication methods have to be defined and
@@ -186,6 +208,14 @@ grant all on table demo.project_assignments to demouser;
 update veil2.authentication_types
    set enabled = true
  where shortname = 'plaintext';
+
+-- Set up accessor contexts.  All accessors will be in org context.
+create or replace
+view veil2.accessor_contexts (
+  accessor_id, context_type_id, context_id
+) as
+select party_id, 4, org_id
+  from demo.parties_tbl where party_type_id = 1;
 
 -- Create get_accessor so that we can map from usernames in context to
 -- accessor_ids.  This is used by create_session().
@@ -209,33 +239,6 @@ begin
 end;
 $$
 language plpgsql security definer stable leakproof;
-
-
-create or replace
-view veil2.accessor_contexts (
-  accessor_id, context_type_id, context_id
-) as
-select party_id, 4, org_id
-  from demo.parties_tbl where party_type_id = 1;
-
-
--- STEP 3:
--- Define scopes
--- We create corp, org and project scope types.  Orgs are parts of an
--- organisation in an organisational hierarchy.  Corps are the topmost
--- elements.  Projects are projects, owned by orgs.
-
-insert into veil2.scope_types
-       (scope_type_id, scope_type_name,
-        description)
-values (3, 'corp scope',
-        'For access to data that is specific to corps.'),
-       (4, 'org scope',
-        'For access to data that is specific to subdivisions (orgs) of a corp.'),
-       (5, 'project scope',
-        'For access to data that is specific to to project members.');
-
-
 
 
 
@@ -421,9 +424,8 @@ create trigger parties_tbl_aut after update on demo.parties_tbl
 comment on trigger parties_tbl_aut on demo.parties_tbl is
 'Ensure password changes get propagated to veil2.authentication_details';
 
--- STEP7:
+-- STEP 7:
 -- Link scopes back to the database being secured.
--- THIS SHOULD ALSO HANDLE UPDATES TO SOME OF THE CONTEXT VIEWS???
 
 
 -- 5.1 Parties:

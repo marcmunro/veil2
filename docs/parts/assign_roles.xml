@@ -7,9 +7,9 @@
   <sect2>
     <title>Roles</title>
     <para>
-      Firtly you will need to give the <literal><link
-      linkend="connect_role">connect</link></literal> role to all of
-      your users.
+      Firtly you will need to give the <literal>connect</literal> role
+      to all of your users.  This role allows them to authenticate.
+      Without it, they will be unable to access any data.
     </para>
     <para>
       After this, you will assign user-level roles to your users based

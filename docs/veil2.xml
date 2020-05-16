@@ -97,8 +97,8 @@
   &get_started;
   &veil_demo;
   &veil_setup;
-  &setup_authent;
   &setup_contexts;
+  &setup_authent;
   &setup_privs;
   &setup_roles;
   &setup_accessors;
@@ -108,9 +108,21 @@
   &secure_views;
   &assign_roles;
   
-  <sect1>
+  <sect1 id="contact">
     <title>Contact</title>
     <para/>
+    <sect2 id="reporting_bugs">
+      <title>Reporting Bugs</title>
+      <para/>
+    </sect2>
+  </sect1>
+  <sect1 id="tips">
+    <title>Tips and Considerations</title>
+    <para/>
+    <sect2 id="performance">
+      <title>Performance</title>
+      <para/>
+    </sect2>
   </sect1>
   <appendix>
     <title><literal>Veil2</literal> ERD and Database Objects</title>

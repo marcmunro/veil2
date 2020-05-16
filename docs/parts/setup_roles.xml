@@ -92,7 +92,7 @@
       </para>
     </sect3>
     <sect3>
-      <title>Update Your Application <literal>Veil2</literal>'s Roles</title>
+      <title>Update Your Application To Use <literal>Veil2</literal>'s Roles</title>
       <para>
 	This is conceptually the simplest approach but the amount of
 	work will very much depend on your existing system and its
@@ -105,6 +105,10 @@
 	role implementation.  Since the demo was built with
 	<literal>Veil2</literal> in mind this makes a lot of sense as
 	it keeps the implementation much cleaner and simpler.
+      </para>
+      <para>
+	If you are building a new system from scratch, this should be
+	your prefered approach.
       </para>
     </sect3>
   </sect2>
@@ -135,32 +139,21 @@
       contiguously and re-use ids for records that get deleted.
     </para>
   </sect2>
-  <sect2 id="connect_role">
-    <title>Create a <literal>connect</literal> Role</title>
-    <para>
-      All of your users will need the <literal>connect</literal>
-      privilege.  This gives them the ability to authenticate.
-      Without this they will have no access to protected functionality
-      or data, so being able to assign and revoke this privilege
-      separately is a good way of being able to manage and revoke
-      access.  We recommend that a <literal>connect</literal> role is
-      created that has just this single privilege, and that no other
-      roles are given this privilege.
-    </para>
-  </sect2>
   <sect2>
     <title>In Summary</title>
     <itemizedlist>
       <listitem>integrate with any existing roles;</listitem>
       <listitem>create function-level roles in
-      <literal>veil2.roles</literal>;</listitem> 
+      <literal>
+	<link linkend="entity_role">veil2.roles</link></literal>;</listitem>  
       <listitem>assign privileges to function-level roles (in
-      <literal>veil2.role_privileges</literal>);</listitem>
+      <literal>
+	<link linkend="entity_role_privilege">veil2.role_privileges</link></literal>);</listitem> 
       <listitem>create user-level roles (in
       <literal>veil2.roles</literal>);</listitem> 
       <listitem>assign function-level roles to user-level roles (in
-      <literal>veil2.role_roles</literal>);</listitem>
-      <listitem>create a <literal>connect</literal> role.</listitem>
+      <literal>
+	<link linkend="entity_role_role">veil2.role_roles</link></literal>).</listitem> 
     </itemizedlist>
   </sect2>
 </sect1>

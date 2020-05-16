@@ -1,4 +1,4 @@
-<sect1>
+<sect1 id="setup">
   <title>Setting Up A <literal>Veil2</literal> Virtual Private
   Database - Overview</title>
   <para>
@@ -8,12 +8,12 @@
     <orderedlist>
       <listitem><link linkend="installation">install</link> the
       <literal>Veil2</literal> scripts;</listitem> 
+      <listitem>identify and define your <link
+      linkend="setup_scope_types">scope types</link>;</listitem>
       <listitem>choose and implement your <link
       linkend="authentication">authentication</link> and <link
       linkend="session_management">session management</link>
       mechanisms;</listitem>
-      <listitem>identify and define your <link
-      linkend="setup_scope_types">scope types</link>;</listitem>
       <listitem>create an initial set of <link
       linkend="setup_privs">privileges;</link></listitem> 
       <listitem>integrate and/or create <link

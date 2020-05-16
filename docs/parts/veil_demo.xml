@@ -96,17 +96,21 @@ $ make db; psql -d vpd -f demo/demo.sql
 	they each see different subsets of data.  This should be a
 	pretty convincing demonstration of the power of relational
 	security contexts.  Note that although the users are
-	connecting in a number of different login contexts, their role
-	mapping contexts are all the same (the global context).
-	TODO: ref.  TODO: refs for view, etc below.
+	connecting in a number of different login contexts, their
+	<link linkend="role_mapping">role mapping</link> contexts are
+	all the same (the global context).
       </para>
       <para>
 	The code that follows uses a shortcut single query
-	authentication process.  Do not do this real life.  Create the
-	session in one statement, record the results in your
-	application server (or cookies, or memcache, or whatever) and
-	then subsequently open and re-open the session by properly
-	following the authentication protocol.  TODO: link
+	authentication process.  You should probably not do this in
+	real life.  The overhead of an extra database round-trip will,
+	in most cases, be so small that it will not be noticable, and
+	the ability to subsequently use the two-step authentication
+	protocol as a means to further improve your authentication
+	security is something that you may not want to lose.  For more
+	on this see the <link
+	linkend="authent_protocols">authentication protocols</link>
+	appendix.
       </para>
       <sect4>
 	<title>Alice</title>
@@ -148,7 +152,7 @@ select *
 	</para>
 	<para>
 	  Because he has superuser privilege for Secured Corp, Bob can
-	  see all records associated with SecuredCorp.  
+	  see all records associated with Secured Corp.  
 	</para>
 	<para>
 	  If you compare Bob's
@@ -171,7 +175,7 @@ select *
 	  </programlisting>
 	</para>
 	<para>
-	  Unlike Bob, Carol can see no projects.  That is because
+	  Unlike Bob, Carol can see no projects.  This is because
 	  Protected Corp has no projects.
 	</para>
       </sect4>
@@ -289,38 +293,12 @@ vpd=> \d demo.parties
 	  </programlisting>
 	</para>
 	<para>
-	  Ok, that wan't much help.  Let's try the enhanced version,
-	  <literal>\d+</literal>
-	  <programlisting>
-vpd=> \d+ demo.parties
-                               View "demo.parties"
-    Column     |  Type   | Collation | Nullable | Default | Storage  | Description 
----------------+---------+-----------+----------+---------+----------+-------------
- party_id      | integer |           |          |         | plain    | 
- party_type_id | integer |           |          |         | plain    | 
- corp_id       | integer |           |          |         | plain    | 
- org_id        | integer |           |          |         | plain    | 
- party_name    | text    |           |          |         | extended | 
- password      | text    |           |          |         | extended | 
-View definition:
- SELECT parties_tbl.party_id,
-    parties_tbl.party_type_id,
-    parties_tbl.corp_id,
-    parties_tbl.org_id,
-    parties_tbl.party_name,
-        CASE
-            WHEN parties_tbl.password IS NOT NULL THEN 'xxxxxxxxxxxx'::text
-            ELSE NULL::text
-        END AS password
-   FROM demo.parties_tbl;
-	  </programlisting>
-	</para>
-	<para>
-	  Well, that explains it.  <literal>demo.parties</literal> is
-	  a view, not a table.  It appears to not have any security
-	  restrictions on it (calls to <literal>Veil2</literal>
-	  privilege testing functions), so let's take a look at the
-	  underlying table: <literal>demo.parties_tbl</literal>:
+	  Hmmm <literal>demo.parties</literal> is a view, not a table.
+	  It appears, on inspection using <literal>\d+</literal>, to
+	  not have any security restrictions (calls to
+	  <literal>Veil2</literal> privilege testing functions) on it,
+	  so let's take a look at the underlying table:
+	  <literal>demo.parties_tbl</literal>:
 	  <programlisting>
 vpd=> \d demo.parties_tbl
                  Table "demo.parties_tbl"
@@ -362,7 +340,7 @@ Triggers:
 	  that these privileges are <literal>select parties</literal>
 	  and <literal>select orgs</literal>.  Note that to view the
 	  contents of the <literal>veil2.privileges</literal> table
-	  you will need to connect to a more privileged user -
+	  you will need to connect to a more privileged user as
 	  <literal>demouser</literal> has no select privilege on that
 	  table.
 	</para>
@@ -387,11 +365,16 @@ vpd=> select veil2.i_have_priv_in_scope(23, 4, 105);
  t
 (1 row)
 	  </programlisting>
-	  Well, that appears to explain it, but it required a few
-	  assumptions.  We can discover the full set of Simon's
-	  privileges by selecting from session_privileges.  Since this
-	  contains bitmaps, which are difficult to read, we use
-	  <literal>to_array()</literal> to show the individual
+	  Well, that appears to explain it but it required a few
+	  assumptions.  Let's try do it again, without those
+	  assumptions.
+	</para>
+	<para>
+	  We can discover the full set of Simon's privileges by
+	  selecting from <literal><link
+	  linkend="entity_session_privilege">session_privileges</link></literal>.
+	  Since this contains bitmaps, which are difficult to read, we
+	  use <literal>to_array()</literal> to show the individual
 	  privileges:
 	  <programlisting>
 vpd=> select scope_type_id, scope_id, to_array(roles), to_array(privs)
@@ -433,8 +416,9 @@ vpd->  from session_privileges;
 	</para>
 	<para>
 	  We can get more detailed information about privilege
-	  assignments from the
-	  <literal>veil2.privilege_assignments</literal> view:
+	  assignments from the <literal><link
+	  linkend="view_privilege_assignments">veil2.privilege_assignments</link></literal>
+	  view:
 	  <programlisting>
 vpd=> select privilege_id as priv_id, ass_cntxt_type_id as cntxt_type,
 vpd->        ass_cntxt_id as cntxt_id, scope_type_id as scope_type,

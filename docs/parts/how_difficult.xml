@@ -82,10 +82,6 @@
 	  <emphasis>everyone else</emphasis> does not look too good
 	  when you start looking closely.
         </para>
-        <para>
-	  But, if you don’t think you need to be secure, then you
-	  certainly don’t need to implement relational security.
-        </para>
       </listitem>
       <listitem>
         <para>
@@ -94,7 +90,7 @@
         <para>
           Really?  Why?  Your application developers should have an easier
           time of things.  You should end up with a higher-quality,
-          easier to maintain application.  There will be a need to do
+          and easier-to-maintain application.  There will be a need to do
           some careful thinking about access controls, and you will need
           to document your security model, but that is a good thing to
 	  do anyway.
@@ -132,8 +128,8 @@
           Not in the author's experience but you may find otherwise.
           You may need to perform some data denormalizations and you
           will want to analyze some of your queries but there should
-          be little performance impact.  See TODO: ref to performance
-	  stuff. 
+          be little performance impact.  See <link
+	  linkend="performance">Performance</link>.
         </para>
         <para>
 	  If you are concerned, and you should be, try modelling your
@@ -152,7 +148,7 @@
 	  should be able to cope and quickly become an expert.  The
 	  underlying principles are all documented.  The code is all
 	  documented.  There are documented examples.  And there are
-	  even contact links (TODO: reference)
+	  even <link linkend="contact">contact</link> links.
         </para>
       </listitem>
     </itemizedlist>

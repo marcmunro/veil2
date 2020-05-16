@@ -18,3 +18,12 @@ config.status
 # My notes
 NOTES
 TODO
+
+# diagrams target files
+diagrams/*coords
+diagrams/*map
+diagrams/*png
+
+# extracts targets
+docs/extracts
+extracts.d

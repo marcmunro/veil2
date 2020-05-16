@@ -83,7 +83,7 @@ make_areas () {
     }
     BEGIN {
         printf("<div id=\"%s_div\">\n", BASENAME)
-        printf("  <map id=\"%s_map\">\n", BASENAME)
+        printf("  <map name=\"%s_map\">\n", BASENAME)
     }
     END {
         printf("  </map>\n")

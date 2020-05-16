@@ -37,6 +37,11 @@ Custom docbook stylesheet for html for Veil2 docs.
   <xsl:param name="section.label.includes.component.label">1</xsl:param>
   <xsl:param name="chunk.section.depth" select="1"/>
 
+  <!-- Doctype -->
+  <xsl:param name="chunker.output.doctype-public" select="''"/>
+  <xsl:param name="chunker.output.indent" select="'yes'"/>
+  
+  
   <!-- Template copied from inline.xsl and hacked to properly deal with
        strikethrough.  -->
   <xsl:template match="emphasis">
@@ -239,6 +244,58 @@ Custom docbook stylesheet for html for Veil2 docs.
 				   '.xml')"/>
     </xsl:variable>
     <xsl:apply-templates select="document($filename)/extract/*"/>
+  </xsl:template>
+
+
+  <!-- MM: The following hack is to ensure a DOCTYPE header in each
+       chunk.  There ought to be a better way to do this but I haven't
+       found it.  Template copied from chunk-common.xsl -->
+  <xsl:template name="process-chunk">
+    <xsl:param name="prev" select="."/>
+    <xsl:param name="next" select="."/>
+    <xsl:param name="content">
+      <xsl:apply-imports/>
+    </xsl:param>
+    
+    <xsl:variable name="ischunk">
+      <xsl:call-template name="chunk"/>
+    </xsl:variable>
+  
+    <xsl:variable name="chunkfn">
+      <xsl:if test="$ischunk='1'">
+	<xsl:apply-templates mode="chunk-filename" select="."/>
+      </xsl:if>
+    </xsl:variable>
+
+    <xsl:if test="$ischunk='0'">
+      <xsl:message>
+	<xsl:text>Error </xsl:text>
+	<xsl:value-of select="name(.)"/>
+	<xsl:text> is not a chunk!</xsl:text>
+      </xsl:message>
+    </xsl:if>
+
+    <xsl:variable name="filename">
+      <xsl:call-template name="make-relative-filename">
+	<xsl:with-param name="base.dir" select="$chunk.base.dir"/>
+	<xsl:with-param name="base.name" select="$chunkfn"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:call-template name="write.chunk">
+      <xsl:with-param name="filename" select="$filename"/>
+      <xsl:with-param name="content">
+	<!-- MM's hack begins. -->
+	<xsl:text disable-output-escaping="yes">&lt;!DOCTYPE html&gt;&#x0a;</xsl:text>
+	<!-- MM's hack ends. -->
+	<xsl:call-template name="chunk-element-content">
+          <xsl:with-param name="prev" select="$prev"/>
+          <xsl:with-param name="next" select="$next"/>
+          <xsl:with-param name="content" select="$content"/>
+	</xsl:call-template>
+      </xsl:with-param>
+      <xsl:with-param name="quiet" select="$chunk.quietly"/>
+    </xsl:call-template>
   </xsl:template>
   
 </xsl:stylesheet>

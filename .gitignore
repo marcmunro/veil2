@@ -6,8 +6,6 @@
 # Log files
 *.log
 
-# The html directory
-html
 
 # Docs: generated files
 docs/*sgml

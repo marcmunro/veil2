@@ -1,0 +1,109 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>14. Integrate And/Or Create Roles</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="prev" href="ar01s13.html" title="13. Create Initial Privileges"><link rel="next" href="ar01s15.html" title="15. Link Your Users To Veil2's Accessors"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s13.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s15.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">13. Create Initial Privileges </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 15. Link Your Users To <code class="literal">Veil2</code>'s Accessors</td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setup_roles"></a>14. Integrate And/Or Create Roles</h2></div></div></div><p>
+    The demo chooses to use only <code class="literal">Veil2</code>'s role
+    tables for its roles implementation.  This makes things very
+    simple, but may be unhelpful as an example.  The author apologises
+    but there are some things you will have to do for yourselves.
+    Look for  STEP 5 in the file <code class="literal">demo/demo.sql</code>.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm947"></a>14.1. Integrating Existing Roles</h3></div></div></div><p>
+      If your existing system has roles of some sort that you wish to
+      keep using, you are going to have to find a way to integrate
+      them with the <code class="literal">veil2.roles</code> table.
+    </p><p>
+      There are essentially three options:
+    </p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm952"></a>14.1.1. Link <code class="literal">Veil2</code> To Your Existing Data</h4></div></div></div><p>
+	This is likely to be a reasonably complex process.  You are
+	going to need:
+	</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	      an id mapping mechanism;
+	    </p><p>
+	      Your existing role keys are not going to work with
+	      <code class="literal">Veil2</code>, so we will need a way to map
+	      your role keys with <code class="literal">Veil2</code>'s
+	      <code class="literal">role_ids</code>.  Note that you need to keep
+	      the range of <code class="literal">role_id</code>s as small as
+	      possible in order to keep their bitmap representations
+	      small.
+	    </p><p>
+	      Probably the best way to do this is to add a column to
+	      <code class="literal">veil2.roles</code> which references your
+	      existing roles table.  Use a foreign key relationship to
+	      ensure that the <code class="literal">Veil2</code> table is kept
+	      in step with your existing table.  Use the <code class="literal">on
+	      delete cascade</code> and <code class="literal">on update
+	      cascade</code> clauses to the foreign key.
+	    </p><p>
+	      You will also need an insert trigger on the existing
+	      roles table to populate <code class="literal">veil2.roles</code>
+	      when new roles are created.  This trigger needs to be
+	      smart enough to create contiguous
+	      <code class="literal">role_id</code>s and re-use any deleted ones
+	      in order to keep the role bitmaps reasonably small.
+	    </p><p>
+	      For some examples of how the triggers can be constructed
+	      take a look at the demo.  In particular the way that the
+	      demo's <code class="literal">parties</code> table is linked to
+	      <code class="literal">veil2.accessors</code>. 
+	    </p></li></ul></div><p>
+      </p><p>
+	Whether this will work, will depend on the semantics of your
+	existing role implementation.  If they are similar to
+	<code class="literal">Veil2</code>'s role semantics, this may work.  You
+	will have to do some careful thinking about this.
+      </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm977"></a>14.1.2. Make <code class="literal">Veil2</code>'s Roles Provide Your Role
+      Data</h4></div></div></div><p>
+	In this option, we replace your roles implementation with that
+	from <code class="literal">Veil2</code> but make it look like your
+	existing implementation is still in place.
+      </p><p>
+	The key to this is to use views and instead-of triggers to
+	make the <code class="literal">Veil2</code> table function in the same
+	way as your existing table.  You will probably need to add
+	columns to <code class="literal">veil2.roles</code> and you will need to
+	change many existing foreign key relationships.
+      </p><p>
+	As with the previous option, this will require some serious
+	thinking, but it will probably give you a simpler system than
+	the previous option.  Roles and privileges are complex enough
+	without adding an extra level of redirection.
+      </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm986"></a>14.1.3. Update Your Application To Use <code class="literal">Veil2</code>'s Roles</h4></div></div></div><p>
+	This is conceptually the simplest approach but the amount of
+	work will very much depend on your existing system and its
+	needs.  Remember: you can add whatever columns you need to
+	<code class="literal">veil2.roles</code>.
+      </p><p>
+	The demo chooses to use <code class="literal">Veil2</code>'s
+	implementation of roles, rather than integrating any existing
+	role implementation.  Since the demo was built with
+	<code class="literal">Veil2</code> in mind this makes a lot of sense as
+	it keeps the implementation much cleaner and simpler.
+      </p><p>
+	If you are building a new system from scratch, this should be
+	your prefered approach.
+      </p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm995"></a>14.2. Create New Roles</h3></div></div></div><p>
+      If your application has user-level roles (roles that are
+      assigned to users), you may be able to re-use them.  You will
+      probably not have function-level roles however, and you will
+      need to at least create a minimal set of these.
+    </p><p>
+      The minimal set of user-level roles should be enough to give you
+      2 or more pieces of functionality that you can then use to test
+      your access control mechanisms.  To these roles, you will
+      assign privileges by creating records in
+      <code class="literal">veil2.role_privileges</code>.
+    </p><p>
+      You will then need to create role-&gt;role mappings, making your
+      function-level roles available to your user-level roles.  You
+      will do this by creating records in
+      <code class="literal">veil2.role_roles</code>. 
+    </p><p>
+      As with privileges, you should keep the range of
+      <code class="literal">role_ids</code> as small as possible, allocating them
+      contiguously and re-use ids for records that get deleted.
+    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1004"></a>14.3. In Summary</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">integrate with any existing roles;</li><li class="listitem">create function-level roles in
+      <code class="literal">
+	<a class="link" href="apa.html#entity_role" title="A.1.6. Roles Table">veil2.roles</a></code>;</li><li class="listitem">assign privileges to function-level roles (in
+      <code class="literal">
+	<a class="link" href="apa.html#entity_role_privilege" title="A.1.8. Role Privileges Table">veil2.role_privileges</a></code>);</li><li class="listitem">create user-level roles (in
+      <code class="literal">veil2.roles</code>);</li><li class="listitem">assign function-level roles to user-level roles (in
+      <code class="literal">
+	<a class="link" href="apa.html#entity_role_role" title="A.1.13. Role Roles Table">veil2.role_roles</a></code>).</li></ul></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s13.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s15.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">13. Create Initial Privileges </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 15. Link Your Users To <code class="literal">Veil2</code>'s Accessors</td></tr></table></div></body></html>

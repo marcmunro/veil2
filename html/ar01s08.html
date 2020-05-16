@@ -1,0 +1,157 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>8. Getting Started With Veil2</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="prev" href="ar01s07.html" title="7. How Difficult Is This?"><link rel="next" href="ar01s09.html" title="9. Exploring The Veil2 Demo"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s07.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s09.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">7. How Difficult Is This? </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 9. Exploring The <code class="literal">Veil2</code> Demo</td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="starting"></a>8. Getting Started With <code class="literal">Veil2</code></h2></div></div></div><p>
+    This section aims to get you started.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="installation"></a>8.1. Installing <code class="literal">Veil2</code></h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="pre-requisites"></a>8.1.1. Pre-Requisites</h4></div></div></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm525"></a>RDBMS</h5></div></div></div><p>
+	  Any currently-supported version of <a class="ulink" href="https://postgresql.org/" target="_top">Postgres</a> will be adequate.
+	</p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm529"></a>Postgres Extensions</h5></div></div></div><p>
+	  You will need to be able to install the
+	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><code class="literal">pgbitmap</code>; and</li><li class="listitem"><code class="literal">pgcrypto</code>.</li></ul></div><p>
+	  extensions in your database.  For
+	  <code class="literal">pgbitmap</code>, this means that you will
+	  probably need a full build environment unless you can find
+	  someone you trust who has a pre-built library you can use.
+	  See the <a class="ulink" href="https://github.com/marcmunro/pgbitmap" target="_top">pgbitmap</a>
+	  web page for build instructions.
+	</p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm539"></a>Operating System Environment</h5></div></div></div><p>
+	  You should be able to install <code class="literal">Veil2</code> on
+	  any operating system, though something Unix-like is
+	  recommended, as we use <code class="literal">make</code> for a lot of
+	  tasks.  If you don't have <code class="literal">make</code> available,
+	  you can still install <code class="literal">Veil2</code> but you will
+	  be doing it directly from the SQL scripts.
+	</p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm546"></a>Software Required</h5></div></div></div><p>
+	  If you want to install from git and build the documentation
+	  from source, you will need the following:
+	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><code class="literal">xsltproc;</code></li><li class="listitem"><code class="literal">libxslt1.1;</code></li><li class="listitem"><code class="literal">libxml2;</code></li><li class="listitem"><code class="literal">dia;</code></li><li class="listitem"><code class="literal">gawk;</code></li><li class="listitem"><code class="literal">make;</code></li><li class="listitem">docbook 4.5 stylesheets.</li></ul></div><p>
+	  The last is available on debian through the packages
+	  <code class="literal">docbook-xsl</code> and
+	  <code class="literal">docbook-xsl</code>. 
+	</p><p>
+	  For installation from tarballs, you will only need a
+	  command to unpack the tar file.
+	</p></div></div><div class="sect3"><div class="titlepage"></div><p>
+	You may install either from pre-built tarballs, or directly
+	from the git repository.  Unless you have some need to use the
+	git repository, use the tarball (TODO: refs).
+      </p><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm568"></a>Installation From Tarball</h5></div></div></div><p>
+	  Download the file into a fresh directory, and unpack its
+	  contents:
+	  </p><pre class="programlisting">
+$ curl TODO: get url
+$ tar xvjf TODO: get filename
+$ cd veil2*
+	  </pre><p>
+	</p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm572"></a>Installation From Git Repository</h5></div></div></div><p>
+	  </p><pre class="programlisting">
+$ git clone TODO: ref
+$ cd veil2*
+	  </pre><p>
+	</p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm576"></a>Building The HTML Documentation</h5></div></div></div><p>
+	  You probably don't need to do this, but if you want to.
+	  </p><pre class="programlisting">
+$ cd &lt;to the veil2 directory&gt;
+$ ./configure
+$ make html
+	  </pre><p>
+	  The documentation will be created in the
+	  <code class="literal">html</code> directory.  Open the
+	  <code class="literal">index.html</code> file with your browser to view it.
+	</p></div></div><div class="sect3"><div class="titlepage"></div><p>
+	Before running any of the <code class="literal">Veil2</code> SQL
+	scripts, you should satisfy yourself that they will do no harm
+	to any of your existing databases.  Obviously you will not run
+	them in your production environment.  The scripts are mostly
+	safe but they do create and drop users and roles.  These are
+	all named <code class="literal">veil_&lt;something&gt;</code> so they
+	should not conflict with anything you are already using BUT
+	YOU HAVE BEEN WARNED.
+      </p><p>
+	If you'd like to test the <code class="literal">Veil2</code>
+	installation, you should run the command:
+	</p><pre class="programlisting">
+$ make unit TESTDB=whateverdbnameyoulike
+	</pre><p>
+	The name you give <code class="literal">TESTDB</code> is the name of the
+	database that will be created for testing.  This should
+	<span class="bold"><strong>not</strong></span> be the name of an
+	existing database!  If you don't provide
+	<code class="literal">TESTDB</code>, the database name will be
+	<code class="literal">vpd</code>.
+      </p><p>
+	If all is well, you'll see something like this:
+	</p><pre class="programlisting">
+...
+VPD database created successfully
+
+Performing unit tests...
+RUNNING SETUP
+...creating test users...
+...creating test schema...
+......creating test functions...
+......creating corp context type...
+......creating test corp...
+......creating test corp...
+......creating test corp...
+......creating test corp...
+...creating test parties...
+......creating test roles...
+......creating test context_roles...
+...creating test privileges...
+...setting access rights for parties...
+RUNNING TESTS
+...views...
+......checking direct_role_privileges...
+.........connect role and privilege...
+.........superuser role...
+.........test roles...
+......checking assigned_role_info...
+...authentication functions...
+......checking plaintext authentication...
+......checking bcrypt authentication...
+...checking basic veil2 session handling...
+.....reset_session()...
+.....create_session()...
+.....open_connection()...
+.....open_connection(checking nonce handling)...
+...close_connection()...
+...checking dbuser-based session handling...
+......checking visibility of veil2 objects...
+"user=marc host=/var/run/postgresql port=5432 dbname=whateverdbnameyoulike"
+...context in session handling...
+.....create and open session(invalid context)...
+TESTS COMPLETE
+RUNNING TEARDOWN
+	</pre><p>
+	If you see any mention of ERROR, then your installation has a
+	problem.  This will either mean that your extensions are not
+	properly installed, or that you have found a bug.  Start by
+	carefully reading the output and see if you can figure it out
+	for yourself.  If not, see <a class="link" href="ar01s21.html#reporting_bugs" title="21.1. Reporting Bugs">reporting bugs</a>.
+      </p><p>
+	When you wish to remove the databse you can do:
+	</p><pre class="programlisting">
+$ make drop TESTDB=whateverdbnameyoulike
+	</pre><p>
+      </p><p>
+	If you are in an environment without <code class="literal">make</code>
+	you have our sympathy.  In this case, you can run the scripts
+	manually.  Take a look in <code class="literal">GNUmakefile</code> for
+	the <code class="literal">db</code> and <code class="literal">unit</code>
+	targets.  You will see <code class="literal">psql</code> commands
+	there.  You can run these directly.
+      </p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="demo-install"></a>8.2. Installing The Demo</h3></div></div></div><p>
+      We start by creating a database and installing the 
+      <code class="literal">Veil2</code> database objects.  We can do this using
+      <code class="literal">make</code>:
+      	</p><pre class="programlisting">
+$ make db TESTDB=whateverdbnameyoulike
+	</pre><p>
+    </p><p>
+      Next, we run the demo creation script against the newly created
+      database:
+      	</p><pre class="programlisting">
+$ psql -d whateverdbnameyoulike -f demo/demo.sql
+	</pre><p>
+      This installs the demo database, and links it to the
+      <code class="literal">Veil2</code> database objects.  The demo database is
+      now ready to use.
+    </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s07.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s09.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">7. How Difficult Is This? </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 9. Exploring The <code class="literal">Veil2</code> Demo</td></tr></table></div></body></html>

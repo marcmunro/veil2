@@ -1,0 +1,72 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>17. Create Scope Promotions</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="prev" href="ar01s16.html" title="16. Link Your Scopes and Security Contexts"><link rel="next" href="ar01s18.html" title="18. Secure Your Tables"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s16.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s18.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">16. Link Your Scopes and Security Contexts </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 18. Secure Your Tables</td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="scope_promotions"></a>17. Create Scope Promotions</h2></div></div></div><p>
+    Determining which scopes may be promoted to which other scopes is
+    done through the <code class="literal"><a class="link" href="apas02.html#view_scope_promotions" title="A.2.4. Scope Promotions View">scope_promotions</a></code>
+    view.  This identifies, for each scope, what directly superior
+    scopes exist.  It does not identify global scope, and does not
+    require a recursive query to identify grandparent scopes etc.
+    These are handled elsewhere.  Also, there is no need for this view
+    to be materialized for performance, as this is a base view, used
+    by <code class="literal">Veil2</code> to populate more sophisticated,
+    recursively defined and materialized views.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1123"></a>17.1. Creating The View</h3></div></div></div><p>
+      You will need to completely redefine the <code class="literal"><a class="link" href="apas02.html#view_scope_promotions" title="A.2.4. Scope Promotions View">scope_promotions</a></code>
+      view.  The provided <code class="literal">Veil2</code> version of this
+      view is simply a placeholder.
+    </p><p>
+      You will define this view as the union of a number of queries.
+      Each query will represent a single type of scope promotion.  The
+      following example is from the demo.  See STEP 8 in the file
+      <code class="literal">demo/demo.sql</code>.
+      </p><pre class="programlisting">
+create or replace
+view veil2.scope_promotions (
+  scope_type_id, scope_id,
+  promoted_scope_type_id, promoted_scope_id
+) as
+select 4, party_id,  -- Promote org to corp scope
+       3, corp_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+union all
+select 3, party_id,  -- Promotion of org to higher org
+       3, org_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+select 5, s.scope_id,   -- Project to corp promotions
+       3, p.corp_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id
+union all
+select 5, s.scope_id,   -- Project to org promotions
+       4, p.org_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id;
+      </pre><p>
+    </p><p>
+      Note that if you have something like an organizational hierarchy
+      in which you want someone that is assigned a role in an
+      organizational context, to automatically have those rights in
+      all subordinate organizational contexts, you will need to define
+      scope promotions within that hierarchy.  This is done by the
+      second query in the above union.
+    </p><p>
+      Once you have redefined the view, you should refresh the
+      <code class="literal"><a class="link" href="apas02.html#view_all_scope_promotions" title="A.2.6. All Scope Promotions Views">veil2.all_scope_promotions</a></code>
+      materialized view.  This should automatically refresh when
+      <code class="literal">scopes</code> records are updated, but not when
+      <code class="literal">scope_promotions</code>, the view it is based, is
+      redefined.
+    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1138"></a>17.2. In Summary</h3></div></div></div><p>
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	    For each type of context promotion that is possible,
+	    including those within a hierarchy of the same scope types
+	    (eg the org hierarchy from the demo), create a query that
+	    is part of a union that defines the <code class="literal"><a class="link" href="apas02.html#view_scope_promotions" title="A.2.4. Scope Promotions View">scope_promotions</a></code>
+	    view.
+	  </p></li><li class="listitem"><p>
+	    Refreshthe <code class="literal"><a class="link" href="apas02.html#view_all_scope_promotions" title="A.2.6. All Scope Promotions Views">veil2.all_scope_promotions</a></code>
+	    materialized view.
+	  </p></li></ul></div><p>
+    </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s16.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s18.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">16. Link Your Scopes and Security Contexts </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 18. Secure Your Tables</td></tr></table></div></body></html>

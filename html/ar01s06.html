@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>6. What is Veil2 And What Does It Provide?</title>
+<title>6.Â What is Veil2 And What Does It Provide?</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
 <link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="prev" href="ar01s05.html" title="5. Veil2 Concepts">
-<link rel="next" href="ar01s07.html" title="7. How Difficult Is This?">
+<link rel="prev" href="ar01s05.html" title="5.Â Veil2 Concepts">
+<link rel="next" href="ar01s07.html" title="7.Â How Difficult Is This?">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s05.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s07.html">Next</a>
+<a accesskey="p" href="ar01s05.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s07.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">5. <code class="literal">Veil2</code> Concepts </td>
+<td width="40%" align="left" valign="top">5.Â <code class="literal">Veil2</code> ConceptsÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 7. How Difficult Is This?</td>
+<td width="40%" align="right" valign="top">Â 7.Â How Difficult Is This?</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="whatis"></a>6. What is <code class="literal">Veil2</code> And What Does It Provide?</h2></div></div></div>
+<a name="whatis"></a>6.Â What is <code class="literal">Veil2</code> And What Does It Provide?</h2></div></div></div>
 <p>
     <code class="literal">Veil2</code> is a collection of database objects that
     provides an implementation of roles, privileges, contexts, scopes
@@ -68,7 +68,7 @@
     </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">this document, especially the setup sections starting
-      <a class="link" href="ar01s10.html" title="10. Setting Up A Veil2 Virtual Private Database - Overview">here</a>;</li>
+      <a class="link" href="ar01s10.html" title="10.Â Setting Up A Veil2 Virtual Private Database - Overview">here</a>;</li>
 <li class="listitem">comments in the database objects;</li>
 <li class="listitem">comments in the <code class="literal">Veil2</code> creation
       scripts;</li>
@@ -78,12 +78,12 @@
   </p>
 <p>
     You should familiarize yourself with at least this document and
-    the <a class="link" href="ar01s09.html" title="9. Exploring The Veil2 Demo">demo</a> before starting out on
+    the <a class="link" href="ar01s09.html" title="9.Â Exploring The Veil2 Demo">demo</a> before starting out on
     your implementation.
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm379"></a>6.1. How Does It Work?</h3></div></div></div>
+<a name="idm379"></a>6.1.Â How Does It Work?</h3></div></div></div>
 <p>
       <code class="literal">Veil2</code> works by:
       </p>
@@ -113,11 +113,11 @@
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm389"></a>6.1.1. Knowing The User</h4></div></div></div>
+<a name="idm389"></a>6.1.1.Â Knowing The User</h4></div></div></div>
 <p>
 	<code class="literal">Veil2</code> provides session management functions
-	for both <a class="link" href="apbs02.html" title="B.2. Dedicated Database Sessions">dedicated</a> and
-	<a class="link" href="apb.html#shared_session_management" title="B.1. Shared Session Authentication">shared</a>
+	for both <a class="link" href="apbs02.html" title="B.2.Â Dedicated Database Sessions">dedicated</a> and
+	<a class="link" href="apb.html#shared_session_management" title="B.1.Â Shared Session Authentication">shared</a>
 	database connections.  It is up to the user or the user's
 	application to ensure that the session protocols are followed.
 	If they are not, the user will have access to no data.
@@ -154,7 +154,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm399"></a>6.1.2. Contextual Privileges Per User</h4></div></div></div>
+<a name="idm399"></a>6.1.2.Â Contextual Privileges Per User</h4></div></div></div>
 <p>
 	Each privilege assigned to a user operates within a scope that
 	depends on the context in which it was assigned.  Some
@@ -165,7 +165,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm402"></a>6.1.3. Fast Privilege Testing</h4></div></div></div>
+<a name="idm402"></a>6.1.3.Â Fast Privilege Testing</h4></div></div></div>
 <p>
 	As stated above, the set of privileges in each scope is stored
 	in a bitmap, and tests for the presence of a privilege in the
@@ -203,7 +203,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm409"></a>6.1.4. Individually Securing Each Relation</h4></div></div></div>
+<a name="idm409"></a>6.1.4.Â Individually Securing Each Relation</h4></div></div></div>
 <p>
 	Every table and view is given its own individual security
 	definition.  For tables, they will be much as shown above but
@@ -222,7 +222,7 @@ create policy projects__select
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm413"></a>6.2. Refactoring Your Systems To Use <code class="literal">Veil2</code>
+<a name="idm413"></a>6.2.Â Refactoring Your Systems To Use <code class="literal">Veil2</code>
 </h3></div></div></div>
 <p>
       Integrating your systems with <code class="literal">Veil2</code> is not a
@@ -233,11 +233,11 @@ create policy projects__select
       address in order to protect an existing system with
       <code class="literal">Veil2</code>.  This is intended as an introduction
       to the process solely in order to give you a feel for what is
-      required.  The process is covered in much more detail <a class="link" href="ar01s10.html" title="10. Setting Up A Veil2 Virtual Private Database - Overview">later</a>.
+      required.  The process is covered in much more detail <a class="link" href="ar01s10.html" title="10.Â Setting Up A Veil2 Virtual Private Database - Overview">later</a>.
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm421"></a>6.2.1. Web Session Management</h4></div></div></div>
+<a name="idm421"></a>6.2.1.Â Web Session Management</h4></div></div></div>
 <p>
 	The <code class="literal">Veil2</code>-protected database needs to know
 	which user is accessing it all times.  It provides a
@@ -250,7 +250,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm425"></a>6.2.2. Integration of Role Handling</h4></div></div></div>
+<a name="idm425"></a>6.2.2.Â Integration of Role Handling</h4></div></div></div>
 <p>
 	<code class="literal">Veil2</code> has its own view of what roles should
 	do and look like.  If your own system uses roles for its
@@ -307,7 +307,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm449"></a>6.2.3. Integration of Security Contexts</h4></div></div></div>
+<a name="idm449"></a>6.2.3.Â Integration of Security Contexts</h4></div></div></div>
 <p>
 	For every type of security context that you wish to provide,
 	you will need to provide a link from your existing tables back
@@ -318,7 +318,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm453"></a>6.2.4. Integration of Users</h4></div></div></div>
+<a name="idm453"></a>6.2.4.Â Integration of Users</h4></div></div></div>
 <p>
 	All of your users must be associated with
 	<code class="literal">Veil2</code> accessors, and any existing
@@ -329,7 +329,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm457"></a>6.2.5. Performance Denormalizations</h4></div></div></div>
+<a name="idm457"></a>6.2.5.Â Performance Denormalizations</h4></div></div></div>
 <p>
 	You will be applying access control to each relation in your
 	system.  Some of them may benefit from data denormlization to
@@ -342,7 +342,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm460"></a>6.2.6. Authentication</h4></div></div></div>
+<a name="idm460"></a>6.2.6.Â Authentication</h4></div></div></div>
 <p>
 	You may need to implement a new authentication system for
 	users.  Or the built-in bcrypt implementation may be enough.
@@ -350,7 +350,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm463"></a>6.2.7. Development/Tightening of Access Controls</h4></div></div></div>
+<a name="idm463"></a>6.2.7.Â Development/Tightening of Access Controls</h4></div></div></div>
 <p>
 	Once you have everything integrated, you will be able to use
 	your system.  Create a super-role that allows all access and
@@ -376,15 +376,15 @@ create policy projects__select
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s05.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s07.html">Next</a>
+<a accesskey="p" href="ar01s05.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s07.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">5. <code class="literal">Veil2</code> Concepts </td>
+<td width="40%" align="left" valign="top">5.Â <code class="literal">Veil2</code> ConceptsÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 7. How Difficult Is This?</td>
+<td width="40%" align="right" valign="top">Â 7.Â How Difficult Is This?</td>
 </tr>
 </table>
 </div>

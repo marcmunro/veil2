@@ -1,56 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>16. Link Your Scopes and Security Contexts</title>
+<title>16.Â Link Your Scopes and Security Contexts</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
 <link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="prev" href="ar01s15.html" title="15. Link Your Users To Veil2's Accessors">
-<link rel="next" href="ar01s17.html" title="17. Create Scope Promotions">
+<link rel="prev" href="ar01s15.html" title="15.Â Link Your Users To Veil2's Accessors">
+<link rel="next" href="ar01s17.html" title="17.Â Create Scope Promotions">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s15.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s17.html">Next</a>
+<a accesskey="p" href="ar01s15.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s17.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">15. Link Your Users To <code class="literal">Veil2</code>'s Accessors </td>
+<td width="40%" align="left" valign="top">15.Â Link Your Users To <code class="literal">Veil2</code>'s AccessorsÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 17. Create Scope Promotions</td>
+<td width="40%" align="right" valign="top">Â 17.Â Create Scope Promotions</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="link_scopes"></a>16. Link Your Scopes and Security Contexts</h2></div></div></div>
+<a name="link_scopes"></a>16.Â Link Your Scopes and Security Contexts</h2></div></div></div>
 <p>
-    The <code class="literal">Veil2 <a class="link" href="apa.html#entity_scope" title="A.1.5. Scopes Table">scopes</a></code> table is the most
+    The <code class="literal">Veil2 <a class="link" href="apa.html#entity_scope" title="A.1.5.Â Scopes Table">scopes</a></code> table is the most
     important link between <code class="literal">Veil2</code> and the database
     that it is protecting.  It provides the semantic link between
-    <a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scopes</a> as understood by the security
-    model, and the <a class="link" href="ar01s05.html#security-contexts" title="5.5. Security Contexts">security
+    <a class="link" href="ar01s05.html#scopes" title="5.2.Â Scopes">scopes</a> as understood by the security
+    model, and the <a class="link" href="ar01s05.html#security-contexts" title="5.5.Â Security Contexts">security
     contexts</a> provided or implied by the data model.
   </p>
 <p>
     The simplest, and recommended, way to implement these links is by
     adding foreign-key columns and relationships to the <code class="literal">Veil2
-    <a class="link" href="apa.html#entity_scope" title="A.1.5. Scopes Table">scopes</a></code> table.
+    <a class="link" href="apa.html#entity_scope" title="A.1.5.Â Scopes Table">scopes</a></code> table.
   </p>
 <p>
     Look for STEP 7 in the file <code class="literal">demo/demo.sql</code>.
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1089"></a>16.1. Create Foreign Key Links</h3></div></div></div>
+<a name="idm1089"></a>16.1.Â Create Foreign Key Links</h3></div></div></div>
 <p>
       For each relational security context, you will add columns to
       the <code class="literal">scopes</code> table.  For instance if you have a
@@ -96,7 +96,7 @@ alter table veil2.scopes
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1103"></a>16.2. Create Insertion Triggers</h3></div></div></div>
+<a name="idm1103"></a>16.2.Â Create Insertion Triggers</h3></div></div></div>
 <p>
       Next, we want to ensure that new <code class="literal">projects</code>
       records are automatically recorded in the
@@ -106,7 +106,7 @@ alter table veil2.scopes
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1108"></a>16.3. Link Existing Records</h3></div></div></div>
+<a name="idm1108"></a>16.3.Â Link Existing Records</h3></div></div></div>
 <p>
       The final step is to populate scope records for your existing
       projects.  Something like this:
@@ -134,7 +134,7 @@ select 6, nextval('veil2.scope_id_seq'), project_id
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1113"></a>16.4. In Summary</h3></div></div></div>
+<a name="idm1113"></a>16.4.Â In Summary</h3></div></div></div>
 <p>
       For each relational context you will add foreign key columns,
       create foreign key and check constraints, create an insert
@@ -148,15 +148,15 @@ select 6, nextval('veil2.scope_id_seq'), project_id
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s15.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s17.html">Next</a>
+<a accesskey="p" href="ar01s15.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s17.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">15. Link Your Users To <code class="literal">Veil2</code>'s Accessors </td>
+<td width="40%" align="left" valign="top">15.Â Link Your Users To <code class="literal">Veil2</code>'s AccessorsÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 17. Create Scope Promotions</td>
+<td width="40%" align="right" valign="top">Â 17.Â Create Scope Promotions</td>
 </tr>
 </table>
 </div>

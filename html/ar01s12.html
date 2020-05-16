@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>12. Setting Up Authentication and Session Management</title>
+<title>12.Â Setting Up Authentication and Session Management</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
 <link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="prev" href="ar01s11.html" title="11. Identify and Define Your Scope Types">
-<link rel="next" href="ar01s13.html" title="13. Create Initial Privileges">
+<link rel="prev" href="ar01s11.html" title="11.Â Identify and Define Your Scope Types">
+<link rel="next" href="ar01s13.html" title="13.Â Create Initial Privileges">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s11.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s13.html">Next</a>
+<a accesskey="p" href="ar01s11.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s13.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">11. Identify and Define Your Scope Types </td>
+<td width="40%" align="left" valign="top">11.Â Identify and Define Your Scope TypesÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 13. Create Initial Privileges</td>
+<td width="40%" align="right" valign="top">Â 13.Â Create Initial Privileges</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="setup_authent"></a>12. Setting Up Authentication and Session Management</h2></div></div></div>
+<a name="setup_authent"></a>12.Â Setting Up Authentication and Session Management</h2></div></div></div>
 <p>
     <code class="literal">Veil2</code> provides built-in mechanisms for
     authentication and session management.  You can choose to use
@@ -40,7 +40,7 @@
 <p>
     This section provides an introduction to what is needed,
     references to more detailed explanations and a final, simple list,
-    of <a class="link" href="ar01s12.html#authent_what" title="12.5. In Summary">actions</a> you need to take or
+    of <a class="link" href="ar01s12.html#authent_what" title="12.5.Â In Summary">actions</a> you need to take or
     consider.
   </p>
 <p>
@@ -50,7 +50,7 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="authentication"></a>12.1. Authentication</h3></div></div></div>
+<a name="authentication"></a>12.1.Â Authentication</h3></div></div></div>
 <p>
       Authenticating users is hard.  There are many different ways to
       do it.  <code class="literal">Veil2</code> provides 2 default
@@ -66,7 +66,7 @@
 	    This is provided simply for testing.  With plaintext
 	    authorization, a password is provided which is simply
 	    checked against a copy stored in
-	    <a class="link" href="apa.html#entity_authentication_detail" title="A.1.15. Authentication Details Table"><code class="literal">veil2.authentication_details</code></a>.
+	    <a class="link" href="apa.html#entity_authentication_detail" title="A.1.15.Â Authentication Details Table"><code class="literal">veil2.authentication_details</code></a>.
 	  </p>
 <p>
 	    By default, this authentication mechanism is disabled.  It
@@ -96,41 +96,41 @@
     </p>
 <p>
       New authentication methods should be created by creating new
-      authentication functions and new records in <a class="link" href="apa.html#entity_authentication_type" title="A.1.12. Authentication Types Table"><code class="literal">veil2.authentication_types</code></a>.
+      authentication functions and new records in <a class="link" href="apa.html#entity_authentication_type" title="A.1.12.Â Authentication Types Table"><code class="literal">veil2.authentication_types</code></a>.
     </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm838"></a>12.2. Associate Your Users With Their Authentication
+<a name="idm838"></a>12.2.Â Associate Your Users With Their Authentication
     Contexts</h3></div></div></div>
 <p>
       If your users do not all authenticate in the same context you
-      will need to redefine the <code class="literal"><a class="link" href="apas02.html#view_accessor_contexts" title="A.2.5. Accessor Contexts View">veil2.accessor_contexts</a></code>
-      view.  This view associates accessors with <a class="link" href="ar01s05.html#authentication_context" title="5.7. Authentication Contexts">authentication
+      will need to redefine the <code class="literal"><a class="link" href="apas02.html#view_accessor_contexts" title="A.2.5.Â Accessor Contexts View">veil2.accessor_contexts</a></code>
+      view.  This view associates accessors with <a class="link" href="ar01s05.html#authentication_context" title="5.7.Â Authentication Contexts">authentication
       contexts</a>.  Step 3 in the demo provides a good example of
       this.
     </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm844"></a>12.3. Define Your <code class="literal">get_accessor()</code> Function</h3></div></div></div>
+<a name="idm844"></a>12.3.Â Define Your <code class="literal">get_accessor()</code> Function</h3></div></div></div>
 <p>
       For user authentication purposes <code class="literal">Veil2</code> needs
-      the <code class="literal">accessor_id</code> for the <code class="literal"><a class="link" href="apa.html#entity_accessor" title="A.1.9. Accessors Table">accessors</a></code> record that
+      the <code class="literal">accessor_id</code> for the <code class="literal"><a class="link" href="apa.html#entity_accessor" title="A.1.9.Â Accessors Table">accessors</a></code> record that
       represents the user.  Since usernames, email addresses and
       whatever else might be used to uniquely identify a user, in
-      their <a class="link" href="ar01s05.html#authentication_context" title="5.7. Authentication Contexts">authentication
+      their <a class="link" href="ar01s05.html#authentication_context" title="5.7.Â Authentication Contexts">authentication
       context</a> are stored in tables
       external to <code class="literal">Veil2</code>, we need a function that
       returns an <code class="literal">accessor_id</code> for a username.  The
       <code class="literal">
-	<a class="link" href="apas03.html#func_get_accessor" title="A.3.9. get_accessor()">get_accessor()</a></code>
+	<a class="link" href="apas03.html#func_get_accessor" title="A.3.9.Â get_accessor()">get_accessor()</a></code>
       function is that function. 
     </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="session_management"></a>12.4. Session Management</h3></div></div></div>
+<a name="session_management"></a>12.4.Â Session Management</h3></div></div></div>
 <p>
       There are 2 distinct types of sessions provided:
       </p>
@@ -173,7 +173,7 @@
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm869"></a>12.4.1. Shared-Connection Sessions</h4></div></div></div>
+<a name="idm869"></a>12.4.1.Â Shared-Connection Sessions</h4></div></div></div>
 <p>
 	Within a shared connection environment, such as provided by
 	most web applications, a database connection will be shared
@@ -206,7 +206,7 @@
 	called before returning the database connection to the pool.
       </p>
 <p>
-	A detailed description of this can be found in the <a class="link" href="apb.html" title="B. Veil2 Authentication Protocols">Authentication Protocols</a>
+	A detailed description of this can be found in the <a class="link" href="apb.html" title="B.Â Veil2 Authentication Protocols">Authentication Protocols</a>
 	appendix, which describes the functions, their parameters, and
 	describes error handling.
       </p>
@@ -216,7 +216,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm888"></a>12.4.2. Dedicated Sessions</h4></div></div></div>
+<a name="idm888"></a>12.4.2.Â Dedicated Sessions</h4></div></div></div>
 <p>
 	If you have users that connect directly to your database,
 	perhaps through some reporting tool, you will want to set them
@@ -271,21 +271,21 @@ select * from session where result = 0;
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="authent_what"></a>12.5. In Summary</h3></div></div></div>
+<a name="authent_what"></a>12.5.Â In Summary</h3></div></div></div>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem"><p>
 	  For shared-session use, choose an authentication system.
 	  You may need to implement it.  You should disable (in
-	  <code class="literal"><a class="link" href="apa.html#entity_authentication_type" title="A.1.12. Authentication Types Table">veil2.authentication_types</a></code>
+	  <code class="literal"><a class="link" href="apa.html#entity_authentication_type" title="A.1.12.Â Authentication Types Table">veil2.authentication_types</a></code>
 	  the authentication systems you do not want to use. 
 	</p></li>
 <li class="listitem"><p>
-	  Redefine the <code class="literal"><a class="link" href="apas02.html#view_accessor_contexts" title="A.2.5. Accessor Contexts View">accessor_contexts</a></code>
-	  view, if neccessary, to associate users with their <a class="link" href="ar01s05.html#authentication_context" title="5.7. Authentication Contexts">authentication
+	  Redefine the <code class="literal"><a class="link" href="apas02.html#view_accessor_contexts" title="A.2.5.Â Accessor Contexts View">accessor_contexts</a></code>
+	  view, if neccessary, to associate users with their <a class="link" href="ar01s05.html#authentication_context" title="5.7.Â Authentication Contexts">authentication
 	  contexts</a>.
 	</p></li>
 <li class="listitem"><p>
-	  Implement <code class="literal"><a class="link" href="apas03.html#func_get_accessor" title="A.3.9. get_accessor()">get_accessor()</a></code>
+	  Implement <code class="literal"><a class="link" href="apas03.html#func_get_accessor" title="A.3.9.Â get_accessor()">get_accessor()</a></code>
 	  to retrieve <code class="literal">accessor_id</code>s based on
 	  usernames or whatever.
 	</p></li>
@@ -297,9 +297,9 @@ select * from session where result = 0;
 <li class="listitem"><p>
 	  For dedicated sessions users, create
 	  <code class="literal">
-	    <a class="link" href="apa.html#entity_accessor" title="A.1.9. Accessors Table">veil2.accessors</a></code>
+	    <a class="link" href="apa.html#entity_accessor" title="A.1.9.Â Accessors Table">veil2.accessors</a></code>
 	  records.  Maybe create a view that calls
-	  <code class="literal"><a class="link" href="apas03.html#func_hello" title="A.3.16. hello()">veil2.hello()</a></code>. 
+	  <code class="literal"><a class="link" href="apas03.html#func_hello" title="A.3.16.Â hello()">veil2.hello()</a></code>. 
 	</p></li>
 </ul></div>
 </div>
@@ -309,15 +309,15 @@ select * from session where result = 0;
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s11.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s13.html">Next</a>
+<a accesskey="p" href="ar01s11.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s13.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">11. Identify and Define Your Scope Types </td>
+<td width="40%" align="left" valign="top">11.Â Identify and Define Your Scope TypesÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 13. Create Initial Privileges</td>
+<td width="40%" align="right" valign="top">Â 13.Â Create Initial Privileges</td>
 </tr>
 </table>
 </div>

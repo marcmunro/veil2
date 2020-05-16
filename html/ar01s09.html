@@ -1,30 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>9. Exploring The Veil2 Demo</title>
+<title>9.Â Exploring The Veil2 Demo</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
 <link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="prev" href="ar01s08.html" title="8. Getting Started With Veil2">
-<link rel="next" href="ar01s10.html" title="10. Setting Up A Veil2 Virtual Private Database - Overview">
+<link rel="prev" href="ar01s08.html" title="8.Â Getting Started With Veil2">
+<link rel="next" href="ar01s10.html" title="10.Â Setting Up A Veil2 Virtual Private Database - Overview">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s08.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s10.html">Next</a>
+<a accesskey="p" href="ar01s08.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s10.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">8. Getting Started With <code class="literal">Veil2</code> </td>
+<td width="40%" align="left" valign="top">8.Â Getting Started With <code class="literal">Veil2</code>Â </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 10. Setting Up A <code class="literal">Veil2</code> Virtual Private
+<td width="40%" align="right" valign="top">Â 10.Â Setting Up A <code class="literal">Veil2</code> Virtual Private
   Database - Overview</td>
 </tr>
 </table>
@@ -32,10 +32,10 @@
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="veil_demo"></a>9. Exploring The <code class="literal">Veil2</code> Demo</h2></div></div></div>
+<a name="veil_demo"></a>9.Â Exploring The <code class="literal">Veil2</code> Demo</h2></div></div></div>
 <p>
     The <code class="literal">Veil2</code> demo exists to demonstrate a
-    <a class="link" href="ar01s02.html" title="2. What Is A Relational Security System?">Relational Security
+    <a class="link" href="ar01s02.html" title="2.Â What Is A Relational Security System?">Relational Security
     System</a>, show its capabilities and provide an example of 
     <code class="literal">Veil2</code> in use.  It is a trivial, simple and
     incomplete example but provides enough of a foundation to explore
@@ -49,7 +49,7 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm623"></a>9.1. The Security Contexts</h3></div></div></div>
+<a name="idm623"></a>9.1.Â The Security Contexts</h3></div></div></div>
 <p>
       The demo provides 3 relational contexts:
       </p>
@@ -62,7 +62,7 @@
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm630"></a>9.1.1. Corp Context</h4></div></div></div>
+<a name="idm630"></a>9.1.1.Â Corp Context</h4></div></div></div>
 <p>
 	The demo uses the <code class="literal">parties</code> table to identfiy
 	organizations and persons.  There is a tree structured
@@ -76,7 +76,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm635"></a>9.1.2. Org Context</h4></div></div></div>
+<a name="idm635"></a>9.1.2.Â Org Context</h4></div></div></div>
 <p>
 	Within each corp there is a tree of organisational parts, or
 	orgs.  Privileges applied in org contexts apply in all
@@ -88,7 +88,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm638"></a>9.1.3. Project Context</h4></div></div></div>
+<a name="idm638"></a>9.1.3.Â Project Context</h4></div></div></div>
 <p>
 	Projects have their own contexts.  Assignment to a project
 	uses a different mechanism from the more explicit role
@@ -98,7 +98,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm641"></a>9.2. The Organizational Hierarchy</h3></div></div></div>
+<a name="idm641"></a>9.2.Â The Organizational Hierarchy</h3></div></div></div>
 <p>
       See the above descriptions of corp and org contexts for an
       introduction to this.   Persons work for specific orgs in the
@@ -110,7 +110,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm645"></a>9.3. Exploring It</h3></div></div></div>
+<a name="idm645"></a>9.3.Â Exploring It</h3></div></div></div>
 <p>
       You can install the demo to a database that already had
       <code class="literal">Veil2</code> objects installed by running the file
@@ -133,7 +133,7 @@ $ make db; psql -d vpd -f demo/demo.sql
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm655"></a>9.3.1. Users</h4></div></div></div>
+<a name="idm655"></a>9.3.1.Â Users</h4></div></div></div>
 <p>
 	This section describes a number of the users defined for the
 	demo.  These users are mostly assigned the same roles, but
@@ -141,7 +141,7 @@ $ make db; psql -d vpd -f demo/demo.sql
 	pretty convincing demonstration of the power of relational
 	security contexts.  Note that although the users are
 	connecting in a number of different login contexts, their
-	<a class="link" href="ar01s05.html#role_mapping" title="5.3.1. Contextual Role Mapping">role mapping</a> contexts are
+	<a class="link" href="ar01s05.html#role_mapping" title="5.3.1.Â Contextual Role Mapping">role mapping</a> contexts are
 	all the same (the global context).
       </p>
 <p>
@@ -152,7 +152,7 @@ $ make db; psql -d vpd -f demo/demo.sql
 	the ability to subsequently use the two-step authentication
 	protocol as a means to further improve your authentication
 	security is something that you may not want to lose.  For more
-	on this see the <a class="link" href="apb.html" title="B. Veil2 Authentication Protocols">authentication protocols</a>
+	on this see the <a class="link" href="apb.html" title="B.Â Veil2 Authentication Protocols">authentication protocols</a>
 	appendix.
       </p>
 <div class="sect4">
@@ -444,7 +444,7 @@ vpd=&gt; select veil2.i_have_priv_in_scope(23, 4, 105);
 	</p>
 <p>
 	  We can discover the full set of Simon's privileges by
-	  selecting from <code class="literal"><a class="link" href="apa.html#entity_session_privilege" title="A.1.14. Session Privileges Type and Table">session_privileges</a></code>.
+	  selecting from <code class="literal"><a class="link" href="apa.html#entity_session_privilege" title="A.1.14.Â Session Privileges Type and Table">session_privileges</a></code>.
 	  Since this contains bitmaps, which are difficult to read, we
 	  use <code class="literal">to_array()</code> to show the individual
 	  privileges:
@@ -492,7 +492,7 @@ vpd-&gt;  from session_privileges;
 	</p>
 <p>
 	  We can get more detailed information about privilege
-	  assignments from the <code class="literal"><a class="link" href="apas02.html#view_privilege_assignments" title="A.2.14. Privilege Assignments View">veil2.privilege_assignments</a></code>
+	  assignments from the <code class="literal"><a class="link" href="apas02.html#view_privilege_assignments" title="A.2.14.Â Privilege Assignments View">veil2.privilege_assignments</a></code>
 	  view:
 	  </p>
 <pre class="programlisting">
@@ -533,15 +533,15 @@ vpd-&gt;  where accessor_id = 114 and privilege_id in (17, 23);
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s08.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s10.html">Next</a>
+<a accesskey="p" href="ar01s08.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s10.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">8. Getting Started With <code class="literal">Veil2</code> </td>
+<td width="40%" align="left" valign="top">8.Â Getting Started With <code class="literal">Veil2</code>Â </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 10. Setting Up A <code class="literal">Veil2</code> Virtual Private
+<td width="40%" align="right" valign="top">Â 10.Â Setting Up A <code class="literal">Veil2</code> Virtual Private
   Database - Overview</td>
 </tr>
 </table>

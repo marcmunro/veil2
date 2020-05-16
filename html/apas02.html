@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A.2. Veil2 Views</title>
+<title>A.2.Â Veil2 Views</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="up" href="apa.html" title="A. Veil2 ERD and Database Objects">
-<link rel="prev" href="apa.html" title="A. Veil2 ERD and Database Objects">
-<link rel="next" href="apas03.html" title="A.3. Veil2 Functions and Triggers">
+<link rel="up" href="apa.html" title="A.Â Veil2 ERD and Database Objects">
+<link rel="prev" href="apa.html" title="A.Â Veil2 ERD and Database Objects">
+<link rel="next" href="apas03.html" title="A.3.Â Veil2 Functions and Triggers">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="apa.html">Prev</a> </td>
+<a accesskey="p" href="apa.html">Prev</a>Â </td>
 <td width="20%" align="center"><a accesskey="u" href="apa.html">Up</a></td>
-<td width="40%" align="right"> <a accesskey="n" href="apas03.html">Next</a>
+<td width="40%" align="right">Â <a accesskey="n" href="apas03.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">A. <code class="literal">Veil2</code> ERD and Database Objects </td>
+<td width="40%" align="left" valign="top">A.Â <code class="literal">Veil2</code> ERD and Database ObjectsÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> A.3. Veil2 Functions and Triggers</td>
+<td width="40%" align="right" valign="top">Â A.3.Â Veil2 Functions and Triggers</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm1278"></a>A.2. Veil2 Views</h2></div></div></div>
+<a name="idm1278"></a>A.2.Â Veil2 Views</h2></div></div></div>
 <p>
     Many of the views in <code class="literal">Veil2</code> come in 3 flavours:
     </p>
@@ -72,10 +72,10 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_direct_role_privileges"></a>A.2.1. Direct Role Privileges Views</h3></div></div></div>
+<a name="view_direct_role_privileges"></a>A.2.1.Â Direct Role Privileges Views</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1301"></a>A.2.1.1. <code class="literal">direct_role_privileges_vv</code>
+<a name="idm1301"></a>A.2.1.1.Â <code class="literal">direct_role_privileges_vv</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.direct_role_privileges_vv as
@@ -92,7 +92,7 @@ such sets of views.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1304"></a>A.2.1.2. <code class="literal">direct_role_privileges_vv_info</code>
+<a name="idm1304"></a>A.2.1.2.Â <code class="literal">direct_role_privileges_vv_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.direct_role_privileges_vv_info (
@@ -111,7 +111,7 @@ views.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1307"></a>A.2.1.3. <code class="literal">direct_role_privileges_v</code>
+<a name="idm1307"></a>A.2.1.3.Â <code class="literal">direct_role_privileges_v</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.direct_role_privileges_v (
@@ -151,7 +151,7 @@ Note the use of bitmap_of() to aggregate privilege_ids.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1310"></a>A.2.1.4. <code class="literal">direct_role_privileges_v_info</code>
+<a name="idm1310"></a>A.2.1.4.Â <code class="literal">direct_role_privileges_v_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.direct_role_privileges_v_info (
@@ -170,7 +170,7 @@ views.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1313"></a>A.2.1.5. <code class="literal">direct_role_privileges</code>
+<a name="idm1313"></a>A.2.1.5.Â <code class="literal">direct_role_privileges</code>
 </h4></div></div></div>
 <pre class="programlisting">
 materialized view veil2.direct_role_privileges
@@ -186,7 +186,7 @@ Returns all privileges, along with some basic privilege promotion data,
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1316"></a>A.2.1.6. <code class="literal">direct_role_privileges_info</code>
+<a name="idm1316"></a>A.2.1.6.Â <code class="literal">direct_role_privileges_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.direct_role_privileges_info (
@@ -206,10 +206,10 @@ views.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_all_role_roles"></a>A.2.2. All Role Roles View</h3></div></div></div>
+<a name="view_all_role_roles"></a>A.2.2.Â All Role Roles View</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1321"></a>A.2.2.1. <code class="literal">all_role_roles</code>
+<a name="idm1321"></a>A.2.2.1.Â <code class="literal">all_role_roles</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_role_roles (
@@ -244,10 +244,10 @@ a is assigned (indirectly) to c.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_all_role_privs"></a>A.2.3. All Role Privs Views</h3></div></div></div>
+<a name="view_all_role_privs"></a>A.2.3.Â All Role Privs Views</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1326"></a>A.2.3.1. <code class="literal">all_role_privs_vv</code>
+<a name="idm1326"></a>A.2.3.1.Â <code class="literal">all_role_privs_vv</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_role_privs_vv (
@@ -277,7 +277,7 @@ that this is a true view, not relying on any materialized views.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1329"></a>A.2.3.2. <code class="literal">all_role_privs_vv_info</code>
+<a name="idm1329"></a>A.2.3.2.Â <code class="literal">all_role_privs_vv_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_role_privs_vv_info (
@@ -301,7 +301,7 @@ views.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1332"></a>A.2.3.3. <code class="literal">all_role_privs_v</code>
+<a name="idm1332"></a>A.2.3.3.Â <code class="literal">all_role_privs_v</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_role_privs_v (
@@ -333,7 +333,7 @@ information.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1335"></a>A.2.3.4. <code class="literal">all_role_privs_v_info</code>
+<a name="idm1335"></a>A.2.3.4.Â <code class="literal">all_role_privs_v_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_role_privs_v_info (
@@ -357,7 +357,7 @@ views.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1338"></a>A.2.3.5. <code class="literal">all_role_privs</code>
+<a name="idm1338"></a>A.2.3.5.Â <code class="literal">all_role_privs</code>
 </h4></div></div></div>
 <pre class="programlisting">
 materialized view veil2.all_role_privs
@@ -370,7 +370,7 @@ Materialized version of veil2.all_role_privs_v.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1341"></a>A.2.3.6. <code class="literal">all_role_privs_info</code>
+<a name="idm1341"></a>A.2.3.6.Â <code class="literal">all_role_privs_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_role_privs_info (
@@ -395,10 +395,10 @@ views.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_scope_promotions"></a>A.2.4. Scope Promotions View</h3></div></div></div>
+<a name="view_scope_promotions"></a>A.2.4.Â Scope Promotions View</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1346"></a>A.2.4.1. <code class="literal">scope_promotions</code>
+<a name="idm1346"></a>A.2.4.1.Â <code class="literal">scope_promotions</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.scope_promotions (
@@ -451,10 +451,10 @@ veil2.all_scope_promotions which you should have no need to modify.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_accessor_contexts"></a>A.2.5. Accessor Contexts View</h3></div></div></div>
+<a name="view_accessor_contexts"></a>A.2.5.Â Accessor Contexts View</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1351"></a>A.2.5.1. <code class="literal">scope_promotions</code>
+<a name="idm1351"></a>A.2.5.1.Â <code class="literal">scope_promotions</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.accessor_contexts (
@@ -503,10 +503,10 @@ in the context of the client that they work for.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_all_scope_promotions"></a>A.2.6. All Scope Promotions Views</h3></div></div></div>
+<a name="view_all_scope_promotions"></a>A.2.6.Â All Scope Promotions Views</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1356"></a>A.2.6.1. <code class="literal">all_scope_promotions_vv</code>
+<a name="idm1356"></a>A.2.6.1.Â <code class="literal">all_scope_promotions_vv</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_scope_promotions_vv as
@@ -520,7 +520,7 @@ that this is a true view, not relying on any materialized views.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1359"></a>A.2.6.2. <code class="literal">all_scope_promotions_v</code>
+<a name="idm1359"></a>A.2.6.2.Â <code class="literal">all_scope_promotions_v</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_scope_promotions_v (
@@ -564,7 +564,7 @@ implementation.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1362"></a>A.2.6.3. <code class="literal">all_scope_promotions</code>
+<a name="idm1362"></a>A.2.6.3.Â <code class="literal">all_scope_promotions</code>
 </h4></div></div></div>
 <pre class="programlisting">
 materialized view veil2.all_scope_promotions
@@ -588,10 +588,10 @@ implementation.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_scope_tree"></a>A.2.7. Scope Tree View</h3></div></div></div>
+<a name="view_scope_tree"></a>A.2.7.Â Scope Tree View</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1367"></a>A.2.7.1. <code class="literal">scope_tree</code>
+<a name="idm1367"></a>A.2.7.1.Â <code class="literal">scope_tree</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.scope_tree (scope_tree) as
@@ -658,10 +658,10 @@ designers and administrators and is not used elsewhere in Veil2.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_promotable_privileges"></a>A.2.8. Promotable Privileges Views</h3></div></div></div>
+<a name="view_promotable_privileges"></a>A.2.8.Â Promotable Privileges Views</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1372"></a>A.2.8.1. <code class="literal">promotable_privileges</code>
+<a name="idm1372"></a>A.2.8.1.Â <code class="literal">promotable_privileges</code>
 </h4></div></div></div>
 <pre class="programlisting">
 create view veil2.promotable_privileges (
@@ -682,7 +682,7 @@ in veil2 but may be useful for visualising data.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1375"></a>A.2.8.2. <code class="literal">promotable_privileges_info</code>
+<a name="idm1375"></a>A.2.8.2.Â <code class="literal">promotable_privileges_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 create view veil2.promotable_privileges_info (
@@ -701,10 +701,10 @@ views.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_all_accessor_roles"></a>A.2.9. All Accessor Roles Views</h3></div></div></div>
+<a name="view_all_accessor_roles"></a>A.2.9.Â All Accessor Roles Views</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1380"></a>A.2.9.1. <code class="literal">all_accessor_roles</code>
+<a name="idm1380"></a>A.2.9.1.Â <code class="literal">all_accessor_roles</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_accessor_roles (
@@ -749,7 +749,7 @@ select party_id, role_id,
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1383"></a>A.2.9.2. <code class="literal">all_accessor_roles_plus</code>
+<a name="idm1383"></a>A.2.9.2.Â <code class="literal">all_accessor_roles_plus</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_accessor_roles_plus as
@@ -770,10 +770,10 @@ debugging.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_all_context_privs"></a>A.2.10. All Context Privs Views</h3></div></div></div>
+<a name="view_all_context_privs"></a>A.2.10.Â All Context Privs Views</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1388"></a>A.2.10.1. <code class="literal">all_context_privs</code>
+<a name="idm1388"></a>A.2.10.1.Â <code class="literal">all_context_privs</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_context_privs as
@@ -791,7 +791,7 @@ access to this.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1391"></a>A.2.10.2. <code class="literal">all_context_privs_info</code>
+<a name="idm1391"></a>A.2.10.2.Â <code class="literal">all_context_privs_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_context_privs_info (
@@ -817,10 +817,10 @@ views.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_all_accessor_privs"></a>A.2.11. All Accessor Privs Views</h3></div></div></div>
+<a name="view_all_accessor_privs"></a>A.2.11.Â All Accessor Privs Views</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1396"></a>A.2.11.1. <code class="literal">all_accessor_privs_vv</code>
+<a name="idm1396"></a>A.2.11.1.Â <code class="literal">all_accessor_privs_vv</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_accessor_privs_vv as
@@ -833,7 +833,7 @@ As veil2.all_accessor_privs_v
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1399"></a>A.2.11.2. <code class="literal">all_accessor_privs_vv_info</code>
+<a name="idm1399"></a>A.2.11.2.Â <code class="literal">all_accessor_privs_vv_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_accessor_privs_vv_info (
@@ -858,7 +858,7 @@ views.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1402"></a>A.2.11.3. <code class="literal">all_accessor_privs_v</code>
+<a name="idm1402"></a>A.2.11.3.Â <code class="literal">all_accessor_privs_v</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_accessor_privs_v (
@@ -885,7 +885,7 @@ contexts, excepting the implied personal context.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1405"></a>A.2.11.4. <code class="literal">all_accessor_privs_v_info</code>
+<a name="idm1405"></a>A.2.11.4.Â <code class="literal">all_accessor_privs_v_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_accessor_privs_v_info (
@@ -910,7 +910,7 @@ views.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1408"></a>A.2.11.5. <code class="literal">all_accessor_privs</code>
+<a name="idm1408"></a>A.2.11.5.Â <code class="literal">all_accessor_privs</code>
 </h4></div></div></div>
 <pre class="programlisting">
 materialized view veil2.all_accessor_privs
@@ -924,7 +924,7 @@ contexts, excepting the implied personal context.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1411"></a>A.2.11.6. <code class="literal">all_accessor_privs_info</code>
+<a name="idm1411"></a>A.2.11.6.Â <code class="literal">all_accessor_privs_info</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_accessor_privs_info (
@@ -950,10 +950,10 @@ views.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_role_chains"></a>A.2.12. Role Chains View</h3></div></div></div>
+<a name="view_role_chains"></a>A.2.12.Â Role Chains View</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1416"></a>A.2.12.1. <code class="literal">role_chains</code>
+<a name="idm1416"></a>A.2.12.1.Â <code class="literal">role_chains</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.role_chains as
@@ -973,10 +973,10 @@ complete way.  Try it, it should immediately make sense.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_all_accessor_roles_plus"></a>A.2.13. All Accessor Roles Plus</h3></div></div></div>
+<a name="view_all_accessor_roles_plus"></a>A.2.13.Â All Accessor Roles Plus</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1421"></a>A.2.13.1. <code class="literal">all_accessor_roles_plus</code>
+<a name="idm1421"></a>A.2.13.1.Â <code class="literal">all_accessor_roles_plus</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.all_accessor_roles_plus as
@@ -997,10 +997,10 @@ debugging.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="view_privilege_assignments"></a>A.2.14. Privilege Assignments View</h3></div></div></div>
+<a name="view_privilege_assignments"></a>A.2.14.Â Privilege Assignments View</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1426"></a>A.2.14.1. <code class="literal">privilege_assignments</code>
+<a name="idm1426"></a>A.2.14.1.Â <code class="literal">privilege_assignments</code>
 </h4></div></div></div>
 <pre class="programlisting">
 view veil2.privilege_assignments as
@@ -1065,15 +1065,15 @@ select *
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="apa.html">Prev</a> </td>
+<a accesskey="p" href="apa.html">Prev</a>Â </td>
 <td width="20%" align="center"><a accesskey="u" href="apa.html">Up</a></td>
-<td width="40%" align="right"> <a accesskey="n" href="apas03.html">Next</a>
+<td width="40%" align="right">Â <a accesskey="n" href="apas03.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">A. <code class="literal">Veil2</code> ERD and Database Objects </td>
+<td width="40%" align="left" valign="top">A.Â <code class="literal">Veil2</code> ERD and Database ObjectsÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> A.3. Veil2 Functions and Triggers</td>
+<td width="40%" align="right" valign="top">Â A.3.Â Veil2 Functions and Triggers</td>
 </tr>
 </table>
 </div>

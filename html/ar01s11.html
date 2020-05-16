@@ -1,38 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>11. Identify and Define Your Scope Types</title>
+<title>11.Â Identify and Define Your Scope Types</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
 <link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="prev" href="ar01s10.html" title="10. Setting Up A Veil2 Virtual Private Database - Overview">
-<link rel="next" href="ar01s12.html" title="12. Setting Up Authentication and Session Management">
+<link rel="prev" href="ar01s10.html" title="10.Â Setting Up A Veil2 Virtual Private Database - Overview">
+<link rel="next" href="ar01s12.html" title="12.Â Setting Up Authentication and Session Management">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s10.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s12.html">Next</a>
+<a accesskey="p" href="ar01s10.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s12.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">10. Setting Up A <code class="literal">Veil2</code> Virtual Private
-  Database - Overview </td>
+<td width="40%" align="left" valign="top">10.Â Setting Up A <code class="literal">Veil2</code> Virtual Private
+  Database - OverviewÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 12. Setting Up Authentication and Session Management</td>
+<td width="40%" align="right" valign="top">Â 12.Â Setting Up Authentication and Session Management</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="setup_scope_types"></a>11. Identify and Define Your Scope Types</h2></div></div></div>
+<a name="setup_scope_types"></a>11.Â Identify and Define Your Scope Types</h2></div></div></div>
 <p>
     You need to identify the types of scopes that your privileges will
     have.  It may be easier to think in terms of relational contexts
@@ -55,8 +55,8 @@
     global and personal contexts.
   </p>
 <p>
-    Consider also your <a class="link" href="ar01s05.html#authentication_context" title="5.7. Authentication Contexts">authentication contexts</a>
-    and <a class="link" href="ar01s05.html#role_mapping" title="5.3.1. Contextual Role Mapping">role mapping</a> contexts.
+    Consider also your <a class="link" href="ar01s05.html#authentication_context" title="5.7.Â Authentication Contexts">authentication contexts</a>
+    and <a class="link" href="ar01s05.html#role_mapping" title="5.3.1.Â Contextual Role Mapping">role mapping</a> contexts.
     You need to work out whether all of your users will be logging in
     to the system as if they were all using the same system within the
     same copmany, or whether they exist in mutually independent
@@ -64,8 +64,8 @@
     independent spaces will need to separately manage their own
     role-&gt;role mappings or whether a single set of mappings that apply
     equally to all users is enough.  If you need multiple role-&gt;role
-    mapping contexts, you need to define <span class="quote">&#8220;<span class="quote"><code class="literal">mapping context
-    target scope type</code></span>&#8221;</span> in the <code class="literal"><a class="link" href="apa.html#entity_system_parameter" title="A.1.2. System Parameters Table">system_parameters</a></code>
+    mapping contexts, you need to define <span class="quote">â€œ<span class="quote"><code class="literal">mapping context
+    target scope type</code></span>â€</span> in the <code class="literal"><a class="link" href="apa.html#entity_system_parameter" title="A.1.2.Â System Parameters Table">system_parameters</a></code>
     table.
   </p>
 <p>
@@ -76,18 +76,18 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm799"></a>11.1. In Summary</h3></div></div></div>
+<a name="idm799"></a>11.1.Â In Summary</h3></div></div></div>
 <p>
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem"><p>
-	    Create records in <code class="literal"><a class="link" href="apa.html#entity_scope_type" title="A.1.1. Scope Types Table">veil2.scope_types</a></code>.
+	    Create records in <code class="literal"><a class="link" href="apa.html#entity_scope_type" title="A.1.1.Â Scope Types Table">veil2.scope_types</a></code>.
 	  </p></li>
 <li class="listitem"><p>
 	    Define how your role mapping context is promoted from
 	    authentication contexts in the <code class="literal">system
-	    parameter</code>: <span class="quote">&#8220;<span class="quote"><code class="literal">mapping context
-	    target scope type</code></span>&#8221;</span>.
+	    parameter</code>: <span class="quote">â€œ<span class="quote"><code class="literal">mapping context
+	    target scope type</code></span>â€</span>.
 	  </p></li>
 </ul></div>
 <p>
@@ -99,16 +99,16 @@
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s10.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="ar01s12.html">Next</a>
+<a accesskey="p" href="ar01s10.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="ar01s12.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">10. Setting Up A <code class="literal">Veil2</code> Virtual Private
-  Database - Overview </td>
+<td width="40%" align="left" valign="top">10.Â Setting Up A <code class="literal">Veil2</code> Virtual Private
+  Database - OverviewÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 12. Setting Up Authentication and Session Management</td>
+<td width="40%" align="right" valign="top">Â 12.Â Setting Up Authentication and Session Management</td>
 </tr>
 </table>
 </div>

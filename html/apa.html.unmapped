@@ -1,44 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A. Veil2 ERD and Database Objects</title>
+<title>A.Â Veil2 ERD and Database Objects</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
 <link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="prev" href="ar01s22.html" title="22. Tips and Considerations">
-<link rel="next" href="apas02.html" title="A.2. Veil2 Views">
+<link rel="prev" href="ar01s22.html" title="22.Â Tips and Considerations">
+<link rel="next" href="apas02.html" title="A.2.Â Veil2 Views">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s22.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="apas02.html">Next</a>
+<a accesskey="p" href="ar01s22.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="apas02.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">22. Tips and Considerations </td>
+<td width="40%" align="left" valign="top">22.Â Tips and ConsiderationsÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> A.2. Veil2 Views</td>
+<td width="40%" align="right" valign="top">Â A.2.Â Veil2 Views</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="appendix">
 <div class="titlepage"><div><div><h2 class="title">
-<a name="idm1210"></a>A. <code class="literal">Veil2</code> ERD and Database Objects</h2></div></div></div>
+<a name="idm1210"></a>A.Â <code class="literal">Veil2</code> ERD and Database Objects</h2></div></div></div>
 <div class="mediaobject"><img src="veil2_erd.png"></div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm1216"></a>A.1. Veil2 Tables</h2></div></div></div>
+<a name="idm1216"></a>A.1.Â Veil2 Tables</h2></div></div></div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_scope_type"></a>A.1.1. Scope Types Table</h3></div></div></div>
+<a name="entity_scope_type"></a>A.1.1.Â Scope Types Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.scope_types (
   scope_type_id	       		integer not null,
@@ -62,7 +62,7 @@ personal contexts.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_system_parameter"></a>A.1.2. System Parameters Table</h3></div></div></div>
+<a name="entity_system_parameter"></a>A.1.2.Â System Parameters Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.system_parameters (
     parameter_name		text not null,
@@ -82,7 +82,7 @@ Provides values for various parameters.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_role_type"></a>A.1.3. Role Types Table</h3></div></div></div>
+<a name="entity_role_type"></a>A.1.3.Â Role Types Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.role_types (
   role_type_id		      integer not null,
@@ -113,7 +113,7 @@ to identify specific properties of specific role_types.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_privilege"></a>A.1.4. Privileges Table</h3></div></div></div>
+<a name="entity_privilege"></a>A.1.4.Â Privileges Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.privileges (
   privilege_id			integer not null,
@@ -193,7 +193,7 @@ name, a description of the privilege should appear here.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_scope"></a>A.1.5. Scopes Table</h3></div></div></div>
+<a name="entity_scope"></a>A.1.5.Â Scopes Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.scopes (
   scope_type_id	       		integer not null,
@@ -272,7 +272,7 @@ data.  This might be a party, or a project, or a department.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_role"></a>A.1.6. Roles Table</h3></div></div></div>
+<a name="entity_role"></a>A.1.6.Â Roles Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.roles (
   role_id			integer not null,
@@ -323,7 +323,7 @@ name, a description of the role should appear here.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_context_role"></a>A.1.7. Context Roles Table</h3></div></div></div>
+<a name="entity_context_role"></a>A.1.7.Â Context Roles Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.context_roles (
   role_id			integer not null,
@@ -371,7 +371,7 @@ ever see roles from more than one context.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_role_privilege"></a>A.1.8. Role Privileges Table</h3></div></div></div>
+<a name="entity_role_privilege"></a>A.1.8.Â Role Privileges Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.role_privileges (
   role_id			integer not null,
@@ -416,7 +416,7 @@ superuser role.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_accessor"></a>A.1.9. Accessors Table</h3></div></div></div>
+<a name="entity_accessor"></a>A.1.9.Â Accessors Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.accessors (
   accessor_id			integer not null,
@@ -477,7 +477,7 @@ from the protected database
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_accessor_role"></a>A.1.10. Accessor Roles Table</h3></div></div></div>
+<a name="entity_accessor_role"></a>A.1.10.Â Accessor Roles Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.accessor_roles (
   accessor_id			integer not null,
@@ -501,7 +501,7 @@ that that role has been assigned, whether directly or indirectly.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_session"></a>A.1.11. Sessions Table</h3></div></div></div>
+<a name="entity_session"></a>A.1.11.Â Sessions Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.scope_types (
   scope_type_id	       		integer not null,
@@ -525,7 +525,7 @@ personal contexts.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_authentication_type"></a>A.1.12. Authentication Types Table</h3></div></div></div>
+<a name="entity_authentication_type"></a>A.1.12.Â Authentication Types Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.authentication_types (
   shortname			text not null,
@@ -593,7 +593,7 @@ exchange, should you wish to implement such a thing.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_role_role"></a>A.1.13. Role Roles Table</h3></div></div></div>
+<a name="entity_role_role"></a>A.1.13.Â Role Roles Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.role_roles (
   primary_role_id		integer not null,
@@ -626,7 +626,7 @@ may have different privileges from a CSR at another.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_session_privilege"></a>A.1.14. Session Privileges Type and Table</h3></div></div></div>
+<a name="entity_session_privilege"></a>A.1.14.Â Session Privileges Type and Table</h3></div></div></div>
 <pre class="programlisting">
 create type veil2.session_privileges_t as (
   session_id			integer,
@@ -650,7 +650,7 @@ table which is populated by Veil2's session management functions.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_authentication_detail"></a>A.1.15. Authentication Details Table</h3></div></div></div>
+<a name="entity_authentication_detail"></a>A.1.15.Â Authentication Details Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.authentication_details (
   accessor_id			integer not null,
@@ -685,15 +685,15 @@ be where the password would be stored.
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s22.html">Prev</a> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="apas02.html">Next</a>
+<a accesskey="p" href="ar01s22.html">Prev</a>Â </td>
+<td width="20%" align="center">Â </td>
+<td width="40%" align="right">Â <a accesskey="n" href="apas02.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">22. Tips and Considerations </td>
+<td width="40%" align="left" valign="top">22.Â Tips and ConsiderationsÂ </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> A.2. Veil2 Views</td>
+<td width="40%" align="right" valign="top">Â A.2.Â Veil2 Views</td>
 </tr>
 </table>
 </div>

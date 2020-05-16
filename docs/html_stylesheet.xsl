@@ -37,10 +37,9 @@ Custom docbook stylesheet for html for Veil2 docs.
   <xsl:param name="section.label.includes.component.label">1</xsl:param>
   <xsl:param name="chunk.section.depth" select="1"/>
 
-  <!-- Doctype -->
-  <xsl:param name="chunker.output.doctype-public" select="''"/>
+  <!-- Easier to read html -->
   <xsl:param name="chunker.output.indent" select="'yes'"/>
-  
+  <xsl:param name="chunker.output.encoding">UTF-8</xsl:param>
   
   <!-- Template copied from inline.xsl and hacked to properly deal with
        strikethrough.  -->

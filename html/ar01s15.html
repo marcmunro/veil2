@@ -1,4 +1,38 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>15. Link Your Users To Veil2's Accessors</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="prev" href="ar01s14.html" title="14. Integrate And/Or Create Roles"><link rel="next" href="ar01s16.html" title="16. Link Your Scopes and Security Contexts"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s14.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s16.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">14. Integrate And/Or Create Roles </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 16. Link Your Scopes and Security Contexts</td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setup_accessors"></a>15. Link Your Users To <code class="literal">Veil2</code>'s Accessors</h2></div></div></div><p>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>15. Link Your Users To Veil2's Accessors</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="prev" href="ar01s14.html" title="14. Integrate And/Or Create Roles">
+<link rel="next" href="ar01s16.html" title="16. Link Your Scopes and Security Contexts">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ar01s14.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s16.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">14. Integrate And/Or Create Roles </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 16. Link Your Scopes and Security Contexts</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="setup_accessors"></a>15. Link Your Users To <code class="literal">Veil2</code>'s Accessors</h2></div></div></div>
+<p>
     Unlike the situation with roles, <code class="literal">Veil2</code>'s
     accessors are probably not going to be usable in place of your
     system's users or parties tables.  Your system is likely to have a
@@ -6,74 +40,140 @@
     keeping the <code class="literal">Veil2</code> accessor separate from this
     is likely to be the simplest thing you can do.  This is the way
     that the demo handles accessors and is our recommended practice.
-  </p><p><a name="accessors_steps"></a>
+  </p>
+<p><a name="accessors_steps"></a>
     The steps for this are:
-    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
 	create foreign-key links to your users;
-      </li><li class="listitem">
+      </li>
+<li class="listitem">
 	create insert triggers;
-      </li><li class="listitem">
+      </li>
+<li class="listitem">
 	copy existing user records;
-      </li><li class="listitem">
+      </li>
+<li class="listitem">
 	copy existing user authentication details;
-      </li><li class="listitem">
+      </li>
+<li class="listitem">
 	ensure authentication changes are propagated.
-      </li></ul></div><p>
-  </p><p>
+      </li>
+</ul></div>
+<p>
+  </p>
+<p>
     Look for STEP 6 in the file <code class="literal">demo/demo.sql</code>.
-  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1034"></a>15.1. Create Foreign-Key Links to Your Users</h3></div></div></div><p>
+  </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1034"></a>15.1. Create Foreign-Key Links to Your Users</h3></div></div></div>
+<p>
       For each user table that you have you will need to create a
       foreign key link from <code class="literal"><a class="link" href="apa.html#entity_accessor" title="A.1.9. Accessors Table">veil2.accessors</a></code>.  If
       you have multiple users tables this will be more complex, but
       the aim is to have a single accessor entry for each user.
-    </p><p>
+    </p>
+<p>
       You may be able to use the same id for
       <code class="literal">accessors</code> as you currently use for for your
       users table.  Do so if you can.  The demo does this.
-    </p><p>
+    </p>
+<p>
       You should use the <code class="literal">on delete cascade</code> and
       <code class="literal">on update cascade</code> options on the foreign key
       constraint so that updates and deletions on your users table are
       reflected in <code class="literal">veil2.accessors</code>.
-    </p><p>
+    </p>
+<p>
       Take a look at the code for the demo (in
       <code class="literal">demo/demo.sql</code>) for details (following the
       comment <span class="quote">&#8220;<span class="quote">STEP 6:</span>&#8221;</span>).
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1048"></a>15.2. Create Insert Trigger</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1048"></a>15.2. Create Insert Trigger</h3></div></div></div>
+<p>
       When new users are created in your users table, we need
       <code class="literal">veil2.accessors</code> records to also be created.
       Insert triggers on your users tables will achieve this.  A fine
       example can be found in the demo.
-    </p><p>
+    </p>
+<p>
       Note that you do not need update and delete triggers as long as
       you create your FK with the <code class="literal">on delete cascade</code>
       and <code class="literal">on update cascade</code> options.
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1055"></a>15.3. Copy Existing User Records</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1055"></a>15.3. Copy Existing User Records</h3></div></div></div>
+<p>
       Create copies of the existing user records in
       <code class="literal">veil2.accessors</code>.  See the demo.
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1059"></a>15.4. Copy Existing Authentication Details</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1059"></a>15.4. Copy Existing Authentication Details</h3></div></div></div>
+<p>
       <code class="literal">Veil2</code> accessors may have multiple sets of
       authentication details, 1 for each active authentication type
       (eg bcrypt).  Existing authentication details will need to be
       copied from your current users tables, possibly modified (eg
       bcrypted), and stored in
       <code class="literal">veil2.authentication_details</code>.
-    </p><p>
+    </p>
+<p>
       See the demo for an example but note that the demo uses
       plaintext authentication which should not be used.
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1065"></a>15.5. Ensure Authentication Changes Are Propagated</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1065"></a>15.5. Ensure Authentication Changes Are Propagated</h3></div></div></div>
+<p>
       Ideally, on an ongoing basis, all authentication details will be
       kept solely in <code class="literal">veil2.authentication_details</code>
       and use of the original users tables for this will be
       deprecated.  Until this can be completed though, you may still
       be allowing passwords etc to be created in your original users
       tables.
-    </p><p>
+    </p>
+<p>
       To ensure that password changes are propagated to
       <code class="literal">Veil2</code>, triggers should be placed on the
       source tables which will cause the appropriate modifications to
       be made to <code class="literal">veil2.authentication_details</code>.
       Again, examples can be found in the demo code.
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1072"></a>15.6. In Summary</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1072"></a>15.6. In Summary</h3></div></div></div>
+<p>
       What the <a class="link" href="ar01s15.html#accessors_steps">above list</a> says.
-    </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s14.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s16.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">14. Integrate And/Or Create Roles </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 16. Link Your Scopes and Security Contexts</td></tr></table></div></body></html>
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ar01s14.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s16.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">14. Integrate And/Or Create Roles </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 16. Link Your Scopes and Security Contexts</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

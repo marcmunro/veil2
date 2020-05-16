@@ -1,4 +1,38 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>19. Secure Your Views</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="prev" href="ar01s18.html" title="18. Secure Your Tables"><link rel="next" href="ar01s20.html" title="20. Assign Initial Roles"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s18.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s20.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">18. Secure Your Tables </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 20. Assign Initial Roles</td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="secure_views"></a>19. Secure Your Views</h2></div></div></div><p>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>19. Secure Your Views</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="prev" href="ar01s18.html" title="18. Secure Your Tables">
+<link rel="next" href="ar01s20.html" title="20. Assign Initial Roles">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ar01s18.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s20.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">18. Secure Your Tables </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 20. Assign Initial Roles</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="secure_views"></a>19. Secure Your Views</h2></div></div></div>
+<p>
     Just as with tables, user-facing views should be secured.  You can
     do this either explicitly, by adding privilege testing functions to
     the view definitions, or implicitly by building the views on
@@ -6,10 +40,15 @@
     views will need to be owned by a separate database role from that
     which owns the tables as views are processed with the access
     rights of their owners.
-  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1179"></a>19.1. Doing It</h3></div></div></div><p>
+  </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1179"></a>19.1. Doing It</h3></div></div></div>
+<p>
       This is best explained by example.  Here is an example from the
       demo:
-      </p><pre class="programlisting">
+      </p>
+<pre class="programlisting">
 create or replace
 view party_roles (
     party_id,
@@ -35,8 +74,10 @@ select ar.accessor_id, r.role_name,
  where veil2.i_have_global_priv(20)
     or veil2.i_have_priv_in_scope(20, 3, context_id)
     or veil2.i_have_priv_in_scope(20, 4, context_id);
-      </pre><p>
-    </p><p>
+      </pre>
+<p>
+    </p>
+<p>
       Note that if the view is updatable you will also need to build
       instead-of triggers or some equivalent, that take into account
       update, insert and delete privileges.  One wrinkle with
@@ -44,11 +85,38 @@ select ar.accessor_id, r.role_name,
       rows that they would not be allowed to see, so the select
       privilege must usually be explicitly tested in addition to the
       select, insert or update privilege.
-    </p><p>
+    </p>
+<p>
       Views do provide some interesting possibilities though.  One is
       to use the privilege testing functions on specific columns to
       make access controls even more fine-grained.
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1185"></a>19.2. In Summary</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1185"></a>19.2. In Summary</h3></div></div></div>
+<p>
       Add privilege testing functions to each user-facing view
       definition.
-    </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s18.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s20.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">18. Secure Your Tables </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 20. Assign Initial Roles</td></tr></table></div></body></html>
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ar01s18.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s20.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">18. Secure Your Tables </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 20. Assign Initial Roles</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

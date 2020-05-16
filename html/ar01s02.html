@@ -1,15 +1,51 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>2. What Is A Relational Security System?</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="prev" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="next" href="ar01s03.html" title="3. How Is Relational Security Different?"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Veil2 0.5 (alpha) Documentation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 3. How Is Relational Security Different?</td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="what-is-relational-security"></a>2. What Is A Relational Security System?</h2></div></div></div><p>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2. What Is A Relational Security System?</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="prev" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="next" href="ar01s03.html" title="3. How Is Relational Security Different?">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="index.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s03.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Veil2 0.5 (alpha) Documentation </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 3. How Is Relational Security Different?</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="what-is-relational-security"></a>2. What Is A Relational Security System?</h2></div></div></div>
+<p>
     A Relational Security System is one in which each assigned
     privilege has a scope, which limits the extent to which the
     privilege applies.
-  </p><p>
+  </p>
+<p>
     The scope of an assigned privilege is related to a specific subset
     of data, so that each privilege assignment will give access to
     that specific subset.  The scope may be all-encompassing or very
     specific.  It may give access to thousands of records; to just a
     few; or even to none.  And privileges may be assigned multiple
     times, in different scopes.
-  </p><p>
+  </p>
+<p>
     Scopes may be created from almost any definable subset of your
     data.  Mostly they are based on the relationships of your users
     with their data, though they need not be.  Typically, scopes are
@@ -17,15 +53,37 @@
     other parties, or to specific artifacts described by your
     database.  For example, a person's relationship to the company
     they work for, or their membership of a project team.
-  </p><p>
+  </p>
+<p>
     Having scopes associated with privileges means that the
     granularity of access controls can be as coarse or as fine as the
     data demands, and it means that there is rarely the need for more
     complex access checks than "do I have privilege X in scope Y?".
-  </p><p>
+  </p>
+<p>
     Instead of having privileges which imply conditional rule checks,
     such as the privilege to
     <span class="emphasis"><em>maintain-a-project-if-the-user-is-a-member-of-the-project-team</em></span>,
     privileges can effectively contain their conditionality through
     their scope. 
-  </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Veil2 0.5 (alpha) Documentation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 3. How Is Relational Security Different?</td></tr></table></div></body></html>
+  </p>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="index.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s03.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Veil2 0.5 (alpha) Documentation </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 3. How Is Relational Security Different?</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

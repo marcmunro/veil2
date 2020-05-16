@@ -1,35 +1,187 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Veil2 0.5 (alpha) Documentation</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="next" href="ar01s02.html" title="2. What Is A Relational Security System?"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> 2. What Is A Relational Security System?</td></tr></table><hr></div><div class="article"><div class="titlepage"><div><div><h2 class="title"><a name="Veil2"></a>Veil2 0.5 (alpha) Documentation</h2></div></div><hr></div><div class="toc"><dl class="toc"><dt><span class="sect1"><a href="index.html#introduction">1. Introduction</a></span></dt><dt><span class="sect1"><a href="ar01s02.html">2. What Is A Relational Security System?</a></span></dt><dt><span class="sect1"><a href="ar01s03.html">3. How Is Relational Security Different?</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s03.html#Traditional">3.1. The <span class="emphasis"><em>Traditional</em></span> Approach</a></span></dt><dt><span class="sect2"><a href="ar01s03.html#How-Assign">3.2. The Relational Security Approach</a></span></dt><dt><span class="sect2"><a href="ar01s03.html#Where-Implemented">3.3. Where Are Access Controls Implemented In A Relational
-    Security System?</a></span></dt><dt><span class="sect2"><a href="ar01s03.html#How-Restricted">3.4. How Is Access Restricted In A Relational Security
-    System?</a></span></dt><dt><span class="sect2"><a href="ar01s03.html#ease_of_reasoning">3.5. Ease of Reasoning</a></span></dt><dt><span class="sect2"><a href="ar01s03.html#comprehensiveness">3.6. Comprehensiveness</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s04.html">4. Why Use <code class="literal">Veil2</code></a></span></dt><dt><span class="sect1"><a href="ar01s05.html">5. <code class="literal">Veil2</code> Concepts</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s05.html#privileges">5.1. Privileges</a></span></dt><dt><span class="sect2"><a href="ar01s05.html#scopes">5.2. Scopes</a></span></dt><dt><span class="sect2"><a href="ar01s05.html#roles">5.3. Roles</a></span></dt><dt><span class="sect2"><a href="ar01s05.html#assignments">5.4. Assignments</a></span></dt><dt><span class="sect2"><a href="ar01s05.html#security-contexts">5.5. Security Contexts</a></span></dt><dt><span class="sect2"><a href="ar01s05.html#privilege-promotion">5.6. Privilege Promotion</a></span></dt><dt><span class="sect2"><a href="ar01s05.html#authentication_context">5.7. Authentication Contexts</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s06.html">6. What is <code class="literal">Veil2</code> And What Does It Provide?</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s06.html#idm379">6.1. How Does It Work?</a></span></dt><dt><span class="sect2"><a href="ar01s06.html#idm413">6.2. Refactoring Your Systems To Use <code class="literal">Veil2</code></a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s07.html">7. How Difficult Is This?</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s07.html#frequently-imagined-criticisms-fic">7.1. Frequently Imagined Criticisms (FIC)</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s08.html">8. Getting Started With <code class="literal">Veil2</code></a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s08.html#installation">8.1. Installing <code class="literal">Veil2</code></a></span></dt><dt><span class="sect2"><a href="ar01s08.html#demo-install">8.2. Installing The Demo</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s09.html">9. Exploring The <code class="literal">Veil2</code> Demo</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s09.html#idm623">9.1. The Security Contexts</a></span></dt><dt><span class="sect2"><a href="ar01s09.html#idm641">9.2. The Organizational Hierarchy</a></span></dt><dt><span class="sect2"><a href="ar01s09.html#idm645">9.3. Exploring It</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s10.html">10. Setting Up A <code class="literal">Veil2</code> Virtual Private
-  Database - Overview</a></span></dt><dt><span class="sect1"><a href="ar01s11.html">11. Identify and Define Your Scope Types</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s11.html#idm799">11.1. In Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s12.html">12. Setting Up Authentication and Session Management</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s12.html#authentication">12.1. Authentication</a></span></dt><dt><span class="sect2"><a href="ar01s12.html#idm838">12.2. Associate Your Users With Their Authentication
-    Contexts</a></span></dt><dt><span class="sect2"><a href="ar01s12.html#idm844">12.3. Define Your <code class="literal">get_accessor()</code> Function</a></span></dt><dt><span class="sect2"><a href="ar01s12.html#session_management">12.4. Session Management</a></span></dt><dt><span class="sect2"><a href="ar01s12.html#authent_what">12.5. In Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s13.html">13. Create Initial Privileges</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s13.html#idm937">13.1. In Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s14.html">14. Integrate And/Or Create Roles</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s14.html#idm947">14.1. Integrating Existing Roles</a></span></dt><dt><span class="sect2"><a href="ar01s14.html#idm995">14.2. Create New Roles</a></span></dt><dt><span class="sect2"><a href="ar01s14.html#idm1004">14.3. In Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s15.html">15. Link Your Users To <code class="literal">Veil2</code>'s Accessors</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s15.html#idm1034">15.1. Create Foreign-Key Links to Your Users</a></span></dt><dt><span class="sect2"><a href="ar01s15.html#idm1048">15.2. Create Insert Trigger</a></span></dt><dt><span class="sect2"><a href="ar01s15.html#idm1055">15.3. Copy Existing User Records</a></span></dt><dt><span class="sect2"><a href="ar01s15.html#idm1059">15.4. Copy Existing Authentication Details</a></span></dt><dt><span class="sect2"><a href="ar01s15.html#idm1065">15.5. Ensure Authentication Changes Are Propagated</a></span></dt><dt><span class="sect2"><a href="ar01s15.html#idm1072">15.6. In Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s16.html">16. Link Your Scopes and Security Contexts</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s16.html#idm1089">16.1. Create Foreign Key Links</a></span></dt><dt><span class="sect2"><a href="ar01s16.html#idm1103">16.2. Create Insertion Triggers</a></span></dt><dt><span class="sect2"><a href="ar01s16.html#idm1108">16.3. Link Existing Records</a></span></dt><dt><span class="sect2"><a href="ar01s16.html#idm1113">16.4. In Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s17.html">17. Create Scope Promotions</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s17.html#idm1123">17.1. Creating The View</a></span></dt><dt><span class="sect2"><a href="ar01s17.html#idm1138">17.2. In Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s18.html">18. Secure Your Tables</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s18.html#idm1154">18.1. Doing It</a></span></dt><dt><span class="sect2"><a href="ar01s18.html#idm1164">18.2. The <code class="literal">Veil2</code> tables</a></span></dt><dt><span class="sect2"><a href="ar01s18.html#idm1173">18.3. In Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s19.html">19. Secure Your Views</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s19.html#idm1179">19.1. Doing It</a></span></dt><dt><span class="sect2"><a href="ar01s19.html#idm1185">19.2. In Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s20.html">20. Assign Initial Roles</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s20.html#idm1192">20.1. Roles</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s21.html">21. Contact</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s21.html#reporting_bugs">21.1. Reporting Bugs</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s22.html">22. Tips and Considerations</a></span></dt><dd><dl><dt><span class="sect2"><a href="ar01s22.html#performance">22.1. Performance</a></span></dt></dl></dd><dt><span class="appendix"><a href="apa.html">A. <code class="literal">Veil2</code> ERD and Database Objects</a></span></dt><dd><dl><dt><span class="sect1"><a href="apa.html#idm1216">A.1. Veil2 Tables</a></span></dt><dt><span class="sect1"><a href="apas02.html">A.2. Veil2 Views</a></span></dt><dt><span class="sect1"><a href="apas03.html">A.3. Veil2 Functions and Triggers</a></span></dt></dl></dd><dt><span class="appendix"><a href="apb.html">B. <code class="literal">Veil2</code> Authentication Protocols</a></span></dt><dd><dl><dt><span class="sect1"><a href="apb.html#shared_session_management">B.1. Shared Session Authentication</a></span></dt><dt><span class="sect1"><a href="apbs02.html">B.2. Dedicated Database Sessions</a></span></dt></dl></dd></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>1. Introduction</h2></div></div></div><p>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veil2 0.5 (alpha) Documentation</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="next" href="ar01s02.html" title="2. What Is A Relational Security System?">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left"> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s02.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top"> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right" valign="top"> 2. What Is A Relational Security System?</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="article">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="Veil2"></a>Veil2 0.5 (alpha) Documentation</h2></div></div>
+<hr>
+</div>
+<div class="toc"><dl class="toc">
+<dt><span class="sect1"><a href="index.html#introduction">1. Introduction</a></span></dt>
+<dt><span class="sect1"><a href="ar01s02.html">2. What Is A Relational Security System?</a></span></dt>
+<dt><span class="sect1"><a href="ar01s03.html">3. How Is Relational Security Different?</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s03.html#Traditional">3.1. The <span class="emphasis"><em>Traditional</em></span> Approach</a></span></dt>
+<dt><span class="sect2"><a href="ar01s03.html#How-Assign">3.2. The Relational Security Approach</a></span></dt>
+<dt><span class="sect2"><a href="ar01s03.html#Where-Implemented">3.3. Where Are Access Controls Implemented In A Relational
+    Security System?</a></span></dt>
+<dt><span class="sect2"><a href="ar01s03.html#How-Restricted">3.4. How Is Access Restricted In A Relational Security
+    System?</a></span></dt>
+<dt><span class="sect2"><a href="ar01s03.html#ease_of_reasoning">3.5. Ease of Reasoning</a></span></dt>
+<dt><span class="sect2"><a href="ar01s03.html#comprehensiveness">3.6. Comprehensiveness</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s04.html">4. Why Use <code class="literal">Veil2</code></a></span></dt>
+<dt><span class="sect1"><a href="ar01s05.html">5. <code class="literal">Veil2</code> Concepts</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s05.html#privileges">5.1. Privileges</a></span></dt>
+<dt><span class="sect2"><a href="ar01s05.html#scopes">5.2. Scopes</a></span></dt>
+<dt><span class="sect2"><a href="ar01s05.html#roles">5.3. Roles</a></span></dt>
+<dt><span class="sect2"><a href="ar01s05.html#assignments">5.4. Assignments</a></span></dt>
+<dt><span class="sect2"><a href="ar01s05.html#security-contexts">5.5. Security Contexts</a></span></dt>
+<dt><span class="sect2"><a href="ar01s05.html#privilege-promotion">5.6. Privilege Promotion</a></span></dt>
+<dt><span class="sect2"><a href="ar01s05.html#authentication_context">5.7. Authentication Contexts</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s06.html">6. What is <code class="literal">Veil2</code> And What Does It Provide?</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s06.html#idm379">6.1. How Does It Work?</a></span></dt>
+<dt><span class="sect2"><a href="ar01s06.html#idm413">6.2. Refactoring Your Systems To Use <code class="literal">Veil2</code></a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s07.html">7. How Difficult Is This?</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="ar01s07.html#frequently-imagined-criticisms-fic">7.1. Frequently Imagined Criticisms (FIC)</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="ar01s08.html">8. Getting Started With <code class="literal">Veil2</code></a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s08.html#installation">8.1. Installing <code class="literal">Veil2</code></a></span></dt>
+<dt><span class="sect2"><a href="ar01s08.html#demo-install">8.2. Installing The Demo</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s09.html">9. Exploring The <code class="literal">Veil2</code> Demo</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s09.html#idm623">9.1. The Security Contexts</a></span></dt>
+<dt><span class="sect2"><a href="ar01s09.html#idm641">9.2. The Organizational Hierarchy</a></span></dt>
+<dt><span class="sect2"><a href="ar01s09.html#idm645">9.3. Exploring It</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s10.html">10. Setting Up A <code class="literal">Veil2</code> Virtual Private
+  Database - Overview</a></span></dt>
+<dt><span class="sect1"><a href="ar01s11.html">11. Identify and Define Your Scope Types</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="ar01s11.html#idm799">11.1. In Summary</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="ar01s12.html">12. Setting Up Authentication and Session Management</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s12.html#authentication">12.1. Authentication</a></span></dt>
+<dt><span class="sect2"><a href="ar01s12.html#idm838">12.2. Associate Your Users With Their Authentication
+    Contexts</a></span></dt>
+<dt><span class="sect2"><a href="ar01s12.html#idm844">12.3. Define Your <code class="literal">get_accessor()</code> Function</a></span></dt>
+<dt><span class="sect2"><a href="ar01s12.html#session_management">12.4. Session Management</a></span></dt>
+<dt><span class="sect2"><a href="ar01s12.html#authent_what">12.5. In Summary</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s13.html">13. Create Initial Privileges</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="ar01s13.html#idm937">13.1. In Summary</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="ar01s14.html">14. Integrate And/Or Create Roles</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s14.html#idm947">14.1. Integrating Existing Roles</a></span></dt>
+<dt><span class="sect2"><a href="ar01s14.html#idm995">14.2. Create New Roles</a></span></dt>
+<dt><span class="sect2"><a href="ar01s14.html#idm1004">14.3. In Summary</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s15.html">15. Link Your Users To <code class="literal">Veil2</code>'s Accessors</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s15.html#idm1034">15.1. Create Foreign-Key Links to Your Users</a></span></dt>
+<dt><span class="sect2"><a href="ar01s15.html#idm1048">15.2. Create Insert Trigger</a></span></dt>
+<dt><span class="sect2"><a href="ar01s15.html#idm1055">15.3. Copy Existing User Records</a></span></dt>
+<dt><span class="sect2"><a href="ar01s15.html#idm1059">15.4. Copy Existing Authentication Details</a></span></dt>
+<dt><span class="sect2"><a href="ar01s15.html#idm1065">15.5. Ensure Authentication Changes Are Propagated</a></span></dt>
+<dt><span class="sect2"><a href="ar01s15.html#idm1072">15.6. In Summary</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s16.html">16. Link Your Scopes and Security Contexts</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s16.html#idm1089">16.1. Create Foreign Key Links</a></span></dt>
+<dt><span class="sect2"><a href="ar01s16.html#idm1103">16.2. Create Insertion Triggers</a></span></dt>
+<dt><span class="sect2"><a href="ar01s16.html#idm1108">16.3. Link Existing Records</a></span></dt>
+<dt><span class="sect2"><a href="ar01s16.html#idm1113">16.4. In Summary</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s17.html">17. Create Scope Promotions</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s17.html#idm1123">17.1. Creating The View</a></span></dt>
+<dt><span class="sect2"><a href="ar01s17.html#idm1138">17.2. In Summary</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s18.html">18. Secure Your Tables</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s18.html#idm1154">18.1. Doing It</a></span></dt>
+<dt><span class="sect2"><a href="ar01s18.html#idm1164">18.2. The <code class="literal">Veil2</code> tables</a></span></dt>
+<dt><span class="sect2"><a href="ar01s18.html#idm1173">18.3. In Summary</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s19.html">19. Secure Your Views</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="ar01s19.html#idm1179">19.1. Doing It</a></span></dt>
+<dt><span class="sect2"><a href="ar01s19.html#idm1185">19.2. In Summary</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="ar01s20.html">20. Assign Initial Roles</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="ar01s20.html#idm1192">20.1. Roles</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="ar01s21.html">21. Contact</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="ar01s21.html#reporting_bugs">21.1. Reporting Bugs</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="ar01s22.html">22. Tips and Considerations</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="ar01s22.html#performance">22.1. Performance</a></span></dt></dl></dd>
+<dt><span class="appendix"><a href="apa.html">A. <code class="literal">Veil2</code> ERD and Database Objects</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="apa.html#idm1216">A.1. Veil2 Tables</a></span></dt>
+<dt><span class="sect1"><a href="apas02.html">A.2. Veil2 Views</a></span></dt>
+<dt><span class="sect1"><a href="apas03.html">A.3. Veil2 Functions and Triggers</a></span></dt>
+</dl></dd>
+<dt><span class="appendix"><a href="apb.html">B. <code class="literal">Veil2</code> Authentication Protocols</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="apb.html#shared_session_management">B.1. Shared Session Authentication</a></span></dt>
+<dt><span class="sect1"><a href="apbs02.html">B.2. Dedicated Database Sessions</a></span></dt>
+</dl></dd>
+</dl></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="introduction"></a>1. Introduction</h2></div></div></div>
+<p>
       <code class="literal">Veil2</code> is a Postgres add-on for implementing
       relational security systems.
-    </p><p>
+    </p>
+<p>
       A <a class="link" href="ar01s02.html" title="2. What Is A Relational Security System?">relational
       security system</a> Is one in which access to data is
       determined, at least partly, by a user&#8217;s relationships to that
       data.  Many access controls may therefore be implicit rather
       than explicit.
-    </p><p>
+    </p>
+<p>
       The primary aims of a relational security system are to make the
       management of access to data a seamless, and necessary, component of
       your application, and to make its implementation as simple as
       possible and as sophisticated as needed.
-    </p><p>
+    </p>
+<p>
       <code class="literal">Veil2</code> is designed to make the implementation
       of relational security systems as easy as possible.  It provides
       an extensible framework of permissions, permission checks, and
       user authentication so that you can start building a secure
       database in a matter of hours.
-    </p><p>
+    </p>
+<p>
       With <code class="literal">Veil2</code> we secure the database itself and
       not just applications that use it.  This means that even if your
       application server is compromised, an attacker's ability to
       access data will be limited to the data for which they can steal
       access credentials.  This gives them little more access than
       the application itself would give them.
-    </p><p>
+    </p>
+<p>
       The security of database applications is more usually managed by
       building the access control rules into application servers, and
       typically these access control rules offer a fairly coarse level
@@ -39,4 +191,24 @@
       about what sort of user needs what sort of access, and using
       <code class="literal">Veil2</code> the implementation of access control
       rules becomes trivial.
-    </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> 2. What Is A Relational Security System?</td></tr></table></div></body></html>
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left"> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s02.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top"> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right" valign="top"> 2. What Is A Relational Security System?</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

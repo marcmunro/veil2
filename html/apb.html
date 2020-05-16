@@ -1,112 +1,220 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>B. Veil2 Authentication Protocols</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="prev" href="apas03.html" title="A.3. Veil2 Functions and Triggers"><link rel="next" href="apbs02.html" title="B.2. Dedicated Database Sessions"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"><a accesskey="p" href="apas03.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="apbs02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.3. Veil2 Functions and Triggers </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> B.2. Dedicated Database Sessions</td></tr></table><hr></div><div class="appendix"><div class="titlepage"><div><div><h2 class="title"><a name="authent_protocols"></a>B. <code class="literal">Veil2</code> Authentication Protocols</h2></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="shared_session_management"></a>B.1. Shared Session Authentication</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1512"></a>B.1.1. The Problem Space</h3></div></div></div><p>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B. Veil2 Authentication Protocols</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="prev" href="apas03.html" title="A.3. Veil2 Functions and Triggers">
+<link rel="next" href="apbs02.html" title="B.2. Dedicated Database Sessions">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="apas03.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="apbs02.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">A.3. Veil2 Functions and Triggers </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> B.2. Dedicated Database Sessions</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="appendix">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="authent_protocols"></a>B. <code class="literal">Veil2</code> Authentication Protocols</h2></div></div></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="shared_session_management"></a>B.1. Shared Session Authentication</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1512"></a>B.1.1. The Problem Space</h3></div></div></div>
+<p>
 	Shared sessions are database connections that are shared
 	amongst many users.  Typically these are used by web
 	application servers.  When a user does something that requires
 	a database interaction, a database connection is released from
 	the pool, temporarily assigned to that user's session, and
 	when the interaction is complete, returned to the pool.
-      </p><p>
+      </p>
+<p>
 	A further complication is that many applications will perform
 	multiple parallel database operations for a page, each
 	requiring its own connection.
-      </p><p>
+      </p>
+<p>
 	What this means is that:
-	</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+	</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
 	    database connections are not dedicated to individual users;
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    each user may use a different connection for each interaction;
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    multiple connections may be in use simultaneously for a user;
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    usage of connections for a given user is not serialized.
-	  </li></ul></div><p>
-      </p><p>
+	  </li>
+</ul></div>
+<p>
+      </p>
+<p>
 	What the last item means is that the order of requests ariving
 	at the database server may not, due to network lag and
 	application task handling, be the same order in which the user
 	session initiated those requests.
-      </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1523"></a>B.1.2. Requirements</h3></div></div></div><p>
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1523"></a>B.1.2. Requirements</h3></div></div></div>
+<p>
 	There is only one fundamental requirement of a session
 	management protocol.  That is, that the session should know at
 	all times which user is accessing the system.
-      </p><p>
+      </p>
+<p>
 	Wha this means is:
-	</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+	</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
 	    it must identify and authenticate each user;
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    it must know when the user is finished;
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    it must make it as difficult as possible to impersonate a
 	    user, or otherwise gain their access rights.
-	  </li></ul></div><p>
-      </p><p>
+	  </li>
+</ul></div>
+<p>
+      </p>
+<p>
 	A further requirement is that it must all be done with as
 	little overhead as possible.
-      </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1532"></a>B.1.3. The Threat Space</h3></div></div></div><p>
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1532"></a>B.1.3. The Threat Space</h3></div></div></div>
+<p>
 	Ordinarily, web systems aim to protect themselves from
 	user-space only.  It is assumed that we are protected from bad
 	actors in the network layer by appropriate use of TLS, and
 	that if the server is compromised the game is over anyway.
-      </p><p>
+      </p>
+<p>
        However, by placing our primary security in the database
        server, and the database server in a secured part of our
        network, we can actually hope to protect ourselves against
        compromised application servers.
-      </p><p>
+      </p>
+<p>
 	If this sounds paranoid, then consider this:
-	</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+	</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
 	    it is the job of a security implementor to be paranoid;
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    many data breaches have arisen from hackers having
 	    long-term access to compromised servers;
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    even the paranoid may have enemies.
-	  </li></ul></div><p>
-      </p><p>
+	  </li>
+</ul></div>
+<p>
+      </p>
+<p>
 	Given that with <code class="literal">Veil2</code> we
 	<span class="emphasis"><em>can</em></span> attempt to protect ourselves from a
 	compromised server, we should try to do so.
-      </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1544"></a>B.1.4. Properties of the Solution Space</h3></div></div></div><p>
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1544"></a>B.1.4. Properties of the Solution Space</h3></div></div></div>
+<p>
 	We are not going to claim that <code class="literal">Veil2</code>'s
 	session management is perfect or even adequate, but we believe
 	it does	provide a good framework and starting point from which
 	you can build something truly secure.  Remember, that you are
 	<a class="link" href="ar01s06.html#hack-it-yourself">encouraged</a> to extend
 	and build-on what <code class="literal">Veil2</code> provides.
-      </p><p>
+      </p>
+<p>
 	This is what <code class="literal">Veil2</code> provides,
 	out-of-the-box, for session managament:
-	</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+	</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
 	    a default authentication system that is not terrible (bcrypt);
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    extensible authentication methods (build your own);
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    minimal transmission of authentication tokens;
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    resistance to fishing for user-ids;
-	  </li><li class="listitem">
+	  </li>
+<li class="listitem">
 	    a <a class="ulink" href="https://en.wikipedia.org/wiki/Replay_attackhttps://en.wikipedia.org/wiki/Replay_attack" target="_top">replay
 	    attack</a>-resistant protocol.
-	  </li></ul></div><p>
-      </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1559"></a>B.1.5. The Protocol</h3></div></div></div><p>
+	  </li>
+</ul></div>
+<p>
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1559"></a>B.1.5. The Protocol</h3></div></div></div>
+<p>
 	There are 3 functions that your application server's session
 	management must call:
-	</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><code class="literal">
+	</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><code class="literal">
 	      <a class="link" href="apas03.html#func_create_session" title="A.3.10. create_session()">create_session();</a>
-	    </code></li><li class="listitem"><code class="literal">
+	    </code></li>
+<li class="listitem"><code class="literal">
 	      <a class="link" href="apas03.html#func_open_connection" title="A.3.14. open_connection()">open_connection();</a>
-	    </code></li><li class="listitem"><code class="literal">
+	    </code></li>
+<li class="listitem"><code class="literal">
 	      <a class="link" href="apas03.html#func_close_connection" title="A.3.15. close_connection()">close_connection().</a>
-	    </code></li></ul></div><p>
-      </p><p>
+	    </code></li>
+</ul></div>
+<p>
+      </p>
+<p>
 	And the calling protocol has four distinct stages.
-      </p><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm1573"></a>Begin New Session</h5></div></div></div><p>
+      </p>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1573"></a>Begin New Session</h5></div></div></div>
+<p>
 	  We begin a session by calling
 	  <code class="literal">create_session()</code>.  This returns a
 	  <code class="literal">session_id</code> and
 	  <code class="literal">session_token</code> which we must record and
 	  use on subequent calls.
-	</p><p>
+	</p>
+<p>
 	  Sessions remain active, with minimal overhead, until they
 	  time-out.  The timeout period is defined in the
 	  <code class="literal">veil2.system_parameters</code> table, in the
@@ -115,8 +223,14 @@
 	  a session times-out while a connection is active, the
 	  connection will be unaffected, but reconnections will no
 	  longer be possible.
-	</p><p>
-	</p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm1583"></a>Authenticate New Session</h5></div></div></div><p>
+	</p>
+<p>
+	</p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1583"></a>Authenticate New Session</h5></div></div></div>
+<p>
 	  Having created a session and been given a
 	  <code class="literal">session_id</code> by
 	  <code class="literal">create_session()</code>, we authenticate and
@@ -125,7 +239,8 @@
 	  appropriate to the chosen authentication method.  If this
 	  succeeds, our connection is considered open and we can start
 	  executing queries.
-	</p><p>
+	</p>
+<p>
 	  What this means is that it takes 2 database round-trips
 	  before we can begin executing queries on the user's behalf.
 	  While this may seem an unreasonable overhead, it only occurs
@@ -133,14 +248,24 @@
 	  only a single round-trip, which, given that the database has
 	  to be informed of which user is connected, seems like a
 	  pretty reasonable and unavoidable overhead.
-	</p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm1590"></a>Close Connection</h5></div></div></div><p>
+	</p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1590"></a>Close Connection</h5></div></div></div>
+<p>
 	  When we are done and are ready to return the database
 	  connection to the pool for use by another user, we call
 	  <code class="literal">close_connection()</code>.  This is important.
 	  If you do not do this everything will continue to work, but
 	  the connection can be taken over by another user, thereby
 	  inheriting the previous user's access rights.
-	</p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idm1594"></a>Re-open Connection</h5></div></div></div><p>
+	</p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1594"></a>Re-open Connection</h5></div></div></div>
+<p>
 	  As long as a session has not timed-out, new connections can
 	  be opened using it.  These re-opened connections do not
 	  require re-authentication using the original credentials.
@@ -153,55 +278,91 @@
 	  as part of the authentication token.  Any attempt to re-use
 	  a nonce will be noticed and the connection attempt will
 	  fail.
-	</p><p>
+	</p>
+<p>
 	  Note that multiple simultaneous connections can be opened on
 	  the same session.  The only requirement is that each is
 	  opened with its own nonce, and that the nonces are
 	  more-or-less sequentially numbered.
-	</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm1599"></a>B.1.6. Function Calling Minutiae</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1601"></a>B.1.6.1. <code class="literal">create_session()</code></h4></div></div></div><p>
+	</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1599"></a>B.1.6. Function Calling Minutiae</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1601"></a>B.1.6.1. <code class="literal">create_session()</code>
+</h4></div></div></div>
+<p>
 	  We provide the following parameters to
 	  <code class="literal">create_session()</code>:
-	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
 		<code class="literal">username</code>;
-	      </p><p>
+	      </p>
+<p>
 		This is a string that uniquely identifies the user
 		within the context provided by the context parameters.
 		This is converted into an
 		<code class="literal">accessor_id</code> by the function
 		<code class="literal"><a class="link" href="apas03.html#func_get_accessor" title="A.3.9. get_accessor()">veil2.get_accessor()</a></code>
 		which you must define as part of your implementation.
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">authent_type</code>;
-	      </p><p>
+	      </p>
+<p>
 		This is the name of an authentication method recorded
 		in <code class="literal">veil2.authentication_types</code>, and
 		for which an authentication function has been
 		provided.  TODO: refs
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">context_type_id</code>;
-	      </p><p>
+	      </p>
+<p>
 		This is an integer identifying the type of context
 		that the user is authenticating within.  See the demo
 		TODO: ref for how this is used to enable different
 		users to belong to different companies.
-	      </p><p>
+	      </p>
+<p>
 		This will match a scope_type as defined in
 		<code class="literal">veil2.scope_types</code>.  TODO refs
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">context_id</code>.
-	      </p><p>
+	      </p>
+<p>
 		This is an integer identifying, in combination with
 		<code class="literal">context_type_id</code>,  the context
 		that the user is authenticating within.  See the demo
 		TODO: ref for how this is used to enable different
 		users to belong to different companies.
-	      </p></li></ul></div><p>
-	</p><p>
+	      </p>
+</li>
+</ul></div>
+<p>
+	</p>
+<p>
 	  The function always appears to succeed, and it returns the
 	  following result columns: 
-	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
 		<code class="literal">session_id;</code>.
-	      </p><p>
+	      </p>
+<p>
 		This is an integer that identifies the session for
 		your connections.  If your parameters successfully
 		identified a legitimate user, a record with this key
@@ -209,35 +370,54 @@
 		<code class="literal">veil2.sessions</code>.  The user will not
 		be able to see this record, or determine that it is
 		absent.
-	      </p><p>
+	      </p>
+<p>
 		The caller will need to provide this value as a
 		parameter in subsequent calls to
 		<code class="literal">open_connection()</code>.
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">session_token;</code>.
-	      </p><p>
+	      </p>
+<p>
 		This is a randomly generated
 		<a class="ulink" href="https://en.wikipedia.org/wiki/Base64" target="_top">base64</a>
 		text value that the caller must use in subsequent,
 		continuation, calls to
 		<code class="literal">open_connection()</code>.
-	      </p><p>
+	      </p>
+<p>
 		Posession of this token is assumed to be proof that
 		the holder is the same user that authenticated
 		themselves to us.
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">session_supplemental.</code>.
-	      </p><p>
+	      </p>
+<p>
 		This is a string containing extra information that
 		some user-provided authentication methods may
 		require.  This is for your use.  Be imaginative.
-	      </p></li></ul></div><p>
-	</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1650"></a>B.1.6.2. <code class="literal">open_connection()</code>
-	Authentication</h4></div></div></div><p>
+	      </p>
+</li>
+</ul></div>
+<p>
+	</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1650"></a>B.1.6.2. <code class="literal">open_connection()</code>
+	Authentication</h4></div></div></div>
+<p>
 	  This call is used to authenticate a user to a previously
 	  created session.  It must be the next database call after
 	  <code class="literal">create_session()</code> has returned.
-	</p><p>
+	</p>
+<p>
 	  You may wonder why this is not simply rolled into the
 	  <code class="literal">create_session()</code> call, thereby reducing
 	  the number of round trips.  The answer is that some
@@ -247,22 +427,35 @@
 	  Diffie&#8211;Hellman Key Exchange</a>-based protocol.  If you
 	  implement such a thing please contact (TODO: ref) the author
 	  who would love to see it.
-	</p><p>
+	</p>
+<p>
 	  The parameters to this function are:
-	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
 		<code class="literal">session_id</code>;
-	      </p><p>
+	      </p>
+<p>
 		This will be the value returned from
 		<code class="literal">create_session()</code>. 
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">nonce</code>;
-	      </p><p>
+	      </p>
+<p>
 		This will be an integer value.  You should
 		allocate this sequentially for each session, though it
 		does not need to start at 1.
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">authent_token</code>.
-	      </p><p>
+	      </p>
+<p>
 		This is a string value.  Its value will depend on the
 		authentication method being used.  Ideally that
 		authentication method will not require a plaintext
@@ -272,21 +465,37 @@
 		this over the plaintext authentication method is that
 		the password cannot be easily extracted from the
 		database.
-	      </p></li></ul></div><p>
-	</p><p>
+	      </p>
+</li>
+</ul></div>
+<p>
+	</p>
+<p>
 	  This function returns the following result columns:
-	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
 		<code class="literal">success;</code>.
-	      </p><p>
+	      </p>
+<p>
 		A boolean.  The meaning should be obvious.
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">errmsg</code>.
-	      </p><p>
+	      </p>
+<p>
 		If authentication failed, this provides additional
 		information to the caller.  The possible values are:
-		</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+		</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem">
+<p>
 		      <code class="literal">AUTHFAIL</code>;
-		    </p><p>
+		    </p>
+<p>
 		      This means that the user could not be
 		      authenticated.  This might be because the user
 		      and context for the session were invalid or
@@ -295,112 +504,213 @@
 		      called <code class="literal">create_session()</code> but
 		      if not, where did you get teh value for
 		      <code class="literal">session_id</code>?
-		    </p><p>
+		    </p>
+<p>
 		      More information about the failure is recorded
 		      in the postgres logs, but this is not available
 		      to the user session.
-		    </p><p>
+		    </p>
+<p>
 		      If <code class="literal">authent_token</code> was invalid,
 		      at least for the <code class="literal">bcrypt</code>
 		      authentication method, you can retry with the
 		      correct token.
-		    </p></li><li class="listitem"><p>
+		    </p>
+</li>
+<li class="listitem">
+<p>
 		      <code class="literal">EXPIRED</code>;
-		    </p><p>
+		    </p>
+<p>
 		      This means that the session has timed-out.  You
 		      will need to create a new session using
 		      <code class="literal">create_session()</code>.
-		    </p></li><li class="listitem"><p>
+		    </p>
+</li>
+<li class="listitem">
+<p>
 		      <code class="literal">NONCEFAIL.</code>;
-		    </p><p>
+		    </p>
+<p>
 		      This should not be possible in this, the
 		      authentication call.
-		    </p></li></ul></div><p>
-	      </p></li></ul></div><p>
-	</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1705"></a>B.1.6.3. <code class="literal">open_connection()</code> Continuation</h4></div></div></div><p>
+		    </p>
+</li>
+</ul></div>
+<p>
+	      </p>
+</li>
+</ul></div>
+<p>
+	</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1705"></a>B.1.6.3. <code class="literal">open_connection()</code> Continuation</h4></div></div></div>
+<p>
 	  Once a session has been successfully authenticated,
 	  subsequent calls to <code class="literal">open_connection()</code> are
 	  considered to be continuations.  Mutiple open connections
 	  for a session may be used simultaneously, but they must each
 	  use their own nonce values.
-	</p><p>
+	</p>
+<p>
 	  The parameters to this function are:
-	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
 		<code class="literal">session_id</code>;
-	      </p><p>
+	      </p>
+<p>
 		This is just as for the Authentication version of this
 		function call.
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">nonce</code>;
-	      </p><p>
+	      </p>
+<p>
 		This integer must be peviously unused for this
 		session, and should be allocated sequentially in
 		ascending order.  They may arrive out of sequence but
 		not by more than a value of 32.
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">authent_token</code>.
-	      </p><p>
+	      </p>
+<p>
 		This is created from the value of
 		<code class="literal">authent_token</code> returned from the
 		<code class="literal">create_session()</code> call that created
 		the session, along with the nonce.  It should be
 		created as follows:
-		</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+		</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
 		      Concatenate <code class="literal">authent_token</code>
 		      with the lower-case hexadecimal representation
 		      of the nonce parameter.
-		    </p></li><li class="listitem"><p>
+		    </p></li>
+<li class="listitem"><p>
 		      Create a <a class="ulink" href="https://en.wikipedia.org/wiki/SHA-1" target="_top">sha-1</a> 
 		      hash of the concatenated string.
-		    </p></li><li class="listitem"><p>
+		    </p></li>
+<li class="listitem"><p>
 		      Encode the hash as a base64 string.
-		    </p></li></ul></div><p>
-	      </p><p>
+		    </p></li>
+</ul></div>
+<p>
+	      </p>
+<p>
 		The <code class="literal">open_connection()</code> function will
 		create the same encoded hash internally and check that
 		it matches.  If it does, we can be sure that the
 		caller is in posession of the original
 		<code class="literal">authent_token</code> from the creation of
 		the session.
-	      </p></li></ul></div><p>
-	</p><p>
+	      </p>
+</li>
+</ul></div>
+<p>
+	</p>
+<p>
 	  This function returns the following result columns:
-	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
 		<code class="literal">success;</code>.
-	      </p><p>
+	      </p>
+<p>
 		A boolean.  The meaning should be obvious.
-	      </p></li><li class="listitem"><p>
+	      </p>
+</li>
+<li class="listitem">
+<p>
 		<code class="literal">errmsg</code>.
-	      </p><p>
+	      </p>
+<p>
 		This provides similar results to those for
 		authentication.
-		</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+		</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem">
+<p>
 		      <code class="literal">AUTHFAIL</code>;
-		    </p><p>
+		    </p>
+<p>
 		      Assuming your session was previously valid, you
 		      got the value of
 		      <code class="literal">authent_token</code> wrong.  You can
 		      retry, but you will need a new nonce value.
-		    </p><p>
+		    </p>
+<p>
 		      More information about the failure is recorded
 		      in the postgres logs, but this is not available
 		      to the user session.
-		    </p></li><li class="listitem"><p>
+		    </p>
+</li>
+<li class="listitem">
+<p>
 		      <code class="literal">EXPIRED</code>;
-		    </p><p>
+		    </p>
+<p>
 		      This means that the session has timed-out.  You
 		      will need to create a new session using
 		      <code class="literal">create_session()</code>.
-		    </p></li><li class="listitem"><p>
+		    </p>
+</li>
+<li class="listitem">
+<p>
 		      <code class="literal">NONCEFAIL.</code>;
-		    </p><p>
+		    </p>
+<p>
 		      You have attempted to re-use a nonce that was
 		      previously used.  Try again with a new nonce.
 		      Try adding 4 or more to the latest
 		      successfully-used value.
-		    </p></li></ul></div><p>
-	      </p></li></ul></div><p>
-	</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1764"></a>B.1.6.4. <code class="literal">close_connection()</code></h4></div></div></div><p>
+		    </p>
+</li>
+</ul></div>
+<p>
+	      </p>
+</li>
+</ul></div>
+<p>
+	</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1764"></a>B.1.6.4. <code class="literal">close_connection()</code>
+</h4></div></div></div>
+<p>
 	  This function has no parameters and always returns a boolean
 	  true.
-	</p></div></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="apas03.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="apbs02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.3. Veil2 Functions and Triggers </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> B.2. Dedicated Database Sessions</td></tr></table></div></body></html>
+	</p>
+</div>
+</div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="apas03.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="apbs02.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">A.3. Veil2 Functions and Triggers </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> B.2. Dedicated Database Sessions</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

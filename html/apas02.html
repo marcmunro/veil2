@@ -1,7 +1,51 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>A.2. Veil2 Views</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="up" href="apa.html" title="A. Veil2 ERD and Database Objects"><link rel="prev" href="apa.html" title="A. Veil2 ERD and Database Objects"><link rel="next" href="apas03.html" title="A.3. Veil2 Functions and Triggers"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"><a accesskey="p" href="apa.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="apa.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="apas03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A. <code class="literal">Veil2</code> ERD and Database Objects </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.3. Veil2 Functions and Triggers</td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm1278"></a>A.2. Veil2 Views</h2></div></div></div><p>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A.2. Veil2 Views</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="up" href="apa.html" title="A. Veil2 ERD and Database Objects">
+<link rel="prev" href="apa.html" title="A. Veil2 ERD and Database Objects">
+<link rel="next" href="apas03.html" title="A.3. Veil2 Functions and Triggers">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="apa.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="apa.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="apas03.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">A. <code class="literal">Veil2</code> ERD and Database Objects </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> A.3. Veil2 Functions and Triggers</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1278"></a>A.2. Veil2 Views</h2></div></div></div>
+<p>
     Many of the views in <code class="literal">Veil2</code> come in 3 flavours:
-    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><code class="literal">&lt;basename&gt;</code>;</li><li class="listitem"><code class="literal">&lt;basename&gt;_v</code>;</li><li class="listitem"><code class="literal">&lt;basename&gt;_vv</code>.</li></ul></div><p>
-  </p><p>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<code class="literal">&lt;basename&gt;</code>;</li>
+<li class="listitem">
+<code class="literal">&lt;basename&gt;_v</code>;</li>
+<li class="listitem">
+<code class="literal">&lt;basename&gt;_vv</code>.</li>
+</ul></div>
+<p>
+  </p>
+<p>
     This naming convention is used to distinguish between materialized
     and non-materialized views.  A view with a
     <code class="literal">_vv</code> suffix is completely non-materialized and
@@ -11,29 +55,46 @@
     definition.   A view with no suffix will be the materialized
     version (if there are matching <code class="literal">_v</code> and
     <code class="literal">_vv</code> definitions).
-  </p><p>
+  </p>
+<p>
     The distinction is particularly useful when debugging materialized
     view refresh mechanisms.  If there is a difference between the
     rows returned by any of these views, at least one materialized
     view needs to be refreshed.
-  </p><p>
+  </p>
+<p>
     There are also views named with a <code class="literal">_info</code> suffix.
     These are intended for use by developers only.  They provide the
     same data as the non <code class="literal">_info</code> version of the view,
     but with bitmaps converted to arrays.  This is simply an aid to
     understanding and debugging.  Please do not use these views for
     production purposes.
-  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_direct_role_privileges"></a>A.2.1. Direct Role Privileges Views</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1301"></a>A.2.1.1. <code class="literal">direct_role_privileges_vv</code></h4></div></div></div><pre class="programlisting">
+  </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_direct_role_privileges"></a>A.2.1. Direct Role Privileges Views</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1301"></a>A.2.1.1. <code class="literal">direct_role_privileges_vv</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.direct_role_privileges_vv as
 select * from veil2.direct_role_privileges_v;
 
-</pre><p>
+</pre>
+<p>
 Exactly as veil2.direct_role_privileges_v.  The _vv suffix indicates
 that this is a true view, not relying on any materialized views.
 As it happens, direct_role_privileges_v also does not rely on any
 materialized views, so this view exists only to be consistent with other
 such sets of views.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1304"></a>A.2.1.2. <code class="literal">direct_role_privileges_vv_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1304"></a>A.2.1.2. <code class="literal">direct_role_privileges_vv_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.direct_role_privileges_vv_info (
     role_id, privileges, global_privileges,
     promotable_privileges) as
@@ -41,11 +102,18 @@ select role_id, to_array(privileges),
        to_array(global_privileges), to_array(promotable_privileges)
   from veil2.direct_role_privileges_vv;
 
-</pre><p>
+</pre>
+<p>
 As veil2.direct_role_privileges_vv with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1307"></a>A.2.1.3. <code class="literal">direct_role_privileges_v</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1307"></a>A.2.1.3. <code class="literal">direct_role_privileges_v</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.direct_role_privileges_v (
     role_id, privileges, global_privileges,
     promotable_privileges) as
@@ -70,14 +138,22 @@ select arp.role_id, bitmap_of(p.privilege_id),
     on p.privilege_id = arp.privilege_id
  group by arp.role_id;
 
-</pre><p>
+</pre>
+<p>
 Returns all privileges, along with some basic privilege promotion data,
 that are assigned directly to each role, including the implied
 privileges for the superuser role.  This does not show privileges
 arising from role to role assignments.
-</p><p>
+</p>
+<p>
 Note the use of bitmap_of() to aggregate privilege_ids.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1310"></a>A.2.1.4. <code class="literal">direct_role_privileges_v_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1310"></a>A.2.1.4. <code class="literal">direct_role_privileges_v_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.direct_role_privileges_v_info (
     role_id, privileges, global_privileges,
     promotable_privileges) as
@@ -85,20 +161,34 @@ select role_id, to_array(privileges),
        to_array(global_privileges), to_array(promotable_privileges)
   from veil2.direct_role_privileges_v;
 
-</pre><p>
+</pre>
+<p>
 As veil2.direct_role_privileges_v with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1313"></a>A.2.1.5. <code class="literal">direct_role_privileges</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1313"></a>A.2.1.5. <code class="literal">direct_role_privileges</code>
+</h4></div></div></div>
+<pre class="programlisting">
 materialized view veil2.direct_role_privileges
 as select * from veil2.direct_role_privileges_v;
 
-</pre><p>
+</pre>
+<p>
 Returns all privileges, along with some basic privilege promotion data,
  that are assigned directly to each role, including the implied
  privileges for the superuser role.  This does not show privileges
  arising from role to role assignments
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1316"></a>A.2.1.6. <code class="literal">direct_role_privileges_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1316"></a>A.2.1.6. <code class="literal">direct_role_privileges_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.direct_role_privileges_info (
     role_id, privileges, global_privileges,
     promotable_privileges) as
@@ -106,11 +196,22 @@ select role_id, to_array(privileges),
        to_array(global_privileges), to_array(promotable_privileges)
   from veil2.direct_role_privileges;
 
-</pre><p>
+</pre>
+<p>
 As veil2.direct_role_privileges with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_all_role_roles"></a>A.2.2. All Role Roles View</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1321"></a>A.2.2.1. <code class="literal">all_role_roles</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_all_role_roles"></a>A.2.2. All Role Roles View</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1321"></a>A.2.2.1. <code class="literal">all_role_roles</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_role_roles (
     primary_role_id, assigned_role_id,
     context_type_id, context_id) as
@@ -120,20 +221,35 @@ with recursive assigned_roles (
   (
     -- get all role-&gt;role assignments, both direct and indirect, in all contexts
 
-</pre><p>
+</pre>
+<p>
 Show all role-&gt;role mappings in all contexts, including mappings that
 are implied and those that are indirect.
-</p><p>
+</p>
+<p>
 Implied mappings are:
-</p><p>
+</p>
+<p>
  1 - the superuser role is assigned all non-implicit roles except connect;
-</p><p>
+</p>
+<p>
  2 - all roles implicitly map to themselves.
-</p><p>
+</p>
+<p>
 Indirect mappings occur through other mappings (ie mappings are
 transitive).  Eg if a is assigned to b and b to c, then by transitivity
 a is assigned (indirectly) to c.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_all_role_privs"></a>A.2.3. All Role Privs Views</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1326"></a>A.2.3.1. <code class="literal">all_role_privs_vv</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_all_role_privs"></a>A.2.3. All Role Privs Views</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1326"></a>A.2.3.1. <code class="literal">all_role_privs_vv</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_role_privs_vv (
   role_id, roles,
   privileges, global_privileges, 
@@ -153,10 +269,17 @@ select arr.primary_role_id,
         or drp.role_id = arr.primary_role_id)
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
 
-</pre><p>
+</pre>
+<p>
 Exactly as veil2.all_role_privs_v.  The _vv suffix indicates
 that this is a true view, not relying on any materialized views.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1329"></a>A.2.3.2. <code class="literal">all_role_privs_vv_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1329"></a>A.2.3.2. <code class="literal">all_role_privs_vv_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_role_privs_vv_info (
   role_id, roles,
   privileges, global_privileges, 
@@ -169,11 +292,18 @@ select role_id, to_array(roles),
   context_id
 from veil2.all_role_privs_vv;
 
-</pre><p>
+</pre>
+<p>
 As veil2.all_role_privs_vv with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1332"></a>A.2.3.3. <code class="literal">all_role_privs_v</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1332"></a>A.2.3.3. <code class="literal">all_role_privs_v</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_role_privs_v (
   role_id, roles,
   privileges, global_privileges, 
@@ -193,12 +323,19 @@ select arr.primary_role_id,
         or drp.role_id = arr.primary_role_id)
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
 
-</pre><p>
+</pre>
+<p>
 This is simply the aggregation of all role-&gt;role mappings as provided
 by veil2.all_role_roles and the role_privileges as provided by
 veil2.direct_role_privileges.  See the comments on those views for more
 information.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1335"></a>A.2.3.4. <code class="literal">all_role_privs_v_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1335"></a>A.2.3.4. <code class="literal">all_role_privs_v_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_role_privs_v_info (
   role_id, roles,
   privileges, global_privileges, 
@@ -211,17 +348,31 @@ select role_id, to_array(roles),
   context_id
 from veil2.all_role_privs_v;
 
-</pre><p>
+</pre>
+<p>
 As veil2.all_role_privs_v with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1338"></a>A.2.3.5. <code class="literal">all_role_privs</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1338"></a>A.2.3.5. <code class="literal">all_role_privs</code>
+</h4></div></div></div>
+<pre class="programlisting">
 materialized view veil2.all_role_privs
 as select * from veil2.all_role_privs_v;
 
-</pre><p>
+</pre>
+<p>
 Materialized version of veil2.all_role_privs_v.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1341"></a>A.2.3.6. <code class="literal">all_role_privs_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1341"></a>A.2.3.6. <code class="literal">all_role_privs_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_role_privs_info (
   role_id, roles,
   privileges, global_privileges, 
@@ -234,11 +385,22 @@ select role_id, to_array(roles),
   context_id
 from veil2.all_role_privs;
 
-</pre><p>
+</pre>
+<p>
 As veil2.all_role_privs with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_scope_promotions"></a>A.2.4. Scope Promotions View</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1346"></a>A.2.4.1. <code class="literal">scope_promotions</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_scope_promotions"></a>A.2.4. Scope Promotions View</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1346"></a>A.2.4.1. <code class="literal">scope_promotions</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.scope_promotions (
   scope_type_id, scope_id,
   promoted_scope_type_id, promoted_scope_id
@@ -247,13 +409,15 @@ select null::integer, null::integer,
        null::integer, null::integer
 where false;
 
-</pre><p>
+</pre>
+<p>
 This view lists all possible direct scope promotions.  It is used
 for privilege promotion when a role that is assigned in a restricted
 security context has privileges that must be applied in a less
 restricted scope.  Note that promotion to global scope is always
 possible and is not managed through this view.
-</p><p>
+</p>
+<p>
 VPD Implementation Notes:
 If you have restricted scopes which are sub-scopes of less
 restricted ones, and you need privilege promotion for privileges
@@ -263,8 +427,10 @@ which other scopes.  For example if you have a corp scope type and a
 dept scope type which is a sub-scope of it, and your departments table
 identifies the corp_id for each deprtment, you would redefine your
 view something like this:
-</p><p>
-</p><pre class="programlisting">
+</p>
+<p>
+</p>
+<pre class="programlisting">
 create or replace
 view veil2.scope_promotions (
   scope_type_id, scope_id,
@@ -276,17 +442,29 @@ select 96, -- dept scope type id
        corp_id
   from departments;
 
-</pre><p>
+</pre>
+<p>
 Note that any multi-level context promotions will be handled by
 veil2.all_scope_promotions which you should have no need to modify.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_accessor_contexts"></a>A.2.5. Accessor Contexts View</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1351"></a>A.2.5.1. <code class="literal">scope_promotions</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_accessor_contexts"></a>A.2.5. Accessor Contexts View</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1351"></a>A.2.5.1. <code class="literal">scope_promotions</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.accessor_contexts (
   accessor_id, context_type_id, context_id
 ) as
 select accessor_id, 1, 0
   from veil2.accessors;
 
-</pre><p>
+</pre>
+<p>
 This view lists the allowed session contexts for accessors.  When an
 accessor opens a session, they choose a session context.  This session
 context determines which set of role-&gt;role mappings are in play.
@@ -294,34 +472,57 @@ Typically, there will only be one such set, as provided by the default
 implementation of this view.  If however, your application requires
 separate contexts to have different role-&gt;role mappings, you should
 modify this role to map your accessors with that context.
-</p><p>
+</p>
+<p>
 Typically this will be used in a situation where your application
 serves a number of different clients, each of which have their own
 role definitions.  Each accessor will belong to one of those clients
 and this view should be modified to make that mapping apparent.
-</p><p>
+</p>
+<p>
 A typical view definition might be:
   select party_id, 3, client_id
-</p><pre class="programlisting">
+</p>
+<pre class="programlisting">
 from app_schema.parties
-</pre><p>
+</pre>
+<p>
    union all 
   select party_id, 1, 0
-</p><pre class="programlisting">
+</p>
+<pre class="programlisting">
 from mycorp_schema.superusers;
 
-</pre><p>
+</pre>
+<p>
 which would allow those defined in the superusers table to connect in
 the global context, and those defined in the parties table to connect
 in the context of the client that they work for.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_all_scope_promotions"></a>A.2.6. All Scope Promotions Views</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1356"></a>A.2.6.1. <code class="literal">all_scope_promotions_vv</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_all_scope_promotions"></a>A.2.6. All Scope Promotions Views</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1356"></a>A.2.6.1. <code class="literal">all_scope_promotions_vv</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_scope_promotions_vv as
 select * from veil2.all_scope_promotions_v;
 
-</pre><p>
+</pre>
+<p>
 Exactly as veil2.all_scope_promotions_v.  The _vv suffix indicates
 that this is a true view, not relying on any materialized views.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1359"></a>A.2.6.2. <code class="literal">all_scope_promotions_v</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1359"></a>A.2.6.2. <code class="literal">all_scope_promotions_v</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_scope_promotions_v (
   scope_type_id, scope_id,
   promoted_scope_type_id, promoted_scope_id,
@@ -347,30 +548,52 @@ with recursive recursive_scope_promotions as
 select *
   from recursive_scope_promotions;
 
-</pre><p>
+</pre>
+<p>
 This takes the simple custom view veil2.scope_promotions and makes it
 recursive so that if context a contains scope b and scope b contains
 scope c, then this view will return rows for scope c promoting to
 both scope b and scope a.  
-</p><p>
-</p><p>
+</p>
+<p>
+</p>
+<p>
 You should not need to modify this view when creating your custom VPD
 implementation.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1362"></a>A.2.6.3. <code class="literal">all_scope_promotions</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1362"></a>A.2.6.3. <code class="literal">all_scope_promotions</code>
+</h4></div></div></div>
+<pre class="programlisting">
 materialized view veil2.all_scope_promotions
 as select * from veil2.all_scope_promotions_v;
 
-</pre><p>
+</pre>
+<p>
 This takes the simple custom view veil2.scope_promotions and makes it
 recursive so that if context a contains context b and context b contains
 context c, then this view will return rows for context c promoting to
 both context b and context a.  
-</p><p>
+</p>
+<p>
 It is automatically refreshed when the veil2.scopes table is modified.
-</p><p>
+</p>
+<p>
 You should not need to modify this view when creating your custom VPD
 implementation.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_scope_tree"></a>A.2.7. Scope Tree View</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1367"></a>A.2.7.1. <code class="literal">scope_tree</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_scope_tree"></a>A.2.7. Scope Tree View</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1367"></a>A.2.7.1. <code class="literal">scope_tree</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.scope_tree (scope_tree) as
 with recursive
   top_scopes as
@@ -425,11 +648,22 @@ select format('%' || ((depth)*16 - 14) || 's', '+-') ||
        child 
   from format1;
 
-</pre><p>
+</pre>
+<p>
 Provides a simple ascii-formatted tree representation of our scope
 promotions tree.  This is an aid to data visualisation for data
 designers and administrators and is not used elsewhere in Veil2.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_promotable_privileges"></a>A.2.8. Promotable Privileges Views</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1372"></a>A.2.8.1. <code class="literal">promotable_privileges</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_promotable_privileges"></a>A.2.8. Promotable Privileges Views</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1372"></a>A.2.8.1. <code class="literal">promotable_privileges</code>
+</h4></div></div></div>
+<pre class="programlisting">
 create view veil2.promotable_privileges (
   scope_type_id, privilege_ids)
 as
@@ -439,22 +673,40 @@ select st.scope_type_id, bitmap_of(p.privilege_id)
     on p.promotion_scope_type_id = st.scope_type_id
 group by st.scope_type_id;
 
-</pre><p>
+</pre>
+<p>
 Provide bitmaps of those privileges that may be promoted, mapped to the
 context types to which they should promote.  This is not used elsewhere
 in veil2 but may be useful for visualising data.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1375"></a>A.2.8.2. <code class="literal">promotable_privileges_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1375"></a>A.2.8.2. <code class="literal">promotable_privileges_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 create view veil2.promotable_privileges_info (
   scope_type_id, privilege_ids)
 as
 select scope_type_id, to_array(privilege_ids)
   from veil2.promotable_privileges;
 
-</pre><p>
+</pre>
+<p>
 As veil2.promotable_privileges with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_all_accessor_roles"></a>A.2.9. All Accessor Roles Views</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1380"></a>A.2.9.1. <code class="literal">all_accessor_roles</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_all_accessor_roles"></a>A.2.9. All Accessor Roles Views</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1380"></a>A.2.9.1. <code class="literal">all_accessor_roles</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_accessor_roles (
   accessor_id, role_id, context_type_id, context_id
 ) as
@@ -462,19 +714,23 @@ select accessor_id, role_id,
        context_type_id, context_id
   from veil2.accessor_roles;
 
-</pre><p>
+</pre>
+<p>
 Provides all of an accessor's explicit role assignments, ie it does
 not provide the personal_context role.  This view is used by the veil2
 access control functions, and when adding new security context types,
 this view is all that should usually need to be modified.
-</p><p>
+</p>
+<p>
 VPD Implementation Notes: If you have any explicitly assigned roles
 that are not granted through the veil2.accessor_role table, you will
 need to redefine this view.  For example if you have a project context
 that is dependent on an accessor being assigned to a project you might
 redefine the view as follows:
-</p><p>
-</p><pre class="programlisting">
+</p>
+<p>
+</p>
+<pre class="programlisting">
 create or replace
 view veil2.all_accessor_roles (
   accessor_id, role_id, context_type_id, context_id
@@ -487,8 +743,15 @@ select party_id, role_id,
        99,  -- id for project context_type
        project_id
   from project_parties;
-</pre><p>
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1383"></a>A.2.9.2. <code class="literal">all_accessor_roles_plus</code></h4></div></div></div><pre class="programlisting">
+</pre>
+<p>
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1383"></a>A.2.9.2. <code class="literal">all_accessor_roles_plus</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_accessor_roles_plus as
 select accessor_id, role_id,
        context_type_id, context_id
@@ -497,22 +760,40 @@ select accessor_id, role_id,
 select accessor_id, 2, 1, accessor_id
   from veil2.accessors;
 
-</pre><p>
+</pre>
+<p>
 As all_accessor_roles but also showing personal_context role for each
 accessor.  This is a developer view, aimed at development and
 debugging.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_all_context_privs"></a>A.2.10. All Context Privs Views</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1388"></a>A.2.10.1. <code class="literal">all_context_privs</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_all_context_privs"></a>A.2.10. All Context Privs Views</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1388"></a>A.2.10.1. <code class="literal">all_context_privs</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_context_privs as
     -- We retrieve 2 distinct pairs of context keys: one for the
     -- scope within which the privilge applies (which for directly
     -- assigned roles and privileges is the context of the
     -- assignment), and one for the role-&gt;role mappings, which may be
 
-</pre><p>
+</pre>
+<p>
 This is an internal view aimed to help development and debugging.
 There should be no need to give anyone other than developers any
 access to this.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1391"></a>A.2.10.2. <code class="literal">all_context_privs_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1391"></a>A.2.10.2. <code class="literal">all_context_privs_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_context_privs_info (
   accessor_id, assignment_context_type_id,
   assignment_context_id, mapping_context_type_id,
@@ -526,17 +807,35 @@ select accessor_id, assignment_context_type_id,
        to_array(privs), source
   from veil2.all_context_privs;
 
-</pre><p>
+</pre>
+<p>
 As veil2.direct_role_privileges_v with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_all_accessor_privs"></a>A.2.11. All Accessor Privs Views</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1396"></a>A.2.11.1. <code class="literal">all_accessor_privs_vv</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_all_accessor_privs"></a>A.2.11. All Accessor Privs Views</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1396"></a>A.2.11.1. <code class="literal">all_accessor_privs_vv</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_accessor_privs_vv as
 select * from veil2.all_accessor_privs_v;
 
-</pre><p>
+</pre>
+<p>
 As veil2.all_accessor_privs_v
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1399"></a>A.2.11.2. <code class="literal">all_accessor_privs_vv_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1399"></a>A.2.11.2. <code class="literal">all_accessor_privs_vv_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_accessor_privs_vv_info (
   accessor_id,
   assignment_context_type_id, assignment_context_id,
@@ -550,11 +849,18 @@ select accessor_id,
        to_array(roles),  to_array(privs)
   from veil2.all_accessor_privs_vv;
 
-</pre><p>
+</pre>
+<p>
 As veil2.all_accessor_privs_vv with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1402"></a>A.2.11.3. <code class="literal">all_accessor_privs_v</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1402"></a>A.2.11.3. <code class="literal">all_accessor_privs_v</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_accessor_privs_v (
   accessor_id,
   assignment_context_type_id, assignment_context_id,
@@ -571,10 +877,17 @@ select accessor_id,
   mapping_context_type_id, mapping_context_id,
   scope_type_id, scope_id;
 
-</pre><p>
+</pre>
+<p>
 Show all roles and privileges assigned to all accessors in all
 contexts, excepting the implied personal context.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1405"></a>A.2.11.4. <code class="literal">all_accessor_privs_v_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1405"></a>A.2.11.4. <code class="literal">all_accessor_privs_v_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_accessor_privs_v_info (
   accessor_id,
   assignment_context_type_id, assignment_context_id,
@@ -588,18 +901,32 @@ select accessor_id,
        to_array(roles),  to_array(privs)
   from veil2.all_accessor_privs_v;
 
-</pre><p>
+</pre>
+<p>
 As veil2.all_accessor_privs_v with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1408"></a>A.2.11.5. <code class="literal">all_accessor_privs</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1408"></a>A.2.11.5. <code class="literal">all_accessor_privs</code>
+</h4></div></div></div>
+<pre class="programlisting">
 materialized view veil2.all_accessor_privs
   as select * from veil2.all_accessor_privs_v;
 
-</pre><p>
+</pre>
+<p>
 Show all roles and privileges assigned to all accessors in all
 contexts, excepting the implied personal context.
-</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1411"></a>A.2.11.6. <code class="literal">all_accessor_privs_info</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1411"></a>A.2.11.6. <code class="literal">all_accessor_privs_info</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_accessor_privs_info (
   accessor_id,
   assignment_context_type_id, assignment_context_id,
@@ -613,11 +940,22 @@ select accessor_id,
        to_array(roles),  to_array(privs)
   from veil2.all_accessor_privs;
 
-</pre><p>
+</pre>
+<p>
 As veil2.all_accessor_privs with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
 views.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_role_chains"></a>A.2.12. Role Chains View</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1416"></a>A.2.12.1. <code class="literal">role_chains</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_role_chains"></a>A.2.12. Role Chains View</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1416"></a>A.2.12.1. <code class="literal">role_chains</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.role_chains as
 with recursive role_chains
 as
@@ -625,11 +963,22 @@ as
     select rr.primary_role_id, rr.assigned_role_id,
     	   rr.primary_role_id::text || '-&gt;' ||
 
-</pre><p>
+</pre>
+<p>
 This is a developer view.  It is intended for development and
 debugging, and provides a way to view role mappings in a simple but
 complete way.  Try it, it should immediately make sense.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_all_accessor_roles_plus"></a>A.2.13. All Accessor Roles Plus</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1421"></a>A.2.13.1. <code class="literal">all_accessor_roles_plus</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_all_accessor_roles_plus"></a>A.2.13. All Accessor Roles Plus</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1421"></a>A.2.13.1. <code class="literal">all_accessor_roles_plus</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.all_accessor_roles_plus as
 select accessor_id, role_id,
        context_type_id, context_id
@@ -638,11 +987,22 @@ select accessor_id, role_id,
 select accessor_id, 2, 1, accessor_id
   from veil2.accessors;
 
-</pre><p>
+</pre>
+<p>
 As all_accessor_roles but also showing personal_context role for each
 accessor.  This is a developer view, aimed at development and
 debugging.
-</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="view_privilege_assignments"></a>A.2.14. Privilege Assignments View</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm1426"></a>A.2.14.1. <code class="literal">privilege_assignments</code></h4></div></div></div><pre class="programlisting">
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="view_privilege_assignments"></a>A.2.14. Privilege Assignments View</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1426"></a>A.2.14.1. <code class="literal">privilege_assignments</code>
+</h4></div></div></div>
+<pre class="programlisting">
 view veil2.privilege_assignments as
 select aar.accessor_id, rp.privilege_id,
        aar.context_type_id as ass_cntxt_type_id,
@@ -676,19 +1036,46 @@ select aar.accessor_id, rp.privilege_id,
    and asp.promoted_scope_type_id = p.promotion_scope_type_id
    and asp.is_type_promotion;
 
-</pre><p>
+</pre>
+<p>
 Developer view that shows how accessors get privileges.  It shows the
 roles that the user is assigned, and the context in which they are
 assigned, as well as the mappings from role to role to privilege which
 give that resulting privilege to the accessor.
-</p><p>
+</p>
+<p>
 If you are uncertain how accessor 999 has privilege 333, then simply
 run:
-</p><p>
-</p><pre class="programlisting">
+</p>
+<p>
+</p>
+<pre class="programlisting">
 select * 
   from veil2.privilege_assignments 
  where accessor_id = 999 
    and privilege_id = 333;
-</pre><p>
-</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="apa.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="apa.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="apas03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A. <code class="literal">Veil2</code> ERD and Database Objects </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.3. Veil2 Functions and Triggers</td></tr></table></div></body></html>
+</pre>
+<p>
+</p>
+</div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="apa.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="apa.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="apas03.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">A. <code class="literal">Veil2</code> ERD and Database Objects </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> A.3. Veil2 Functions and Triggers</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

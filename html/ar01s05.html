@@ -1,16 +1,79 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><meta name="viewport" content="width=device-width, initial-scale=1"><title>5. Veil2 Concepts</title><link rel="stylesheet" type="text/css" href="veil2.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation"><link rel="prev" href="ar01s04.html" title="4. Why Use Veil2"><link rel="next" href="ar01s06.html" title="6. What is Veil2 And What Does It Provide?"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s04.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s06.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">4. Why Use <code class="literal">Veil2</code> </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 6. What is <code class="literal">Veil2</code> And What Does It Provide?</td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="veil2-concepts"></a>5. <code class="literal">Veil2</code> Concepts</h2></div></div></div><p>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5. Veil2 Concepts</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="prev" href="ar01s04.html" title="4. Why Use Veil2">
+<link rel="next" href="ar01s06.html" title="6. What is Veil2 And What Does It Provide?">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ar01s04.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s06.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">4. Why Use <code class="literal">Veil2</code> </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 6. What is <code class="literal">Veil2</code> And What Does It Provide?</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="veil2-concepts"></a>5. <code class="literal">Veil2</code> Concepts</h2></div></div></div>
+<p>
     The following concepts are crucial to understanding
     <code class="literal">Veil2</code>.
-  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><a class="link" href="ar01s05.html#privileges" title="5.1. Privileges">privileges</a>;</li><li class="listitem"><a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scopes</a>;</li><li class="listitem"><a class="link" href="ar01s05.html#roles" title="5.3. Roles">roles</a>;</li><li class="listitem"><a class="link" href="ar01s05.html#assignments" title="5.4. Assignments">assignments</a>;</li><li class="listitem"><a class="link" href="ar01s05.html#security-contexts" title="5.5. Security Contexts">security
-    contexts</a>;</li><li class="listitem"><a class="link" href="ar01s05.html#privilege-promotion" title="5.6. Privilege Promotion">privilege
-    promotion</a>;</li><li class="listitem"><a class="link" href="">authentication
-    contexts</a>.</li></ul></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="privileges"></a>5.1. Privileges</h3></div></div></div><p>
+  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="ar01s05.html#privileges" title="5.1. Privileges">privileges</a>;</li>
+<li class="listitem">
+<a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scopes</a>;</li>
+<li class="listitem">
+<a class="link" href="ar01s05.html#roles" title="5.3. Roles">roles</a>;</li>
+<li class="listitem">
+<a class="link" href="ar01s05.html#assignments" title="5.4. Assignments">assignments</a>;</li>
+<li class="listitem">
+<a class="link" href="ar01s05.html#security-contexts" title="5.5. Security Contexts">security
+    contexts</a>;</li>
+<li class="listitem">
+<a class="link" href="ar01s05.html#privilege-promotion" title="5.6. Privilege Promotion">privilege
+    promotion</a>;</li>
+<li class="listitem">
+<a class="link" href="">authentication
+    contexts</a>.</li>
+</ul></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="privileges"></a>5.1. Privileges</h3></div></div></div>
+<p>
       Privileges are the atomic units of access control, limiting
       access to specific data or operations.  By convention, most
       privileges are named <span class="quote">&#8220;<span class="quote"><code class="literal">&lt;action&gt;
       &lt;object&gt;</code></span>&#8221;</span>.  Actions will include:
-      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">select;</li><li class="listitem">insert;</li><li class="listitem">update;</li><li class="listitem">delete;</li><li class="listitem">execute.</li></ul></div><p>
-    </p><p>
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">select;</li>
+<li class="listitem">insert;</li>
+<li class="listitem">update;</li>
+<li class="listitem">delete;</li>
+<li class="listitem">execute.</li>
+</ul></div>
+<p>
+    </p>
+<p>
       Objects will usually be the names of tables and, for
       <code class="literal">execute</code> actions, the names of specific pieces
       of functionality.  Note that <code class="literal">Veil2</code> takes no
@@ -18,19 +81,27 @@
       <code class="literal">privilege_id</code>.  It is up to the implementation
       to ensure that each privilege is used in a manner consistent
       with its name.
-    </p><p>
+    </p>
+<p>
       A typical privilege might be <code class="literal">select parties</code>
       which we could assume would allow select access to the
       <code class="literal">parties</code> table.  Note that every privilege
       assigned in <code class="literal">Veil2</code> is assigned with a specific
       <a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scope</a>.
-    </p><p>
+    </p>
+<p>
       A <code class="literal">Veil2</code>-based security system is likely to
       have tens or hundreds of distinct privileges.
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="scopes"></a>5.2. Scopes</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="scopes"></a>5.2. Scopes</h3></div></div></div>
+<p>
       A scope describes the applicability of a <a class="link" href="ar01s05.html#privileges" title="5.1. Privileges">privilege</a>.  Scopes are mostly based
       upon existing relationships in your data.
-    </p><p>
+    </p>
+<p>
       Some scopes will allow access to large subsets of data, and some
       to very small subsets.  We refer to this as the scope level.  A
       scope that is very restrictive is considered a low-level scope,
@@ -39,7 +110,8 @@
       this is always from a lower level to a higher level, which is to
       say that the scope becomes less restrictive, and likely to
       return a larger set of data.
-    </p><p>
+    </p>
+<p>
       One scope that is particularly low-level is personal scope.
       This limits access to data that specifically relates to the
       accessor (privilege holder).  So if <code class="literal">user X</code>
@@ -49,14 +121,20 @@
       <code class="literal">users</code> records will depend on whether they
       have been assigned <code class="literal">select users</code> in any other
       scopes.
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="roles"></a>5.3. Roles</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="roles"></a>5.3. Roles</h3></div></div></div>
+<p>
       Roles exist to manage collections of <a class="link" href="ar01s05.html#privileges" title="5.1. Privileges">privileges</a>.  Because privileges
       apply at such a low level, managing access by assigning
       individual privileges is untenable.  Instead we manage groups of
       privileges through roles.  Privileges are assigned to roles, and
       roles are assigned to users.  See <a class="link" href="ar01s05.html#assignments" title="5.4. Assignments">assignments</a>; <a class="link" href="ar01s05.html#security-contexts" title="5.5. Security Contexts">security contexts</a>; and <a class="link" href="ar01s05.html#privilege-promotion" title="5.6. Privilege Promotion">privilege promotion</a>, for
       information on how each privilege's <a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scope</a> is managed.
-    </p><p>
+    </p>
+<p>
       To make roles more flexible, we allow roles to be assigned to
       other roles.  We often call this, role mapping.  This allows us
       to create low-level <span class="emphasis"><em>functional</em></span> roles that
@@ -65,7 +143,8 @@
       <span class="emphasis"><em>user</em></span> roles which can then be assigned to
       users.  By doing this, we minimize the number of different roles
       that we need to be able to assign to users.
-    </p><p>
+    </p>
+<p>
       Typical functional roles might include <code class="literal">view
       order</code>, <code class="literal">create order</code>,
       <code class="literal">approve order</code>, etc.  These function level
@@ -73,13 +152,15 @@
       <code class="literal">customer service rep</code>, <code class="literal">customer
       service manager</code>, <code class="literal">product manager</code>,
       etc.  Typically you would only assign user level roles to users.
-    </p><p>
+    </p>
+<p>
       As the roles themselves do not care whether they are functional
       or user level, there is no limit to how deeply role to role
       mappings may be nested.  This can be useful when you want to
       create a user-role that combines the abilities of 2 or more
       existing user roles.
-    </p><p>
+    </p>
+<p>
       <code class="literal">Veil2</code> does not care how roles are mapped to
       each other, in fact, you can map <code class="literal">Role A</code> to
       <code class="literal">Role B</code> and then <code class="literal">Role B</code> to
@@ -87,7 +168,11 @@
       handle it just fine; it will just mean that the two roles are
       equivalent - which is hardly useful.  You may want to implement
       some policies around this for your own system.
-    </p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="role_mapping"></a>5.3.1. Contextual Role Mapping</h4></div></div></div><p>
+    </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="role_mapping"></a>5.3.1. Contextual Role Mapping</h4></div></div></div>
+<p>
 	One of the possible use-cases for <code class="literal">Veil2</code>, is
 	to provide virtual private databases in a
 	<a class="ulink" href="https://en.wikipedia.org/wiki/Software_as_a_service" target="_top">SaaS</a> 
@@ -95,7 +180,8 @@
 	of such a service might want different user-level roles, and
 	different mappings between them and the base function-level
 	roles.
-      </p><p>
+      </p>
+<p>
 	<code class="literal">Veil2</code> provides the means to do this, by
 	making each role-&gt;role mapping depend on a scope, which
 	describes the context in which the role-&gt;role mapping applies.
@@ -111,19 +197,27 @@
 	<code class="literal">system_parameter</code> named
 	<span class="quote">&#8220;<span class="quote"><code class="literal">mapping context target scope
 	type</code></span>&#8221;</span>.
-      </p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="assignments"></a>5.4. Assignments</h3></div></div></div><p>
+      </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="assignments"></a>5.4. Assignments</h3></div></div></div>
+<p>
       Users are assigned <a class="link" href="ar01s05.html#roles" title="5.3. Roles">roles</a> in a
       number of ways, and <code class="literal">Veil2</code> attempts to place
       no limits on the mechanisms that an implementation may choose to
       use.  Assignments may be explicit, implicit or even a
       combination of the two.
-    </p><p>
+    </p>
+<p>
       An explicit role assignment would consist of a record
       associating a role with the user being assigned the role, in a
       specific context (see security contexts below).  This record
       would be for the sole purpose of assigning the role.  This is
       what makes it explicit.
-    </p><p>
+    </p>
+<p>
       Implicit assignments can be made in a number of ways.  In
       <code class="literal">Veil2</code> each user, by default, is assigned the
       <code class="literal">personal context</code> role.  This is done by
@@ -131,7 +225,8 @@
       record relating the role to the user.  Note that although the
       role is assigned by default, it has no <a class="link" href="ar01s05.html#privileges" title="5.1. Privileges">privileges</a>.  What <code class="literal">personal
       context</code> allows is up to your implementation.
-    </p><p>
+    </p>
+<p>
       Other forms of implicit role assignment will be through existing
       data relationships.  For instance, we might want project team
       members to have certain privileges to the data for their
@@ -143,7 +238,12 @@
       record linking the user and the project.  In such a case we
       would create a <code class="literal">team member</code> role, and assume
       that team members have this role.
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="security-contexts"></a>5.5. Security Contexts</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="security-contexts"></a>5.5. Security Contexts</h3></div></div></div>
+<p>
       A security context (or just <code class="literal">context</code>) applies
       to a <a class="link" href="ar01s05.html#assignments" title="5.4. Assignments">role assignment</a>.  It is
       similar to a <a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scope</a>, but where the
@@ -154,7 +254,8 @@
       relates to the underlying data model of your database, and a
       scope is an internal detail and relates primarily to the
       <code class="literal">Veil2</code>-based security model.
-    </p><p>
+    </p>
+<p>
       The distinction between scope and context becomes more clear
       when we consider that a role may be assigned in a context that
       has no meaning for that role's privileges.  Consider a
@@ -166,7 +267,8 @@
       context of its assignment, and so its operating scope will need
       to be promoted (see <a class="link" href="ar01s05.html#privilege-promotion" title="5.6. Privilege Promotion">privilege
       promotion</a> below).
-    </p><p>
+    </p>
+<p>
       It is largely because privileges may apply in different scopes
       from their role's assignment context, that contexts and scopes
       have distinct terms.  While this may seem to be semantic
@@ -174,16 +276,22 @@
       and contexts are such that the distinction is useful.  The
       author has been there and resents that he will never get those
       hours back.
-    </p><p>
+    </p>
+<p>
       The key to a good relational security implementation is an
       understanding of your relational security contexts.  In
       particular, how you may need to perform some data
       denormalizations in order to get good performance.
       TODO: Reference that section.
-    </p><p>
+    </p>
+<p>
       <code class="literal">Veil2</code> provides 2 built-in security security
       contexts:
-    </p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="global-context"></a>5.5.1. Global Context</h4></div></div></div><p>
+    </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="global-context"></a>5.5.1. Global Context</h4></div></div></div>
+<p>
 	This is a non-relational context.  Privileges assigned in
 	global context apply without limitation.  If you are assigned
 	a role in global context, all of its privileges will apply in
@@ -191,22 +299,35 @@
 	customer</code> privilege (via a role) in global context, 
         you will be able to see all <code class="literal">customer</code>
 	records.
-      </p><p>
+      </p>
+<p>
         Global Context is powerful and dangerous. It is the level of
         access control provided by <a class="link" href="ar01s03.html#Traditional" title="3.1. The Traditional Approach">traditional</a> security systems and
         it should be used with great care.
-      </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="personal-context"></a>5.5.2. Personal Context</h4></div></div></div><p>
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="personal-context"></a>5.5.2. Personal Context</h4></div></div></div>
+<p>
 	Personal context is an implied context.  Each user has an
 	implicit assignment of the <code class="literal">personal context</code>
 	role in this context. 
-      </p><p>
+      </p>
+<p>
         The personal context is all about the application user, ie the
         person that is using your application. It applies to data that
         is about that person.  This would include their authentication
         credentials, contact information, etc. The purpose of the
         personal context is to give you access to your data, and no-one
         else&#8217;s.
-      </p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="privilege-promotion"></a>5.6. Privilege Promotion</h3></div></div></div><p>
+      </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="privilege-promotion"></a>5.6. Privilege Promotion</h3></div></div></div>
+<p>
       <a class="link" href="ar01s05.html#privileges" title="5.1. Privileges">Privileges</a> may give access to
       rows in a table, or to specific functionality. Often, a
       privilege that is needed for a particular <a class="link" href="ar01s05.html#roles" title="5.3. Roles">role</a>, will apply to an object that exists
@@ -214,7 +335,8 @@
       of the <a class="link" href="ar01s05.html#assignments" title="5.4. Assignments">role assignment</a>.  In
       such cases, the privilege must be promoted from the context of
       its assignment to apply in a higher-level <a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scope</a>.
-    </p><p>
+    </p>
+<p>
       Consider a <a class="link" href="ar01s05.html#roles" title="5.3. Roles">role</a>,
       <code class="literal">CSR</code>, that has been assigned to a user in
       <code class="literal">customer context</code> for <code class="literal">customer
@@ -222,11 +344,23 @@
       give the user the ability to manage <code class="literal">customer
       Z</code> and no other customer.  Among the hypothetical
       privileges for this role are:
-    </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><code class="literal">select customer</code>;
-      </li><li class="listitem"><code class="literal">update customer</code>;
-      </li><li class="listitem"><code class="literal">...</code></li><li class="listitem"><code class="literal">select lookups</code>;
-      </li><li class="listitem"><code class="literal">connect</code>.
-      </li></ul></div><p>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; ">
+<li class="listitem">
+<code class="literal">select customer</code>;
+      </li>
+<li class="listitem">
+<code class="literal">update customer</code>;
+      </li>
+<li class="listitem"><code class="literal">...</code></li>
+<li class="listitem">
+<code class="literal">select lookups</code>;
+      </li>
+<li class="listitem">
+<code class="literal">connect</code>.
+      </li>
+</ul></div>
+<p>
       If we assume that <code class="literal">select lookups</code> gives the
       user the ability to view all lookup data, and
       <code class="literal">connect</code> gives them the ability to actually
@@ -238,12 +372,14 @@
       be applied in the global scope, but they have been assigned in
       the <code class="literal">customer context</code> for <code class="literal">customer
       Z</code>.
-    </p><p>
+    </p>
+<p>
       The context for the role assignment makes no sense for these
       privileges, so they must be promoted to a higher-level scope.
       In this case, the scope would be that of the <code class="literal">global
       context</code>.
-    </p><p>
+    </p>
+<p>
       As another example consider that a role that has been assigned
       in <code class="literal">project context</code> provides the
       <code class="literal">select department</code> privilege to view the
@@ -255,7 +391,8 @@
       department scope.  Note that if the <code class="literal">select
       project</code> privilege were promoted in the same way, it
       would allow the user to view all projects for the department.
-    </p><p>
+    </p>
+<p>
       The level of promotion required for each privilege is specific
       to the object that the privilege exists to protect.  So, each
       privilege identifies its target scope level.  If the privilege
@@ -263,22 +400,51 @@
       context, then promotion to the higher target scope level will
       automatically be performed when the user's privileges are first
       loaded.
-    </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="authentication_context"></a>5.7. Authentication Contexts</h3></div></div></div><p>
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="authentication_context"></a>5.7. Authentication Contexts</h3></div></div></div>
+<p>
       Each accessor (database user) is associated with a specific
       context within which they authenticate.  Typically, this context
       would represent the organisation they work for.  When
       authenticating an accessor, their authentication context must be
       provided along with their username or other identifier.
-    </p><p>
+    </p>
+<p>
       What this means is that usernames, etc do not have to be
       globally unique, but only unique within each authentication
       context.
-    </p><p>
+    </p>
+<p>
       You can choose to allow all accessors to authenticate within the
       same context if you wish.  This would usually be the global
       context.
-    </p><p>
+    </p>
+<p>
       As described in <a class="link" href="ar01s05.html#role_mapping" title="5.3.1. Contextual Role Mapping">Contextual Role
       Mapping</a> above, the role names and role-&gt;role mappings
       that an accessor sees may depend on their authentication context.
-    </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s04.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s06.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">4. Why Use <code class="literal">Veil2</code> </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 6. What is <code class="literal">Veil2</code> And What Does It Provide?</td></tr></table></div></body></html>
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ar01s04.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s06.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">4. Why Use <code class="literal">Veil2</code> </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 6. What is <code class="literal">Veil2</code> And What Does It Provide?</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

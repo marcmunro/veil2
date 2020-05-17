@@ -1,0 +1,73 @@
+<sect1 id="contact">
+  <title>Contact Links</title>
+  <para/>
+  <sect2 id="reporting_bugs">
+    <title>Reporting Bugs</title>
+    <para>
+      If you find something that looks like a bug, please report it
+      using the github <ulink
+      url="https://github.com/marcmunro/veil2/issues">issue
+      tracker</ulink>.
+    </para>
+  </sect2>
+  <sect2 id="contributing">
+    <title>Contributing</title>
+    <para>
+      All sorts of contibutions are welcomed.  In particular:
+      <itemizedlist>
+	<listitem>
+	  documentation fixes and enhancements;
+	</listitem>
+	<listitem>
+	  code fixes;
+	</listitem>
+	<listitem>
+	  authentication functions;
+	</listitem>
+	<listitem>
+	  translations.
+	</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      If you'd like to get involved, you should chat with Marc using
+      <link linkend="chatting">IRC</link> or <link
+      linkend="email">email</link> (sorry that's not a very helpful link).
+    </para>
+    <para>
+      Oh, and feel free to fork the project if you get no response.
+    </para>
+  </sect2>
+  <sect2 id="chatting">
+    <title>IRC</title>
+    <para>
+      You may be able to find Marc on IRC at freenode.net.  If
+      possible he will be in the <literal>#veil2</literal> room with
+      the nick <literal>dbdude</literal>.
+    </para>
+    <para>
+      Feel free to drop in for a
+      <ulink url="irc://irc.freenode.net/veil2">chat</ulink>.  You may
+      be able to get advice and help.  Marc is usually pretty
+      friendly.  His home timezone is PST.
+    </para>
+  </sect2>
+  <sect2 id="email">
+    <title>Email</title>
+    <para>
+      Marc is not going to publish his email address here as he gets
+      enough spam as it is.  But he isn't that hard to find with a bit
+      of googling.  Put Veil2 in the email subject line and you're
+      less likly to fall into the spam bucket.  If all else fails,
+      raise an issue and he'll probably get back to you.
+    </para>
+  </sect2>
+  <sect2 id="availability">
+    <title>Availability</title>
+    <para>
+      Marc is not paid for this and likes to believe he has a life.
+      He may not be available for extended periods of time, so please
+      be patient.
+    </para>
+  </sect2>
+</sect1>

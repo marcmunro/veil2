@@ -1,0 +1,116 @@
+<sect1 id="tips">
+  <title>Tips and Guidelines</title>
+  <para>
+    This section provides whatever tips and guidelines have occurred
+    to the author.  We can hope that the section expands over time.
+  </para>
+  <sect2>
+    <title>Write Queries That Work Without <literal>Veil2</literal></title>
+    <para>
+      Generally, with a well-behaved application and well-implemented
+      database design, <literal>Veil2</literal> adds little
+      performance overhead.  This is because it, mostly, only applies
+      permission checks on the records that the user sees.  If the
+      user is only going to see a few records, the overhead of
+      checking those few records is going to be small.
+    </para>
+    <para>
+      However, if you make <literal>Veil2</literal> do your query
+      filtering for you, instead of writing properly crafted
+      where-clauses, performance is going to suck.  Consider the
+      following queries:
+      <programlisting>
+select stuff
+  from parties
+ where org_id = 20
+   and party_name like '%Bob%';
+
+select stuff
+ from parties
+where party_name like '%Bob%';
+      </programlisting>
+    </para>
+    <para>
+      Assume that we are in a <literal>Veil2</literal>-protected
+      database and that we have aelect access only to
+      <literal>org_id</literal> 4.
+    </para>
+    <para>
+      Both queries will return the same number of rows.  But in a
+      database with lots of parties, the second query will be slow.
+    </para>
+    <para>
+      In the second query, a full-table scan will be performed, and
+      many Bobs from other orgs might be returned, only to be
+      discarded by the <literal>Veil2</literal>-based security policy.
+    </para>
+    <para>
+      The first query will, most likely, use an index and return a
+      much smaller set of records, which will then be filtered looking
+      for Bob, and finally checked against the security policy.  In
+      this case the security policy has only had to check records that
+      the user was allowed to see anyway.
+    </para>
+  </sect2>
+  <sect2>
+    <title>Consider Reporting Blocked Accesses</title>
+    <para>
+      For most applications, any time that a security policy blocks
+      something, the application has done something wrong.  You should
+      consider this a bug in the application.  Although no harm will
+      be done, this is an indication of one of two things:
+      <itemizedlist>
+	<listitem>
+	  the application has not been properly implemented;
+	</listitem>
+	<listitem>
+	  your security policy is over-restrictive.
+	</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      In either case, it makes sense to note the occurrence and
+      investigate.  Note that in a reporting environment where ad-hoc
+      reports can be run, this may prove less useful.
+    </para>
+  </sect2>
+  <sect2>
+    <title>Consider Testing With and Without Security</title>
+    <para>
+      If you have automated tests, you should run them against both
+      secured and unsecured databases.  If the tests pass in both
+      instances, then your application and the security implementation
+      are in harmony, and you should be very pleased with yourselves.
+      Encourage your employer to provide handsome bonuses.
+    </para>
+  </sect2>
+  <sect2>
+    <title>Denormalize Around Your Scopes</title>
+    <para>
+      If you find that your security policies require joins to other
+      tables (possibly through function calls), then your security
+      system's performance may suffer.  Consider adding scope_id
+      columns to some tables to improve the performance of security
+      tests.  You might also consider doing this just to simplify
+      those tests.
+    </para>
+  </sect2>
+  <sect2>
+    <title>Use Secured Views To Implement Complex Queries</title>
+    <para>
+      You may find that multi-table queries encounter performance
+      issues as the security policy has to be applied for some tables
+      on more rows than are ultimately returned by the query.  If you
+      cannot find a way to improve the query by rewriting, then
+      consider replacing it with a secured view instead.
+    </para>
+    <para>
+      The secured view would implement the joins and whatever
+      filtering can be written in to the view, and would then apply a
+      security policy only to the resulting rows, rather than to
+      intermediate rows that are discarded by subsequent joins in the
+      original query.
+    </para>
+  </sect2>
+</sect1>
+

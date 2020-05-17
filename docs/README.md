@@ -37,4 +37,4 @@ Veil2 documents.
 ## License
 
 Veil2 is distributed under the General Public License version 3.  See
-the [LICENSE](./LICENSE) file.
+the [LICENSE](../LICENSE) file.

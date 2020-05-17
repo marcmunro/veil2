@@ -49,7 +49,7 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm623"></a>9.1. The Security Contexts</h3></div></div></div>
+<a name="idm638"></a>9.1. The Security Contexts</h3></div></div></div>
 <p>
       The demo provides 3 relational contexts:
       </p>
@@ -62,7 +62,7 @@
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm630"></a>9.1.1. Corp Context</h4></div></div></div>
+<a name="idm645"></a>9.1.1. Corp Context</h4></div></div></div>
 <p>
 	The demo uses the <code class="literal">parties</code> table to identfiy
 	organizations and persons.  There is a tree structured
@@ -76,7 +76,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm635"></a>9.1.2. Org Context</h4></div></div></div>
+<a name="idm650"></a>9.1.2. Org Context</h4></div></div></div>
 <p>
 	Within each corp there is a tree of organisational parts, or
 	orgs.  Privileges applied in org contexts apply in all
@@ -88,7 +88,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm638"></a>9.1.3. Project Context</h4></div></div></div>
+<a name="idm653"></a>9.1.3. Project Context</h4></div></div></div>
 <p>
 	Projects have their own contexts.  Assignment to a project
 	uses a different mechanism from the more explicit role
@@ -98,7 +98,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm641"></a>9.2. The Organizational Hierarchy</h3></div></div></div>
+<a name="idm656"></a>9.2. The Organizational Hierarchy</h3></div></div></div>
 <p>
       See the above descriptions of corp and org contexts for an
       introduction to this.   Persons work for specific orgs in the
@@ -110,7 +110,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm645"></a>9.3. Exploring It</h3></div></div></div>
+<a name="idm660"></a>9.3. Exploring It</h3></div></div></div>
 <p>
       You can install the demo to a database that already had
       <code class="literal">Veil2</code> objects installed by running the file
@@ -133,7 +133,7 @@ $ make db; psql -d vpd -f demo/demo.sql
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm655"></a>9.3.1. Users</h4></div></div></div>
+<a name="idm670"></a>9.3.1. Users</h4></div></div></div>
 <p>
 	This section describes a number of the users defined for the
 	demo.  These users are mostly assigned the same roles, but
@@ -157,7 +157,7 @@ $ make db; psql -d vpd -f demo/demo.sql
       </p>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm661"></a>Alice</h5></div></div></div>
+<a name="idm676"></a>Alice</h5></div></div></div>
 <p>
 	  Alice is a global superuser.  She works for Veil Corp (corp
 	  100).  She authenticates using bcrypt.  You can connect as
@@ -188,7 +188,7 @@ select *
 </div>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm668"></a>Bob</h5></div></div></div>
+<a name="idm683"></a>Bob</h5></div></div></div>
 <p>
 	  Bob is a superuser in corp context for Secured Corp.  He
 	  works for Secured Corp (corp 101).  He authenticates using
@@ -215,7 +215,7 @@ select *
 </div>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm675"></a>Carol</h5></div></div></div>
+<a name="idm690"></a>Carol</h5></div></div></div>
 <p>
 	  Carol is a superuser in corp context for Protected Corp.
 	  She works for Protected Corp (corp 102).  She authenticates
@@ -235,7 +235,7 @@ select *
 </div>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm680"></a>Eve</h5></div></div></div>
+<a name="idm695"></a>Eve</h5></div></div></div>
 <p>
 	  Eve is a superuser in corp context for both Secure Corp and
 	  Protected Corp.  She works for Veil Corp (corp 100).  She
@@ -257,7 +257,7 @@ select *
 </div>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm685"></a>Sue</h5></div></div></div>
+<a name="idm700"></a>Sue</h5></div></div></div>
 <p>
 	  Sue is a superuser in org context for Department S.  She
 	  works for Department S (org 105).  She authenticates using
@@ -287,7 +287,7 @@ select veil2.i_have_priv_in_superior_scope(21, 5, 1);
 </div>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm692"></a>Simon</h5></div></div></div>
+<a name="idm707"></a>Simon</h5></div></div></div>
 <p>
 	  Simon is a project manager for project S.1.  He works for
 	  Department S (org 105).  He authenticates using plaintext.

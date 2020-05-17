@@ -16,7 +16,7 @@ permissions, permission checks, and user authentication so that you
 can start building a secure database in a matter of hours.
 
 Extensive documentation is [provided
-here]((https://marcmunro.github.io/veil2/html/index.html).
+here](https://marcmunro.github.io/veil2/html/index.html).
 
 ## Getting Started
 
@@ -37,4 +37,4 @@ Veil2 documents.
 ## License
 
 Veil2 is distributed under the General Public License version 3.  See
-the [LICENSE](LICENSE) file.
+the [LICENSE](./LICENSE) file.

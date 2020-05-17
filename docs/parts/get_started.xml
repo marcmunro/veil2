@@ -54,41 +54,24 @@
 	    <listitem><literal>dia;</literal></listitem>
 	    <listitem><literal>gawk;</literal></listitem>
 	    <listitem><literal>make;</literal></listitem>
-	    <listitem>docbook 4.5 stylesheets.</listitem>
+	    <listitem><literal>docbook</literal> V4.5 stylesheets.</listitem>
 	  </itemizedlist>
 	  The last is available on debian through the packages
 	  <literal>docbook-xsl</literal> and
 	  <literal>docbook-xsl</literal>. 
 	</para>
-	<para>
-	  For installation from tarballs, you will only need a
-	  command to unpack the tar file.
-	</para>
       </sect4>
     </sect3>
     <sect3 id="install">
       <para>
-	You may install either from pre-built tarballs, or directly
-	from the git repository.  Unless you have some need to use the
-	git repository, use the tarball (TODO: refs).
+	Installation is, for now, available only from the git
+	repository at github.
       </para>
-      <sect4>
-	<title>Installation From Tarball</title>
-	<para>
-	  Download the file into a fresh directory, and unpack its
-	  contents:
-	  <programlisting>
-$ curl TODO: get url
-$ tar xvjf TODO: get filename
-$ cd veil2*
-	  </programlisting>
-	</para>
-      </sect4>
       <sect4>
 	<title>Installation From Git Repository</title>
 	<para>
 	  <programlisting>
-$ git clone TODO: ref
+$ git clone https://github.com/marcmunro/veil2.git
 $ cd veil2*
 	  </programlisting>
 	</para>
@@ -96,7 +79,7 @@ $ cd veil2*
       <sect4>
 	<title>Building The HTML Documentation</title>
 	<para>
-	  You probably don't need to do this, but if you want to.
+	  You probably don't need to do this, but if you want to:
 	  <programlisting>
 $ cd &lt;to the veil2 directory&gt;
 $ ./configure
@@ -107,8 +90,40 @@ $ make html
 	  <literal>index.html</literal> file with your browser to view it.
 	</para>
       </sect4>
+      <sect4>
+	<title>Getting <literal>html</literal> Docs From <literal>git</literal></title>
+	<para>
+	  The <literal>Veil2</literal> online documentation is hosted
+	  using <ulink url="https://pages.github.com/">github
+	  pages</ulink>, with the html files kept in the
+	  <literal>gh-pages</literal> branch of the
+	  <literal>Veil2</literal> repository.
+	</para>
+	<para>
+	  If you need a local copy of the <literal>html</literal>
+	  documentation and are unable to build them using make, you
+	  can simply switch to the <literal>gh-pages</literal> branch
+	  of your local <literal>git</literal> repository:
+	  <programlisting>
+$ cd veil2	    
+$ git checkout gh-pages
+$ cd html
+	  </programlisting>
+	</para>
+	<para>
+	  The <literal>html</literal> directory contains all of the
+	  documentation files including css and images.  The start
+	  page is <literal>index.html</literal>.
+	</para>
+	<para>
+	  If you are going to use the git repository to keep track of
+	  your local changes, be sure to switch back to the
+	  <literal>master</literal> branch before you start coding.
+	</para>
+      </sect4>
     </sect3>
     <sect3 id="test">
+      <title>Testing</title>
       <para>
 	Before running any of the <literal>Veil2</literal> SQL
 	scripts, you should satisfy yourself that they will do no harm

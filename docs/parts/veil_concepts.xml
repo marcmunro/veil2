@@ -13,7 +13,7 @@
     contexts</link>;</listitem> 
     <listitem><link linkend="privilege-promotion">privilege
     promotion</link>;</listitem> 
-    <listitem><link linkend="authenticationcontext">authentication
+    <listitem><link linkend="authentication_context">authentication
     contexts</link>.</listitem>
   </itemizedlist>
   <sect2 id="privileges">
@@ -98,13 +98,13 @@
     </para>
     <para>
       To make roles more flexible, we allow roles to be assigned to
-      other roles.  We often call this, role mapping.  This allows us
+      other roles.  We often call this role-mapping.  This allows us
       to create low-level <emphasis>functional</emphasis> roles that
       have the privileges necessary to perform a specific task, and we
-      then assign these roles to higher-level
-      <emphasis>user</emphasis> roles which can then be assigned to
-      users.  By doing this, we minimize the number of different roles
-      that we need to be able to assign to users.
+      assign these roles to higher-level <emphasis>user</emphasis>
+      roles which can then be assigned to users.  By doing this, we
+      minimize the number of different roles that we need to be able
+      to assign to users.
     </para>
     <para>
       Typical functional roles might include <literal>view
@@ -119,8 +119,8 @@
       As the roles themselves do not care whether they are functional
       or user level, there is no limit to how deeply role to role
       mappings may be nested.  This can be useful when you want to
-      create a user-role that combines the abilities of 2 or more
-      existing user roles.
+      create a user-level role that combines the abilities of 2 or
+      more existing user-level roles.
     </para>
     <para>
       <literal>Veil2</literal> does not care how roles are mapped to

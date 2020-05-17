@@ -166,8 +166,9 @@
             than the more usual lack of access controls;
           </listitem>
           <listitem>
-            the set of rights given through default roles can change
-            over time, without having to modify the application.
+            the set of rights given through default roles can be
+            changed with time and experience without having to modify
+            the application.
           </listitem>
         </itemizedlist>
       </listitem>
@@ -328,10 +329,9 @@
       What this means is that <emphasis>all</emphasis> of the access
       control rules are built from a common framework using a single
       set of guiding principles.  Although it is possible to implement
-      <emphasis>special cases</emphasis> there is rarely any need.
-      This is because the access control mechanisms are based on the
-      simple mechanism of privileges with scope, which is highly
-      flexible.
+      special cases there is rarely any need.  This is because the
+      access control mechanisms are based on the simple mechanism of
+      privileges with scope, which is highly flexible.
     </para>
   </sect2>
   <sect2 id="ease_of_reasoning">

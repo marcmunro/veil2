@@ -36,10 +36,11 @@ select 4, party_id,  -- Promote org to corp scope
   from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
  where party_type_id = 2
 union all
-select 3, party_id,  -- Promotion of org to higher org
-       3, org_id
+select 4, party_id,  -- Promotion of org to higher org
+       4, org_id
   from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
  where party_type_id = 2
+union all
 select 5, s.scope_id,   -- Project to corp promotions
        3, p.corp_id
   from demo.projects p
@@ -87,7 +88,7 @@ select 5, s.scope_id,   -- Project to org promotions
 	</listitem>
 	<listitem>
 	  <para>
-	    Refreshthe <literal><link
+	    Refresh the <literal><link
 	    linkend="view_all_scope_promotions">veil2.all_scope_promotions</link></literal>
 	    materialized view.
 	  </para>

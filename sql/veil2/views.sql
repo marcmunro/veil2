@@ -336,7 +336,7 @@ context determines which set of role->role mappings are in play.
 Typically, there will only be one such set, as provided by the default
 implementation of this view.  If however, your application requires
 separate contexts to have different role->role mappings, you should
-modify this role to map your accessors with that context.
+modify this view to map your accessors with that context.
 
 Typically this will be used in a situation where your application
 serves a number of different clients, each of which have their own

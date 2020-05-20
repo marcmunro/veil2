@@ -12,8 +12,13 @@
 \echo .....reset_session()...
 -- Perform a reset session without returning a row.  This ensures the
 -- temporary table is created.
+with reset_session as
+  (
+    select 1 as result from veil2.reset_session()
+  )
 select null
- where not veil2.reset_session();
+  from reset_session
+ where result != 1;
 
 select null where test.expect(
     (select count(*) from session_parameters)::integer,
@@ -29,8 +34,13 @@ select null where test.expect(
 -- Test that resetting session causes session_parameters record to be
 -- removed.
 
+with reset_session as
+  (
+    select 1 as result from veil2.reset_session()
+  )
 select null
- where not veil2.reset_session();
+  from reset_session
+ where result != 1;
 
 select null where test.expect(
     (select count(*) from session_parameters)::integer,
@@ -159,8 +169,13 @@ select session_id from session_parameters;
 -- Disconnect and reconnect the above session.  Since this is a
 -- continuation of an existing session, we use the continuation
 -- authentication mechanism.
+with reset_session as
+  (
+    select 1 as result from veil2.reset_session()
+  )
 select null
- where not veil2.reset_session();
+  from reset_session
+ where result != 1;
 
 with session as
   (
@@ -642,7 +657,8 @@ view veil2.accessor_contexts (
 ) as
 select accessor_id, 1, 0
   from veil2.accessors
- union all select -2, -3, -31;
+ union all select -2, -3, -31  -- Give Eve two authentication contexts
+ union all select -2, -3, -3;
 
 -- Now we should have connect privilege.  Authentication should succeed.
 with session as
@@ -656,5 +672,195 @@ select null
  where test.expect(s.success, true, 'Authentication should not have failed');
 
 
+\echo ...become_user()...
+
+-- Modify user -2 (eve) to have role 7 (almost superuser) and connect
+delete from veil2.accessor_roles where accessor_id = -2 and role_id = 1;
+insert into veil2.accessor_roles
+       (accessor_id, role_id, context_type_id, context_id)
+values (-2, 7, 1, 0);
+
+-- Check that Bob (-5) authenticates and has some expected privileges
+with session as
+  (
+    select o.*
+      from veil2.create_session('bob', 'plaintext') c
+     cross join veil2.open_connection(c.session_id, 1, 'password5') o
+  )
+select null
+  from session s
+ where test.expect(s.success, true, 'Bob should be authenticated');
+
+select null
+ where test.expect(veil2.i_have_priv_in_scope(20, -5, -51), true,
+       'Bob should have priv 20 in context -5,-51')
+    or test.expect(veil2.i_have_priv_in_scope(21, -5, -51), true,
+       'Bob should have priv 21 in context -5,-51')
+    or test.expect(veil2.i_have_priv_in_scope(23, -5, -51), true,
+       'Bob should have priv 23 in context -5,-51')
+    or test.expect(veil2.i_have_priv_in_scope(24, -5, -51), true,
+       'Bob should have priv 24 in context -5,-51')
+     or test.expect(veil2.i_have_priv_in_scope(25, -4, -41), true,
+       'Bob should have priv 25 in context -4,-41');
+
+-- connect as eve
+with session as
+  (
+    select o.*
+      from veil2.create_session('eve', 'plaintext') c
+     cross join veil2.open_connection(c.session_id, 1, 'password2') o
+  )
+select null
+  from session s
+ where test.expect(s.success, true, 'Eve should be authenticated');
+
+--select 'EVE:';
+--select session_id, scope_type_id, scope_id,
+--       to_array(roles), to_array(privs)
+--  from session_privileges
+-- order by 1, 2, 3;
 
 
+-- eve becomes bob
+-- Need to record the session_token for later use.
+create temporary table session_tt (
+  session_id integer,
+  session_token text,
+  success boolean,
+  errmsg text);
+
+with session as
+  (
+    select * from veil2.become_user('bob', 1, 0)
+    --select * from veil2.become_accessor(-5, 1, 0)
+  )
+insert into session_tt select * from session;
+
+select null
+  from session_tt s
+ where test.expect(s.success, true, 'Eve should now be Bob');
+ 
+select null
+  from session_parameters
+ where test.expect(accessor_id, -5, 'Eve should now have Bob'' accessor_id');
+ 
+-- Check Eve-as-Bob's privs: should be mostly the same but without
+-- priv 20 which Eve did not have.
+
+select null
+ where test.expect(veil2.i_have_priv_in_scope(20, -5, -51), false,
+       'Bob should not have priv 20 in context -5,-51')
+    or test.expect(veil2.i_have_priv_in_scope(21, -5, -51), true,
+       'Bob should have priv 21 in context -5,-51 (2)')
+    or test.expect(veil2.i_have_priv_in_scope(23, -5, -51), true,
+       'Bob should have priv 23 in context -5,-51 (2)')
+    or test.expect(veil2.i_have_priv_in_scope(24, -5, -51), true,
+       'Bob should have priv 24 in context -5,-51 (2)')
+     or test.expect(veil2.i_have_priv_in_scope(25, -4, -41), true,
+       'Bob should have priv 25 in context -4,-41 (2)');
+
+\echo ......continuation...
+select o.errmsg
+  from session_tt
+ cross join veil2.open_connection(session_id, 2,
+              encode(digest(session_token || to_hex(2), 'sha1'),
+	             'base64')) o
+ where test.expect(o.success, true, 'Bob''s session should have continued');
+
+\echo ...contextual role mapppings...
+
+-- We will use eve with some new role assignments
+delete from veil2.accessor_roles where accessor_id = -2;
+insert into veil2.accessor_roles
+       (accessor_id, role_id, context_type_id, context_id)
+values (-2, 0, 1, 0),     -- global connect
+       (-2, 5, -3, -3),   -- test_role_1
+       (-2, 6, -3, -3),   -- test_role_2
+       (-2, 6, -3, -31),  -- test_role_3
+       (-2, 7, -3, -31);  -- test_role_3
+
+-- Recreate role mappings for roles 5->9 in contexts
+delete from veil2.role_roles where primary_role_id in (5,6,7,8,9);
+insert into veil2.role_roles
+       (primary_role_id, assigned_role_id, context_type_id, context_id)
+values (6, 8, -3, -3),
+       (6, 9, -3, -31);
+
+-- Update target scope
+update veil2.system_parameters
+   set parameter_value = '3'
+ where parameter_name = 'mapping context target scope type';
+
+-- connect as eve for scope -3,-3
+with session as
+  (
+    select o.*
+      from veil2.create_session('eve', 'plaintext', -3, -3) c
+     cross join veil2.open_connection(c.session_id, 1, 'password2') o
+  )
+select null
+  from session s
+ where test.expect(s.success, true, 'Eve should be authenticated (2)');
+
+-- Ensure Eve has roles for scope -3, -3 but not -3, -31
+select null
+  from session_privileges
+ where scope_type_id = -3
+   and (   test.expect(scope_id, -3,
+               'Eve should only have corp assignments in scope -3')
+	or test.expect(roles ? 5, true,
+	       'Eve should have role 5')
+	or test.expect(roles ? 6, true,
+	       'Eve should have role 6')
+	or test.expect(roles ? 8, true,
+	       'Eve should have role 6')
+	or test.expect(roles ? 9, false,
+	       'Eve should not have role 9'));
+ 
+/*
+select 'EVE: -3, -3';
+select session_id, scope_type_id, scope_id,
+       to_array(roles), to_array(privs)
+  from session_privileges
+ order by 1, 2, 3;
+*/
+-- connect as eve for scope -3,-31
+with session as
+  (
+    select o.*
+      from veil2.create_session('eve', 'plaintext', -3, -31) c
+     cross join veil2.open_connection(c.session_id, 1, 'password2') o
+  )
+select null
+  from session s
+ where test.expect(s.success, true, 'Eve should be authenticated (3)');
+
+-- Ensure Eve has roles for scope -3, -31 but not -3, -3
+select null
+  from session_privileges
+ where scope_type_id = -3
+   and (   test.expect(scope_id, -31,
+               'Eve should only have corp assignments in scope -31')
+	or test.expect(roles ? 5, false,
+	       'Eve should not have role 5')
+	or test.expect(roles ? 6, true,
+	       'Eve should have role 6')
+	or test.expect(roles ? 7, true,
+	       'Eve should have role 7')
+	or test.expect(roles ? 9, true,
+	       'Eve should have role 7'));
+
+
+/*
+\pset format aligned
+\pset tuples_only false
+
+select 'EVE: -3, -31';
+select session_id, scope_type_id, scope_id,
+       to_array(roles), to_array(privs)
+  from session_privileges
+ order by 1, 2, 3;
+select *
+  from veil2.privilege_assignments
+ where accessor_id = -2;
+*/

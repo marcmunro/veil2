@@ -35,7 +35,7 @@
 	</itemizedlist>
       </para>
       <para>
-	What the last item means is that the order of requests ariving
+	What the last item means is that the order of requests arriving
 	at the database server may not, due to network lag and
 	application task handling, be the same order in which the user
 	session initiated those requests.
@@ -49,7 +49,7 @@
 	all times which user is accessing the system.
       </para>
       <para>
-	Wha this means is:
+	What this means is:
 	<itemizedlist>
 	  <listitem>
 	    it must identify and authenticate each user;
@@ -86,7 +86,7 @@
 	If this sounds paranoid, then consider this:
 	<itemizedlist>
 	  <listitem>
-	    it is the job of a security implementor to be paranoid;
+	    it is the job of a security implementer to be paranoid;
 	  </listitem>
 	  <listitem>
 	    many data breaches have arisen from hackers having
@@ -115,7 +115,7 @@
       </para>
       <para>
 	This is what <literal>Veil2</literal> provides,
-	out-of-the-box, for session managament:
+	out-of-the-box, for session management:
 	<itemizedlist>
 	  <listitem>
 	    a default authentication system that is not terrible (bcrypt);
@@ -170,7 +170,7 @@
 	  <literal>create_session()</literal>.  This returns a
 	  <literal>session_id</literal> and
 	  <literal>session_token</literal> which we must record and
-	  use on subequent calls.
+	  use on subsequent calls.
 	</para>
 	<para>
 	  Sessions remain active, with minimal overhead, until they
@@ -179,7 +179,7 @@
 	  parameter called <literal>shared session timeout</literal>.
 	  Each time a connection is opened, the timeout is reset.  If
 	  a session times-out while a connection is active, the
-	  connection will be unaffected, but reconnections will no
+	  connection will be unaffected, but re-connections will no
 	  longer be possible.
 	</para>
 	<para>
@@ -228,7 +228,7 @@
 	  original authenticator.  This may be computationally cheaper
 	  than providing the original credentials, but more
 	  importantly it means that those credentials are not being
-	  continualy retransmitted.  And to prevent replay attacks we
+	  continually re-transmitted.  And to prevent replay attacks we
 	  use a <ulink
 	  url="https://en.wikipedia.org/wiki/Cryptographic_nonce">nonce</ulink>
 	  as part of the authentication token.  Any attempt to re-use
@@ -271,9 +271,10 @@
 	      </para>
 	      <para>
 		This is the name of an authentication method recorded
-		in <literal>veil2.authentication_types</literal>, and
-		for which an authentication function has been
-		provided.  TODO: refs
+		in <literal> <link
+		linkend="entity_authentication_type">veil2.authentication_types</link></literal>,
+		and for which an authentication function has been
+		provided.
 	      </para>
 	    </listitem>
 	    <listitem>
@@ -282,13 +283,15 @@
 	      </para>
 	      <para>
 		This is an integer identifying the type of context
-		that the user is authenticating within.  See the demo
-		TODO: ref for how this is used to enable different
-		users to belong to different companies.
+		that the user is authenticating within.  See the <link
+		linkend="veil_demo">demo</link> for how this is used
+		to enable different users to belong to different
+		companies.
 	      </para>
 	      <para>
 		This will match a scope_type as defined in
-		<literal>veil2.scope_types</literal>.  TODO refs
+		<literal><link
+		linkend="entity_scope_type">veil2.scope_types</link></literal>.
 	      </para>
 	    </listitem>
 	    <listitem>
@@ -297,10 +300,11 @@
 	      </para>
 	      <para>
 		This is an integer identifying, in combination with
-		<literal>context_type_id</literal>,  the context
-		that the user is authenticating within.  See the demo
-		TODO: ref for how this is used to enable different
-		users to belong to different companies.
+		<literal>context_type_id</literal>, the context that
+		the user is authenticating within.  See the <link
+		linkend="veil_demo">demo</link> for how this is used
+		to enable different users to belong to different
+		companies.
 	      </para>
 	    </listitem>
 	  </itemizedlist>
@@ -341,7 +345,7 @@
 		<literal>open_connection()</literal>.
 	      </para>
 	      <para>
-		Posession of this token is assumed to be proof that
+		Possession of this token is assumed to be proof that
 		the holder is the same user that authenticated
 		themselves to us.
 	      </para>
@@ -376,8 +380,9 @@
 	  example of this would be <ulink
 	  url="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">a
 	  Diffie–Hellman Key Exchange</ulink>-based protocol.  If you
-	  implement such a thing please contact (TODO: ref) the author
-	  who would love to see it.
+	  implement such a thing please <link
+	  linkend="contact">contact</link> the author who would love
+	  to see it.
 	</para>
 	<para>
 	  The parameters to this function are:
@@ -449,7 +454,7 @@
 		      because <literal>authent_token</literal> was
 		      invalid.  It could even mean that you haven't
 		      called <literal>create_session()</literal> but
-		      if not, where did you get teh value for
+		      if not, where did you get the value for
 		      <literal>session_id</literal>?
 		    </para>
 		    <para>
@@ -494,7 +499,7 @@
 	<para>
 	  Once a session has been successfully authenticated,
 	  subsequent calls to <literal>open_connection()</literal> are
-	  considered to be continuations.  Mutiple open connections
+	  considered to be continuations.  Multiple open connections
 	  for a session may be used simultaneously, but they must each
 	  use their own nonce values.
 	</para>
@@ -515,7 +520,7 @@
 		<literal>nonce</literal>;
 	      </para>
 	      <para>
-		This integer must be peviously unused for this
+		This integer must be previously unused for this
 		session, and should be allocated sequentially in
 		ascending order.  They may arrive out of sequence but
 		not by more than a value of 32.
@@ -557,7 +562,7 @@
 		The <literal>open_connection()</literal> function will
 		create the same encoded hash internally and check that
 		it matches.  If it does, we can be sure that the
-		caller is in posession of the original
+		caller is in possession of the original
 		<literal>authent_token</literal> from the creation of
 		the session.
 	      </para>
@@ -637,6 +642,31 @@
   </sect1>
   <sect1 id="dedicated_session_management">
     <title>Dedicated Database Sessions</title>
-    <para/>
+    <para>
+      If you are accessing your secured database using dedicated
+      database connections, things are much simpler.  With a dedicated
+      database connection you are the sole user of the connection, and
+      there is no need for a complex create-open-close protocol dance,
+      to prevent your credentials from being used by someone else.
+    </para>
+    <para>
+      Typically, dedicated database connections will be used for
+      running reports or ad-hoc queries, and each user will have their
+      own database credentials (typically username and password).
+    </para>
+    <para>
+      <literal>Veil2</literal> associates a database user with its own
+      accessor record by recording the database username in the
+      <literal>veil2.accessors</literal> record's
+      <literal>username</literal> column.
+    </para>
+    <para>
+      For dedicated sessions, you just have to tell
+      <literal>Veil2</literal> to load your accessor privileges by
+      making a single, parameterless function call:
+      <programlisting>
+select veil2.hello();
+      </programlisting>
+    </para>
   </sect1>
 </appendix>

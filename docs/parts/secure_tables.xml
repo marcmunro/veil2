@@ -21,31 +21,31 @@
       <programlisting>
 alter table demo.projects enable row level security;
 
-create policy projects__select
-    on demo.projects
+create policy parties_tbl__select
+    on demo.parties_tbl
    for select
- using (   veil2.i_have_global_priv(21)
-        or veil2.i_have_priv_in_scope(21, 3, corp_id)
-        or veil2.i_have_priv_in_scope(21, 4, org_id)
-        or veil2.i_have_priv_in_scope(21, 5, project_id));
+ using (   veil2.i_have_global_priv(17)
+        or veil2.i_have_priv_in_scope(17, 3, corp_id)
+        or veil2.i_have_priv_in_scope(17, 4, org_id)
+        or veil2.i_have_priv_in_scope(17, 4, party_id) -- View the org itself
+        or veil2.i_have_personal_priv(17, party_id)
+	or (    party_type_id = 2    -- View an org that owns a project
+	    and veil2.i_have_priv_in_scope(23, 4, party_id)));
       </programlisting>
     </para>
     <para>
       Note that we check for <literal>select projects</literal>
-      privilege in four different ways.  This is because there are
+      privilege in many different ways.  This is because there are
       multiple ways that we could have been assigned the privilege.
-      This still does not cover all eventualities though.  If you wish
-      to allow someone with <literal>select projects</literal>
-      privilege in an org scope for a superior org to the org
-      that owns the project (ie you want to use the organizational
-      hierarchy in your security model, then you can use
-      <literal>veil2.i_have_priv_in_superior_scope(21, 5,
-      project_id)</literal> in place of any or all of the non
-      global-priv tests above.  Or you may choose to leave the
-      existing tests and add the superior scope test.  This may give
-      slightly better performance as you will only try the more
-      expensive superior-scope test if none of the other tests
-      succeed.
+      The most interesting test is the last one, which tests for
+      <literal>select orgs</literal> rather than <literal>select
+      parties</literal>.  This is to allow someone with that privilege
+      to view the party record for the org that is the owner of some
+      other record.  In this case, the org will be the owner of a
+      project, and a user assigned <literal>select orgs</literal> in
+      the context of that project will have that privilege
+      automatically promoted to org scope allowing them to see the
+      party that owns the project, but no other parties.
     </para>
     <para>
       Note that the demo only implements the select policy.

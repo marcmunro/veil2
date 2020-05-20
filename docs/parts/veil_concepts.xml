@@ -8,7 +8,7 @@
     <listitem><link linkend="privileges">privileges</link>;</listitem>
     <listitem><link linkend="scopes">scopes</link>;</listitem>
     <listitem><link linkend="roles">roles</link>;</listitem>
-    <listitem><link linkend="assignments">assignments</link>;</listitem>
+    <listitem><link linkend="assignments">role assignments</link>;</listitem>
     <listitem><link linkend="security-contexts">security
     contexts</link>;</listitem> 
     <listitem><link linkend="privilege-promotion">privilege
@@ -90,7 +90,7 @@
       individual privileges is untenable.  Instead we manage groups of
       privileges through roles.  Privileges are assigned to roles, and
       roles are assigned to users.  See <link
-      linkend="assignments">assignments</link>; <link
+      linkend="assignments">role assignments</link>; <link
       linkend="security-contexts">security contexts</link>; and <link
       linkend="privilege-promotion">privilege promotion</link>, for
       information on how each privilege's <link
@@ -165,7 +165,7 @@
     </sect3>
   </sect2>
   <sect2 id="assignments">
-    <title>Assignments</title>
+    <title>Role Assignments</title>
     <para>
       Users are assigned <link linkend="roles">roles</link> in a
       number of ways, and <literal>Veil2</literal> attempts to place
@@ -181,7 +181,7 @@
       what makes it explicit.
     </para>
     <para>
-      Implicit assignments can be made in a number of ways.  In
+      Implicit role assignments can be made in a number of ways.  In
       <literal>Veil2</literal> each user, by default, is assigned the
       <literal>personal context</literal> role.  This is done by
       <literal>Veil2</literal> itself, and is not the result of any
@@ -244,8 +244,8 @@
       The key to a good relational security implementation is an
       understanding of your relational security contexts.  In
       particular, how you may need to perform some data
-      denormalizations in order to get good performance.
-      TODO: Reference that section.
+      <link linkend="denormalize">denormalizations</link> in order to
+      get good performance.
     </para>
     <para>
       <literal>Veil2</literal> provides 2 built-in security security
@@ -372,7 +372,7 @@
     <para>
       Each accessor (database user) is associated with a specific
       context within which they authenticate.  Typically, this context
-      would represent the organisation they work for.  When
+      would represent the organization they work for.  When
       authenticating an accessor, their authentication context must be
       provided along with their username or other identifier.
     </para>

@@ -1,3 +1,44 @@
 <appendix id="change_history">
   <title><literal>Veil2</literal> Changes History</title>
+  <table>
+    Change History
+    <tgroup cols='4' colsep='1' rowsep='1'>
+      <colspec colname="version" align="center"/>
+      <colspec colname="tag" align="center"/>
+      <colspec colname="date" align="center"/>
+      <colspec colname="notes"/>
+      <thead>
+	<row>
+	  <entry>Version</entry>
+	  <entry>git tag</entry>
+	  <entry>Release Date</entry>
+	  <entry>Notes</entry>
+	</row>
+      </thead>
+      <tbody>
+	<row>
+	  <entry>0.5 (alpha)</entry>
+	  <entry>n/a</entry>
+	  <entry>n/a</entry>
+	  <entry>
+	    <para>
+	      This was the version number used for original
+	      development.  There was no release of this version.
+	    </para>
+	  </entry>
+	</row>
+	<row>
+	  <entry>0.9 (beta)</entry>
+	  <entry>v0.9</entry>
+	  <entry>202005020</entry>
+	  <entry>
+	    <para>
+	      The first public release.  Announced to pgsql-announce
+	      20200521.
+	    </para>
+	  </entry>
+	</row>
+      </tbody>
+    </tgroup>
+  </table>
 </appendix>

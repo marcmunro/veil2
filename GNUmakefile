@@ -17,6 +17,21 @@
 # automatically invoke this makefile ins such a way that emacs'
 # compile and next-error handling still works if you are not in the
 # root directory.
+
+#
+# At some point we should add some targets for dealing with releases
+# to github.
+# For now, know this.
+# the branch gh-pages is for documentation.  Merge from master do a
+# make html and then push to remote:
+# make clean
+# git commit -a
+# git checkout gh-pages
+# git merge master
+# make html
+# git commit -a
+# git push origin gh-pages
+# git checkout master
 # 
 
 .PHONY: db drop clean help unit check test html \
@@ -24,6 +39,10 @@
 
 include Makefile.global
 include extracts.d
+
+# Automatically run configure if needed.
+Makefile.global:
+	./configure
 
 all: db html
 
@@ -241,6 +260,7 @@ drop:
 unit check test: db
 	@echo "Performing unit tests..."
 	@psql -v flags=$(FLAGS) -f test/test_veil2.sql -d $(TESTDB) | grep -v '^##'
+
 
 
 # Provide a list of the targets buildable by this makefile.

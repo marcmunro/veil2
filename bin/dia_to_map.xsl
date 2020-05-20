@@ -1,5 +1,10 @@
 <?xml version='1.0'?>
 <!--
+
+      Copyright (c) 2020 Marc Munro
+      Author:  Marc Munro
+      License: GPL V3
+
 Stylesheet for extracting position information from Dia files of
 Marc's pretty ERDs.  This is to enable the creation of map files from
 diagrams, so that we can use a diagram as an interface into a data

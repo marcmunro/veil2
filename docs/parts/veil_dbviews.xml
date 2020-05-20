@@ -33,6 +33,52 @@
     understanding and debugging.  Please do not use these views for
     production purposes.
   </para>
+  <para>
+    The following views are defined in <literal>veil2/sql/views.sql</literal>:
+    <itemizedlist>
+      <listitem>
+      <link
+	  linkend="view_direct_role_privileges">direct_role_privileges</link>;</listitem>
+      <listitem>
+      <link
+	  linkend="view_all_role_roles">all_role_roles</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_all_role_privs">all_role_privs</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_accessor_contexts">accessor_contexts</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_scope_promotions">scope_promotions</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_all_scope_promotions">all_scope_promotions</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_scope_tree">scope_tree</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_promotable_privileges">promotable_privileges</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_all_accessor_roles">all_accessor_roles</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_all_context_privs">all_context_privs</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_all_accessor_privs">all_accessor_privs</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_role_chains">role_chains</link>;</listitem> 
+      <listitem>
+      <link
+	  linkend="view_all_accessor_roles_plus">all_accessor_roles_plus</link>;</listitem> 
+      <listitem>
+      <link linkend="view_privilege_assignments">privilege_assignments</link>.</listitem>
+    </itemizedlist>
+  </para>
   <sect2 id="view_direct_role_privileges">
     <title>Direct Role Privileges Views</title>
     <sect3>
@@ -94,18 +140,18 @@
       <?sql-definition view veil2.all_role_privs_info sql/veil2/views.sql ?>
     </sect3>
   </sect2>
+  <sect2 id="view_accessor_contexts">
+    <title>Accessor Contexts View</title>
+    <sect3>
+      <title><literal>accessor_contexts</literal></title>
+      <?sql-definition view veil2.accessor_contexts sql/veil2/views.sql ?>
+    </sect3>
+  </sect2>
   <sect2 id="view_scope_promotions">
     <title>Scope Promotions View</title>
     <sect3>
       <title><literal>scope_promotions</literal></title>
       <?sql-definition view veil2.scope_promotions sql/veil2/views.sql ?>
-    </sect3>
-  </sect2>
-  <sect2 id="view_accessor_contexts">
-    <title>Accessor Contexts View</title>
-    <sect3>
-      <title><literal>scope_promotions</literal></title>
-      <?sql-definition view veil2.accessor_contexts sql/veil2/views.sql ?>
     </sect3>
   </sect2>
   <sect2 id="view_all_scope_promotions">

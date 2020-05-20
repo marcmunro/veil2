@@ -6,9 +6,9 @@
 <title>A. Veil2 ERD and Database Objects</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="prev" href="ar01s22.html" title="22. Tips and Guidelines">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="prev" href="ar01s23.html" title="23. Tips and Guidelines">
 <link rel="next" href="apas02.html" title="A.2. Veil2 Views">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -16,13 +16,13 @@
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s22.html">Prev</a> </td>
+<a accesskey="p" href="ar01s23.html">Prev</a> </td>
 <td width="20%" align="center"> </td>
 <td width="40%" align="right"> <a accesskey="n" href="apas02.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">22. Tips and Guidelines </td>
+<td width="40%" align="left" valign="top">23. Tips and Guidelines </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
 <td width="40%" align="right" valign="top"> A.2. Veil2 Views</td>
 </tr>
@@ -31,11 +31,11 @@
 </div>
 <div class="appendix">
 <div class="titlepage"><div><div><h2 class="title">
-<a name="idm1280"></a>A. <code class="literal">Veil2</code> ERD and Database Objects</h2></div></div></div>
+<a name="idm1288"></a>A. <code class="literal">Veil2</code> ERD and Database Objects</h2></div></div></div>
 <div class="mediaobject"><img src="veil2_erd.png"></div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm1286"></a>A.1. Veil2 Tables</h2></div></div></div>
+<a name="idm1294"></a>A.1. Veil2 Tables</h2></div></div></div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="entity_scope_type"></a>A.1.1. Scope Types Table</h3></div></div></div>
@@ -204,7 +204,7 @@ create table veil2.scopes (
 <p>
 A scope, or context, identifies a limit to access.  It is a
 scope_type applied to a specific instance.  For example, if access
-controls are placed in in project scopes, there will be one scopes
+controls are placed in project scopes, there will be one scopes
 record for each project that we wish to manage access to.  So for
 three projects A, B and C, there would be 3 scopes with scope_types of
 project.  This table as created by the Veil2 database creation scripts
@@ -362,8 +362,7 @@ will have different names, and different sets of roles will exist.
 <p>
 If this makes no sense to you, you probably have no need for it, so
 don't use it.  If do choose to use, do so sparingly as it could lead to
-great confusion.  No users other than global-context superusers should
-ever see roles from more than one context.
+great confusion.
 </p>
 <p>
       <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
@@ -406,7 +405,7 @@ role-&gt;role assignment may therefore need to be specific to those groups
 from a similar role in another company).
 </p>
 <p>
-You should not use this table directly: instead use the
+You should not normally query this table directly; instead use the
 direct_role_privilges view which deals with implied assignments for the
 superuser role.
 </p>
@@ -492,7 +491,7 @@ alter table veil2.accessor_roles add constraint accessor_role__pk
 </pre>
 <p>
 This records the assignment of roles to accessors in various contexts.
-A role assigned to a party here, grants that party all of the privileges
+A role assigned to a party here, grants that accessor all of the privileges
 that that role has been assigned, whether directly or indirectly.
 </p>
 <p>
@@ -608,9 +607,6 @@ alter table veil2.role_roles add constraint role_role__pk
 </pre>
 <p>
 This table shows the mapping of roles to roles in various contexts.
-Role mappings in the global context apply in all other contexts.  Role
-mappings in a specific context apply in that context only, in addition to
-the global role mappings.
 </p>
 <p>
 The purpose of context-specific role mappings is to enable custom role
@@ -685,13 +681,13 @@ be where the password would be stored.
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s22.html">Prev</a> </td>
+<a accesskey="p" href="ar01s23.html">Prev</a> </td>
 <td width="20%" align="center"> </td>
 <td width="40%" align="right"> <a accesskey="n" href="apas02.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">22. Tips and Guidelines </td>
+<td width="40%" align="left" valign="top">23. Tips and Guidelines </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
 <td width="40%" align="right" valign="top"> A.2. Veil2 Views</td>
 </tr>

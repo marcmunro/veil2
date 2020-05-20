@@ -6,8 +6,8 @@
 <title>17. Create Scope Promotions</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
 <link rel="prev" href="ar01s16.html" title="16. Link Your Scopes and Security Contexts">
 <link rel="next" href="ar01s18.html" title="18. Secure Your Tables">
 </head>
@@ -34,7 +34,7 @@
 <a name="scope_promotions"></a>17. Create Scope Promotions</h2></div></div></div>
 <p>
     Determining which scopes may be promoted to which other scopes is
-    done through the <code class="literal"><a class="link" href="apas02.html#view_scope_promotions" title="A.2.4. Scope Promotions View">scope_promotions</a></code>
+    done through the <code class="literal"><a class="link" href="apas02.html#view_scope_promotions" title="A.2.5. Scope Promotions View">scope_promotions</a></code>
     view.  This identifies, for each scope, what directly superior
     scopes exist.  It does not identify global scope, and does not
     require a recursive query to identify grandparent scopes etc.
@@ -45,9 +45,9 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1138"></a>17.1. Creating The View</h3></div></div></div>
+<a name="idm1140"></a>17.1. Creating The View</h3></div></div></div>
 <p>
-      You will need to completely redefine the <code class="literal"><a class="link" href="apas02.html#view_scope_promotions" title="A.2.4. Scope Promotions View">scope_promotions</a></code>
+      You will need to completely redefine the <code class="literal"><a class="link" href="apas02.html#view_scope_promotions" title="A.2.5. Scope Promotions View">scope_promotions</a></code>
       view.  The provided <code class="literal">Veil2</code> version of this
       view is simply a placeholder.
     </p>
@@ -68,10 +68,11 @@ select 4, party_id,  -- Promote org to corp scope
   from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
  where party_type_id = 2
 union all
-select 3, party_id,  -- Promotion of org to higher org
-       3, org_id
+select 4, party_id,  -- Promotion of org to higher org
+       4, org_id
   from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
  where party_type_id = 2
+union all
 select 5, s.scope_id,   -- Project to corp promotions
        3, p.corp_id
   from demo.projects p
@@ -105,7 +106,7 @@ select 5, s.scope_id,   -- Project to org promotions
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1153"></a>17.2. In Summary</h3></div></div></div>
+<a name="idm1155"></a>17.2. In Summary</h3></div></div></div>
 <p>
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
@@ -113,11 +114,11 @@ select 5, s.scope_id,   -- Project to org promotions
 	    For each type of context promotion that is possible,
 	    including those within a hierarchy of the same scope types
 	    (eg the org hierarchy from the demo), create a query that
-	    is part of a union that defines the <code class="literal"><a class="link" href="apas02.html#view_scope_promotions" title="A.2.4. Scope Promotions View">scope_promotions</a></code>
+	    is part of a union that defines the <code class="literal"><a class="link" href="apas02.html#view_scope_promotions" title="A.2.5. Scope Promotions View">scope_promotions</a></code>
 	    view.
 	  </p></li>
 <li class="listitem"><p>
-	    Refreshthe <code class="literal"><a class="link" href="apas02.html#view_all_scope_promotions" title="A.2.6. All Scope Promotions Views">veil2.all_scope_promotions</a></code>
+	    Refresh the <code class="literal"><a class="link" href="apas02.html#view_all_scope_promotions" title="A.2.6. All Scope Promotions Views">veil2.all_scope_promotions</a></code>
 	    materialized view.
 	  </p></li>
 </ul></div>

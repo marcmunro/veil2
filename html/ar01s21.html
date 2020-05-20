@@ -3,13 +3,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>21. Contact Links</title>
+<title>21. Setup Housekeeping Tasks</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
 <link rel="prev" href="ar01s20.html" title="20. Assign Initial Roles">
-<link rel="next" href="ar01s22.html" title="22. Tips and Guidelines">
+<link rel="next" href="ar01s22.html" title="22. Contact Links">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
@@ -24,89 +24,20 @@
 <tr>
 <td width="40%" align="left" valign="top">20. Assign Initial Roles </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 22. Tips and Guidelines</td>
+<td width="40%" align="right" valign="top"> 22. Contact Links</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="contact"></a>21. Contact Links</h2></div></div></div>
-<p></p>
-<div class="sect2">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="reporting_bugs"></a>21.1. Reporting Bugs</h3></div></div></div>
+<a name="housekeeping"></a>21. Setup Housekeeping Tasks</h2></div></div></div>
 <p>
-      If you find something that looks like a bug, please report it
-      using the github <a class="ulink" href="https://github.com/marcmunro/veil2/issues" target="_top">issue
-      tracker</a>.
-    </p>
-</div>
-<div class="sect2">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="contributing"></a>21.2. Contributing</h3></div></div></div>
-<p>
-      All sorts of contibutions are welcomed.  In particular:
-      </p>
-<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
-<li class="listitem">
-	  documentation fixes and enhancements;
-	</li>
-<li class="listitem">
-	  code fixes;
-	</li>
-<li class="listitem">
-	  authentication functions;
-	</li>
-<li class="listitem">
-	  translations.
-	</li>
-</ul></div>
-<p>
-    </p>
-<p>
-      If you'd like to get involved, you should chat with Marc using
-      <a class="link" href="ar01s21.html#chatting" title="21.3. IRC">IRC</a> or <a class="link" href="ar01s21.html#email" title="21.4. Email">email</a> (sorry that's not a very helpful link).
-    </p>
-<p>
-      Oh, and feel free to fork the project if you get no response.
-    </p>
-</div>
-<div class="sect2">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="chatting"></a>21.3. IRC</h3></div></div></div>
-<p>
-      You may be able to find Marc on IRC at freenode.net.  If
-      possible he will be in the <code class="literal">#veil2</code> room with
-      the nick <code class="literal">dbdude</code>.
-    </p>
-<p>
-      Feel free to drop in for a
-      <a class="ulink" href="irc://irc.freenode.net/veil2" target="_top">chat</a>.  You may
-      be able to get advice and help.  Marc is usually pretty
-      friendly.  His home timezone is PST.
-    </p>
-</div>
-<div class="sect2">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="email"></a>21.4. Email</h3></div></div></div>
-<p>
-      Marc is not going to publish his email address here as he gets
-      enough spam as it is.  But he isn't that hard to find with a bit
-      of googling.  Put Veil2 in the email subject line and you're
-      less likly to fall into the spam bucket.  If all else fails,
-      raise an issue and he'll probably get back to you.
-    </p>
-</div>
-<div class="sect2">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="availability"></a>21.5. Availability</h3></div></div></div>
-<p>
-      Marc is not paid for this and likes to believe he has a life.
-      He may not be available for extended periods of time, so please
-      be patient.
-    </p>
-</div>
+    The only essential housekeeping task beyond normal database
+    maintenance is to add a periodic job to delete expired sessions.
+    This can be done by simply calling the <code class="literal"><a class="link" href="apas03.html#delete_expired_sessions" title="A.3.25. delete_expired_sessions()">delete_expired_sessions()</a></code>
+    function.
+  </p>
 </div>
 <div class="navfooter">
 <hr>
@@ -121,7 +52,7 @@
 <tr>
 <td width="40%" align="left" valign="top">20. Assign Initial Roles </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 22. Tips and Guidelines</td>
+<td width="40%" align="right" valign="top"> 22. Contact Links</td>
 </tr>
 </table>
 </div>

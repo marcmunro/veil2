@@ -6,8 +6,8 @@
 <title>18. Secure Your Tables</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
 <link rel="prev" href="ar01s17.html" title="17. Create Scope Promotions">
 <link rel="next" href="ar01s19.html" title="19. Secure Your Views">
 </head>
@@ -44,7 +44,7 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1169"></a>18.1. Doing It</h3></div></div></div>
+<a name="idm1171"></a>18.1. Doing It</h3></div></div></div>
 <p>
       Securing a table is pretty simple.  First you enable row
       level security for that table, and then you define policies on
@@ -55,32 +55,32 @@
 <pre class="programlisting">
 alter table demo.projects enable row level security;
 
-create policy projects__select
-    on demo.projects
+create policy parties_tbl__select
+    on demo.parties_tbl
    for select
- using (   veil2.i_have_global_priv(21)
-        or veil2.i_have_priv_in_scope(21, 3, corp_id)
-        or veil2.i_have_priv_in_scope(21, 4, org_id)
-        or veil2.i_have_priv_in_scope(21, 5, project_id));
+ using (   veil2.i_have_global_priv(17)
+        or veil2.i_have_priv_in_scope(17, 3, corp_id)
+        or veil2.i_have_priv_in_scope(17, 4, org_id)
+        or veil2.i_have_priv_in_scope(17, 4, party_id) -- View the org itself
+        or veil2.i_have_personal_priv(17, party_id)
+	or (    party_type_id = 2    -- View an org that owns a project
+	    and veil2.i_have_priv_in_scope(23, 4, party_id)));
       </pre>
 <p>
     </p>
 <p>
       Note that we check for <code class="literal">select projects</code>
-      privilege in four different ways.  This is because there are
+      privilege in many different ways.  This is because there are
       multiple ways that we could have been assigned the privilege.
-      This still does not cover all eventualities though.  If you wish
-      to allow someone with <code class="literal">select projects</code>
-      privilege in an org scope for a superior org to the org
-      that owns the project (ie you want to use the organizational
-      hierarchy in your security model, then you can use
-      <code class="literal">veil2.i_have_priv_in_superior_scope(21, 5,
-      project_id)</code> in place of any or all of the non
-      global-priv tests above.  Or you may choose to leave the
-      existing tests and add the superior scope test.  This may give
-      slightly better performance as you will only try the more
-      expensive superior-scope test if none of the other tests
-      succeed.
+      The most interesting test is the last one, which tests for
+      <code class="literal">select orgs</code> rather than <code class="literal">select
+      parties</code>.  This is to allow someone with that privilege
+      to view the party record for the org that is the owner of some
+      other record.  In this case, the org will be the owner of a
+      project, and a user assigned <code class="literal">select orgs</code> in
+      the context of that project will have that privilege
+      automatically promoted to org scope allowing them to see the
+      party that owns the project, but no other parties.
     </p>
 <p>
       Note that the demo only implements the select policy.
@@ -88,7 +88,7 @@ create policy projects__select
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1179"></a>18.2. The <code class="literal">Veil2</code> tables</h3></div></div></div>
+<a name="idm1182"></a>18.2. The <code class="literal">Veil2</code> tables</h3></div></div></div>
 <p>
       Each <code class="literal">Veil2</code> table is protected with a select
       privilege.  It is generally assumed that no-one will be granted
@@ -105,7 +105,7 @@ create policy projects__select
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1188"></a>18.3. In Summary</h3></div></div></div>
+<a name="idm1191"></a>18.3. In Summary</h3></div></div></div>
 <p>
       Create and enable security policies for each user-facing table.
     </p>

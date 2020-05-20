@@ -6,8 +6,8 @@
 <title>6. What is Veil2 And What Does It Provide?</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
 <link rel="prev" href="ar01s05.html" title="5. Veil2 Concepts">
 <link rel="next" href="ar01s07.html" title="7. How Difficult Is This?">
 </head>
@@ -83,7 +83,7 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm378"></a>6.1. How Does It Work?</h3></div></div></div>
+<a name="idm379"></a>6.1. How Does It Work?</h3></div></div></div>
 <p>
       <code class="literal">Veil2</code> works by:
       </p>
@@ -113,7 +113,7 @@
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm388"></a>6.1.1. Knowing The User</h4></div></div></div>
+<a name="idm389"></a>6.1.1. Knowing The User</h4></div></div></div>
 <p>
 	<code class="literal">Veil2</code> provides session management functions
 	for both <a class="link" href="apbs02.html" title="B.2. Dedicated Database Sessions">dedicated</a> and
@@ -154,7 +154,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm398"></a>6.1.2. Contextual Privileges Per User</h4></div></div></div>
+<a name="idm399"></a>6.1.2. Contextual Privileges Per User</h4></div></div></div>
 <p>
 	Each privilege assigned to a user operates within a scope that
 	depends on the context in which it was assigned.  Some
@@ -165,7 +165,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm401"></a>6.1.3. Fast Privilege Testing</h4></div></div></div>
+<a name="idm402"></a>6.1.3. Fast Privilege Testing</h4></div></div></div>
 <p>
 	As stated above, the set of privileges in each scope is stored
 	in a bitmap, and tests for the presence of a privilege in the
@@ -203,7 +203,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm408"></a>6.1.4. Individually Securing Each Relation</h4></div></div></div>
+<a name="idm409"></a>6.1.4. Individually Securing Each Relation</h4></div></div></div>
 <p>
 	Every table and view is given its own individual security
 	definition.  For tables, they will be much as shown above but
@@ -222,7 +222,7 @@ create policy projects__select
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm412"></a>6.2. Refactoring Your Systems To Use <code class="literal">Veil2</code>
+<a name="idm413"></a>6.2. Refactoring Your Systems To Use <code class="literal">Veil2</code>
 </h3></div></div></div>
 <p>
       Integrating your systems with <code class="literal">Veil2</code> is not a
@@ -237,7 +237,7 @@ create policy projects__select
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm420"></a>6.2.1. Web Session Management</h4></div></div></div>
+<a name="idm421"></a>6.2.1. Web Session Management</h4></div></div></div>
 <p>
 	The <code class="literal">Veil2</code>-protected database needs to know
 	which user is accessing it all times.  It provides a
@@ -250,7 +250,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm424"></a>6.2.2. Integration of Role Handling</h4></div></div></div>
+<a name="idm425"></a>6.2.2. Integration of Role Handling</h4></div></div></div>
 <p>
 	<code class="literal">Veil2</code> has its own view of what roles should
 	do and look like.  If your own system uses roles for its
@@ -307,7 +307,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm448"></a>6.2.3. Integration of Security Contexts</h4></div></div></div>
+<a name="idm449"></a>6.2.3. Integration of Security Contexts</h4></div></div></div>
 <p>
 	For every type of security context that you wish to provide,
 	you will need to provide a link from your existing tables back
@@ -318,7 +318,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm452"></a>6.2.4. Integration of Users</h4></div></div></div>
+<a name="idm453"></a>6.2.4. Integration of Users</h4></div></div></div>
 <p>
 	All of your users must be associated with
 	<code class="literal">Veil2</code> accessors, and any existing
@@ -329,7 +329,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm456"></a>6.2.5. Performance Denormalizations</h4></div></div></div>
+<a name="idm457"></a>6.2.5. Performance Denormalizations</h4></div></div></div>
 <p>
 	You will be applying access control to each relation in your
 	system.  Some of them may benefit from data denormlization to
@@ -342,7 +342,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm459"></a>6.2.6. Authentication</h4></div></div></div>
+<a name="idm460"></a>6.2.6. Authentication</h4></div></div></div>
 <p>
 	You may need to implement a new authentication system for
 	users.  Or the built-in bcrypt implementation may be enough.
@@ -350,7 +350,7 @@ create policy projects__select
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm462"></a>6.2.7. Development/Tightening of Access Controls</h4></div></div></div>
+<a name="idm463"></a>6.2.7. Development/Tightening of Access Controls</h4></div></div></div>
 <p>
 	Once you have everything integrated, you will be able to use
 	your system.  Create a super-role that allows all access and

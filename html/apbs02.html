@@ -6,7 +6,7 @@
 <title>B.2. Dedicated Database Sessions</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
 <link rel="up" href="apb.html" title="B. Veil2 Authentication Protocols">
 <link rel="prev" href="apb.html" title="B. Veil2 Authentication Protocols">
 <link rel="next" href="apc.html" title="C. Veil2 Changes History">
@@ -32,7 +32,34 @@
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="dedicated_session_management"></a>B.2. Dedicated Database Sessions</h2></div></div></div>
-<p></p>
+<p>
+      If you are accessing your secured database using dedicated
+      database connections, things are much simpler.  With a dedicated
+      database connection you are the sole user of the connection, and
+      there is no need for a complex create-open-close protocol dance,
+      to prevent your credentials from being used by someone else.
+    </p>
+<p>
+      Typically, dedicated database connections will be used for
+      running reports or ad-hoc queries, and each user will have their
+      own database credentials (typically username and password).
+    </p>
+<p>
+      <code class="literal">Veil2</code> associates a database user with its own
+      accessor record by recording the database username in the
+      <code class="literal">veil2.accessors</code> record's
+      <code class="literal">username</code> column.
+    </p>
+<p>
+      For dedicated sessions, you just have to tell
+      <code class="literal">Veil2</code> to load your accessor privileges by
+      making a single, parameterless function call:
+      </p>
+<pre class="programlisting">
+select veil2.hello();
+      </pre>
+<p>
+    </p>
 </div>
 <div class="navfooter">
 <hr>

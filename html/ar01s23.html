@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>23. Tips and Guidelines</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="prev" href="ar01s22.html" title="22. Contact Links">
+<link rel="next" href="apa.html" title="A. Veil2 ERD and Database Objects">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ar01s22.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="apa.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">22. Contact Links </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> A. <code class="literal">Veil2</code> ERD and Database Objects</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="tips"></a>23. Tips and Guidelines</h2></div></div></div>
+<p>
+    This section provides whatever tips and guidelines have occurred
+    to the author.  We can hope that the section expands over time.
+  </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1256"></a>23.1. Write Queries That Work Without <code class="literal">Veil2</code>
+</h3></div></div></div>
+<p>
+      Generally, with a well-behaved application and well-implemented
+      database design, <code class="literal">Veil2</code> adds little
+      performance overhead.  This is because it, mostly, only applies
+      permission checks on the records that the user sees.  If the
+      user is only going to see a few records, the overhead of
+      checking those few records is going to be small.
+    </p>
+<p>
+      However, if you make <code class="literal">Veil2</code> do your query
+      filtering for you, instead of writing properly crafted
+      where-clauses, performance is going to suck.  Consider the
+      following queries:
+      </p>
+<pre class="programlisting">
+select stuff
+  from parties
+ where org_id = 20
+   and party_name like '%Bob%';
+
+select stuff
+ from parties
+where party_name like '%Bob%';
+      </pre>
+<p>
+    </p>
+<p>
+      Assume that we are in a <code class="literal">Veil2</code>-protected
+      database and that we have select access only to
+      <code class="literal">org_id</code> 4.
+    </p>
+<p>
+      Both queries will return the same number of rows.  But in a
+      database with lots of parties, the second query will be slow.
+    </p>
+<p>
+      In the second query, a full-table scan will be performed, and
+      many Bobs from other orgs might be returned, only to be
+      discarded by the <code class="literal">Veil2</code>-based security policy.
+    </p>
+<p>
+      The first query will, most likely, use an index and return a
+      much smaller set of records, which will then be filtered looking
+      for Bob, and finally checked against the security policy.  In
+      this case the security policy has only had to check records that
+      the user was allowed to see anyway.
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1271"></a>23.2. Consider Reporting Blocked Accesses</h3></div></div></div>
+<p>
+      For most applications, any time that a security policy blocks
+      something, the application has done something wrong.  You should
+      consider this a bug in the application.  Although no harm will
+      be done, this is an indication of one of two things:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+	  the application has not been properly implemented;
+	</li>
+<li class="listitem">
+	  your security policy is over-restrictive.
+	</li>
+</ul></div>
+<p>
+    </p>
+<p>
+      In either case, it makes sense to note the occurrence and
+      investigate.  Note that in a reporting environment where ad-hoc
+      reports can be run, this may prove less useful.
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1278"></a>23.3. Consider Testing With and Without Security</h3></div></div></div>
+<p>
+      If you have automated tests, you should run them against both
+      secured and unsecured databases.  If the tests pass in both
+      instances, then your application and the security implementation
+      are in harmony, and you should be very pleased with yourselves.
+      Encourage your employer to provide handsome bonuses.
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="denormalize"></a>23.4. Denormalize Around Your Scopes</h3></div></div></div>
+<p>
+      If you find that your security policies require joins to other
+      tables (possibly through function calls), then your security
+      system's performance may suffer.  Consider adding scope_id
+      columns to some tables to improve the performance of security
+      tests.  You might also consider doing this just to simplify
+      those tests.
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1284"></a>23.5. Use Secured Views To Implement Complex Queries</h3></div></div></div>
+<p>
+      You may find that multi-table queries encounter performance
+      issues as the security policy has to be applied for some tables
+      on more rows than are ultimately returned by the query.  If you
+      cannot find a way to improve the query by rewriting, then
+      consider replacing it with a secured view instead.
+    </p>
+<p>
+      The secured view would implement the joins and whatever
+      filtering can be written in to the view, and would then apply a
+      security policy only to the resulting rows, rather than to
+      intermediate rows that are discarded by subsequent joins in the
+      original query.
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ar01s22.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="apa.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">22. Contact Links </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> A. <code class="literal">Veil2</code> ERD and Database Objects</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

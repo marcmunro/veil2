@@ -3,13 +3,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>22. Tips and Guidelines</title>
+<title>22. Contact Links</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="prev" href="ar01s21.html" title="21. Contact Links">
-<link rel="next" href="apa.html" title="A. Veil2 ERD and Database Objects">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="prev" href="ar01s21.html" title="21. Setup Housekeeping Tasks">
+<link rel="next" href="ar01s23.html" title="23. Tips and Guidelines">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
@@ -18,140 +18,93 @@
 <td width="40%" align="left">
 <a accesskey="p" href="ar01s21.html">Prev</a> </td>
 <td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="apa.html">Next</a>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s23.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">21. Contact Links </td>
+<td width="40%" align="left" valign="top">21. Setup Housekeeping Tasks </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> A. <code class="literal">Veil2</code> ERD and Database Objects</td>
+<td width="40%" align="right" valign="top"> 23. Tips and Guidelines</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="tips"></a>22. Tips and Guidelines</h2></div></div></div>
-<p>
-    This section provides whatever tips and guidelines have occurred
-    to the author.  We can hope that the section expands over time.
-  </p>
+<a name="contact"></a>22. Contact Links</h2></div></div></div>
+<p></p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1248"></a>22.1. Write Queries That Work Without <code class="literal">Veil2</code>
-</h3></div></div></div>
+<a name="reporting_bugs"></a>22.1. Reporting Bugs</h3></div></div></div>
 <p>
-      Generally, with a well-behaved application and well-implemented
-      database design, <code class="literal">Veil2</code> adds little
-      performance overhead.  This is because it, mostly, only applies
-      permission checks on the records that the user sees.  If the
-      user is only going to see a few records, the overhead of
-      checking those few records is going to be small.
-    </p>
-<p>
-      However, if you make <code class="literal">Veil2</code> do your query
-      filtering for you, instead of writing properly crafted
-      where-clauses, performance is going to suck.  Consider the
-      following queries:
-      </p>
-<pre class="programlisting">
-select stuff
-  from parties
- where org_id = 20
-   and party_name like '%Bob%';
-
-select stuff
- from parties
-where party_name like '%Bob%';
-      </pre>
-<p>
-    </p>
-<p>
-      Assume that we are in a <code class="literal">Veil2</code>-protected
-      database and that we have aelect access only to
-      <code class="literal">org_id</code> 4.
-    </p>
-<p>
-      Both queries will return the same number of rows.  But in a
-      database with lots of parties, the second query will be slow.
-    </p>
-<p>
-      In the second query, a full-table scan will be performed, and
-      many Bobs from other orgs might be returned, only to be
-      discarded by the <code class="literal">Veil2</code>-based security policy.
-    </p>
-<p>
-      The first query will, most likely, use an index and return a
-      much smaller set of records, which will then be filtered looking
-      for Bob, and finally checked against the security policy.  In
-      this case the security policy has only had to check records that
-      the user was allowed to see anyway.
+      If you find something that looks like a bug, please report it
+      using the github <a class="ulink" href="https://github.com/marcmunro/veil2/issues" target="_top">issue
+      tracker</a>.
     </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1263"></a>22.2. Consider Reporting Blocked Accesses</h3></div></div></div>
+<a name="contributing"></a>22.2. Contributing</h3></div></div></div>
 <p>
-      For most applications, any time that a security policy blocks
-      something, the application has done something wrong.  You should
-      consider this a bug in the application.  Although no harm will
-      be done, this is an indication of one of two things:
+      All sorts of contibutions are welcomed.  In particular:
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
-	  the application has not been properly implemented;
+	  documentation fixes and enhancements;
 	</li>
 <li class="listitem">
-	  your security policy is over-restrictive.
+	  code fixes;
+	</li>
+<li class="listitem">
+	  authentication functions;
+	</li>
+<li class="listitem">
+	  translations.
 	</li>
 </ul></div>
 <p>
     </p>
 <p>
-      In either case, it makes sense to note the occurrence and
-      investigate.  Note that in a reporting environment where ad-hoc
-      reports can be run, this may prove less useful.
+      If you'd like to get involved, you should chat with Marc using
+      <a class="link" href="ar01s22.html#chatting" title="22.3. IRC">IRC</a> or <a class="link" href="ar01s22.html#email" title="22.4. Email">email</a> (sorry that's not a very helpful link).
+    </p>
+<p>
+      Oh, and feel free to fork the project if you get no response.
     </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1270"></a>22.3. Consider Testing With and Without Security</h3></div></div></div>
+<a name="chatting"></a>22.3. IRC</h3></div></div></div>
 <p>
-      If you have automated tests, you should run them against both
-      secured and unsecured databases.  If the tests pass in both
-      instances, then your application and the security implementation
-      are in harmony, and you should be very pleased with yourselves.
-      Encourage your employer to provide handsome bonuses.
+      You may be able to find Marc on IRC at freenode.net.  If
+      possible he will be in the <code class="literal">#veil2</code> room with
+      the nick <code class="literal">dbdude</code>.
+    </p>
+<p>
+      Feel free to drop in for a
+      <a class="ulink" href="irc://irc.freenode.net/veil2" target="_top">chat</a>.  You may
+      be able to get advice and help.  Marc is usually pretty
+      friendly.  His home timezone is PST.
     </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1273"></a>22.4. Denormalize Around Your Scopes</h3></div></div></div>
+<a name="email"></a>22.4. Email</h3></div></div></div>
 <p>
-      If you find that your security policies require joins to other
-      tables (possibly through function calls), then your security
-      system's performance may suffer.  Consider adding scope_id
-      columns to some tables to improve the performance of security
-      tests.  You might also consider doing this just to simplify
-      those tests.
+      Marc is not going to publish his email address here as he gets
+      enough spam as it is.  But he isn't that hard to find with a bit
+      of googling.  Put Veil2 in the email subject line and you're
+      less likly to fall into the spam bucket.  If all else fails,
+      raise an issue and he'll probably get back to you.
     </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1276"></a>22.5. Use Secured Views To Implement Complex Queries</h3></div></div></div>
+<a name="availability"></a>22.5. Availability</h3></div></div></div>
 <p>
-      You may find that multi-table queries encounter performance
-      issues as the security policy has to be applied for some tables
-      on more rows than are ultimately returned by the query.  If you
-      cannot find a way to improve the query by rewriting, then
-      consider replacing it with a secured view instead.
-    </p>
-<p>
-      The secured view would implement the joins and whatever
-      filtering can be written in to the view, and would then apply a
-      security policy only to the resulting rows, rather than to
-      intermediate rows that are discarded by subsequent joins in the
-      original query.
+      Marc is not paid for this and likes to believe he has a life.
+      He may not be available for extended periods of time, so please
+      be patient.
     </p>
 </div>
 </div>
@@ -162,13 +115,13 @@ where party_name like '%Bob%';
 <td width="40%" align="left">
 <a accesskey="p" href="ar01s21.html">Prev</a> </td>
 <td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="apa.html">Next</a>
+<td width="40%" align="right"> <a accesskey="n" href="ar01s23.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">21. Contact Links </td>
+<td width="40%" align="left" valign="top">21. Setup Housekeeping Tasks </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> A. <code class="literal">Veil2</code> ERD and Database Objects</td>
+<td width="40%" align="right" valign="top"> 23. Tips and Guidelines</td>
 </tr>
 </table>
 </div>

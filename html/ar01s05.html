@@ -6,8 +6,8 @@
 <title>5. Veil2 Concepts</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
 <link rel="prev" href="ar01s04.html" title="4. Why Use Veil2">
 <link rel="next" href="ar01s06.html" title="6. What is Veil2 And What Does It Provide?">
 </head>
@@ -44,7 +44,7 @@
 <li class="listitem">
 <a class="link" href="ar01s05.html#roles" title="5.3. Roles">roles</a>;</li>
 <li class="listitem">
-<a class="link" href="ar01s05.html#assignments" title="5.4. Assignments">assignments</a>;</li>
+<a class="link" href="ar01s05.html#assignments" title="5.4. Role Assignments">role assignments</a>;</li>
 <li class="listitem">
 <a class="link" href="ar01s05.html#security-contexts" title="5.5. Security Contexts">security
     contexts</a>;</li>
@@ -131,7 +131,7 @@
       apply at such a low level, managing access by assigning
       individual privileges is untenable.  Instead we manage groups of
       privileges through roles.  Privileges are assigned to roles, and
-      roles are assigned to users.  See <a class="link" href="ar01s05.html#assignments" title="5.4. Assignments">assignments</a>; <a class="link" href="ar01s05.html#security-contexts" title="5.5. Security Contexts">security contexts</a>; and <a class="link" href="ar01s05.html#privilege-promotion" title="5.6. Privilege Promotion">privilege promotion</a>, for
+      roles are assigned to users.  See <a class="link" href="ar01s05.html#assignments" title="5.4. Role Assignments">role assignments</a>; <a class="link" href="ar01s05.html#security-contexts" title="5.5. Security Contexts">security contexts</a>; and <a class="link" href="ar01s05.html#privilege-promotion" title="5.6. Privilege Promotion">privilege promotion</a>, for
       information on how each privilege's <a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scope</a> is managed.
     </p>
 <p>
@@ -202,7 +202,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="assignments"></a>5.4. Assignments</h3></div></div></div>
+<a name="assignments"></a>5.4. Role Assignments</h3></div></div></div>
 <p>
       Users are assigned <a class="link" href="ar01s05.html#roles" title="5.3. Roles">roles</a> in a
       number of ways, and <code class="literal">Veil2</code> attempts to place
@@ -218,7 +218,7 @@
       what makes it explicit.
     </p>
 <p>
-      Implicit assignments can be made in a number of ways.  In
+      Implicit role assignments can be made in a number of ways.  In
       <code class="literal">Veil2</code> each user, by default, is assigned the
       <code class="literal">personal context</code> role.  This is done by
       <code class="literal">Veil2</code> itself, and is not the result of any
@@ -245,7 +245,7 @@
 <a name="security-contexts"></a>5.5. Security Contexts</h3></div></div></div>
 <p>
       A security context (or just <code class="literal">context</code>) applies
-      to a <a class="link" href="ar01s05.html#assignments" title="5.4. Assignments">role assignment</a>.  It is
+      to a <a class="link" href="ar01s05.html#assignments" title="5.4. Role Assignments">role assignment</a>.  It is
       similar to a <a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scope</a>, but where the
       scope applies to a <a class="link" href="ar01s05.html#privileges" title="5.1. Privileges">privilege</a>,
       a context applies to a <a class="link" href="ar01s05.html#roles" title="5.3. Roles">role</a>.  It is
@@ -281,8 +281,8 @@
       The key to a good relational security implementation is an
       understanding of your relational security contexts.  In
       particular, how you may need to perform some data
-      denormalizations in order to get good performance.
-      TODO: Reference that section.
+      <a class="link" href="ar01s23.html#denormalize" title="23.4. Denormalize Around Your Scopes">denormalizations</a> in order to
+      get good performance.
     </p>
 <p>
       <code class="literal">Veil2</code> provides 2 built-in security security
@@ -332,7 +332,7 @@
       rows in a table, or to specific functionality. Often, a
       privilege that is needed for a particular <a class="link" href="ar01s05.html#roles" title="5.3. Roles">role</a>, will apply to an object that exists
       outside of the <a class="link" href="ar01s05.html#security-contexts" title="5.5. Security Contexts">context</a>
-      of the <a class="link" href="ar01s05.html#assignments" title="5.4. Assignments">role assignment</a>.  In
+      of the <a class="link" href="ar01s05.html#assignments" title="5.4. Role Assignments">role assignment</a>.  In
       such cases, the privilege must be promoted from the context of
       its assignment to apply in a higher-level <a class="link" href="ar01s05.html#scopes" title="5.2. Scopes">scope</a>.
     </p>
@@ -408,7 +408,7 @@
 <p>
       Each accessor (database user) is associated with a specific
       context within which they authenticate.  Typically, this context
-      would represent the organisation they work for.  When
+      would represent the organization they work for.  When
       authenticating an accessor, their authentication context must be
       provided along with their username or other identifier.
     </p>

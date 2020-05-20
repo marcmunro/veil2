@@ -6,8 +6,8 @@
 <title>12. Setting Up Authentication and Session Management</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.5 (alpha) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.5 (alpha) Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
 <link rel="prev" href="ar01s11.html" title="11. Identify and Define Your Scope Types">
 <link rel="next" href="ar01s13.html" title="13. Create Initial Privileges">
 </head>
@@ -101,11 +101,11 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm853"></a>12.2. Associate Your Users With Their Authentication
+<a name="idm855"></a>12.2. Associate Your Users With Their Authentication
     Contexts</h3></div></div></div>
 <p>
       If your users do not all authenticate in the same context you
-      will need to redefine the <code class="literal"><a class="link" href="apas02.html#view_accessor_contexts" title="A.2.5. Accessor Contexts View">veil2.accessor_contexts</a></code>
+      will need to redefine the <code class="literal"><a class="link" href="apas02.html#view_accessor_contexts" title="A.2.4. Accessor Contexts View">veil2.accessor_contexts</a></code>
       view.  This view associates accessors with <a class="link" href="ar01s05.html#authentication_context" title="5.7. Authentication Contexts">authentication
       contexts</a>.  Step 3 in the demo provides a good example of
       this.
@@ -113,7 +113,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm859"></a>12.3. Define Your <code class="literal">get_accessor()</code> Function</h3></div></div></div>
+<a name="idm861"></a>12.3. Define Your <code class="literal">get_accessor()</code> Function</h3></div></div></div>
 <p>
       For user authentication purposes <code class="literal">Veil2</code> needs
       the <code class="literal">accessor_id</code> for the <code class="literal"><a class="link" href="apa.html#entity_accessor" title="A.1.9. Accessors Table">accessors</a></code> record that
@@ -173,7 +173,7 @@
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm884"></a>12.4.1. Shared-Connection Sessions</h4></div></div></div>
+<a name="idm886"></a>12.4.1. Shared-Connection Sessions</h4></div></div></div>
 <p>
 	Within a shared connection environment, such as provided by
 	most web applications, a database connection will be shared
@@ -216,7 +216,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm903"></a>12.4.2. Dedicated Sessions</h4></div></div></div>
+<a name="idm905"></a>12.4.2. Dedicated Sessions</h4></div></div></div>
 <p>
 	If you have users that connect directly to your database,
 	perhaps through some reporting tool, you will want to set them
@@ -280,7 +280,7 @@ select * from session where result = 0;
 	  the authentication systems you do not want to use. 
 	</p></li>
 <li class="listitem"><p>
-	  Redefine the <code class="literal"><a class="link" href="apas02.html#view_accessor_contexts" title="A.2.5. Accessor Contexts View">accessor_contexts</a></code>
+	  Redefine the <code class="literal"><a class="link" href="apas02.html#view_accessor_contexts" title="A.2.4. Accessor Contexts View">accessor_contexts</a></code>
 	  view, if neccessary, to associate users with their <a class="link" href="ar01s05.html#authentication_context" title="5.7. Authentication Contexts">authentication
 	  contexts</a>.
 	</p></li>
@@ -299,7 +299,7 @@ select * from session where result = 0;
 	  <code class="literal">
 	    <a class="link" href="apa.html#entity_accessor" title="A.1.9. Accessors Table">veil2.accessors</a></code>
 	  records.  Maybe create a view that calls
-	  <code class="literal"><a class="link" href="apas03.html#func_hello" title="A.3.16. hello()">veil2.hello()</a></code>. 
+	  <code class="literal"><a class="link" href="apas03.html#func_hello" title="A.3.20. hello()">veil2.hello()</a></code>. 
 	</p></li>
 </ul></div>
 </div>

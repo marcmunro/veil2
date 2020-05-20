@@ -32,7 +32,7 @@ where party_name like '%Bob%';
     </para>
     <para>
       Assume that we are in a <literal>Veil2</literal>-protected
-      database and that we have aelect access only to
+      database and that we have select access only to
       <literal>org_id</literal> 4.
     </para>
     <para>
@@ -84,7 +84,7 @@ where party_name like '%Bob%';
       Encourage your employer to provide handsome bonuses.
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="denormalize">
     <title>Denormalize Around Your Scopes</title>
     <para>
       If you find that your security policies require joins to other

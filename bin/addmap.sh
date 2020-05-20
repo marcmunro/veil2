@@ -2,10 +2,17 @@
 #
 # addmap.sh
 #
+#      Copyright (c) 2020 Marc Munro
+#      Author:  Marc Munro
+#      License: GPL V3
+#
 # Usage:
 #    addmap.sh htmldir maps...
 #
-# TODO: Copyrights and comments
+# This is part of the process for creating maps for Marc's pretty
+# ERDs.  This needs to be refactored into a stand-alon process.  Right
+# now there is an unpleasantly coupled amagam of scripts and make
+# targets.
 #
 
 # Add mapping to 1 source file

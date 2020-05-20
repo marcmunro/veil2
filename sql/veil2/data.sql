@@ -30,7 +30,13 @@ values ('bcrypt', true,
        ('plaintext', false,
         'Plaintext password - enable for development only',
 	'veil2.authenticate_plaintext'),
-       ('oath2', false,
+       ('dedicated', false,
+        'Dedicated Session.  Authentication by database session username',
+        'veil2.authenticate_false'),
+       ('become', false,
+        'From become_user.  Session supplemental identifies the originating session',
+       'veil2.authenticate_false'),
+       ('oath2', false,  -- Placeholder.  An exercise for the reader
         'Openid authentication.', 'veil2.authenticate_false');
 
 insert into veil2.privileges

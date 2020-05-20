@@ -31,6 +31,7 @@
 <!ENTITY secure_tables          SYSTEM "parts/secure_tables.xml">
 <!ENTITY secure_views           SYSTEM "parts/secure_views.xml">
 <!ENTITY assign_roles           SYSTEM "parts/assign_roles.xml">
+<!ENTITY housekeeping           SYSTEM "parts/housekeeping.xml">
 <!ENTITY contact                SYSTEM "parts/contact.xml">
 <!ENTITY tips                   SYSTEM "parts/tips.xml">
 <!ENTITY veil_dbtables          SYSTEM "parts/veil_dbtables.xml">
@@ -110,6 +111,7 @@
   &secure_tables;
   &secure_views;
   &assign_roles;
+  &housekeeping;
   &contact;
   &tips;
   <appendix>

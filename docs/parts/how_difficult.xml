@@ -128,8 +128,7 @@
           Not in the author's experience but you may find otherwise.
           You may need to perform some data denormalizations and you
           will want to analyze some of your queries but there should
-          be little performance impact.  See <link
-	  linkend="performance">Performance</link>.
+          be little performance impact.
         </para>
         <para>
 	  If you are concerned, and you should be, try modelling your
@@ -147,7 +146,7 @@
 	  Any postgres specialist who can read this documentation
 	  should be able to cope and quickly become an expert.  The
 	  underlying principles are all documented.  The code is all
-	  documented.  There are documented examples.  And there are
+	  documented.  There are documented examples.  There are
 	  even <link linkend="contact">contact</link> links.
         </para>
       </listitem>

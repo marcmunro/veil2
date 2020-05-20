@@ -244,8 +244,8 @@
       The key to a good relational security implementation is an
       understanding of your relational security contexts.  In
       particular, how you may need to perform some data
-      denormalizations in order to get good performance.
-      TODO: Reference that section.
+      <link linkend="denormalize">denormalizations</link> in order to
+      get good performance.
     </para>
     <para>
       <literal>Veil2</literal> provides 2 built-in security security
@@ -372,7 +372,7 @@
     <para>
       Each accessor (database user) is associated with a specific
       context within which they authenticate.  Typically, this context
-      would represent the organisation they work for.  When
+      would represent the organization they work for.  When
       authenticating an accessor, their authentication context must be
       provided along with their username or other identifier.
     </para>

@@ -25,6 +25,10 @@
 include Makefile.global
 include extracts.d
 
+# Automatically run configure if needed.
+Makefile.global:
+	./configure
+
 all: db html
 
 SUBDIRS = demo docs docs/extracts docs/parts sql sql/veil2 diagrams test
@@ -241,6 +245,7 @@ drop:
 unit check test: db
 	@echo "Performing unit tests..."
 	@psql -v flags=$(FLAGS) -f test/test_veil2.sql -d $(TESTDB) | grep -v '^##'
+
 
 
 # Provide a list of the targets buildable by this makefile.

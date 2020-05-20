@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 #
-# extract_sql.sh
+#      extract_sql.sh
+#
+#      Copyright (c) 2020 Marc Munro
+#      Author:  Marc Munro
+#      License: GPL V3
+#
 # Usage:
 #  extract_sql.sh [-d|-D] <docs_dir> <target_dir>
 #
-# TODO: Copyrights and comments
+# This is very tightly bound to Marc's SQL coding style.  It does the
+# job but is pretty fragile.
 #
 # Extract definitions from sql files to generate inclusions for
 # docbook documentation.

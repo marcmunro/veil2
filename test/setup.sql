@@ -320,7 +320,9 @@ select m.id + r.role_id, r.role_name
     union
     select 5, 'test_role_5'
     union
-    select 6, 'test_role_6') r;
+    select 6, 'test_role_6'
+    union
+    select 7, 'test_super') r;  -- test_super will be almost superuser
 
 \echo ......creating test context_roles...
 insert into veil2.context_roles
@@ -448,6 +450,19 @@ select r.role_id, p.privilege_id
  inner join veil2.privileges p
          on p.privilege_name like 'test_privilege_' || n::text || '%';
 
+-- Almost superuser role: test_super (role 7)
+-- has all privs except connect and priv 20
+insert into veil2.role_privileges
+      (role_id, privilege_id)
+select 7, p.privilege_id
+  from veil2.privileges p
+ where p.privilege_id not in (0, 20)
+   and not exists (
+    select null
+      from veil2.role_privileges rp
+     where rp.role_id = 7
+       and rp.privilege_id = p.privilege_id);
+
 \echo ...setting access rights for parties...
 -- party -1 has no rights
 -- party -2 has connect and global superuser
@@ -457,8 +472,6 @@ select r.role_id, p.privilege_id
 -- Create connect and superuser rights for party -3 in global context
 -- and for party -3 connect in global context and SOMETHING ELSE IN
 -- ANOTHER CONTEXT TODO: COMMENT THIS PROPERLY
-
--- TODO: UNCOMMENT THE DATA BELOW
 
 with named_values(accessor_id, role_name, context_type_id, context_id) as
   (

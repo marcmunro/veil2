@@ -30,6 +30,9 @@
       views</link>;</listitem>
       <listitem><link linkend="assign_roles">assign initial
       roles</link> to users;</listitem>
+      <listitem>
+      <link linkend="housekeeping">set up housekeeping
+      tasks;</link></listitem> 
       <listitem>test</listitem>
     </orderedlist>
   </para>

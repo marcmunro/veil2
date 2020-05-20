@@ -46,7 +46,7 @@ alter table veil2.scopes
 comment on table veil2.scopes is
 'A scope, or context, identifies a limit to access.  It is a
 scope_type applied to a specific instance.  For example, if access
-controls are placed in in project scopes, there will be one scopes
+controls are placed in project scopes, there will be one scopes
 record for each project that we wish to manage access to.  So for
 three projects A, B and C, there would be 3 scopes with scope_types of
 project.  This table as created by the Veil2 database creation scripts
@@ -270,8 +270,7 @@ will have different names, and different sets of roles will exist.
 
 If this makes no sense to you, you probably have no need for it, so
 don''t use it.  If do choose to use, do so sparingly as it could lead to
-great confusion.  No users other than global-context superusers should
-ever see roles from more than one context.';
+great confusion.';
 
 alter table veil2.context_roles add constraint context_role__pk
   primary key(role_id, context_type_id, context_id);
@@ -327,7 +326,7 @@ role->role assignment may therefore need to be specific to those groups
 (eg a customer liaison role in one company may need different privileges
 from a similar role in another company).
 
-You should not use this table directly: instead use the
+You should not normally query this table directly; instead use the
 direct_role_privilges view which deals with implied assignments for the
 superuser role.';
 
@@ -358,9 +357,6 @@ create table veil2.role_roles (
 
 comment on table veil2.role_roles is
 'This table shows the mapping of roles to roles in various contexts.
-Role mappings in the global context apply in all other contexts.  Role
-mappings in a specific context apply in that context only, in addition to
-the global role mappings.
 
 The purpose of context-specific role mappings is to enable custom role
 mappings in different situations.  An example of when this may be useful
@@ -558,7 +554,7 @@ create table veil2.accessor_roles (
 
 comment on table veil2.accessor_roles is
 'This records the assignment of roles to accessors in various contexts.
-A role assigned to a party here, grants that party all of the privileges
+A role assigned to a party here, grants that accessor all of the privileges
 that that role has been assigned, whether directly or indirectly.';
 
 alter table veil2.accessor_roles add constraint accessor_role__pk

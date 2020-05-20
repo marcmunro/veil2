@@ -9,9 +9,9 @@
     rights based on users' relationships?
   </para>
   <para>
-    (You are not, at this stage going to be creating the scopes
+    You are not, at this stage going to be creating the scopes
     themselves, just identifying and creating their types.  This is a
-    necessary precursor to creating privileges.)
+    necessary precursor to creating privileges.
   </para>
   <para>
     Anywhere that you need context-based access controls, you should

@@ -88,7 +88,7 @@ select 5, s.scope_id,   -- Project to org promotions
 	</listitem>
 	<listitem>
 	  <para>
-	    Refreshthe <literal><link
+	    Refresh the <literal><link
 	    linkend="view_all_scope_promotions">veil2.all_scope_promotions</link></literal>
 	    materialized view.
 	  </para>

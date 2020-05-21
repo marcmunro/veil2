@@ -39,7 +39,7 @@
   </p>
 <p>
     This section provides an introduction to what is needed,
-    references to more detailed explanations and a final, simple list,
+    references to more detailed explanations and a final, simple, list
     of <a class="link" href="ar01s12.html#authent_what" title="12.5. In Summary">actions</a> you need to take or
     consider.
   </p>
@@ -101,7 +101,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm855"></a>12.2. Associate Your Users With Their Authentication
+<a name="idm857"></a>12.2. Associate Your Users With Their Authentication
     Contexts</h3></div></div></div>
 <p>
       If your users do not all authenticate in the same context you
@@ -113,16 +113,15 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm861"></a>12.3. Define Your <code class="literal">get_accessor()</code> Function</h3></div></div></div>
+<a name="idm863"></a>12.3. Define Your <code class="literal">get_accessor()</code> Function</h3></div></div></div>
 <p>
       For user authentication purposes <code class="literal">Veil2</code> needs
       the <code class="literal">accessor_id</code> for the <code class="literal"><a class="link" href="apa.html#entity_accessor" title="A.1.9. Accessors Table">accessors</a></code> record that
-      represents the user.  Since usernames, email addresses and
-      whatever else might be used to uniquely identify a user, in
-      their <a class="link" href="ar01s05.html#authentication_context" title="5.7. Authentication Contexts">authentication
-      context</a> are stored in tables
-      external to <code class="literal">Veil2</code>, we need a function that
-      returns an <code class="literal">accessor_id</code> for a username.  The
+      represents the user.  Since <code class="literal">Veil2</code> does not
+      itself store usernames, email addresses and whatever else that
+      might be used to uniquely identify a user in their <a class="link" href="ar01s05.html#authentication_context" title="5.7. Authentication Contexts">authentication context</a>,
+      we need a function that returns an
+      <code class="literal">accessor_id</code> for a username.  The
       <code class="literal">
 	<a class="link" href="apas03.html#func_get_accessor" title="A.3.9. get_accessor()">get_accessor()</a></code>
       function is that function. 
@@ -173,7 +172,7 @@
     </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm886"></a>12.4.1. Shared-Connection Sessions</h4></div></div></div>
+<a name="idm888"></a>12.4.1. Shared-Connection Sessions</h4></div></div></div>
 <p>
 	Within a shared connection environment, such as provided by
 	most web applications, a database connection will be shared
@@ -216,7 +215,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm905"></a>12.4.2. Dedicated Sessions</h4></div></div></div>
+<a name="idm907"></a>12.4.2. Dedicated Sessions</h4></div></div></div>
 <p>
 	If you have users that connect directly to your database,
 	perhaps through some reporting tool, you will want to set them
@@ -261,7 +260,7 @@ select * from session where result = 0;
 	</p>
 <p>
 	  For an example of this, take a look at the
-	  <code class="literal">Veil2</code>unit tests.  The database user
+	  <code class="literal">Veil2</code> unit tests.  The database user
 	  <code class="literal">veil2_alice</code> is set up as a dedicated
 	  session user (as well as a shared session user).
 	</p>

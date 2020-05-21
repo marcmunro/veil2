@@ -42,8 +42,8 @@
 <p>
     You should aim to keep the range of privilege_ids that are in use
     as small as possible.  You do not want unused ids, as this extends
-    the range and will lead to larger bitmaps being needed and,
-    slightly, reduced performance.  Always allocate privilege_ids
+    the range and will lead to larger bitmaps being needed and
+    slightly reduced performance.  Always allocate privilege_ids
     manually (do not use a sequence), and if you need to delete some
     privileges, try to subsequently re-use the original ids.  Note
     that <code class="literal">Veil2</code> defines a number of its own
@@ -68,7 +68,7 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm954"></a>13.1. In Summary</h3></div></div></div>
+<a name="idm956"></a>13.1. In Summary</h3></div></div></div>
 <p>
       Create records in <a class="link" href="apa.html#entity_privilege" title="A.1.4. Privileges Table"><code class="literal">veil2.privileges</code></a>.
     </p>

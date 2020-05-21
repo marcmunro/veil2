@@ -50,7 +50,7 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1106"></a>16.1. Create Foreign Key Links</h3></div></div></div>
+<a name="idm1108"></a>16.1. Create Foreign Key Links</h3></div></div></div>
 <p>
       For each relational security context, you will add columns to
       the <code class="literal">scopes</code> table.  For instance if you have a
@@ -96,7 +96,7 @@ alter table veil2.scopes
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1120"></a>16.2. Create Insertion Triggers</h3></div></div></div>
+<a name="idm1122"></a>16.2. Create Insertion Triggers</h3></div></div></div>
 <p>
       Next, we want to ensure that new <code class="literal">projects</code>
       records are automatically recorded in the
@@ -106,7 +106,7 @@ alter table veil2.scopes
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1125"></a>16.3. Link Existing Records</h3></div></div></div>
+<a name="idm1127"></a>16.3. Link Existing Records</h3></div></div></div>
 <p>
       The final step is to populate scope records for your existing
       projects.  Something like this:
@@ -134,7 +134,7 @@ select 6, nextval('veil2.scope_id_seq'), project_id
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1130"></a>16.4. In Summary</h3></div></div></div>
+<a name="idm1132"></a>16.4. In Summary</h3></div></div></div>
 <p>
       For each relational context you will add foreign key columns,
       create foreign key and check constraints, create an insert

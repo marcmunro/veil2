@@ -72,7 +72,7 @@
 <li class="listitem">comments in the database objects;</li>
 <li class="listitem">comments in the <code class="literal">Veil2</code> creation
       scripts;</li>
-<li class="listitem">the, commented, <code class="literal">Veil2</code> demo.</li>
+<li class="listitem">the (commented) <code class="literal">Veil2</code> demo.</li>
 </ul></div>
 <p>
   </p>
@@ -191,7 +191,7 @@ create policy projects__select
 	current record.  Tests are made in global scope, then corp
 	scope of the owning corp, then org scope of the owning org,
 	and finally in project scope of the project itself.  Each of 
-	these tests, causes a different bitmap in the users session
+	these tests causes a different bitmap in the users session
 	privileges to be checked.
       </p>
 <p>
@@ -265,8 +265,8 @@ create policy projects__select
 	    </p>
 <p>
 	      Make your roles the source of <code class="literal">Veil2</code>
-	      roles.  Use triggers and FK-constraints to make and
-	      maintain copies of your roles within
+	      roles.  Use triggers and Foreign Key (FK) constraints to
+	      make and maintain copies of your roles within
 	      <code class="literal">Veil2</code>.
 	    </p>
 </li>
@@ -321,10 +321,10 @@ create policy projects__select
 <a name="idm453"></a>6.2.4. Integration of Users</h4></div></div></div>
 <p>
 	All of your users must be associated with
-	<code class="literal">Veil2</code> accessors, and any existing
-	credentials must be migrated.  Again this can be handled by
-	triggers and FK-constraints and, again, the demo provides
-	examples.
+	<code class="literal">Veil2</code> accessors (users who access your
+	database), and any existing credentials must be migrated.
+	Again this can be handled by triggers and FK-constraints, and
+	the demo provides examples.
       </p>
 </div>
 <div class="sect3">
@@ -332,7 +332,7 @@ create policy projects__select
 <a name="idm457"></a>6.2.5. Performance Denormalizations</h4></div></div></div>
 <p>
 	You will be applying access control to each relation in your
-	system.  Some of them may benefit from data denormlization to
+	system.  Some of them may benefit from data denormalization to
 	improve the performance of the security tests.  Typically you
 	may want to add ownership columns to some tables so that
 	ownership can be determined without the need for extra joins.
@@ -345,12 +345,13 @@ create policy projects__select
 <a name="idm460"></a>6.2.6. Authentication</h4></div></div></div>
 <p>
 	You may need to implement a new authentication system for
-	users.  Or the built-in bcrypt implementation may be enough.
+	users.  Or the built-in <a class="ulink" href="https://en.wikipedia.org/wiki/Bcrypt" target="_top">bcrypt</a>
+	implementation may be enough. 
       </p>
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm463"></a>6.2.7. Development/Tightening of Access Controls</h4></div></div></div>
+<a name="idm464"></a>6.2.7. Development/Tightening of Access Controls</h4></div></div></div>
 <p>
 	Once you have everything integrated, you will be able to use
 	your system.  Create a super-role that allows all access and

@@ -31,7 +31,7 @@
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm1538"></a>A.3. Veil2 Functions and Triggers</h2></div></div></div>
+<a name="idm1537"></a>A.3. Veil2 Functions and Triggers</h2></div></div></div>
 <p>
     The following functions are defined in
     <code class="literal">sql/veil2/views.sql</code>:
@@ -109,7 +109,7 @@
 <a name="func_refresh_accessor_privs"></a>A.3.1. Refresh Accessor Privs</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1604"></a>A.3.1.1. <code class="literal">refresh_accessor_privs()</code>
+<a name="idm1603"></a>A.3.1.1. <code class="literal">refresh_accessor_privs()</code>
 </h4></div></div></div>
 <pre class="programlisting">
 function veil2.refresh_accessor_privs()
@@ -131,7 +131,7 @@ data.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1607"></a>A.3.1.2. <code class="literal">accessor_roles__aiudt()</code>
+<a name="idm1606"></a>A.3.1.2. <code class="literal">accessor_roles__aiudt()</code>
 </h4></div></div></div>
 <pre class="programlisting">
 create trigger accessor_roles__aiudt
@@ -150,7 +150,7 @@ VPD Implementation Notes:
 As accessor_roles may be updated moderately frequently, the overhead of
 this trigger may prove to be significant.  If so, you may choose to
 drop it and use other mechanisms to refresh the affected materialized
-views.  Note that this will mean that the materialzed views will not
+views.  Note that this will mean that the materialized views will not
 always be up to date, so this is a trade-off that must be evaluated.
 </p>
 </div>
@@ -160,7 +160,7 @@ always be up to date, so this is a trade-off that must be evaluated.
 <a name="func_refresh_scope_promotions"></a>A.3.2. Refresh Scope Promotions</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1612"></a>A.3.2.1. <code class="literal">refresh_scope_promotions()</code>
+<a name="idm1611"></a>A.3.2.1. <code class="literal">refresh_scope_promotions()</code>
 </h4></div></div></div>
 <pre class="programlisting">
 function veil2.refresh_scope_promotions()
@@ -183,7 +183,7 @@ privilege promotion data.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1615"></a>A.3.2.2. <code class="literal">scopes__aiudt</code>
+<a name="idm1614"></a>A.3.2.2. <code class="literal">scopes__aiudt</code>
 </h4></div></div></div>
 <pre class="programlisting">
 create trigger scopes__aiudt
@@ -203,7 +203,7 @@ Although we expect that scopes will be modified relatively
 infrequently, this may not be the case in your application.  If the
 overhead of this trigger proves to be too significant it should be
 dropped, and other mechanisms used to refresh the affected materialized
-views.  Note that this will mean that the materialzed views will not
+views.  Note that this will mean that the materialized views will not
 always be up to date, so this is a trade-off that must be evaluated.
 </p>
 </div>
@@ -213,7 +213,7 @@ always be up to date, so this is a trade-off that must be evaluated.
 <a name="func_refresh_role_privileges"></a>A.3.3. Refresh Role Privileges</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1620"></a>A.3.3.1. <code class="literal">refresh_role_privileges()</code>
+<a name="idm1619"></a>A.3.3.1. <code class="literal">refresh_role_privileges()</code>
 </h4></div></div></div>
 <pre class="programlisting">
 function veil2.refresh_role_privileges()
@@ -237,7 +237,7 @@ when role-&gt;role or role-&gt;privilege mappings are changed.
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm1623"></a>A.3.3.2. <code class="literal">role_privileges__aiudt</code>
+<a name="idm1622"></a>A.3.3.2. <code class="literal">role_privileges__aiudt</code>
 </h4></div></div></div>
 <pre class="programlisting">
 create trigger role_privileges__aiudt
@@ -619,7 +619,7 @@ method chosen, the client may need to use this when generating their
 authentication token for the subsequent open_connection() call.
 session_supplemental is an authentication method specific set of
 data.  Depending upon the authentication method, the client may need
-to use this in generating subsequent authetntication tokens,
+to use this in generating subsequent authentication tokens,
 </p>
 <p>
 If username is not valid the function will appear to work but
@@ -947,7 +947,7 @@ privileges for _accessor_id.  The temporary table is queried by
 security functions in order to determine what access rights the
 connected user has.  If the optional 3rd parameter is provided, use
 that as the session_id of an originating session - this is part of the
-become-user process (see become_user()
+become-user process (see become_user())
 </p>
 </div>
 <div class="sect2">

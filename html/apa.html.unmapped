@@ -31,11 +31,11 @@
 </div>
 <div class="appendix">
 <div class="titlepage"><div><div><h2 class="title">
-<a name="idm1288"></a>A. <code class="literal">Veil2</code> ERD and Database Objects</h2></div></div></div>
+<a name="idm1287"></a>A. <code class="literal">Veil2</code> ERD and Database Objects</h2></div></div></div>
 <div class="mediaobject"><img src="veil2_erd.png"></div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm1294"></a>A.1. Veil2 Tables</h2></div></div></div>
+<a name="idm1293"></a>A.1. Veil2 Tables</h2></div></div></div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="entity_scope_type"></a>A.1.1. Scope Types Table</h3></div></div></div>
@@ -172,7 +172,7 @@ figure out the purpose of the privilege.
 Column <code class="literal">promotion_scope_type_id</code>: Identfies a security scope type to which this privileges scope should
 be promoted if possible.  This allows roles which will be assigned in
 a restricted security context to contain privileges which necessarily
-must apply in a superior scope (ie as if they has been assigned in a
+must apply in a superior scope (ie as if they had been assigned in a
 superior context).
 </p>
 <p>
@@ -180,7 +180,7 @@ For example a hypothetical 'select lookup' privilege may be assigned
 in a team context (via a hypothetical 'team member' role).  But if the
 lookups table is not in any way team-specific it makes no sense to apply
 that privilege in that scope.  Instead, we will promote that privilege
-to a scope where it does make sense.  See the veil docs for more on
+to a scope where it does make sense.  See the Veil2 docs for more on
 privilege promotion and on the use of the terms scope and context.
 </p>
 <p>
@@ -204,7 +204,7 @@ create table veil2.scopes (
 <p>
 A scope, or context, identifies a limit to access.  It is a
 scope_type applied to a specific instance.  For example, if access
-controls are placed in project scopes, there will be one scopes
+controls are placed in project scopes, there will be one scope
 record for each project that we wish to manage access to.  So for
 three projects A, B and C, there would be 3 scopes with scope_types of
 project.  This table as created by the Veil2 database creation scripts
@@ -256,7 +256,7 @@ reserved value of zero is just simpler (though suckier).
 Column <code class="literal">scope_type_id</code>: Identifies the type of scope that we are describing.
 </p>
 <p>
-Column <code class="literal">scope_id</code>: This, in conjunction with the scope_type_id fully identifies a scope
+Column <code class="literal">scope_id</code>: This, in conjunction with the scope_type_id, fully identifies a scope
 or context.  For global scope, this id is 0: ideally it would be null
 but as it needs to be part of the primary key of this table, that is
 not possible.
@@ -467,7 +467,7 @@ their privileges to be determined.
 </p>
 <p>
 Column <code class="literal">accessor_id</code>: The id of the database accessor.  This is the id used throughout Veil2
-for determining access rights.  Idealy this will be the id of the user
+for determining access rights.  Ideally this will be the id of the user
 from the protected database
 </p>
 <p>
@@ -659,7 +659,7 @@ create table veil2.authentication_details (
 Types of auhentication available for individual parties, along with
 whatever authentication tokens are needed for that form of
 authentication.  Because this table stores authentication tables, access
-to it must be as thoroughly locked down as possibe.
+to it must be as thoroughly locked down as possible.
 </p>
 <p>
 Column <code class="literal">authentication_type</code>: Identifies a specific authentication type.  More than 1 authentication

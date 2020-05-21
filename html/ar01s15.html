@@ -68,7 +68,7 @@
   </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1051"></a>15.1. Create Foreign-Key Links to Your Users</h3></div></div></div>
+<a name="idm1053"></a>15.1. Create Foreign-Key Links to Your Users</h3></div></div></div>
 <p>
       For each user table that you have you will need to create a
       foreign key link from <code class="literal"><a class="link" href="apa.html#entity_accessor" title="A.1.9. Accessors Table">veil2.accessors</a></code>.  If
@@ -94,7 +94,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1065"></a>15.2. Create Insert Trigger</h3></div></div></div>
+<a name="idm1067"></a>15.2. Create Insert Trigger</h3></div></div></div>
 <p>
       When new users are created in your users table, we need
       <code class="literal">veil2.accessors</code> records to also be created.
@@ -109,7 +109,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1072"></a>15.3. Copy Existing User Records</h3></div></div></div>
+<a name="idm1074"></a>15.3. Copy Existing User Records</h3></div></div></div>
 <p>
       Create copies of the existing user records in
       <code class="literal">veil2.accessors</code>.  See the demo.
@@ -117,7 +117,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1076"></a>15.4. Copy Existing Authentication Details</h3></div></div></div>
+<a name="idm1078"></a>15.4. Copy Existing Authentication Details</h3></div></div></div>
 <p>
       <code class="literal">Veil2</code> accessors may have multiple sets of
       authentication details, 1 for each active authentication type
@@ -133,7 +133,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1082"></a>15.5. Ensure Authentication Changes Are Propagated</h3></div></div></div>
+<a name="idm1084"></a>15.5. Ensure Authentication Changes Are Propagated</h3></div></div></div>
 <p>
       Ideally, on an ongoing basis, all authentication details will be
       kept solely in <code class="literal">veil2.authentication_details</code>
@@ -152,9 +152,10 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1089"></a>15.6. In Summary</h3></div></div></div>
+<a name="idm1091"></a>15.6. In Summary</h3></div></div></div>
 <p>
-      What the <a class="link" href="ar01s15.html#accessors_steps">above list</a> says.
+      What the list <a class="link" href="ar01s15.html" title="15. Link Your Users To Veil2's Accessors">at the top of the
+      page</a> says.  
     </p>
 </div>
 </div>

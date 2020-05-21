@@ -35,9 +35,9 @@
         </para>
         <para>
           Actually, it’s easier for them than having to implement
-          application security for themselves.  For the most part, they
-          don’t need to understand the details.  And anyway, how dumb do
-          you think they are?
+          application security for themselves.  For the most part,
+          they don’t need to understand the details.  Also, they may
+          be smarter than you think.
         </para>
       </listitem>
       <listitem>
@@ -88,12 +88,12 @@
           It’s going to be expensive.
         </para>
         <para>
-          Really?  Why?  Your application developers should have an easier
-          time of things.  You should end up with a higher-quality,
-          and easier-to-maintain application.  There will be a need to do
-          some careful thinking about access controls, and you will need
-          to document your security model, but that is a good thing to
-	  do anyway.
+          Not necessarily.  Your application developers should have an
+          easier time of things.  You should end up with a
+          higher-quality, and easier-to-maintain application.  There
+          will be a need to do some careful thinking about access
+          controls, and you will need to document your security model,
+          but that is a good thing to do anyway.
         </para>
       </listitem>
       <listitem>

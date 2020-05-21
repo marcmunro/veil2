@@ -330,7 +330,7 @@ method chosen, the client may need to use this when generating their
 authentication token for the subsequent open_connection() call.
 session_supplemental is an authentication method specific set of
 data.  Depending upon the authentication method, the client may need
-to use this in generating subsequent authetntication tokens,
+to use this in generating subsequent authentication tokens,
 
 If username is not valid the function will appear to work but
 subsequent attempts to open the session will fail and no privileges
@@ -636,7 +636,7 @@ privileges for _accessor_id.  The temporary table is queried by
 security functions in order to determine what access rights the
 connected user has.  If the optional 3rd parameter is provided, use
 that as the session_id of an originating session - this is part of the
-become-user process (see become_user()';
+become-user process (see become_user())';
 
 
 \echo ......check_continuation()...

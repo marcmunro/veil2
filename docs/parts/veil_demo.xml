@@ -83,10 +83,10 @@ $ make db; psql -d vpd -f demo/demo.sql
       </programlisting>
     </para>
     <para>
-      The setup script creates an unprivileged demouser account, which
-      you should use to explore the demo.  Using a privileged account
-      will bypass the security which would be pointless and
-      uninteresting.
+      The setup script creates an unprivileged
+      <literal>demouser</literal> (demo user) account, which you
+      should use to explore the demo.  Using a privileged account will
+      bypass the security which would be pointless and uninteresting.
     </para>
     <sect3>
       <title>Users</title>
@@ -348,7 +348,7 @@ Triggers:
 	  So, does Simon have privileges 17 and/or 23?  Let's try
 	  running the privilege testing functions directly.  We can
 	  see <literal>party</literal> records 114 and 105.  It seems
-	  likley that we can see record 114 because its our record (we
+	  likely that we can see record 114 because its our record (we
 	  are being Simon at this point).  And maybe we can see record
 	  105 because its the owner or project 1, for which we have
 	  the <literal>project manager</literal> role.

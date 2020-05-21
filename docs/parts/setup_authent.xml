@@ -7,7 +7,7 @@
   </para>
   <para>
     This section provides an introduction to what is needed,
-    references to more detailed explanations and a final, simple list,
+    references to more detailed explanations and a final, simple, list
     of <link linkend="authent_what">actions</link> you need to take or
     consider.
   </para>
@@ -84,13 +84,12 @@
       For user authentication purposes <literal>Veil2</literal> needs
       the <literal>accessor_id</literal> for the <literal><link
       linkend="entity_accessor">accessors</link></literal> record that
-      represents the user.  Since usernames, email addresses and
-      whatever else might be used to uniquely identify a user, in
-      their <link
-      linkend="authentication_context">authentication
-      context</link> are stored in tables
-      external to <literal>Veil2</literal>, we need a function that
-      returns an <literal>accessor_id</literal> for a username.  The
+      represents the user.  Since <literal>Veil2</literal> does not
+      itself store usernames, email addresses and whatever else that
+      might be used to uniquely identify a user in their <link
+      linkend="authentication_context">authentication context</link>,
+      we need a function that returns an
+      <literal>accessor_id</literal> for a username.  The
       <literal>
 	<link linkend="func_get_accessor">get_accessor()</link></literal>
       function is that function. 
@@ -213,7 +212,7 @@ select * from session where result = 0;
 	</programlisting>
 	<para>
 	  For an example of this, take a look at the
-	  <literal>Veil2</literal>unit tests.  The database user
+	  <literal>Veil2</literal> unit tests.  The database user
 	  <literal>veil2_alice</literal> is set up as a dedicated
 	  session user (as well as a shared session user).
 	</para>

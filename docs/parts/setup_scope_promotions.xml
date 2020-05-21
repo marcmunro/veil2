@@ -68,8 +68,8 @@ select 5, s.scope_id,   -- Project to org promotions
       linkend="view_all_scope_promotions">veil2.all_scope_promotions</link></literal>
       materialized view.  This should automatically refresh when
       <literal>scopes</literal> records are updated, but not when
-      <literal>scope_promotions</literal>, the view it is based, is
-      redefined.
+      <literal>scope_promotions</literal>, the view on which it is
+      based, is redefined.
     </para>
   </sect2>
   <sect2>

@@ -9,7 +9,7 @@
     rights based on users' relationships?
   </para>
   <para>
-    You are not, at this stage going to be creating the scopes
+    You are not, at this stage, going to be creating the scopes
     themselves, just identifying and creating their types.  This is a
     necessary precursor to creating privileges.
   </para>
@@ -27,7 +27,7 @@
     and <link linkend="role_mapping">role mapping</link> contexts.
     You need to work out whether all of your users will be logging in
     to the system as if they were all using the same system within the
-    same copmany, or whether they exist in mutually independent
+    same company, or whether they exist in mutually independent
     spaces.  Similarly you need to consider whether some of those
     independent spaces will need to separately manage their own
     role->role mappings or whether a single set of mappings that apply

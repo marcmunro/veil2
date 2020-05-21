@@ -1077,7 +1077,7 @@ Although we expect that role->role mappings will be modified relatively
 infrequently, this may not be the case in your application.  If the
 overhead of this trigger proves to be too significant it should be
 dropped, and other mechanisms used to refresh the affected materialized
-views.  Note that this will mean that the materialzed views will not
+views.  Note that this will mean that the materialized views will not
 always be up to date, so this is a trade-off that must be evaluated.';
 
 
@@ -1097,7 +1097,7 @@ Although we expect that scopes will be modified relatively
 infrequently, this may not be the case in your application.  If the
 overhead of this trigger proves to be too significant it should be
 dropped, and other mechanisms used to refresh the affected materialized
-views.  Note that this will mean that the materialzed views will not
+views.  Note that this will mean that the materialized views will not
 always be up to date, so this is a trade-off that must be evaluated.';
 
 
@@ -1116,6 +1116,6 @@ VPD Implementation Notes:
 As accessor_roles may be updated moderately frequently, the overhead of
 this trigger may prove to be significant.  If so, you may choose to
 drop it and use other mechanisms to refresh the affected materialized
-views.  Note that this will mean that the materialzed views will not
+views.  Note that this will mean that the materialized views will not
 always be up to date, so this is a trade-off that must be evaluated.';
 

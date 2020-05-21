@@ -46,7 +46,7 @@ alter table veil2.scopes
 comment on table veil2.scopes is
 'A scope, or context, identifies a limit to access.  It is a
 scope_type applied to a specific instance.  For example, if access
-controls are placed in project scopes, there will be one scopes
+controls are placed in project scopes, there will be one scope
 record for each project that we wish to manage access to.  So for
 three projects A, B and C, there would be 3 scopes with scope_types of
 project.  This table as created by the Veil2 database creation scripts
@@ -90,7 +90,7 @@ comment on column veil2.scopes.scope_type_id is
 'Identifies the type of scope that we are describing.';
 
 comment on column veil2.scopes.scope_id is
-'This, in conjunction with the scope_type_id fully identifies a scope
+'This, in conjunction with the scope_type_id, fully identifies a scope
 or context.  For global scope, this id is 0: ideally it would be null
 but as it needs to be part of the primary key of this table, that is
 not possible.
@@ -149,14 +149,14 @@ comment on column veil2.privileges.promotion_scope_type_id is
 'Identfies a security scope type to which this privileges scope should
 be promoted if possible.  This allows roles which will be assigned in
 a restricted security context to contain privileges which necessarily
-must apply in a superior scope (ie as if they has been assigned in a
+must apply in a superior scope (ie as if they had been assigned in a
 superior context).
 
 For example a hypothetical ''select lookup'' privilege may be assigned
 in a team context (via a hypothetical ''team member'' role).  But if the
 lookups table is not in any way team-specific it makes no sense to apply
 that privilege in that scope.  Instead, we will promote that privilege
-to a scope where it does make sense.  See the veil docs for more on
+to a scope where it does make sense.  See the Veil2 docs for more on
 privilege promotion and on the use of the terms scope and context.';
 
 comment on column veil2.privileges.description is
@@ -427,7 +427,7 @@ their privileges to be determined.';
 
 comment on column veil2.accessors.accessor_id is
 'The id of the database accessor.  This is the id used throughout Veil2
-for determining access rights.  Idealy this will be the id of the user
+for determining access rights.  Ideally this will be the id of the user
 from the protected database';
 
 alter table veil2.accessors add constraint accessor__pk
@@ -505,7 +505,7 @@ comment on table veil2.authentication_details is
 'Types of auhentication available for individual parties, along with
 whatever authentication tokens are needed for that form of
 authentication.  Because this table stores authentication tables, access
-to it must be as thoroughly locked down as possibe.';
+to it must be as thoroughly locked down as possible.';
 
 comment on column veil2.authentication_details.authentication_type is
 'Identifies a specific authentication type.  More than 1 authentication

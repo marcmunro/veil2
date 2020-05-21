@@ -10,8 +10,8 @@
   <para>
     You should aim to keep the range of privilege_ids that are in use
     as small as possible.  You do not want unused ids, as this extends
-    the range and will lead to larger bitmaps being needed and,
-    slightly, reduced performance.  Always allocate privilege_ids
+    the range and will lead to larger bitmaps being needed and
+    slightly reduced performance.  Always allocate privilege_ids
     manually (do not use a sequence), and if you need to delete some
     privileges, try to subsequently re-use the original ids.  Note
     that <literal>Veil2</literal> defines a number of its own

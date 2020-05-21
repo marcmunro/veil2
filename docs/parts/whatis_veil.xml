@@ -39,7 +39,7 @@
       <listitem>comments in the database objects;</listitem>
       <listitem>comments in the <literal>Veil2</literal> creation
       scripts;</listitem> 
-      <listitem>the, commented, <literal>Veil2</literal> demo.</listitem>
+      <listitem>the (commented) <literal>Veil2</literal> demo.</listitem>
     </itemizedlist>
   </para>
   <para>
@@ -150,7 +150,7 @@ create policy projects__select
 	current record.  Tests are made in global scope, then corp
 	scope of the owning corp, then org scope of the owning org,
 	and finally in project scope of the project itself.  Each of 
-	these tests, causes a different bitmap in the users session
+	these tests causes a different bitmap in the users session
 	privileges to be checked.
       </para>
       <para>
@@ -219,8 +219,8 @@ create policy projects__select
 	    </para>
 	    <para>
 	      Make your roles the source of <literal>Veil2</literal>
-	      roles.  Use triggers and FK-constraints to make and
-	      maintain copies of your roles within
+	      roles.  Use triggers and Foreign Key (FK) constraints to
+	      make and maintain copies of your roles within
 	      <literal>Veil2</literal>.
 	    </para>
 	  </listitem>
@@ -272,17 +272,17 @@ create policy projects__select
       <title>Integration of Users</title>
       <para>
 	All of your users must be associated with
-	<literal>Veil2</literal> accessors, and any existing
-	credentials must be migrated.  Again this can be handled by
-	triggers and FK-constraints and, again, the demo provides
-	examples.
+	<literal>Veil2</literal> accessors (users who access your
+	database), and any existing credentials must be migrated.
+	Again this can be handled by triggers and FK-constraints, and
+	the demo provides examples.
       </para>
     </sect3>
     <sect3>
       <title>Performance Denormalizations</title>
       <para>
 	You will be applying access control to each relation in your
-	system.  Some of them may benefit from data denormlization to
+	system.  Some of them may benefit from data denormalization to
 	improve the performance of the security tests.  Typically you
 	may want to add ownership columns to some tables so that
 	ownership can be determined without the need for extra joins.
@@ -294,7 +294,9 @@ create policy projects__select
       <title>Authentication</title>
       <para>
 	You may need to implement a new authentication system for
-	users.  Or the built-in bcrypt implementation may be enough.
+	users.  Or the built-in <ulink
+	url="https://en.wikipedia.org/wiki/Bcrypt">bcrypt</ulink>
+	implementation may be enough. 
       </para>
     </sect3>
     <sect3>

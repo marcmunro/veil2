@@ -7,7 +7,7 @@
   <sect2>
     <title>Roles</title>
     <para>
-      Firtly you will need to give the <literal>connect</literal> role
+      Firstly you will need to give the <literal>connect</literal> role
       to all of your users.  This role allows them to authenticate.
       Without it, they will be unable to access any data.
     </para>

@@ -15,7 +15,7 @@ systems as easy as possible.  It provides an extensible framework of
 permissions, permission checks, and user authentication so that you
 can start building a secure database in a matter of hours.
 
-Extensive documentation is [provided
+Documentation is [provided
 here](https://marcmunro.github.io/veil2/html/index.html).
 
 ## Getting Started

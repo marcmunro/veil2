@@ -25,7 +25,7 @@ personal contexts.';
 
 revoke all on veil2.scope_types from public;
 grant select on veil2.scope_types to veil_user;
-grant all on veil2.scope_types to demouser;
+--grant all on veil2.scope_types to demouser;
 
 
 \echo ......scopes...

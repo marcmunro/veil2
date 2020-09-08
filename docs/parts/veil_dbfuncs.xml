@@ -2,7 +2,7 @@
   <title>Veil2 Functions and Triggers</title>
   <para>
     The following functions are defined in
-    <literal>sql/veil2/views.sql</literal>:
+    <literal>sql/veil2--&version_number;.sql</literal>:
     <itemizedlist>
       <listitem>
 	<link
@@ -13,12 +13,6 @@
 	  <listitem>
 	  <link
 	      linkend="func_refresh_role_privileges">refresh_role_privileges()</link>.</listitem>
-    </itemizedlist>
-  </para>
-  <para>
-    The following functions are defined in
-    <literal>sql/veil2/functions.sql</literal>:
-    <itemizedlist>
       <listitem>
       <link
 	  linkend="func_authenticate_false">authenticate_false()</link>;</listitem> 
@@ -91,133 +85,133 @@
     <title>Refresh Accessor Privs</title>
     <sect3>
       <title><literal>refresh_accessor_privs()</literal></title>
-      <?sql-definition function veil2.refresh_accessor_privs sql/veil2/views.sql ?>
+      <?sql-definition function veil2.refresh_accessor_privs sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3>
       <title><literal>accessor_roles__aiudt()</literal></title>
-      <?sql-definition trigger accessor_roles__aiudt sql/veil2/views.sql ?>
+      <?sql-definition trigger accessor_roles__aiudt sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
   <sect2 id="func_refresh_scope_promotions">
     <title>Refresh Scope Promotions</title>
     <sect3>
       <title><literal>refresh_scope_promotions()</literal></title>
-      <?sql-definition function veil2.refresh_scope_promotions sql/veil2/views.sql ?>
+      <?sql-definition function veil2.refresh_scope_promotions sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3>
       <title><literal>scopes__aiudt</literal></title>
-      <?sql-definition trigger scopes__aiudt sql/veil2/views.sql ?>
+      <?sql-definition trigger scopes__aiudt sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
   <sect2 id="func_refresh_role_privileges">
     <title>Refresh Role Privileges</title>
     <sect3>
       <title><literal>refresh_role_privileges()</literal></title>
-      <?sql-definition function veil2.refresh_role_privileges sql/veil2/views.sql ?>
+      <?sql-definition function veil2.refresh_role_privileges sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3>
       <title><literal>role_privileges__aiudt</literal></title>
-      <?sql-definition trigger role_privileges__aiudt sql/veil2/views.sql ?>
+      <?sql-definition trigger role_privileges__aiudt sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
   <sect2 id="func_authenticate_false">
     <title><literal>authenticate_false()</literal></title>
-    <?sql-definition function veil2.authenticate_false sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.authenticate_false sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_authenticate_plaintext">
     <title><literal>authenticate_plaintext()</literal></title>
-    <?sql-definition function veil2.authenticate_plaintext sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.authenticate_plaintext sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_authenticate_bcrypt">
     <title><literal>authenticate_bcrypt()</literal></title>
-    <?sql-definition function veil2.authenticate_bcrypt sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.authenticate_bcrypt sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_authenticate">
     <title><literal>authenticate()</literal></title>
-    <?sql-definition function veil2.authenticate sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.authenticate sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_reset_session">
     <title><literal>reset_session()</literal></title>
-    <?sql-definition function veil2.reset_session sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.reset_session sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_get_accessor">
     <title><literal>get_accessor()</literal></title>
-    <?sql-definition function veil2.get_accessor sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.get_accessor sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_create_accessor_session">
     <title><literal>create_accessor_session()</literal></title>
-    <?sql-definition function veil2.create_accessor_session sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.create_accessor_session sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_create_session">
     <title><literal>create_session()</literal></title>
-    <?sql-definition function veil2.create_session sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.create_session sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_check_nonce">
     <title><literal>check_nonce()</literal></title>
-    <?sql-definition function veil2.check_nonce sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.check_nonce sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_update_nonces">
     <title><literal>update_nonces()</literal></title>
-    <?sql-definition function veil2.update_nonces sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.update_nonces sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_filter_privs">
     <title><literal>filter_privs()</literal></title>
-    <?sql-definition function veil2.filter_privs sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.filter_privs sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_save_privs_as_orig">
     <title><literal>save_privs_as_orig()</literal></title>
-    <?sql-definition function veil2.save_privs_as_orig sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.save_privs_as_orig sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_load_session_privs">
     <title><literal>load_session_privs()</literal></title>
-    <?sql-definition function veil2.load_session_privs sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.load_session_privs sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_check_continuation">
     <title><literal>check_continuation()</literal></title>
-    <?sql-definition function veil2.check_continuation sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.check_continuation sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_open_connection">
     <title><literal>open_connection()</literal></title>
-    <?sql-definition function veil2.open_connection sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.open_connection sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_close_connection">
     <title><literal>close_connection()</literal></title>
-    <?sql-definition function veil2.close_connection sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.close_connection sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="func_hello">
     <title><literal>hello()</literal></title>
-    <?sql-definition function veil2.hello sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.hello sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="i_have_global_priv">
     <title><literal>i_have_global_priv()</literal></title>
-    <?sql-definition function veil2.i_have_global_priv sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.i_have_global_priv sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="i_have_priv_in_scope">
     <title><literal>i_have_priv_in_scope()</literal></title>
-    <?sql-definition function veil2.i_have_priv_in_scope sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.i_have_priv_in_scope sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="i_have_priv_in_superior_scope">
     <title><literal>i_have_priv_in_superior_scope()</literal></title>
-    <?sql-definition function veil2.i_have_priv_in_superior_scope sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.i_have_priv_in_superior_scope sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="i_have_personal_priv">
     <title><literal>i_have_personal_priv()</literal></title>
-    <?sql-definition function veil2.i_have_personal_priv sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.i_have_personal_priv sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="delete_expired_sessions">
     <title><literal>delete_expired_sessions()</literal></title>
-    <?sql-definition function veil2.delete_expired_sessions sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.delete_expired_sessions sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="bcrypt">
     <title><literal>bcrypt()</literal></title>
-    <?sql-definition function veil2.bcrypt sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.bcrypt sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="become_accessor">
     <title><literal>become_accessor()</literal></title>
-    <?sql-definition function veil2.become_accessor sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.become_accessor sql/veil2--&version_number;.sql ?>
   </sect2>
   <sect2 id="become_user">
     <title><literal>become_user()</literal></title>
-    <?sql-definition function veil2.become_user sql/veil2/functions.sql ?>
+    <?sql-definition function veil2.become_user sql/veil2--&version_number;.sql ?>
   </sect2>
 </sect1>

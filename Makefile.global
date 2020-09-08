@@ -12,10 +12,10 @@
 
 # Version information
 PACKAGE_NAME=		veil2
+VEIL_VERSION=		0.9.1 (beta)
 VERSION=		0.9.1 (beta)
 MAJOR_VERSION=		0
 MINOR_VERSION=		9
-TARNAME=		veil2__0_9
 
 
 XSLTPROC = xsltproc

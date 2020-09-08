@@ -177,12 +177,15 @@ elif [ "x$1" = "x-d" ]; then
     # We have been asked to generate the dependencies between our
     # extracted sql definitions and their source files.
     shift
+    version=`cut -d" " -f1 VERSION`
     find $1 -name '*xml' | xargs \
         gawk '/<?sql-definition/ {printf("'$2'/%s.xml: %s\n", $3, $4)}' |
-	sort -u
+	sed -e "s/&version_number;/${version}/" | sort -u
 else
+    version=`cut -d" " -f1 VERSION`
     find $1 -name '*xml' | xargs \
-        gawk '/<?sql-definition/ {print $2, $3, $4}' | sort -u |
+        gawk '/<?sql-definition/ {print $2, $3, $4}' | 
+	sed -e "s/&version_number;/${version}/" | sort -u |
         while read objtype name file; do
     	echo Creating extract for ${name}...
     	(

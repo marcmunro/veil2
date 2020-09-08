@@ -740,8 +740,6 @@ values (1, 114, 10),  -- S.1 Simon, pm
        (2, 117, 7);   -- S2.1 Steve, member (employee)
 
 select * from veil2.my_status();
-\echo HERE
-\quit
 
 -- TESTS
 

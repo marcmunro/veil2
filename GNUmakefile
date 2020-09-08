@@ -34,43 +34,93 @@
 # git checkout master
 # 
 
-.DEFAULT_GOAL := all
+# Default target
+all:
 
-.PHONY: db drop clean help unit check test html \
-	htmldir images maps unmapped extracts
+.PHONY: help list docs images extracts clean distclean
+
+
+##
+# Autoconf stuff
+# Autoconf/configure is primarily for configuring the build of the
+# Veil2 documentation.
+#
 
 include Makefile.global
 include extracts.d
 
-
-# Automatically run configure if needed.
-Makefile.global:
+Makefile.global: ./configure
 	./configure
 
+./configure:
+	autoconf
 
-# PGXS STUFF
+
+
+##
+# PGXS stuff
 #
-EXTENSION=veil2
 
+EXTENSION=veil2
 PG_CONFIG := $(shell ./find_pg_config)
 PGXS := $(shell $(PG_CONFIG) --pgxs)
-DATA = $(wildcard veil2--*.sql)
+DATA = $(wildcard sql/veil2--*.sql)
+TARGET_FILES := PG_CONFIG PG_VERSION
+
 include $(PGXS)
 
 
-all: db html
+##
+# Documention targets
+#
+# The documentation is constructed using docbook xml.  Much of the
+# detailed documentation is extracted from the SQL source and
+# converted into xml.  Also the dia ERD diagram is processed below so
+# that each entity in the diagram is linked to the documentation for
+# the table that implements it.
+#
+DOC_SOURCES := $(wildcard docs/*.xml) $(wildcard docs/parts/*.xml) 
+BASE_STYLESHEET = $(DOCBOOK_STYLESHEETS)/html/chunkfast.xsl
+VEIL2_STYLESHEET = docs/html_stylesheet.xsl
+STYLESHEET_IMPORTER = docs/system-stylesheet.xsl
+VERSION_FILE = docs/version.sgml
+VERSION_NUMBER := $(shell cut -d" " -f1 VERSION)
+HTMLDIR = html
+TARGET_FILES += $(HTMLDIR)/* 
+TARGET_DIRS += $(HTMLDIR)
 
-SUBDIRS = demo docs docs/extracts docs/parts sql sql/veil2 diagrams test
+INTERMEDIATE_FILES += $(STYLESHEET_IMPORTER) $(VERSION_FILE)
 
-INTERMEDIATE_FILES =
-TARGET_FILES =
-TARGET_DIRS =
+# Build the version entity for the docbook documentation.  This is
+# included into the docbook source.
+#
+$(VERSION_FILE): VERSION configure
+	@echo "Creating version entities for docs..."
+	@{ \
+	  echo "<!ENTITY version_number \"$(VERSION_NUMBER)\">"; \
+	  echo "<!ENTITY version \"$(VEIL_VERSION)\">"; \
+	  echo "<!ENTITY majorversion \"$(MAJOR_VERSION)\">"; \
+	} > $@
 
-###
-# Extracts
-# These are extracts from sql files used to help build the
+# Create stylesheet to import base stylesheet from system.  This
+# allows the base stylesheet which was discovered by configure to be
+# automatically imported into our local stylesheet.
+#
+$(STYLESHEET_IMPORTER): Makefile.global
+	@echo "Creating importer for system base stylesheet for docs..."
+	@{ \
+	  echo "<?xml version='1.0'?>"; \
+	  echo "<xsl:stylesheet"; \
+	  echo "   xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\""; \
+	  echo "   version=\"1.0\">"; \
+	  echo "  <xsl:import"; \
+	  echo "     href=\"$(BASE_STYLESHEET)\"/>"; \
+	  echo "</xsl:stylesheet>"; \
+	} > $@
+
+# Extracts are extracts from sql files used to help build the
 # documentation.  The dependencies here are many, somewhat complex and
-# prone to changing, so we automate their generation.
+# prone to changing, so we automate their generation using a script.
 #
 extracts.d:
 	@echo Recreating extracts dependency file $@...
@@ -82,11 +132,13 @@ extracts.d:
 
 INTERMEDIATE_FILES += extracts.d
 
-# Phony target
-extracts: $(EXTRACTS)
+# Phony target for extracts - makes it easier to build for test and
+# development purposes.
+#
+extracts: docs/extracts
 
-
-$(EXTRACTS): 
+# Use the extracts directory as a proxy for all extracts files.
+docs/extracts:
 	@echo Recreating sql extracts for docs...
 	@[ -d docs/extracts ] || mkdir docs/extracts 
 	@bin/extract_sql.sh docs docs/extracts
@@ -94,22 +146,10 @@ $(EXTRACTS):
 TARGET_FILES += $(EXTRACTS)
 TARGET_DIRS += docs/extracts
 
-###
-# Docs
-# This section of the Makefile is all about building documentation.
+# Handle the generation of diagrams and coordinate maps.  Coordinate
+# maps allow us to embed links from the entities in our ERD to the
+# tables that implement those entities.
 #
-
-DOC_SOURCES := $(wildcard docs/*.xml) $(wildcard docs/parts/*.xml) 
-BASE_STYLESHEET = $(DOCBOOK_STYLESHEETS)/html/chunkfast.xsl
-VEIL2_STYLESHEET = docs/html_stylesheet.xsl
-STYLESHEET_IMPORTER = docs/system-stylesheet.xsl
-VERSION_FILE = docs/version.sgml
-
-INTERMEDIATE_FILES += $(STYLESHEET_IMPORTER) $(VERSION_FILE)
-HTMLDIR = html
-TARGET_FILES += $(HTMLDIR)/* 
-TARGET_DIRS += $(HTMLDIR)
-
 DIAGRAMS_DIR := diagrams
 DIAGRAM_SOURCES := $(wildcard $(DIAGRAMS_DIR)/*.dia)
 DIAGRAM_IMAGES := $(DIAGRAM_SOURCES:%.dia=%.png)
@@ -126,15 +166,8 @@ TARGET_IMAGES := $(patsubst $(DIAGRAMS_DIR)%, $(HTMLDIR)%, $(DIAGRAM_IMAGES))
 #
 $(HTMLDIR)/%: $(DIAGRAMS_DIR)/% 
 	@[ -d html ] || mkdir html # Create the directory, if needed.
+	echo XXXX $(DIAGRAMS_DIR)
 	cp $< $@
-
-# For building diagram images
-#
-%.png: %.dia
-	@echo "Rebuilding $@ from $<..."
-	dia --nosplash  --export=$*.eps $< 2>/dev/null
-	pstoimg -antialias -transparent -crop tblr -scale 0.5 $*.eps
-	@rm $*.eps
 
 # Intermediate file used for creating maps from our diagrams.
 #
@@ -161,47 +194,15 @@ $(HTMLDIR)/%: $(DIAGRAMS_DIR)/%
 #
 images: $(DIAGRAM_IMAGES)
 
-# Phony target for building html map files for images
+
+# This builds a png files from .dia files.
 #
-maps: $(DIAGRAM_MAPS) $(DIAGRAM_COORDS) $(DIAGRAM_IMAGES)
+%.png: %.dia
+	@echo "Rebuilding $@ from $<..."
+	dia --nosplash  --export=$*.eps $< 2>/dev/null
+	pstoimg -antialias -transparent -crop tblr -scale 0.5 $*.eps
+	@rm $*.eps
 
-
-# Create stylesheet to import base stylesheet from system.  This
-# allows the base stylesheet which was discovered by configure to be
-# automatically imported into our local stylesheet.
-#
-$(STYLESHEET_IMPORTER): Makefile.global
-	@echo "Creating importer for system base stylesheet for docs..."
-	@{ \
-	  echo "<?xml version='1.0'?>"; \
-	  echo "<xsl:stylesheet"; \
-	  echo "   xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\""; \
-	  echo "   version=\"1.0\">"; \
-	  echo "  <xsl:import"; \
-	  echo "     href=\"$(BASE_STYLESHEET)\"/>"; \
-	  echo "</xsl:stylesheet>"; \
-	} > $@
-
-# These are the phony target for the html documentation.  The index.html
-# dependency is the real target html target.  The mapped target is
-# used to add image maps to the pre-created html.  If the image
-# mapping stuff fails, you can build a less functional version of the
-# html using the unmapped target.
-#
-unmapped: $(HTMLDIR)/index.html
-
-html: $(HTMLDIR)/mapped
-
-
-# Build the version entity for the docbook documentation.  This is
-# included into the docbook source.
-#
-$(VERSION_FILE): VERSION configure
-	@echo "Creating version entities for docs..."
-	@{ \
-	  echo "<!ENTITY version \"$(VERSION)\">"; \
-	  echo "<!ENTITY majorversion \"$(MAJOR_VERSION)\">"; \
-	} > $@
 
 
 # Do the legwork of building our html documentation from docbook
@@ -224,13 +225,23 @@ $(HTMLDIR)/mapped: $(HTMLDIR)/index.html $(DIAGRAM_MAPS)
 	@touch $@
 
 
-###
-# Clean
-# This section is about cleaning up the directory space.
+# The docs phony target ensures all html documentation targets are
+# built, including the ERD diagram map.
+#
+docs: $(STYLESHEET_IMPORTER) $(VERSION_FILE) extracts \
+	$(HTMLDIR)/index.html $(HTMLDIR)/mapped
+
+
+
+
+##
+# clean targets
 #
 
 # What constitutes general garbage files.
 garbage_files := \\\#*  .\\\#*  *~ 
+AUTOCONF_TARGETS := Makefile.global ./configure autom4te.cache \
+		    config.log config.status
 
 clean:
 	@echo $(SUBDIRS)
@@ -243,42 +254,13 @@ clean:
 	@rmdir $(TARGET_DIRS) 2>/dev/null || true
 
 distclean: clean
-	rm -rf Makefile.global ./configure autom4te.cache config.log
+	echo Cleaning autoconf files...
+	rm -rf $(AUTOCONF_TARGETS)
 
-###
-# Main
-# This section is about installing testing and cleaning-up veil2
-# database objects.
+
+##
+# help targets
 #
-
-TESTDB := vpd
-
-db:
-	@if (psql -l | grep $(TESTDB) >/dev/null 2>&1); then \
-	    >/dev/null; \
-        else \
-	    echo "Creating database..."; \
-	    psql -v dbname="$(TESTDB)" -f sql/create_vpd.sql; \
-	fi
-
-drop:
-	@if (psql -l | grep $(TESTDB) >/dev/null 2>&1); then \
-	    echo "Dropping database $(TESTDB)..."; \
-	    psql -c "drop database $(TESTDB)" || true; \
-	    psql -c "drop role veil_user" || true; \
-        fi
-
-# You can run this using several target names.  It requires the VPD
-# database to exist and will create it if necessary.
-# The grep below is used to eliminate lines that begin with '##'.  In
-# order to make the output cleaner, the unit test script prepends ##
-# to the output of any queries that it makes internally for setting
-# variables.
-unit test: db
-	@echo "Performing unit tests..."
-	@psql -v flags=$(FLAGS) -f test/test_veil2.sql -d $(TESTDB) | grep -v '^##'
-
-
 
 # Provide a list of the targets buildable by this makefile.
 list help:
@@ -289,10 +271,9 @@ list help:
  drop         - drop standalone '$(TESTDB)' database\n\
  unit         - run unit tests (uses '$(TESTDB)' database, takes FLAGS variable)\n\
    test       - ditto (a synonym for unit)\n\
- html         - create html documentation\n\
+ docs         - create html documentation\n\
  images       - create all diagram images from sources\n\
  extracts     - create all doc extracts sql scripts\n\
- maps         - create all html maps for diagram images\n\
  clean        - clean out unwanted files\n\
 \n\
 "

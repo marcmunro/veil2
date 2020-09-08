@@ -588,6 +588,7 @@ create policy parties_tbl__select
     on demo.parties_tbl
    for select
  using (   veil2.i_have_global_priv(17)
+        or veil2.i_have_priv_in_scope(17, 2, party_id)
         or veil2.i_have_priv_in_scope(17, 3, corp_id)
         or veil2.i_have_priv_in_scope(17, 4, org_id)
         or veil2.i_have_priv_in_scope(17, 4, party_id) -- View the org itself
@@ -762,69 +763,113 @@ update veil2.authentication_details
 \c vpd demouser
 
 -- Log Alice in.
+\echo Creating session for Alice...
 select *
   from veil2.create_session('Alice', 'bcrypt', 4, 100) c
  cross join veil2.open_connection(c.session_id, 1, 'passwd1');
 
+\echo ...Alice is a global superuser...
+
+select session_id, scope_type_id, scope_id,
+       to_array(roles) as roles, to_array(privs) as privs
+  from session_privileges ;
+
+\echo ...Alice should see all parties...
+
 select 'Alice sees: ', * from demo.parties;
 
 -- Log Bob in.
+\echo Creating session for Bob...
 select *
   from veil2.create_session('Bob', 'plaintext', 4, 101) c
  cross join veil2.open_connection(c.session_id, 1, 'passwd2') o1
  cross join veil2.open_connection(c.session_id, 2,
              encode(digest(c.session_token || to_hex(2), 'sha1'),
 	     	    'base64')) o2;
+
+\echo ...Bob is a superuser for secured corp...
+
+select session_id, scope_type_id, scope_id,
+       to_array(roles) as roles, to_array(privs) as privs
+  from session_privileges ;
+
+\echo ...Bob should see all parties within secured corp...
  
 select 'Bob sees: ', * from demo.parties;
 
 
 -- Log Carol in.
+\echo Creating session for Carol...
 select *
   from veil2.create_session('Carol', 'plaintext', 4, 102) c
  cross join veil2.open_connection(c.session_id, 1, 'passwd3') o1;
 
+\echo ...Carol is a superuser for protected corp...
+
+select session_id, scope_type_id, scope_id,
+       to_array(roles) as roles, to_array(privs) as privs
+  from session_privileges ;
+
+\echo ...Carol should see all parties within protected corp...
+ 
 select 'Carol sees: ', * from demo.parties;
 
 -- Log Eve in.
+\echo Creating session for Eve...
 select *
   from veil2.create_session('Eve', 'plaintext', 4, 100) c
  cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
 
+\echo ...Carol is a superuser for secured corp and protected corp...
+
+select session_id, scope_type_id, scope_id,
+       to_array(roles) as roles, to_array(privs) as privs
+  from session_privileges ;
+
+\echo ...Eve should see all parties within both corps...
+ 
 select 'Eve sees: ', * from demo.parties;
 
 
 -- Log Sue in.
+\echo Creating session for Sue...
 select *
   from veil2.create_session('Sue', 'plaintext', 4, 105) c
  cross join veil2.open_connection(c.session_id, 1, 'passwd5') o1;
 
+\echo ...Carol is a superuser for Dept S...
+
+select session_id, scope_type_id, scope_id,
+       to_array(roles) as roles, to_array(privs) as privs
+  from session_privileges ;
+
+\echo ...Sue should see all parties within Dept S...
+
 select 'Sue sees: ', * from demo.parties;
 
 -- Log Simon in.
+\echo Creating session for Simon...
 select *
   from veil2.create_session('Simon', 'plaintext', 4, 105) c
  cross join veil2.open_connection(c.session_id, 1, 'passwd7') o1;
 
+\echo ...Simon is a Project Manager for Project S.1...
+
+select session_id, scope_type_id, scope_id,
+       to_array(roles) as roles, to_array(privs) as privs
+  from session_privileges ;
+
+\echo ...Simon should see his own party record, and that of the org...
 select 'Simon sees: ', * from demo.parties;
+
+\echo ...Simon should see only the project he manages...
 select 'Simon sees: ', * from demo.projects;
+
+\echo ...Simon should see only assignments for the project he manages...
 select 'Simon sees: ', * from demo.project_assignments;
+
+\echo ...Simon should see only assignments for the project he manages...
 select 'Simon sees: ', * from demo.party_types;
 
 
 
-
-/*
-
-
-How do I have a certain privilege?
-
-i_have_priv_how(priv)
-
-check in which contexts I have that priv.
-For each context
-  for each role assigned
-    
-
-
-*/

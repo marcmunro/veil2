@@ -524,46 +524,35 @@ begin
       return false;
     end if;
   end if;
-
+  
   with session_context as
     (
-      select mapping_context_type_id, mapping_context_id
+      select mapping_context_type_id, mapping_context_id,
+             login_context_type_id, login_context_id
         from veil2.sessions s
        where s.session_id = load_session_privs.session_id
-    ), 
-  valid_scopes as
+    ),
+ valid_session_scopes as
     (
-      -- This query is used to restrict the role assignments we use,
-      -- to those that apply in scopes superior, inferior or equal to
-      -- our mapping context.  This eliminates roles assigned in
-      -- scopes that have no bearing on our mapping scope, ie from
-      -- parallel parts of the scope tree.  We *must* do this because
-      -- those roles, assigned in an irrelevant context,could contain
-      -- privileges that will be promoted to a relevant one.
-      select asp.promoted_scope_type_id as scope_type_id,
-             asp.promoted_scope_id as scope_id
+      -- This gives the set of scopes to which privileges in any of
+      -- our assigned roles might be promoted based on our login
+      -- context.  The purpose of this is to prevent privileges
+      -- from roles outside our login context from being promoted to
+      -- scopes within that login context.  We do this by simply
+      -- eliminating any such assignments
+      select asp.promoted_scope_type_id, asp.promoted_scope_id
         from session_context sc
        inner join veil2.all_scope_promotions asp
-          on asp.scope_type_id = sc.mapping_context_type_id
-         and asp.scope_id = sc.mapping_context_id
-       union all
-       select 1, 0
-       union all
-       select mapping_context_type_id, mapping_context_id
-         from session_context
-       union all
-       select asp.scope_type_id,
-             asp.scope_id as scope_id
-         from session_context sc
-       inner join veil2.all_scope_promotions asp
-          on (    asp.promoted_scope_type_id = sc.mapping_context_type_id
-              and asp.promoted_scope_id = sc.mapping_context_id)
-	  or sc.mapping_context_type_id = 1
+          on asp.scope_type_id = sc.login_context_type_id
+         and asp.scope_id = sc.login_context_id
+	 and asp.is_type_promotion
+       union
+      select login_context_type_id, login_context_id
+        from session_context
     ),
-  all_session_privs as
+  explicit_session_privs as
     (
-      select session_id,
-      	     aap.scope_type_id, aap.scope_id,
+      select aap.scope_type_id, aap.scope_id,
   	     union_of(aap.roles) as roles,
   	     union_of(aap.privs) as privs
         from session_context c
@@ -573,35 +562,35 @@ begin
   	          and aap.mapping_context_id = c.mapping_context_id))
        where aap.accessor_id = _accessor_id
          and (aap.scope_type_id, aap.scope_id) in (
-           select scope_type_id, scope_id
-  	   from valid_scopes)
+          select scope_type_id, scope_id
+    	    from valid_session_scopes)
        group by aap.scope_type_id, aap.scope_id
     ),
-  global_privs as
+  have_connect as
     (
-      select privs
-        from all_session_privs
+      select privs ? 0 as have_connect
+        from explicit_session_privs
        where scope_type_id = 1
     ),
-  personal_privs as
+  all_session_privs as
     (
-      select session_id,
-      	     2, _accessor_id,  -- Personal context scope type
-	     roles,
-	     privileges
-        from veil2.all_role_privs
-       where role_id = 2      -- Personal context role
+      select *
+        from explicit_session_privs
+       union all
+      select 2, _accessor_id,
+             roles, privileges
+	from veil2.all_role_privs
+       where role_id = 2
     )
   insert
     into session_privileges
         (session_id, scope_type_id, scope_id,
   	 roles, privs)
-  select *
+  select load_session_privs.session_id, scope_type_id, scope_id,
+         roles, privs
     from all_session_privs
-  union all
-  select * from personal_privs
-   where (select privs from global_privs) ? 0; -- Tests for connect priv
-  
+   where (select have_connect from have_connect);
+
   if found then
     insert
       into session_parameters

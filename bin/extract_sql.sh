@@ -43,7 +43,7 @@ extract_definition ()
 	      gsub(/>/, "\\&gt;")
 	      print
 	  }
-	  /;/ { 
+	  /;[ \t]*$/ { 
 	      if ("'$1'" == "function") {
 	          # This is terrible code, irretrievably tied to
 		  # Marc''s sql coding style.  Oh well.
@@ -54,7 +54,9 @@ extract_definition ()
 		  }
 	      }
 	      else {
-	         if (reading) printf("\n")
+	         if (reading) {
+		     printf("\n")
+		 }
 	      	 reading = 0
 	      }
 	  }
@@ -181,6 +183,18 @@ elif [ "x$1" = "x-d" ]; then
     find $1 -name '*xml' | xargs \
         gawk '/<?sql-definition/ {printf("'$2'/%s.xml: %s\n", $3, $4)}' |
 	sed -e "s/&version_number;/${version}/" | sort -u
+elif [ "x$1" = "x-1" ]; then
+    # We have been asked to extract for a single database object.
+    objtype=$2
+    name=$3
+    file=$4
+    echo Creating extract for ${name}...
+    	(
+    	    echo "<extract>"
+                extract_definition ${objtype} ${name} ${file}
+    	    extract_comments ${objtype} ${name} ${file}
+    	    echo "</extract>"
+    	)
 else
     version=`cut -d" " -f1 VERSION`
     find $1 -name '*xml' | xargs \

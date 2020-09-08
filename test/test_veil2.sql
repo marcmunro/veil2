@@ -23,7 +23,7 @@
 -- Begin Parameter Handling
 --
 
--- THIS IS A DIRTY HACK TO DEAL WITH THE flags PARAMETER EVEN IF UNDEFINED
+
 \o tmp.tmp
 \set given = :flags
 \o

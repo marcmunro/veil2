@@ -34,15 +34,29 @@
 # git checkout master
 # 
 
+.DEFAULT_GOAL := all
+
 .PHONY: db drop clean help unit check test html \
 	htmldir images maps unmapped extracts
 
 include Makefile.global
 include extracts.d
 
+
 # Automatically run configure if needed.
 Makefile.global:
 	./configure
+
+
+# PGXS STUFF
+#
+EXTENSION=veil2
+
+PG_CONFIG := $(shell ./find_pg_config)
+PGXS := $(shell $(PG_CONFIG) --pgxs)
+DATA = $(wildcard veil2--*.sql)
+include $(PGXS)
+
 
 all: db html
 
@@ -241,15 +255,18 @@ TESTDB := vpd
 
 db:
 	@if (psql -l | grep $(TESTDB) >/dev/null 2>&1); then \
-	    echo "[database already exists]"; \
+	    >/dev/null; \
         else \
 	    echo "Creating database..."; \
 	    psql -v dbname="$(TESTDB)" -f sql/create_vpd.sql; \
 	fi
 
 drop:
-	@psql -c "drop database $(TESTDB)"
-	@psql -c "drop role veil_user"
+	@if (psql -l | grep $(TESTDB) >/dev/null 2>&1); then \
+	    echo "Dropping database $(TESTDB)..."; \
+	    psql -c "drop database $(TESTDB)" || true; \
+	    psql -c "drop role veil_user" || true; \
+        fi
 
 # You can run this using several target names.  It requires the VPD
 # database to exist and will create it if necessary.
@@ -257,7 +274,7 @@ drop:
 # order to make the output cleaner, the unit test script prepends ##
 # to the output of any queries that it makes internally for setting
 # variables.
-unit check test: db
+unit test: db
 	@echo "Performing unit tests..."
 	@psql -v flags=$(FLAGS) -f test/test_veil2.sql -d $(TESTDB) | grep -v '^##'
 
@@ -272,7 +289,6 @@ list help:
  drop         - drop standalone '$(TESTDB)' database\n\
  unit         - run unit tests (uses '$(TESTDB)' database, takes FLAGS variable)\n\
    test       - ditto (a synonym for unit)\n\
-   check      - ditto (a synonym for unit)\n\
  html         - create html documentation\n\
  images       - create all diagram images from sources\n\
  extracts     - create all doc extracts sql scripts\n\

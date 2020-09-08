@@ -154,12 +154,10 @@ create table demo.project_assignments (
   party_id		integer not null,
   role_id		integer not null,
     primary key (project_id, party_id, role_id),
-    foreign key (party_id) references demo.parties_tbl(party_id),
-    foreign key (role_id) references veil2.roles(role_id)
+    foreign key (party_id) references demo.parties_tbl(party_id)
 );
 
 grant all on table demo.project_assignments to demouser;
-
 
 -- VPD SETUP
 -- Refer to the Veil2 documentation for descriptions of the STEPs
@@ -167,6 +165,13 @@ grant all on table demo.project_assignments to demouser;
 -- Veil2' Virtual Private Database" section.
 
 -- STEP 1 is installing Veil2
+create extension veil2 cascade;
+
+\echo TODO: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+\echo Move this into the appropriate step
+alter table demo.project_assignments add constraint xyzzy
+    foreign key (role_id) references veil2.roles(role_id);
+    
 
 -- STEP 2:
 -- Define scopes
@@ -431,6 +436,7 @@ comment on trigger parties_tbl_aut on demo.parties_tbl is
 -- 5.1 Parties:
 --     this handles corp and org contexts
 
+
 alter table veil2.scopes
   add column party_id integer;
 
@@ -455,7 +461,6 @@ alter table veil2.scopes
 comment on constraint scope__check_fk_type
   on veil2.scopes is
 'Ensure that party-specific contexts have an FK.';
-
 
 
 -- Create initial security contexts
@@ -502,6 +507,8 @@ select 5, project_id, project_id
 -- the project_assignments and add these to the set of privileges seen
 -- for a connected user.
 
+\echo TODO: DOCUMENT THAT THIS IS NOT TO BE MODIFIED ON EXTENSION UPGRADE
+\echo ALSO ANY PREVIOUSLY MODIFIED VIEWS
 create or replace
 view veil2.all_accessor_roles (
   accessor_id, role_id, context_type_id, context_id
@@ -529,12 +536,12 @@ refresh materialized view veil2.all_accessor_privs;
 -- projects. 
 
 
-
 -- STEP 8:
 -- Deal with scope promotions
 -- Note that the second part of the union below allows scope promotion
 -- within the organizational hierarchy.
 
+\echo TODO: DOCUMENT THAT THIS IS NOT TO BE MODIFIED ON EXTENSION UPGRADE
 create or replace
 view veil2.scope_promotions (
   scope_type_id, scope_id,
@@ -587,6 +594,7 @@ create policy parties_tbl__select
         or veil2.i_have_personal_priv(17, party_id)
 	or (    party_type_id = 2    -- View an org that owns a project
 	    and veil2.i_have_priv_in_scope(23, 4, party_id)));
+
 
 -- READER EXERCISE: secure inserts, updates and deletes
 
@@ -730,6 +738,9 @@ values (1, 114, 10),  -- S.1 Simon, pm
        (1, 117, 7),   -- S.1 Steve, member (employee)
        (2, 117, 7);   -- S2.1 Steve, member (employee)
 
+select * from veil2.my_status();
+\echo HERE
+\quit
 
 -- TESTS
 

@@ -16,7 +16,7 @@
   <para id="hack-it-yourself">
     It is important to realize at this point that
     <literal>Veil2</literal> is not an application or a product.  It
-    is a framework for <emphasis>you</emphasis> to build on.  If there
+    is a foundation for <emphasis>you</emphasis> to build on.  If there
     are updates or bug-fixes they will be to specific pieces of
     functionality which you can choose to replace piecemeal or not at
     all (this document will be updated to describe each such update

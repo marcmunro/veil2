@@ -108,7 +108,7 @@
       <para>
 	We are not going to claim that <literal>Veil2</literal>'s
 	session management is perfect or even adequate, but we believe
-	it does	provide a good framework and starting point from which
+	it does	provide a good foundation and starting point from which
 	you can build something truly secure.  Remember, that you are
 	<link linkend="hack-it-yourself">encouraged</link> to extend
 	and build-on what <literal>Veil2</literal> provides.

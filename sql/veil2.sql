@@ -14,7 +14,6 @@
 -- Create the Veil2 schema
 
 
-
 \echo ...veil2 roles...
 create role veil_user;
 comment on role veil_user is
@@ -31,7 +30,7 @@ create schema veil2;
 comment on schema veil2 is
 'Schema into which veil2 database objects will be placed.';
 
--- Limit access to the vpd schema
+-- Limit access to the veil2 schema
 revoke all on schema veil2 from public;
 grant usage on schema veil2 to veil_user;
 

@@ -16,7 +16,7 @@
     </para>
     <para>
       However, if you make <literal>Veil2</literal> do your query
-      filtering for you, instead of writing properly crafted
+      filtering for you instead of writing properly crafted
       where-clauses, performance is going to suck.  Consider the
       following queries:
       <programlisting>
@@ -110,6 +110,34 @@ where party_name like '%Bob%';
       security policy only to the resulting rows, rather than to
       intermediate rows that are discarded by subsequent joins in the
       original query.
+    </para>
+  </sect2>
+  <sect2>
+    <title>Avoid Drop...Cascade</title>
+    <para>
+      While you are integrating <literal>Veil2</literal> with your
+      application and continuing to develop it, you are likely to
+      create and drop your own database objects as they change.  Be
+      aware that through the <literal>veil2.accessors</literal> table
+      and <literal>veil2.scope_promotions</literal> view,
+      <literal>veil2</literal> (and possibly other objects) is tightly
+      coupled with your application schema. 
+    </para>
+    <para>
+      This may mean that it is impossible to to drop some of your
+      database objects because <literal>Veil2</literal> database
+      objects depend on them.  Using the <literal>cascade</literal>
+      option to <literal>drop</literal> will allow the drop to proceed
+      but will result in dependent <literal>Veil2</literal> objects
+      being dropped as well.  Recovering from this can be a tedious
+      and potenially error-prone process.
+    </para>
+    <para>
+      We recommend avoiding the user of
+      <literal>drop... cascade</literal> and instead scripting a
+      drop and rebuild process that will explicitly deal with each
+      dependent object.  By making each drop explicit you can ensure
+      that your have a matching re-build of those objects.
     </para>
   </sect2>
 </sect1>

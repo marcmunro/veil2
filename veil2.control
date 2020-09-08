@@ -1,0 +1,15 @@
+# veil2.control
+#
+#      Postgres extension control file for Veil2
+#
+#      Copyright (c) 2020 Marc Munro
+#      Author:  Marc Munro
+#      License: BSD
+#
+
+directory       = 'extension'
+default_version = '0.9.1'
+requires        = 'pgbitmap,pgcrypto'
+superuser       = true
+
+comment = 'Provides the basis for a Virtual Private Database implementation.'

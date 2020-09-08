@@ -298,11 +298,12 @@
     </para>
     <para>
       The application is not off the hook though.  The application
-      should not allow the user to try to do things that are not
-      allowed.  It should limit the records it tries to retrieve for
-      the user using well-crafted queries with where-clauses that
-      request only the data that the user should be able to see.  But
-      if it gets it wrong, little harm will be done.
+      should not allow the user to try to do things that will not be
+      allowed by the database.  allowed.  It should limit the records
+      it tries to retrieve for the user using well-crafted queries
+      with where-clauses that request only the data that the user
+      should be able to see.  But if it gets it wrong, little harm
+      will be done.
     </para>
   </sect2>
   <sect2 id="How-Restricted">
@@ -363,13 +364,14 @@
       managed by simply not implementing them.  In a relational
       security system, every piece of data is protected by the same
       underlying mechanism of privilege and scope, which means is that
-      if something which once was viewed as public data needs to be
-      secured, it is simply a matter of changing some privilege
-      assignments.  No code needs to be touched and once the change
-      has been tested we can be sure that it will apply throughout the
-      application: there will not be some obscure screen somewhere
-      that someone created by copy and paste that gets forgotten and
-      that does not get updated to implement the new access control.
+      if something which once was viewed as public data subsequently
+      needs to be secured, it is simply a matter of changing some
+      privilege assignments.  No code needs to be touched and once the
+      change has been tested we can be sure that it will apply
+      throughout the application: there will not be some obscure
+      screen somewhere that someone created by copy and paste that
+      gets forgotten and that does not get updated to implement the
+      new access control.
     </para>
     <para>
       By having only one fundamental security mechanism, and by

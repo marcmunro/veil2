@@ -235,5 +235,42 @@ $ psql -d whateverdbnameyoulike -f demo/demo.sql
       <literal>Veil2</literal> database objects.  The demo database is
       now ready to use.
     </para>
+    <sect3 id="demouser-access">
+      <title>Allowing Access For The Demo User</title>
+      <para>
+	It is assumed that the demo database will be accessed by the
+	demo user <literal>demouser</literal>, and that it will be a
+	trusted user (ie no password is needed).  Note that this is
+	not a good security practice and is done simply for simplicity
+	and expediency.
+      </para>
+      <para>
+	Ideally you would modify the demo scripts to use a more secure
+	authentication method that conforms with your site's policies
+	and requirements, but if you want to simply try the demo in a
+	test or development environment where security is not a
+	concern, you can enable trust-based authentication solely for
+	the <literal>demouser</literal> role, solely for your demo
+	database.
+      </para>
+      <para>
+	To allow <literal>demouser</literal> to access the demo
+	database without needing to provide authentication you will
+	need to add a <quote>trust</quote> authentication definition
+	to your <literal>pg_hba.conf</literal> file.  This line should
+	look something like this:
+	<programlisting>
+local   whateverdbnameyoulike demouser                          trust
+	</programlisting>
+      </para>
+      <para>
+	This defines that local (ie non-networked) connections to the
+	<literal>whateverdbnameyoulike</literal> database by the
+	<literal>demouser</literal> user are to be trusted.  This line
+	must appear <emphasis role="bold">before</emphasis> any 
+	<literal>local</literal> definition for <literal>all</literal>
+	databases or <literal>all</literal> users.
+      </para>
+    </sect3>
   </sect2>
 </sect1>

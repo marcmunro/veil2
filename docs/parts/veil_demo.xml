@@ -31,8 +31,8 @@
 	organizations and persons.  There is a tree structured
 	organizational hierarchy of organizations.  The top-level of
 	the each organizational tree is called a corp, or corporation.
-	The corp context applies to all data owned by the corp, by all
-	organizations within it.  Many tables contain a
+	The corp context applies to all data owned by the corp, and by
+	all organizations within it.  Many tables contain a
 	<literal>corp_id</literal> field as a data denormalization to
 	make privilege testing in corp context easier and faster.
       </para>

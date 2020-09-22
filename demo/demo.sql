@@ -552,10 +552,18 @@ select 4, party_id,  -- Promote org to corp scope
   from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
  where party_type_id = 2
 union all
+select 4, party_id,  -- Promote root orgs within corps to corp scope
+       3, party_id
+  from demo.parties_tbl
+ where party_type_id = 2
+   and org_id = 100
+   and party_id != 100
+union all
 select 4, party_id,  -- Promotion of org to higher org
        4, org_id
-  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+  from demo.parties_tbl
  where party_type_id = 2
+   and party_id != org_id
 union all
 select 5, s.scope_id,   -- Project to corp promotions
        3, p.corp_id

@@ -5,7 +5,7 @@
  *
  *      Copyright (c) 2020 Marc Munro
  *      Author:  Marc Munro
- *	License: GPL V3
+ *	License: GPV V3
  *
  * ----------
  */
@@ -493,7 +493,8 @@ create table veil2.authentication_types (
   enabled			boolean not null,
   description			text not null,
   authent_fn			text not null,
-  supplemental_fn		text
+  supplemental_fn		text,
+  user_defined			boolean
 );
 
 comment on table veil2.authentication_types is
@@ -533,6 +534,10 @@ untouched or may be modified.  The session_supplemental result is
 supplemental data for the chosen authentication protocol.  This is where
 you might return the base and modulus selection for a Diffie-Hellman
 exchange, should you wish to implement such a thing.';
+
+comment on column veil2.authentication_types.user_defined is
+'Whether this parameter value was modified by the user.  This is
+needed for exports using pg_dump.';
 
 alter table veil2.authentication_types add constraint authentication_type__pk
   primary key(shortname);
@@ -706,7 +711,8 @@ grant select on veil2.sessions to veil_user;
 \echo ......system_parameters...
 create table veil2.system_parameters (
     parameter_name		text not null,
-    parameter_value		text not null
+    parameter_value		text not null,
+    user_defined		boolean
 );
 
 alter table veil2.system_parameters add constraint system_parameter__pk
@@ -714,6 +720,10 @@ alter table veil2.system_parameters add constraint system_parameter__pk
 
 comment on table veil2.system_parameters is
 'Provides values for various parameters.';
+
+comment on column veil2.system_parameters.user_defined is
+'Whether this parameter value was modified by the user.  This is
+needed for exports using pg_dump.';
 
 revoke all on veil2.system_parameters from public;
 grant select on veil2.system_parameters to veil_user;
@@ -1221,57 +1231,47 @@ grant select on veil2.all_scope_promotions_vv to veil_user;
 create or replace
 view veil2.scope_tree (scope_tree) as
 with recursive
-  top_scopes as
+top_scopes as
   (
     select distinct
-           promoted_scope_id as root_scope_id,
-	   promoted_scope_type_id as root_scope_type_id
-      from veil2.scope_promotions
-     where promoted_scope_id not in (
-        select scope_id
-	  from veil2.scope_promotions)
+           sp.promoted_scope_id as root_scope_id,
+	   sp.promoted_scope_type_id as root_scope_type_id,
+	   st.scope_type_name as root_scope_type_name,
+	   st.scope_type_name || '.' || sp.promoted_scope_id as root_full_name
+      from veil2.scope_promotions sp
+     inner join veil2.scope_types st
+        on st.scope_type_id = sp.promoted_scope_type_id
+     where (sp.promoted_scope_type_id, sp.promoted_scope_id) not in (
+        select sp2.scope_type_id, sp2.scope_id
+	  from veil2.scope_promotions sp2)
   ),
-  recursive_scope_tree as
-  (    
-    select 1 as depth, 
-           '(' || sp.promoted_scope_id::text || '.' ||
-	   sp.scope_id || ').(' || sp.promoted_scope_type_id ||
-	   '.' || sp.scope_type_id || ')' as path,
-           sp.promoted_scope_id, sp.scope_id,
-	   sp.promoted_scope_type_id, sp.scope_type_id
-      from top_scopes ts
-     inner join veil2.scope_promotions sp
-        on sp.promoted_scope_id = ts.root_scope_id
-       and sp.promoted_scope_type_id = ts.root_scope_type_id
-     union all
-    select depth + 1, 
-    	   rst.path || '(' || sp.promoted_scope_id ||
-	   '.' || sp.scope_id || ')',
-           sp.promoted_scope_id, sp.scope_id,
-	   sp.promoted_scope_type_id, sp.scope_type_id
-      from recursive_scope_tree rst
-     inner join veil2.scope_promotions sp
-        on sp.promoted_scope_id = rst.scope_id
-       and sp.promoted_scope_type_id = rst.scope_type_id
-  ),
-  format1 as
+recursive_part as
   (
-    select st1.scope_type_name || ':' ||
-    	    promoted_scope_id::text as parent,
-           st2.scope_type_name || ':' || scope_id::text as child,
-	   depth
-      from recursive_scope_tree rst
-     inner join veil2.scope_types st1
-        on st1.scope_type_id = rst.promoted_scope_type_id
-     inner join veil2.scope_types st2
-        on st2.scope_type_id = rst.scope_type_id
-    order by path
+    select 1 as depth,
+           root_scope_id as scope_id,
+	   root_scope_type_id as scope_type_id,
+	   root_full_name as full_name,
+	   '(' || root_scope_type_id || '.' || root_scope_id || ')' as path,
+	   length(root_full_name) as path_length
+      from top_scopes
+     union all
+    select rp.depth + 1,
+           sp.scope_id,
+	   sp.scope_type_id,
+	   st.scope_type_name || '.' || sp.scope_id,
+	   rp.path || '(' || sp.scope_type_id || '.' || sp.scope_id || ')',
+	   length(st.scope_type_name || '.' || sp.scope_id) + path_length
+      from recursive_part rp
+     inner join veil2.scope_promotions sp
+        on sp.promoted_scope_id = rp.scope_id
+       and sp.promoted_scope_type_id = rp.scope_type_id
+     inner join veil2.scope_types st
+        on st.scope_type_id = sp.scope_type_id
   )
-select format('%' || ((depth)*16 - 14) || 's', '+-') ||
-       substr('------------', length(parent)) || parent ||
-       '-+' || substr('-------------', length(child)) ||
-       child 
-  from format1;
+select format('%' || ((depth * 4) - 2) || 's', '+ ') ||
+       full_name
+from recursive_part
+order by path;
 
 comment on view veil2.scope_tree is
 'Provides a simple ascii-formatted tree representation of our scope
@@ -2358,6 +2358,111 @@ comment on function veil2.save_privs_as_orig() is
 orig_privileges.  This is part of the become user process.';
 
 
+\echo ......session_context()...
+create or replace
+function veil2.session_context(
+    accessor_id out integer,
+    session_id out integer,
+    login_context_type_id out integer,
+    login_context_id out integer,
+    mapping_context_type_id out integer,
+    mapping_context_id out integer
+    )
+  returns record as
+$$
+begin
+  select sp.accessor_id, sp.session_id,
+         sp.login_context_type_id, sp.login_context_id,
+         sp.mapping_context_type_id, sp.mapping_context_id
+    into session_context.accessor_id, session_context.session_id,
+         session_context.login_context_type_id,
+	   session_context.login_context_id,
+         session_context.mapping_context_type_id,
+	   session_context.mapping_context_id
+    from session_parameters sp;
+exception
+  when sqlstate '42P01' then
+    raise notice 'FOUND SESSION %', session_id;
+    return;
+  when others then
+    raise notice 'NO SESSION FOUND';
+    raise;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+comment on function veil2.session_context() is
+'Safe function to return the context of the current session.  If no
+session exists, returns nulls.  We use a function in this context
+because we cannot create a view on the session_parameters table as it
+is a temporary table and does not always exist.';
+
+
+\echo ...explicit_mapped_session_privs view...
+create or replace
+view veil2.explicit_mapped_session_privs as
+  select aap.scope_type_id, aap.scope_id,
+	     aap.roles, aap.privs,
+	     assignment_context_type_id, assignment_context_id
+	from veil2.session_context() sc
+   inner join veil2.all_accessor_privs aap
+      on aap.accessor_id = sc.accessor_id
+	 and (   aap.mapping_context_type_id is null
+          or (    aap.mapping_context_type_id = sc.mapping_context_type_id
+	          and aap.mapping_context_id = sc.mapping_context_id));
+
+comment on view veil2.explicit_mapped_session_privs is
+'Lists the explicitly granted roles and privileges for the current
+session, taking into account the session''s mapping context.  This is
+used in determining the privileges for the session.  It exists as a
+separate view in order to aid dbugging.';
+
+
+\echo ...permitted_assignment_contexts view...
+create or replace
+view veil2.permitted_assignment_contexts as
+   select asp.promoted_scope_type_id, asp.promoted_scope_id
+     from veil2.session_context() sc
+    inner join veil2.all_scope_promotions asp
+       on asp.scope_type_id = sc.login_context_type_id
+      and asp.scope_id = sc.login_context_id
+    union all
+   select sc.login_context_type_id, sc.login_context_id
+     from veil2.session_context() sc;
+
+comment on view veil2.permitted_assignment_contexts is
+'This returns the set of assignment_contexts which are compatible with
+our session''s login context.  Roles and privileges assigned to our
+accessor that are not part of this set will not apply within this
+session.  An accessor may therefore have completely different sets of
+privileges when logged-in in context A, from the set they have in
+context B, even including privileges that have been promoted to global
+scope.';
+
+
+\echo ...explicit_session_privs (view)...
+create or replace
+view veil2.explicit_session_privs as
+  select p.scope_type_id, p.scope_id,
+             union_of(p.roles) as roles, union_of(p.privs) as privs
+    from veil2.session_context() sc
+   cross join veil2.explicit_mapped_session_privs p
+   where sc.login_context_type_id = 1  -- login context is global
+       or p.scope_type_id = 1 -- global context assignments always apply
+       or (p.assignment_context_type_id, -- the assignment is from a
+                                         -- context at or below the
+					 -- login context 
+	   p.assignment_context_id) in
+	  (select pac.promoted_scope_type_id, pac.promoted_scope_id
+	     from veil2.permitted_assignment_contexts pac)
+   group by p.scope_type_id, p.scope_id;
+
+comment on view veil2.explicit_session_privs is
+'Identify the set of explicitly granted roles and privileges for the
+connected session.';
+
+
+
 \echo ......load_session_privs()...
 create or replace
 function veil2.load_session_privs(
@@ -2372,6 +2477,156 @@ declare
   _need_filter boolean := false;
 begin
   execute veil2.reset_session();
+  insert
+    into session_parameters
+        (accessor_id, session_id,
+         login_context_type_id, login_context_id,
+	 mapping_context_type_id, mapping_context_id,
+	 is_open)
+  select _accessor_id, load_session_privs.session_id,
+         login_context_type_id, login_context_id,
+         mapping_context_type_id, mapping_context_id,
+	 true
+    from veil2.sessions s
+   where s.session_id = load_session_privs.session_id;
+
+  if _prev_session_id is not null then
+    select accessor_id,
+      	   case when s.authent_type = 'become'
+	        then s.session_supplemental::integer
+	        else null
+	   end
+      into _prev_accessor_id,
+      	   _prevprev_accessor_id
+      from veil2.sessions
+     where session_id = _prev_session_id;
+    -- Recurse to load privs of originating session.
+    if veil2.load_session_privs(
+           _prev_session_id, _prev_accessor_id,
+	   _prevprev_accessor_id)
+    then
+      -- Save originating session privs for later filtering.
+      execute veil2.save_privs_as_orig();
+      _need_filter := true;
+    else
+      return false;
+    end if;
+  end if;
+  
+  with session_context as
+    (      select mapping_context_type_id, mapping_context_id,
+             login_context_type_id, login_context_id,
+	     _accessor_id as accessor_id
+        from veil2.sessions s
+       where s.session_id = load_session_privs.session_id
+    ),
+  session_scopes as
+    (
+      -- These are the (non-global and non-personal) scopes from which
+      -- role assignments will be used if logging-in in a non-global
+      -- context.  We limit the role assignments we consider because a
+      -- user may have different roles in different login contexts and
+      -- we do not want privileges to be promoted from a role assigned
+      -- in the context of Corp A when we are logging-in in the
+      -- context of Corp B.
+      select asp.promoted_scope_type_id, asp.promoted_scope_id
+        from session_context sc
+       inner join veil2.all_scope_promotions asp
+          on asp.scope_type_id = sc.login_context_type_id
+         and asp.scope_id = sc.login_context_id
+       union
+      select sc.login_context_type_id, sc.login_context_id
+        from session_context sc
+    ),
+  explicit_session_privs as
+    (
+      -- These are the explictly assigned roles and privileges for our
+      -- session user that apply in the context of their login.
+      select aap.scope_type_id, aap.scope_id,
+  	     union_of(aap.roles) as roles,
+  	     union_of(aap.privs) as privs
+	from session_context sc
+       inner join veil2.all_accessor_privs aap
+          on aap.accessor_id = sc.accessor_id
+	 and (   aap.mapping_context_type_id is null
+              or (    aap.mapping_context_type_id = sc.mapping_context_type_id
+  	          and aap.mapping_context_id = sc.mapping_context_id))
+	 and (   aap.assignment_context_type_id = 1 -- assigned globally
+	      or sc.login_context_type_id = 1  -- login context is global
+	      or (aap.assignment_context_type_id,
+	          aap.assignment_context_id) in
+		 (select promoted_scope_type_id, promoted_scope_id
+		    from session_scopes))
+       group by aap.scope_type_id, aap.scope_id
+    ),
+  have_connect as
+    (
+      select privs ? 0 as have_connect
+        from explicit_session_privs
+       where scope_type_id = 1
+    ),
+  all_session_privs as
+    (
+      select *
+        from explicit_session_privs
+       union all
+      select 2, sc.accessor_id,
+             arp.roles, arp.privileges
+	from veil2.all_role_privs arp
+       cross join session_context sc
+       where arp.role_id = 2
+    )
+  insert
+    into session_privileges
+        (session_id, scope_type_id, scope_id,
+  	 roles, privs)
+  select load_session_privs.session_id, scope_type_id, scope_id,
+         roles, privs
+    from all_session_privs
+   where (select have_connect from have_connect);
+
+  if found then
+    if _need_filter then
+      -- We are in a become-user session.  We need to filter the privs
+      -- of the user we became, with the privs of the session we came
+      -- from so that we do not gain privileges the originating
+      -- session did not have.
+      execute veil2.filter_privs();
+    end if;
+    return true;
+  else
+    execute veil2.reset_session();
+    return false;
+  end if;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+create or replace
+function veil2.load_session_privs(
+    session_id in integer,
+    _accessor_id in integer,
+    _prev_session_id in integer default null)
+  returns bool as
+$$
+declare
+  _prev_accessor_id integer;
+  _prevprev_accessor_id integer;
+  _need_filter boolean := false;
+begin
+  execute veil2.reset_session();
+  insert
+    into session_parameters
+        (accessor_id, session_id,
+         login_context_type_id, login_context_id,
+	 mapping_context_type_id, mapping_context_id,
+	 is_open)
+  select _accessor_id, load_session_privs.session_id,
+         login_context_type_id, login_context_id,
+         mapping_context_type_id, mapping_context_id,
+	 true
+    from veil2.sessions s
+   where s.session_id = load_session_privs.session_id;
 
   if _prev_session_id is not null then
     select accessor_id,
@@ -2398,60 +2653,32 @@ begin
   
   with session_context as
     (
-      select mapping_context_type_id, mapping_context_id,
-             login_context_type_id, login_context_id
-        from veil2.sessions s
-       where s.session_id = load_session_privs.session_id
-    ),
- valid_session_scopes as
-    (
-      -- This gives the set of scopes to which privileges in any of
-      -- our assigned roles might be promoted based on our login
-      -- context.  The purpose of this is to prevent privileges
-      -- from roles outside our login context from being promoted to
-      -- scopes within that login context.  We do this by simply
-      -- eliminating any such assignments
-      select asp.promoted_scope_type_id, asp.promoted_scope_id
-        from session_context sc
-       inner join veil2.all_scope_promotions asp
-          on asp.scope_type_id = sc.login_context_type_id
-         and asp.scope_id = sc.login_context_id
-	 and asp.is_type_promotion
-       union
-      select login_context_type_id, login_context_id
-        from session_context
+      select *
+        from veil2.session_context() sc
+       where sc.session_id = load_session_privs.session_id
+         and sc.accessor_id = _accessor_id
     ),
   explicit_session_privs as
     (
-      select aap.scope_type_id, aap.scope_id,
-  	     union_of(aap.roles) as roles,
-  	     union_of(aap.privs) as privs
-        from session_context c
-       inner join veil2.all_accessor_privs aap
-          on (   aap.mapping_context_type_id is null
-              or (    aap.mapping_context_type_id = c.mapping_context_type_id
-  	          and aap.mapping_context_id = c.mapping_context_id))
-       where aap.accessor_id = _accessor_id
-         and (aap.scope_type_id, aap.scope_id) in (
-          select scope_type_id, scope_id
-    	    from valid_session_scopes)
-       group by aap.scope_type_id, aap.scope_id
-    ),
-  have_connect as
-    (
-      select privs ? 0 as have_connect
-        from explicit_session_privs
-       where scope_type_id = 1
+      select *
+        from veil2.explicit_session_privs
     ),
   all_session_privs as
     (
       select *
         from explicit_session_privs
        union all
-      select 2, _accessor_id,
-             roles, privileges
-	from veil2.all_role_privs
-       where role_id = 2
+      select 2, sc.accessor_id,
+             arp.roles, arp.privileges
+	from veil2.all_role_privs arp
+       cross join session_context sc
+       where arp.role_id = 2
+    ),
+  have_connect as
+    (
+      select privs ? 0 as have_connect
+        from explicit_session_privs
+       where scope_type_id = 1
     )
   insert
     into session_privileges
@@ -2463,32 +2690,22 @@ begin
    where (select have_connect from have_connect);
 
   if found then
-    insert
-      into session_parameters
-          (accessor_id, session_id,
-	   login_context_type_id, login_context_id,
-	   mapping_context_type_id, mapping_context_id,
-	   is_open)
-    select _accessor_id, load_session_privs.session_id,
-           login_context_type_id, login_context_id,
-           mapping_context_type_id, mapping_context_id,
-	   true
-      from veil2.sessions s
-     where s.session_id = load_session_privs.session_id;
     if _need_filter then
       -- We are in a become-user session.  We need to filter the privs
-      -- of the user we became with the privs of the session we came
+      -- of the user we became, with the privs of the session we came
       -- from so that we do not gain privileges the originating
       -- session did not have.
       execute veil2.filter_privs();
     end if;
     return true;
   else
+    execute veil2.reset_session();
     return false;
   end if;
 end;
 $$
 language 'plpgsql' security definer volatile;
+
 
 comment on function veil2.load_session_privs(integer, integer, integer) is
 'Load the temporary table session_privileges for session_id, with the
@@ -3381,6 +3598,139 @@ comment on policy system_parameter__select on veil2.system_parameters is
 (assigned in global context) in order to see the data in this table.'; 
 
 
+-- Deal with tables that implementors and administrators are expected
+-- to update.
+
+\echo ...handling for user-defined data in pg_dump...
+\echo ......scope_types...
+select pg_catalog.pg_extension_config_dump(
+           'veil2.scope_types',
+	   'where not scope_type_id in (1,2)');
+
+
+\echo ......system_parameters...
+create or replace
+function veil2.system_parameters_check()
+  returns trigger
+as
+$$
+begin
+  if tg_op = 'INSERT' then
+    -- Check that the insert will not result in a key collision.  If
+    -- it will, do an update instead.  The insert may come from a
+    -- backup from pg_dump which is why we have to handle it like
+    -- this.
+    if exists (
+        select null
+	  from veil2.system_parameters
+	 where parameter_name = new.parameter_name)
+    then
+      update veil2.system_parameters
+         set parameter_value = new.parameter_value
+       where parameter_name = new.parameter_name;
+      return null;
+    end if;
+  end if;
+  new.user_defined := true;
+  return new;
+end;
+$$
+language 'plpgsql' security definer volatile leakproof;
+
+comment on function veil2.system_parameters_check() is
+'Trigger function to allow pg_dump to dump and restore user-defined
+system parameters, and to ensure all inserted and updated rows are
+identfied as user_defined.';
+
+create trigger system_parameters_biu before insert or update
+  on veil2.system_parameters
+  for each row execute function veil2.system_parameters_check();
+
+select pg_catalog.pg_extension_config_dump(
+           'veil2.system_parameters',
+	   'where user_defined');
+
+
+\echo ......authentication_types...
+create or replace
+function veil2.make_user_defined()
+  returns trigger
+as
+$$
+begin
+  if tg_op = 'INSERT' then
+    -- Check that the insert will not result in a key collision.  If
+    -- it will, do an update instead.  The insert may come from a
+    -- backup from pg_dump which is why we have to handle it like
+    -- this.
+    if exists (
+        select null
+	  from veil2.authentication_types
+	 where shortname = new.shortname)
+    then
+      update veil2.authentication_types
+         set enabled = new.enabled,
+	     description = new.description,
+	     authent_fn = new.authent_fn,
+	     supplemental_fn = new.supplemental_fn
+       where shortname = new.shortname;
+      return null;
+    end if;
+  end if;
+  new.user_defined := true;
+  return new;
+end;
+$$
+language 'plpgsql' security definer volatile leakproof;
+
+create trigger authentication_types_biu before insert or update
+  on veil2.authentication_types
+  for each row execute function veil2.make_user_defined();
+
+select pg_catalog.pg_extension_config_dump(
+           'veil2.authentication_types',
+	   'where user_defined');
+
+\echo ......privileges...
+select pg_catalog.pg_extension_config_dump(
+           'veil2.privileges',
+	   'where privilege_id > 15
+               or privilege_id < 0');
+
+\echo ......roles...
+select pg_catalog.pg_extension_config_dump(
+           'veil2.roles',
+	   'where role_id > 4
+               or role_id < 0');
+
+\echo ......role_privileges...
+select pg_catalog.pg_extension_config_dump(
+           'veil2.role_privileges',
+	   'where role_id > 4
+               or role_id < 0');
+
+\echo ......role_roles...
+select pg_catalog.pg_extension_config_dump(
+           'veil2.role_roles', '');
+
+\echo ......scopes...
+select pg_catalog.pg_extension_config_dump(
+           'veil2.scopes', 
+	   'where scope_type_id != 1
+	       or scope_id != 0');
+
+\echo ......accessors...
+select pg_catalog.pg_extension_config_dump(
+           'veil2.accessors', '');
+
+\echo ......authentication_details...
+select pg_catalog.pg_extension_config_dump(
+           'veil2.authentication_details', '');
+
+
+-- Functions for checking implementation status.  These are to help
+-- security model implementors.
+
 \echo ....Functions for checking implementation status...
 create or replace 
 function veil2.have_user_defined_scopes()
@@ -3481,6 +3831,29 @@ modify.';
 
 
 create or replace
+function veil2.init() returns void as
+$$
+begin
+  perform veil2.define_accessor_contexts();
+  execute('refresh materialized view veil2.direct_role_privileges');
+  execute('refresh materialized view veil2.all_role_privs');
+  execute('refresh materialized view veil2.all_scope_promotions');
+  execute('refresh materialized view veil2.all_accessor_privs');
+end;
+$$
+language plpgsql security definer volatile;
+
+comment on function veil2.init() is
+'Perform some basic setup and reset tasks.  This creates
+user-modifiable views that are not already defined and refreshes all
+materialized views.  You should call it any time you have unexpected
+results.  If it fixes your problem then you have a problem with the
+automatic refresh of one of the materialized views.  If not, no harm
+will have been done.';
+
+
+
+create or replace
 function veil2.accessor_contexts_is_original()
   returns boolean as
 $$
@@ -3645,11 +4018,11 @@ declare
   ok boolean := true;
   line text;
 begin
+  perform veil2.init();
   if not veil2.have_user_defined_scopes() then
     ok := false;
     return next 'You need to define some relational scopes (step 2)';
   end if;
-  perform veil2.define_accessor_contexts();
   if veil2.accessor_contexts_is_original() then
     ok := false;
     return next 'You need to redefine the accessor_contexts view (step 3)';
@@ -4007,8 +4380,6 @@ begin
   if veil2.scope_promotions_is_original() then
     ok := false;
     return next 'You need to redefine the scope_promotions view (step 8)';
-  else
-    execute('refresh materialized view veil2.all_scope_promotions');
   end if;
   if ok then
     return next 'Your Veil2 basic implemementation seems to be complete.';
@@ -4018,11 +4389,14 @@ begin
     return next line;
   end loop;
   if ok then
-    return next 'Have you secured your views?.';
+    return next 'Please Ensure that you have secured your views.';
   end if;
 end;
 $$
 language plpgsql security definer volatile;
+
+
+
 
 
 

@@ -232,6 +232,30 @@ docs: $(STYLESHEET_IMPORTER) $(VERSION_FILE) extracts \
 	$(HTMLDIR)/index.html $(HTMLDIR)/mapped
 
 
+##
+# test targets
+#
+
+TESTDB := vpd
+
+db:
+	@if (psql -l | grep " $(TESTDB) " >/dev/null 2>&1); then \
+	    echo "[database $(TESTDB) already exists]"; \
+        else \
+	    echo "Creating database $(TESTDB)..."; \
+	    psql -c "create database $(TESTDB)"; \
+	fi
+
+drop:
+	@if (psql -l | grep " $(TESTDB) " >/dev/null 2>&1); then \
+	    echo "Dropping database $(TESTDB)..."; \
+	    psql -c "drop database $(TESTDB)"; \
+	fi
+
+unit: db
+	@echo "Performing unit tests..."
+	@psql -X -v test=$(TEST) -f test/test_veil2.sql \
+		-d $(TESTDB) 2>&1| bin/pgtest_parser
 
 
 ##

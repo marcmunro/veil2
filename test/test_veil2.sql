@@ -1,75 +1,70 @@
--- Test script for checking Veil2.  This is intended to run safely
--- against both an initial Veil2 database and one that has been deployed
--- with real tables.  That said, there are no guarantees.  Just don't
--- run it in production. 
--- 
--- The script may be called with a flags parameter, where flags is a
--- list of characters in the following set:
---     s   Do not run setup    
---     t   Do not run teardown
---     r   Do not run tests
+--  test_veil2.sql
 --
--- eg: psql -v flags="st" -f <this-file>
+--     Unit tests for Veil2
+--
+--     Copyright (c) 2020 Marc Munro
+--     Author:  Marc Munro
+--     License: GPL V3
+--
+-- Usage: psql -f test_veil2.sql -d dbname
 --
 
--- Format our output for quiet tests.
-\set ECHO none
+
+\echo Running Veil2 unit tests...
+
+\unset ECHO
 \set QUIET 1
 \pset format unaligned
 \pset tuples_only true
-\pset pager
-
---
--- Begin Parameter Handling
---
+\pset pager off
 
 
-\o tmp.tmp
-\set given = :flags
-\o
-\i tmp.tmp
-\! rm tmp.tmp
-
--- The queries below return rows beginning with '##' which can be easily
--- filtered from output using grep.
-select '##' as ignore, :'given' != '=:flags' as have_flags; \gset
-\if :have_flags
--- Read flags into script control variables
-select '##' as ignore,
-       strpos(:'flags', 's') = 0 as do_setup,
-       strpos(:'flags', 't') = 0 as do_teardown,
-       strpos(:'flags', 'r') = 0 as do_runtests; \gset
+\if :{?test}
+  \o /dev/null
+  select case when lower(:'test') like '%view%'
+         then true else :'test' = '' end as test_views,
+	 case when lower(:'test') like '%auth%'
+         then true else :'test' = '' end as test_authent,
+	 case when lower(:'test') like '%sess%'
+         then true else :'test' = '' end as test_sessions; \gset
+  \o
 \else
--- Set all script control variables to true
-\set do_setup 1
-\set do_teardown 1
-\set do_runtests 1
+  \set test_views 1
+  \set test_authent 1
+  \set test_sessions 1
 \endif
---
--- End Parameter Handling
---
 
-\if :do_setup
-\echo RUNNING SETUP
+create extension pgtap;
+
+do
+$$
+declare
+  _result integer;
+begin
+  select 1 into _result from pg_extension where extname = 'veil2';
+  if not found then
+    execute 'create extension veil2 cascade';
+  end if;
+end;
+$$;
+
+select * from veil2.init();
 \ir setup.sql
-\else
-\echo SKIPPING TEST SETUP
+
+
+\if :test_views
+  \ir test_views.sql
 \endif
 
-\if :do_runtests
-\echo RUNNING TESTS
-\ir test_views.sql
-\ir test_authent.sql
-\ir test_sessions.sql
 
-\echo TESTS COMPLETE
+\if :test_authent
+  \ir test_authent.sql
 \endif
 
-\if :do_teardown
-\echo RUNNING TEARDOWN
+
+\if :test_sessions
+  \ir test_sessions.sql
+\endif
+
+\echo Cleaning up...
 \ir teardown.sql
-\else
-\echo SKIPPING TEST TEARDOWN
-\endif
-
-

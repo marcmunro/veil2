@@ -25,6 +25,7 @@ delete from veil2.accessors where accessor_id < 0;
 
 drop table project_assignments;
 drop table projects;
+drop table persons;
 
 -- Remove test roles
 delete
@@ -45,7 +46,8 @@ delete
 
 delete
   from veil2.roles
- where role_name like 'test_role%';
+ where role_name like 'test_role%'
+    or role_name = 'test_super';
 
 delete
   from veil2.privileges
@@ -67,15 +69,6 @@ update veil2.authentication_types
  where shortname = 'plaintext';
  
 
-
-drop function test.expect(text, integer, text);
-drop function test.expect(text, boolean, text);
-drop function test.expect(integer, integer, text);
-drop function test.expect(boolean, boolean, text);
-drop function test.expect(text, text, text);
-
-drop schema test;
-drop user veil2_nopriv;
 drop user veil2_alice;
 drop user veil2_bob;
 drop role db_accessor;

@@ -1,0 +1,109 @@
+#! /usr/bin/env bash
+#  pgtest_parser
+#
+#     Parser for output from pg_tap tests
+#
+#     Copyright (c) 2020 Marc Munro
+#     Author:  Marc Munro
+#     License: GPL V3
+#
+# Usage:  <psql tests> 2>&1 | pgtest_parser
+#
+
+
+
+awk '
+    function report_suites(s) {
+        printf("\nResults by test suite:\n")
+        for (i in suites) {
+	    s = suites[i]
+	    if (s in expected) {
+	       supplemental = "  (expected " expected[s] ")"
+	       diff = passes[s] + failures[s] - expected[s]
+	       if (diff < 0) {
+	           missing = missing - diff
+	       }
+	       else {
+	           extra = extra + diff
+	       }
+	    }
+	    else {
+	    	 supplemental = ""
+	    }		 
+	    printf("  %-30s: %d/%d   %s\n", s, passes[s],
+                   passes[s] + failures[s], supplemental)
+	}
+    }
+    function record_failure() {
+     	 print
+	 failed = failed + 1
+	 failing = 1
+	 failures[suite] = failures[suite] + 1
+	 printf("\n")
+	 next
+    }
+    BEGIN { i = 0; extra = 0; missing = 0 }
+    /^##/
+    /^# Looks like you planned/ {
+        expected[suite] = $6
+    }
+    /^\.\.\.test/ {
+	 sub(/[^ ]* /, "", $0)
+	 sub(/\.*$/, "", $0)
+	 suite = $0
+	 suites[i] = suite
+	 i += 1
+	 failures[suite] = 0
+	 passes[suite] = 0
+     }
+     /^not ok/ {
+         record_failure()
+     }
+     /^psql:.*:[0-9][0-9]*: ERROR:/ {
+         if ($0 ~ /extension.*already exists/) {
+	     -- Ignore errors about pre-existing extensions
+	     next
+ 	 }
+	 else {
+             record_failure()
+         }
+     }
+     /^#/ {
+         if (failing) {
+	     printf("  ")
+	 }
+	 print
+	 next
+     }
+     /^ok/ {
+         if (failing) {
+	     printf("\n")
+	     failing = 0
+	 }
+	 passes[suite] = passes[suite] + 1
+     }
+     {
+         if (failing) {
+	     printf("\n")
+	     failing = 0
+	 }
+	 print
+     }
+     END {
+         report_suites()
+     	 if (failed || missing || extra) {
+	    printf("\n  %d tests failed", failed)
+	    if (missing) {
+	        printf(", %d missing", missing)
+	    }
+	    if (extra) {
+	        printf(", %d unplanned", extra)
+	    }
+	    printf(".\n\n")
+	    exit(2)
+	}
+	else {
+	    printf("\nall tests passed.\n", failed)
+	}	
+     }'
+

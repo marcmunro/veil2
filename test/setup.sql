@@ -1,118 +1,15 @@
--- Set up a test schema
-
-\echo ...creating test users...
-create user veil2_nopriv with login;
-create user veil2_alice with login password 'xyzzy';
-create user veil2_bob with login password 'xyzzy';
 
 create role db_accessor;
+create user veil2_alice password 'xyzzy';
+create role veil2_bob;
 grant db_accessor to veil2_alice;
 grant veil_user to veil2_alice;
 grant db_accessor to veil2_bob;
 grant veil_user to veil2_bob;
 
-\echo ...creating test schema...
-create schema test;
-grant usage on schema test to public;
-
-\echo ......creating test functions...
-
-create or replace
-function test.expect(cmd text, n integer, msg text)
-  returns bool as
-$$
-declare
-  res integer;
-  rc integer;
-begin
-  execute cmd into res;
-  get diagnostics rc = row_count;
-  if rc = 1 then
-    if (res != n) or ((res is null) != (n is null)) then
-      raise exception '%  Expecting %, got %', msg, n, res;
-    end if;
-  else
-    raise exception '%  Expecting %, got no rows', msg, n;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(text, integer, text) to public;
-
-create or replace
-function test.expect(cmd text, n bool, msg text)
-  returns bool as
-$$
-declare
-  res bool;
-  rc integer;
-begin
-  execute cmd into res;
-  get diagnostics rc = row_count;
-  if rc = 1 then
-    if (res != n) or ((res is null) != (n is null)) then
-      raise exception '%  Expecting %, got %', msg, n, res;
-    end if;
-  else
-    raise exception '%  Expecting %, got no rows', msg, n;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(text, bool, text) to public;
-
-create or replace
-function test.expect(val integer, n integer, msg text)
-  returns bool as
-$$
-begin
-  if (val != n) or ((val is null) != (n is null)) then
-    raise exception '%  Expecting %, got %', msg, n, val;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(integer, integer, text) to public;
-
-create or replace
-function test.expect(val bool, n bool, msg text)
-  returns bool as
-$$
-begin
-  if (val != n) or ((val is null) != (n is null)) then
-    raise exception '%  Expecting %, got %', msg, n, val;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(bool, bool, text) to public;
-
-create or replace
-function test.expect(val text, n text, msg text)
-  returns bool as
-$$
-begin
-  if (val != n) or ((val is null) != (n is null)) then
-    raise exception '%  Expecting %, got %', msg, n, val;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(text, text, text) to public;
-
 
 -- Create some context types
-\echo ......creating corp context type...
+--\echo ......creating corp context type...
 insert into veil2.scope_types
        (scope_type_id, scope_type_name, description)
 values (-3, 'corp', 'corporate context'),
@@ -121,14 +18,14 @@ values (-3, 'corp', 'corporate context'),
        (-6, 'proj', 'project context');
 
 -- and a test corp
-\echo ......creating test corp...
+--\echo ......creating test corp...
 insert into veil2.scopes
        (scope_type_id, scope_id)
 values (-3, -3),
        (-3, -31);
 
 -- and some test divisions
-\echo ......creating test corp...
+--\echo ......creating test corp...
 insert into veil2.scopes
        (scope_type_id, scope_id)
 values (-4, -41),
@@ -137,7 +34,7 @@ values (-4, -41),
        (-4, -44);
 
 -- and some test departments
-\echo ......creating test corp...
+--\echo ......creating test corp...
 insert into veil2.scopes
        (scope_type_id, scope_id)
 values (-5, -51),
@@ -146,7 +43,7 @@ values (-5, -51),
        (-5, -54);
 
 -- and some some projects
-\echo ......creating test corp...
+--\echo ......creating test corp...
 insert into veil2.scopes
        (scope_type_id, scope_id)
 values (-6, -61),
@@ -205,7 +102,7 @@ create trigger projects__aiudt
   for each statement
   execute procedure veil2.refresh_scope_promotions();
 
-\echo ...creating test parties...
+--\echo ...creating test parties...
 insert into veil2.accessors
        (accessor_id, username)
 values (-1, null),
@@ -302,7 +199,7 @@ create trigger project_assignments__aiudt
   execute procedure veil2.refresh_accessor_privs();
 
 
-\echo ......creating test roles...
+--\echo ......creating test roles...
 -- Insert some more test roles
 insert into veil2.roles
       (role_id, role_name)
@@ -324,7 +221,7 @@ select m.id + r.role_id, r.role_name
     union
     select 7, 'test_super') r;  -- test_super will be almost superuser
 
-\echo ......creating test context_roles...
+--\echo ......creating test context_roles...
 insert into veil2.context_roles
       (role_id, role_name, context_type_id, context_id)
 select role_id, 'corp_' || role_name, -3, -3
@@ -338,6 +235,7 @@ select role_id, 'dept_' || role_name, -4, -41
  where role_name in ('test_role_5', 'test_role_6');
 
 
+alter table veil2.role_roles disable trigger role_roles__aiudt;
 -- 1->2
 insert into veil2.role_roles
       (primary_role_id, assigned_role_id, context_type_id, context_id)
@@ -387,6 +285,7 @@ select p.role_id, a.role_id, 1, 0
    and a.role_name = 'test_role_5';
 
 -- 6->5 in corp context of -3
+alter table veil2.role_roles enable trigger role_roles__aiudt;
 insert into veil2.role_roles
       (primary_role_id, assigned_role_id, context_id, context_type_id)
 select p.role_id, a.role_id, -3, -3
@@ -394,7 +293,7 @@ select p.role_id, a.role_id, -3, -3
  where p.role_name = 'test_role_6'
    and a.role_name = 'test_role_5';
 
-\echo ...creating test privileges...
+--\echo ...creating test privileges...
 insert into veil2.privileges
       (privilege_id, privilege_name)
 with m(id) as (select max(privilege_id) from veil2.privileges)
@@ -463,7 +362,7 @@ select 7, p.privilege_id
      where rp.role_id = 7
        and rp.privilege_id = p.privilege_id);
 
-\echo ...setting access rights for parties...
+--\echo ...setting access rights for parties...
 -- party -1 has no rights
 -- party -2 has connect and global superuser
 -- party -3 has connect and test_role_5 in corp context -3

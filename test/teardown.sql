@@ -9,15 +9,10 @@ select accessor_id, role_id,
        context_type_id, context_id
   from veil2.accessor_roles;
 
-create or replace
-view veil2.scope_promotions (
-  scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id
-) as
-select null::integer, null::integer,
-       null::integer, null::integer
-where false;
+select veil2.restore_system_views();
+select veil2.restore_system_functions();
 
+drop view veil2.my_scope_promotions;
 drop table org_hierarchy;
 delete from veil2.accessor_roles where accessor_id < 0;
 delete from veil2.authentication_details where accessor_id < 0;;

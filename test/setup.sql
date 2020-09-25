@@ -71,10 +71,10 @@ create table projects (
   project_name	  text
 );
 
--- Redefine scope_promotions view to show above org hierarchy and
+-- create my_scope_promotions view to show above org hierarchy and
 -- proj->dept mapping
 create or replace
-view veil2.scope_promotions (
+view veil2.my_scope_promotions (
   scope_type_id, scope_id,
   promoted_scope_type_id, promoted_scope_id
 ) as
@@ -89,6 +89,8 @@ union all
 select -6, p.project_id,
        -5, p.dept_id
   from projects p;
+
+select veil2.install_user_views();
 
 create trigger org_hierarchy__aiudt
   after insert or update or delete or truncate
@@ -124,20 +126,21 @@ values (-6, 'alice'),
        (-1, 'fred');
 
 create or replace
-function veil2.get_accessor(
+function veil2.my_get_accessor(
     username in text,
     context_type_id in integer,
     context_id in integer)
   returns integer as
 $$
 declare
-  result integer;
+  _result integer;
+  _username text := username;
 begin
   select accessor_id
-    into result
+    into _result
     from persons p
-   where p.username = get_accessor.username;
-   return result;
+   where p.username = _username;
+   return _result;
 end;
 $$
 language plpgsql security definer stable leakproof;

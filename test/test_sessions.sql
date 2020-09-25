@@ -623,7 +623,6 @@ select is(o.success, true, 'Bob''s session should have continued')
 
 
 -- ...contextual role mapppings...
-
 -- We will use eve with some new role assignments
 delete from veil2.accessor_roles where accessor_id = -2;
 insert into veil2.accessor_roles

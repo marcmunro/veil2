@@ -216,7 +216,7 @@ update veil2.authentication_types
 
 -- Set up accessor contexts.  All accessors will be in org context.
 create or replace
-view veil2.accessor_contexts (
+view veil2.my_accessor_contexts (
   accessor_id, context_type_id, context_id
 ) as
 select party_id, 4, org_id
@@ -225,7 +225,7 @@ select party_id, 4, org_id
 -- Create get_accessor so that we can map from usernames in context to
 -- accessor_ids.  This is used by create_session().
 create or replace
-function veil2.get_accessor(
+function veil2.my_get_accessor(
     username in text,
     context_type_id in integer,
     context_id in integer)
@@ -237,14 +237,13 @@ begin
   select party_id
     into _result
     from demo.parties_tbl p
-   where p.party_name = get_accessor.username
+   where p.party_name = username
      and p.org_id = context_id
      and context_type_id = 4;  -- Logins are in org context
    return _result;
 end;
 $$
 language plpgsql security definer stable leakproof;
-
 
 
 -- STEP 4:
@@ -543,7 +542,7 @@ refresh materialized view veil2.all_accessor_privs;
 
 \echo TODO: DOCUMENT THAT THIS IS NOT TO BE MODIFIED ON EXTENSION UPGRADE
 create or replace
-view veil2.scope_promotions (
+view veil2.my_scope_promotions (
   scope_type_id, scope_id,
   promoted_scope_type_id, promoted_scope_id
 ) as
@@ -766,6 +765,9 @@ update veil2.authentication_details
        authentication_type = 'bcrypt'
  where accessor_id = 108;
 
+--select veil2.install_user_functions();
+--select veil2.install_user_views();
+
 \c vpd demouser
 
 -- Log Alice in.
@@ -826,7 +828,7 @@ select *
   from veil2.create_session('Eve', 'plaintext', 4, 100) c
  cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
 
-\echo ...Carol is a superuser for secured corp and protected corp...
+\echo ...Eve is a superuser for secured corp and protected corp...
 
 select session_id, scope_type_id, scope_id,
        to_array(roles) as roles, to_array(privs) as privs
@@ -843,7 +845,7 @@ select *
   from veil2.create_session('Sue', 'plaintext', 4, 105) c
  cross join veil2.open_connection(c.session_id, 1, 'passwd5') o1;
 
-\echo ...Carol is a superuser for Dept S...
+\echo ...Sue is a superuser for Dept S...
 
 select session_id, scope_type_id, scope_id,
        to_array(roles) as roles, to_array(privs) as privs
@@ -876,6 +878,4 @@ select 'Simon sees: ', * from demo.project_assignments;
 
 \echo ...Simon should see only assignments for the project he manages...
 select 'Simon sees: ', * from demo.party_types;
-
-
 

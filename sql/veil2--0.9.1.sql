@@ -5,7 +5,7 @@
  *
  *      Copyright (c) 2020 Marc Munro
  *      Author:  Marc Munro
- *	License: GPV V3
+ *	License: GPL V3
  *
  * ----------
  */
@@ -31,10 +31,7 @@ $$;
 comment on role veil_user is
 'This role will have read access to all veil2 tables.  That is not to
 say that an assignee of the role will be able to see the data in those
-tables, but that they will be allowed to try.  If, in addition to this
-role, they are (in veil2 terms) an accessor and have been assigned (in
-veil2 terms) the veil2_user role, they will be able to see all veil2
-relations and their contents.';
+tables, but that they will be allowed to try.';
 
 \echo ...veil2 schema...
 create schema if not exists veil2;
@@ -707,7 +704,6 @@ revoke all on veil2.sessions from public;
 grant select on veil2.sessions to veil_user;
 
 
-
 \echo ......system_parameters...
 create table veil2.system_parameters (
     parameter_name		text not null,
@@ -727,6 +723,20 @@ needed for exports using pg_dump.';
 
 revoke all on veil2.system_parameters from public;
 grant select on veil2.system_parameters to veil_user;
+
+
+\echo ......deferred_install...
+create table veil2.deferred_install (
+  install_time timestamp with time zone not null);
+
+comment on table veil2.deferred_install is
+'This table is used solely to provide a hook for a trigger.  By
+inserting into this table, a trigger is fired which will cause any
+user-provided veil2 objects to replace their equivalent
+system-provided ones.  TODO: REFS TO OTHER OBJECTS';
+
+revoke all on veil2.deferred_install from public;
+grant select on veil2.deferred_install to veil_user;
 
 
 \echo ......session_privileges_t...
@@ -754,7 +764,6 @@ create type veil2.session_params_t as (
   mapping_context_id		integer,
   is_open			boolean
 );
-
 
 
 -- Create the VEIL2 schema views, including matviews
@@ -1872,6 +1881,291 @@ always be up to date, so this is a trade-off that must be evaluated.';
 -- Create the VEIL2 base functions
 
 
+\echo ...creating veil2 user-provided object handling functions...
+\echo ......function_definition()...
+create or replace
+function veil2.function_definition(fn_name text, fn_oid oid)
+  returns text as
+$$
+declare
+  rec record;
+  _result text;
+begin
+  -- Query (modified) from \df+ in psql
+  select 
+    pg_catalog.pg_get_function_arguments(p.oid) as arg_types,
+    pg_catalog.pg_get_function_result(p.oid) as result_type,
+    p.prosrc as source,
+    l.lanname as language,
+    case when prosecdef then 'definer' else 'invoker' end as security,
+    case
+      when p.provolatile = 'i' then 'immutable'
+      when p.provolatile = 's' then 'stable'
+      when p.provolatile = 'v' then 'volatile'
+    end as volatility,
+    case
+      when p.proparallel = 'r' then 'restricted'
+      when p.proparallel = 's' then 'safe'
+      when p.proparallel = 'u' then 'unsafe'
+    end as parallel
+  into rec
+  from pg_catalog.pg_proc p
+       left join pg_catalog.pg_language l on l.oid = p.prolang
+  where p.oid = fn_oid;
+  if found then
+    _result := 'create or replace function veil2.' || fn_name ||
+              '(' || rec.arg_types || ') returns ' ||
+	      rec.result_type || ' as $xyzzy$' ||
+	      rec.source || '$xyzzy$ language ''' ||
+	      rec.language || ''' security ' ||
+	      rec.security || ' ' || rec.volatility ||
+	      ' parallel ' || rec.parallel;
+  end if;
+  return _result;
+end;
+$$
+language 'plpgsql' security definer stable;
+
+-- TODO: Comment
+
+\echo ......replace_function()...
+create or replace
+function veil2.replace_function(fn_name text, from_fn oid)
+  returns void as
+$$
+declare
+  fn_defn text;
+begin
+  fn_defn := veil2.function_definition(fn_name, from_fn);
+  --raise warning '%', fn_defn;
+  execute fn_defn;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+-- TODO: Comment
+
+\echo ......restore_system_functions()...
+create or replace
+function veil2.restore_system_functions()
+  returns void as
+$$
+declare
+  rec record;
+begin
+  for rec in
+    select po.proname, pb.oid backup_oid, po.oid as old_oid
+      from pg_catalog.pg_namespace n
+     inner join pg_catalog.pg_proc pb -- backup proc
+        on pb.pronamespace = n.oid
+       and pb.proname like 'backup_%'
+      inner join pg_catalog.pg_proc po -- original proc
+        on po.pronamespace = n.oid
+       and pb.proname = 'backup_' || po.proname
+     where n.nspname = 'veil2'
+  loop
+    perform veil2.replace_function(rec.proname, rec.backup_oid);
+  end loop;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+-- TODO: Comment
+
+\echo ......install_user_functions()...
+create or replace
+function veil2.install_user_functions()
+  returns void as
+$$
+declare
+  rec record;
+begin
+  for rec in
+    select po.proname, p.oid new_oid, po.oid as old_oid,
+    	   case when pb.proname is null then false
+	   else true end as have_backup
+      from pg_catalog.pg_namespace n
+     inner join pg_catalog.pg_proc p -- replacement proc
+        on p.pronamespace = n.oid
+       and p.proname like 'my%'
+      inner join pg_catalog.pg_proc po -- original proc
+        on po.pronamespace = n.oid
+       and p.proname = 'my_' || po.proname
+      left outer join pg_catalog.pg_proc pb -- backup of original proc
+        on pb.pronamespace = n.oid
+       and pb.proname = 'backup_' || po.proname
+     where n.nspname = 'veil2'
+  loop
+    if not rec.have_backup then
+      perform veil2.replace_function('backup_' || rec.proname,
+	     			     rec.old_oid);
+    end if;
+    perform veil2.replace_function(rec.proname, rec.new_oid);
+  end loop;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+-- TODO: Comment
+
+\echo ......function_exists()...
+create or replace
+function veil2.function_exists(fn_name text)
+  returns boolean as
+$$
+declare
+  _result boolean;
+begin
+  select true
+    into _result
+     from pg_catalog.pg_namespace n
+    inner join pg_catalog.pg_proc pn -- new proc
+       on pn.pronamespace = n.oid
+      and pn.proname = fn_name
+     where n.nspname = 'veil2';
+  return found;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+-- TODO: Comment
+
+\echo ......view_exists()...
+create or replace
+function veil2.view_exists(fn_name text)
+  returns boolean as
+$$
+declare
+  _result boolean;
+begin
+  select true
+    into _result
+     from pg_catalog.pg_namespace n
+    inner join pg_catalog.pg_class rn -- new reln
+       on rn.relnamespace = n.oid
+      and rn.relname = fn_name
+      and rn.relkind = 'v'
+     where n.nspname = 'veil2';
+  return found;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+-- TODO: Comment
+
+\echo ......replace_view()...
+create or replace
+function veil2.replace_view(view_name text, from_view oid)
+  returns void as
+$$
+declare
+  view_defn text;
+begin
+  view_defn := 'create or replace view veil2.' ||
+  	       view_name || ' as ' ||
+  	       pg_catalog.pg_get_viewdef(from_view, true);
+  --raise warning '%', view_defn;
+  execute view_defn;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+-- TODO: Comment
+
+
+\echo ......restore_system_views()...
+create or replace
+function veil2.restore_system_views()
+  returns void as
+$$
+declare
+  rec record;
+begin
+  for rec in
+    select vo.relname, vb.oid backup_oid, vo.oid as old_oid
+      from pg_catalog.pg_namespace n
+     inner join pg_catalog.pg_class vb -- backup view
+        on vb.relnamespace = n.oid
+       and vb.relkind = 'v'
+       and vb.relname like 'backup_%'
+     inner join pg_catalog.pg_class vo -- original view
+        on vo.relnamespace = n.oid
+       and vo.relkind = 'v'
+       and vb.relname = 'backup_' || vo.relname
+     where n.nspname = 'veil2'
+  loop
+    perform veil2.replace_view(rec.relname, rec.backup_oid);
+  end loop;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+-- TODO: Comment
+
+
+\echo ......install_user_views()...
+create or replace
+function veil2.install_user_views()
+  returns void as
+$$
+declare
+  rec record;
+begin
+  for rec in
+    select vo.relname, v.oid new_oid, vo.oid as old_oid,
+           case when vb.relname is null then false
+           else true end as have_backup
+      from pg_catalog.pg_namespace n
+     inner join pg_catalog.pg_class v -- Replacement view
+        on v.relnamespace = n.oid
+       and v.relkind = 'v'
+     inner join pg_catalog.pg_class vo -- original view
+        on vo.relnamespace = n.oid
+       and vo.relkind = 'v'
+       and v.relname = 'my_' || vo.relname
+      left outer join pg_catalog.pg_class vb -- backup of original proc
+        on vb.relnamespace = n.oid
+       and vb.relkind = 'v'
+       and vb.relname = 'backup_' || vo.relname
+     where n.nspname = 'veil2'
+  loop
+    if not rec.have_backup then
+      perform veil2.replace_view('backup_' || rec.relname,
+	     			 rec.old_oid);
+    end if;
+    perform veil2.replace_view(rec.relname, rec.new_oid);
+  end loop;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+-- TODO: Comment
+
+
+
+
+\echo ......deferred_install()...
+create or replace
+function veil2.deferred_install() returns trigger as
+$$
+begin
+  perform veil2.install_user_functions();
+  perform veil2.install_user_views();
+  return new;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+-- TODO: Comment
+
+
+create trigger deferred_install_trg
+  after insert on veil2.deferred_install
+  for each statement execute function veil2.deferred_install();
+
+-- TODO: Comment
+
+
 \echo ...creating veil2 authentication functions...
 \echo ......authenticate_false()...
 create or replace
@@ -2022,6 +2316,8 @@ Note that the return type is not relevant but using bool rather than
 void makes formatting tests results easier as it makes it easier to
 write queries that call the function that return no rows';
 
+
+\echo ......get_accessor() (placeholder)...
 create or replace
 function veil2.get_accessor(
     username in text,
@@ -2030,14 +2326,29 @@ function veil2.get_accessor(
   returns integer as
 $$
 begin
+  -- Cause any user-provided versions of veil2 functions to be
+  -- installed before the current statement completes.
+  insert into veil2.deferred_install values (now());
+  
+  if veil2.function_exists('my_get_accessor') then
+    -- If we have a user-provided version of this function, we call it
+    -- now.  The next time we are called, this, the system-provided
+    -- version of the function, will have been replaced by the
+    -- user-provided copy.  This version can be restored by calling
+    -- veil2.restore_base_system().
+    return veil2.my_get_accessor(username, context_type_id, context_id);
+  end if;
+  
   return 0;
 end;
 $$
-language plpgsql security definer stable leakproof;
+language plpgsql security definer volatile leakproof;
 
 comment on function veil2.get_accessor(text, integer, integer) is
-'Retrieve accessor_id based on username and context.  This function
-must be customized specifically for your application.';
+'Retrieve accessor_id based on username and context.  A user-provided
+version of this, named my_get_accessor() should be created
+specifically for your application.  It will be automatically installed
+when it is first needed.'; 
 
 
 \echo ......create_accessor_session()...
@@ -2415,7 +2726,7 @@ comment on view veil2.explicit_mapped_session_privs is
 'Lists the explicitly granted roles and privileges for the current
 session, taking into account the session''s mapping context.  This is
 used in determining the privileges for the session.  It exists as a
-separate view in order to aid dbugging.';
+separate view in order to aid debugging.';
 
 
 \echo ...permitted_assignment_contexts view...
@@ -2427,6 +2738,12 @@ view veil2.permitted_assignment_contexts as
        on asp.scope_type_id = sc.login_context_type_id
       and asp.scope_id = sc.login_context_id
     union all
+    select asp.scope_type_id, asp.scope_id
+     from veil2.session_context() sc
+    inner join veil2.all_scope_promotions asp
+       on asp.promoted_scope_type_id = sc.login_context_type_id
+      and asp.promoted_scope_id = sc.login_context_id
+    union all
    select sc.login_context_type_id, sc.login_context_id
      from veil2.session_context() sc;
 
@@ -2437,7 +2754,12 @@ accessor that are not part of this set will not apply within this
 session.  An accessor may therefore have completely different sets of
 privileges when logged-in in context A, from the set they have in
 context B, even including privileges that have been promoted to global
-scope.';
+scope.
+
+The system-provided version of this view allows a user to be gain
+privileges from roles assigned in both superior and inferior
+contexts.  What it blocks are privileges from roles assigned in
+sibling or cousin contexts.';
 
 
 \echo ...explicit_session_privs (view)...
@@ -2462,146 +2784,7 @@ comment on view veil2.explicit_session_privs is
 connected session.';
 
 
-
 \echo ......load_session_privs()...
-create or replace
-function veil2.load_session_privs(
-    session_id in integer,
-    _accessor_id in integer,
-    _prev_session_id in integer default null)
-  returns bool as
-$$
-declare
-  _prev_accessor_id integer;
-  _prevprev_accessor_id integer;
-  _need_filter boolean := false;
-begin
-  execute veil2.reset_session();
-  insert
-    into session_parameters
-        (accessor_id, session_id,
-         login_context_type_id, login_context_id,
-	 mapping_context_type_id, mapping_context_id,
-	 is_open)
-  select _accessor_id, load_session_privs.session_id,
-         login_context_type_id, login_context_id,
-         mapping_context_type_id, mapping_context_id,
-	 true
-    from veil2.sessions s
-   where s.session_id = load_session_privs.session_id;
-
-  if _prev_session_id is not null then
-    select accessor_id,
-      	   case when s.authent_type = 'become'
-	        then s.session_supplemental::integer
-	        else null
-	   end
-      into _prev_accessor_id,
-      	   _prevprev_accessor_id
-      from veil2.sessions
-     where session_id = _prev_session_id;
-    -- Recurse to load privs of originating session.
-    if veil2.load_session_privs(
-           _prev_session_id, _prev_accessor_id,
-	   _prevprev_accessor_id)
-    then
-      -- Save originating session privs for later filtering.
-      execute veil2.save_privs_as_orig();
-      _need_filter := true;
-    else
-      return false;
-    end if;
-  end if;
-  
-  with session_context as
-    (      select mapping_context_type_id, mapping_context_id,
-             login_context_type_id, login_context_id,
-	     _accessor_id as accessor_id
-        from veil2.sessions s
-       where s.session_id = load_session_privs.session_id
-    ),
-  session_scopes as
-    (
-      -- These are the (non-global and non-personal) scopes from which
-      -- role assignments will be used if logging-in in a non-global
-      -- context.  We limit the role assignments we consider because a
-      -- user may have different roles in different login contexts and
-      -- we do not want privileges to be promoted from a role assigned
-      -- in the context of Corp A when we are logging-in in the
-      -- context of Corp B.
-      select asp.promoted_scope_type_id, asp.promoted_scope_id
-        from session_context sc
-       inner join veil2.all_scope_promotions asp
-          on asp.scope_type_id = sc.login_context_type_id
-         and asp.scope_id = sc.login_context_id
-       union
-      select sc.login_context_type_id, sc.login_context_id
-        from session_context sc
-    ),
-  explicit_session_privs as
-    (
-      -- These are the explictly assigned roles and privileges for our
-      -- session user that apply in the context of their login.
-      select aap.scope_type_id, aap.scope_id,
-  	     union_of(aap.roles) as roles,
-  	     union_of(aap.privs) as privs
-	from session_context sc
-       inner join veil2.all_accessor_privs aap
-          on aap.accessor_id = sc.accessor_id
-	 and (   aap.mapping_context_type_id is null
-              or (    aap.mapping_context_type_id = sc.mapping_context_type_id
-  	          and aap.mapping_context_id = sc.mapping_context_id))
-	 and (   aap.assignment_context_type_id = 1 -- assigned globally
-	      or sc.login_context_type_id = 1  -- login context is global
-	      or (aap.assignment_context_type_id,
-	          aap.assignment_context_id) in
-		 (select promoted_scope_type_id, promoted_scope_id
-		    from session_scopes))
-       group by aap.scope_type_id, aap.scope_id
-    ),
-  have_connect as
-    (
-      select privs ? 0 as have_connect
-        from explicit_session_privs
-       where scope_type_id = 1
-    ),
-  all_session_privs as
-    (
-      select *
-        from explicit_session_privs
-       union all
-      select 2, sc.accessor_id,
-             arp.roles, arp.privileges
-	from veil2.all_role_privs arp
-       cross join session_context sc
-       where arp.role_id = 2
-    )
-  insert
-    into session_privileges
-        (session_id, scope_type_id, scope_id,
-  	 roles, privs)
-  select load_session_privs.session_id, scope_type_id, scope_id,
-         roles, privs
-    from all_session_privs
-   where (select have_connect from have_connect);
-
-  if found then
-    if _need_filter then
-      -- We are in a become-user session.  We need to filter the privs
-      -- of the user we became, with the privs of the session we came
-      -- from so that we do not gain privileges the originating
-      -- session did not have.
-      execute veil2.filter_privs();
-    end if;
-    return true;
-  else
-    execute veil2.reset_session();
-    return false;
-  end if;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
 create or replace
 function veil2.load_session_privs(
     session_id in integer,
@@ -2660,6 +2843,7 @@ begin
     ),
   explicit_session_privs as
     (
+      -- This is a cte because it is used multiple times below
       select *
         from veil2.explicit_session_privs
     ),
@@ -2715,7 +2899,6 @@ connected user has.  If the optional 3rd parameter is provided, use
 that as the session_id of an originating session - this is part of the
 become-user process (see become_user())';
 
-
 \echo ......check_continuation()...
 create or replace
 function veil2.check_continuation(
@@ -2736,6 +2919,7 @@ already been authenticated.  It ensures that new tokens are used on
 each call, and that the caller has access to the session_token
 returned from the original (subsequently authenticated) create
 session() call.';
+
 
 \echo ......open_connection()...
 create or replace
@@ -3854,40 +4038,6 @@ will have been done.';
 
 
 create or replace
-function veil2.accessor_contexts_is_original()
-  returns boolean as
-$$
-select pg_catalog.pg_get_viewdef(cn.oid) =
-           pg_catalog.pg_get_viewdef(ct.oid)
-  from pg_catalog.pg_class cn  -- Class for New view
- inner join pg_catalog.pg_namespace n
-    on n.oid = cn.relnamespace
- inner join pg_catalog.pg_class ct -- Class for Template view
-    on n.oid = ct.relnamespace
- where n.nspname = 'veil2'
-   and cn.relname = 'accessor_contexts'
-   and cn.relkind = 'v'
-   and ct.relname = 'accessor_contexts_template'
-   and ct.relkind = 'v';
-$$
-language sql security definer volatile;
-
-create or replace
-function veil2.get_accessor_defined()
-  returns boolean as
-$$
-select exists (
-  select null
-    from pg_proc p
-   inner join pg_catalog.pg_namespace n
-      on n.oid = p.pronamespace
-   where p.proname = 'get_accessor'
-     and n.nspname = 'veil2');
-$$
-language sql security definer volatile;
-
-
-create or replace
 function veil2.have_user_privileges()
   returns boolean as
 $$
@@ -3958,25 +4108,6 @@ select exists (
 $$
 language sql security definer volatile;
 
-
-create or replace
-function veil2.scope_promotions_is_original()
-  returns boolean as
-$$
-select pg_catalog.pg_get_viewdef(cn.oid) =
-           pg_catalog.pg_get_viewdef(ct.oid)
-  from pg_catalog.pg_class cn  -- Class for New view
- inner join pg_catalog.pg_namespace n
-    on n.oid = cn.relnamespace
- inner join pg_catalog.pg_class ct -- Class for Template view
-    on n.oid = ct.relnamespace
- where n.nspname = 'veil2'
-   and cn.relname = 'scope_promotions'
-   and cn.relkind = 'v'
-   and ct.relname = 'scope_promotions_template'
-   and ct.relkind = 'v';
-$$
-language sql security definer volatile;
 
 create or replace
 function veil2.check_table_security()
@@ -4023,11 +4154,11 @@ begin
     ok := false;
     return next 'You need to define some relational scopes (step 2)';
   end if;
-  if veil2.accessor_contexts_is_original() then
+  if not veil2.view_exists('my_accessor_contexts') then
     ok := false;
     return next 'You need to redefine the accessor_contexts view (step 3)';
   end if;
-  if not veil2.get_accessor_defined() then
+  if not veil2.function_exists('my_get_accessor') then
     ok := false;
     return next 'You need to define a get_accessor() function (step 3)';
   end if;
@@ -4055,7 +4186,7 @@ begin
     ok := false;
     return next 'You need to create user scopes (step 7)';
   end if;
-  if veil2.scope_promotions_is_original() then
+  if not veil2.view_exists('my_scope_promotions') then
     ok := false;
     return next 'You need to redefine the scope_promotions view (step 8)';
   else
@@ -4074,329 +4205,6 @@ begin
 end;
 $$
 language plpgsql security definer volatile;
-
-
-
-create or replace 
-function veil2.have_user_defined_scopes()
-  returns boolean as
-$$
--- Have we defined new scope_types:
-select exists (
-  select null
-    from veil2.scope_types
-   where scope_type_id not in (1, 2));
-$$
-language sql security definer stable;
-
-
-create or replace
-function veil2.have_accessor_contexts()
-  returns boolean as
-$$
--- Does the accessor_contexts view exist?
-select exists (
-  select null
-    from pg_catalog.pg_class c
-   inner join pg_catalog.pg_namespace n
-      on n.oid = c.relnamespace
-   where n.nspname = 'veil2'
-     and c.relname = 'accessor_contexts'
-     and c.relkind = 'v');
-$$
-language sql security definer stable;
-
-create or replace
-function veil2.have_accessor_contexts_comment()
-  returns boolean as
-$$
--- Does the accessor_contexts view exist?
-select pg_catalog.obj_description(c.oid) is not null
-  from pg_catalog.pg_class c
- inner join pg_catalog.pg_namespace n
-    on n.oid = c.relnamespace
- where n.nspname = 'veil2'
-   and c.relname = 'accessor_contexts'
-   and c.relkind = 'v';
-$$
-language sql security definer stable;
-
-
-create or replace
-function veil2.define_accessor_contexts()
-  returns void as
-$$
-begin
-  if not veil2.have_accessor_contexts() then
-    execute('create view veil2.accessor_contexts (
-                 accessor_id, context_type_id, context_id
-             ) as
-	       select accessor_id, 1, 0
-	         from veil2.accessors');
-  end if;
-  if not veil2.have_accessor_contexts_comment() then
-    execute($__$
-   comment on view veil2.accessor_contexts is
-'This view lists the allowed session contexts for accessors.  When an
-accessor opens a session, they choose a session context.  This session
-context determines which set of role->role mappings are in play.
-Typically, there will only be one such set, as provided by the default
-implementation of this view.  If however, your application requires
-separate contexts to have different role->role mappings, you should
-modify this view to map your accessors with that context.
-
-Typically this will be used in a situation where your application
-serves a number of different clients, each of which have their own
-role definitions.  Each accessor will belong to one of those clients
-and this view should be modified to make that mapping apparent.
-
-A typical view definition might be:
-  select party_id, 3, client_id
-    from app_schema.parties
-   union all 
-  select party_id, 1, 0
-    from mycorp_schema.superusers;
-
-which would allow those defined in the superusers table to connect in
-the global context, and those defined in the parties table to connect
-in the context of the client that they work for.'
-$__$);
-  end if;
-end;
-$$
-language plpgsql security definer volatile;
-
-comment on function veil2.define_accessor_contexts() is
-'Creates, a dummy version of the accessor_contexts view if it has not
-already been defined.  Also creates a comment for the view if there is
-not already one in place.  This exists to create and comment the view
-which an implementor is supposed to replace.  The view is not created
-as part of the extension as this would make it too difficult to
-modify.'; 
-
-
-create or replace
-function veil2.accessor_contexts_is_original()
-  returns boolean as
-$$
-select pg_catalog.pg_get_viewdef(cn.oid) =
-           pg_catalog.pg_get_viewdef(ct.oid)
-  from pg_catalog.pg_class cn  -- Class for New view
- inner join pg_catalog.pg_namespace n
-    on n.oid = cn.relnamespace
- inner join pg_catalog.pg_class ct -- Class for Template view
-    on n.oid = ct.relnamespace
- where n.nspname = 'veil2'
-   and cn.relname = 'accessor_contexts'
-   and cn.relkind = 'v'
-   and ct.relname = 'accessor_contexts_template'
-   and ct.relkind = 'v';
-$$
-language sql security definer volatile;
-
-create or replace
-function veil2.get_accessor_defined()
-  returns boolean as
-$$
-select exists (
-  select null
-    from pg_proc p
-   inner join pg_catalog.pg_namespace n
-      on n.oid = p.pronamespace
-   where p.proname = 'get_accessor'
-     and n.nspname = 'veil2');
-$$
-language sql security definer volatile;
-
-
-create or replace
-function veil2.have_user_privileges()
-  returns boolean as
-$$
-select exists (
-  select null
-    from veil2.privileges
-   where privilege_id > 15
-      or privilege_id < 0);
-$$
-language sql security definer volatile;
-
-
-create or replace
-function veil2.have_user_roles()
-  returns boolean as
-$$
-select exists (
-  select null
-    from veil2.roles
-   where role_id > 4
-      or role_id < 0);
-$$
-language sql security definer volatile;
-
-
-create or replace
-function veil2.have_role_privileges()
-  returns boolean as
-$$
-select exists (
-  select null
-    from veil2.role_privileges
-   where role_id < 0
-      or role_id > 4);
-$$
-language sql security definer volatile;
-
-create or replace
-function veil2.have_role_roles()
-  returns boolean as
-$$
-select exists (
-  select null
-    from veil2.role_roles);
-$$
-language sql security definer volatile;
-
-create or replace
-function veil2.have_accessors()
-  returns boolean as
-$$
-select exists (
-  select null
-    from veil2.accessors);
-$$
-language sql security definer volatile;
-
-
-create or replace
-function veil2.have_user_scopes ()
-  returns boolean as
-$$
-select exists (
-  select null
-    from veil2.scopes
-   where scope_type_id != 1
-     and scope_id != 0);
-$$
-language sql security definer volatile;
-
-
-create or replace
-function veil2.scope_promotions_is_original()
-  returns boolean as
-$$
-select pg_catalog.pg_get_viewdef(cn.oid) =
-           pg_catalog.pg_get_viewdef(ct.oid)
-  from pg_catalog.pg_class cn  -- Class for New view
- inner join pg_catalog.pg_namespace n
-    on n.oid = cn.relnamespace
- inner join pg_catalog.pg_class ct -- Class for Template view
-    on n.oid = ct.relnamespace
- where n.nspname = 'veil2'
-   and cn.relname = 'scope_promotions'
-   and cn.relkind = 'v'
-   and ct.relname = 'scope_promotions_template'
-   and ct.relkind = 'v';
-$$
-language sql security definer volatile;
-
-create or replace
-function veil2.check_table_security()
-  returns setof text as
-$$
-declare
-  tbl text;
-  header_returned boolean := false;
-begin
-  for tbl in
-    select n.nspname || '.' || c.relname
-      from pg_catalog.pg_class c
-     inner join pg_catalog.pg_namespace n
-        on n.oid = c.relnamespace
-     where c.relkind = 'r'
-       and n.nspname not in ('pg_catalog', 'information_schema')
-       and c.relpersistence = 'p'
-       and not relrowsecurity
-  loop
-    if not header_returned then
-      header_returned := true;
-      return next 'The following tables have no security policies:';
-    end if;
-    return next '    - ' || tbl;
-  end loop;
-  if not header_returned then
-    return next 'All tables appear to have security policies:';
-  end if;  
-end;
-$$
-language plpgsql security definer stable;
-
-
-create or replace
-function veil2.my_status()
-  returns setof text as
-$$
-declare
-  ok boolean := true;
-  line text;
-begin
-  if not veil2.have_user_defined_scopes() then
-    ok := false;
-    return next 'You need to define some relational scopes (step 2)';
-  end if;
-  perform veil2.define_accessor_contexts();
-  if veil2.accessor_contexts_is_original() then
-    ok := false;
-    return next 'You need to redefine the accessor_contexts view (step 3)';
-  end if;
-  if not veil2.get_accessor_defined() then
-    ok := false;
-    return next 'You need to define a get_accessor() function (step 3)';
-  end if;
-  if not veil2.have_user_privileges() then
-    ok := false;
-    return next 'You need to define some privileges (step 4)';
-  end if;
-  if not veil2.have_user_roles() then
-    ok := false;
-    return next 'You need to define some roles (step 5)';
-  end if;
-  if not veil2.have_role_privileges() then
-    ok := false;
-    return next 'You need to create entries in role_privileges (step 5)';
-  end if;
-  if not veil2.have_role_roles() then
-    ok := false;
-    return next 'You need to create entries in role_roles (step 5)';
-  end if;
-  if not veil2.have_accessors() then
-    ok := false;
-    return next 'You need to create accessors (and maybe FK links) (step 6)';
-  end if;
-  if not veil2.have_user_scopes() then
-    ok := false;
-    return next 'You need to create user scopes (step 7)';
-  end if;
-  if veil2.scope_promotions_is_original() then
-    ok := false;
-    return next 'You need to redefine the scope_promotions view (step 8)';
-  end if;
-  if ok then
-    return next 'Your Veil2 basic implemementation seems to be complete.';
-  end if;
-  for line in select * from veil2.check_table_security()
-  loop
-    return next line;
-  end loop;
-  if ok then
-    return next 'Please Ensure that you have secured your views.';
-  end if;
-end;
-$$
-language plpgsql security definer volatile;
-
-
-
 
 
 

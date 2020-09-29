@@ -122,7 +122,7 @@ $(STYLESHEET_IMPORTER): Makefile.global
 # documentation.  The dependencies here are many, somewhat complex and
 # prone to changing, so we automate their generation using a script.
 #
-extracts.d:
+extracts.d: 
 	@echo Recreating extracts dependency file $@...
 	@echo "$@: `bin/extract_sql.sh -D docs docs/extracts`" >$@
 	@bin/extract_sql.sh -d docs docs/extracts >>$@
@@ -138,10 +138,12 @@ INTERMEDIATE_FILES += extracts.d
 extracts: docs/extracts
 
 # Use the extracts directory as a proxy for all extracts files.
-docs/extracts:
+# Recreate the extracts if the source $(DATA) has been modified.
+docs/extracts: $(DATA)
 	@echo Recreating sql extracts for docs...
 	@[ -d docs/extracts ] || mkdir docs/extracts 
 	@bin/extract_sql.sh docs docs/extracts
+	@touch $@
 
 TARGET_FILES += $(EXTRACTS)
 TARGET_DIRS += docs/extracts

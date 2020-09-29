@@ -1,5 +1,5 @@
 <sect1 id="setup_scope_types">
-  <title>Identify and Define Your Scope Types</title>
+  <title>Identify and Define Your Scope Types (STEP 2)</title>
   <para>
     You need to identify the types of scopes that your privileges will
     have.  It may be easier to think in terms of relational contexts

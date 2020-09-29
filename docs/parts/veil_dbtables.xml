@@ -105,4 +105,17 @@
       <link linkend="veil2_erd_div">back to ERD</link>.
     </para>
   </sect2>
+  <sect2 id="table_deferred_install">
+    <title>Deferred Install Table</title>
+    <?sql-definition table veil2.deferred_install sql/veil2--&version_number;.sql ?>
+    <para>
+      The trigger on this table is:
+    </para>
+    <?sql-definition trigger deferred_install_trg sql/veil2--&version_number;.sql ?>
+
+    <para>
+      See <link linkend="func_get_accessor"> function
+      get_accessor()</link> for an example of the use of this table.
+    </para>
+  </sect2>
 </sect1>

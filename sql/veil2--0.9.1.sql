@@ -733,7 +733,7 @@ comment on table veil2.deferred_install is
 'This table is used solely to provide a hook for a trigger.  By
 inserting into this table, a trigger is fired which will cause any
 user-provided veil2 objects to replace their equivalent
-system-provided ones.  TODO: REFS TO OTHER OBJECTS';
+system-provided ones.';  
 
 revoke all on veil2.deferred_install from public;
 grant select on veil2.deferred_install to veil_user;
@@ -1926,7 +1926,12 @@ end;
 $$
 language 'plpgsql' security definer stable;
 
--- TODO: Comment
+comment on function veil2.function_definition(text, oid) is
+'Returns the text to create a function named
+<literal>fn_name</literal>, based on the function definition provided
+by <literal>fn_oid</literal>.  This is used by
+veil2.install_user_functions() and veil2.restore_system_functions()';
+
 
 \echo ......replace_function()...
 create or replace
@@ -1943,7 +1948,12 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
--- TODO: Comment
+comment on function veil2.replace_function(text, oid) is
+'Create or replace the function named <literal>fn_name</literal> based
+on the definition given in <literal>fn_oid</literal>.  Used for
+installing user-provided functions in place of the veil2
+system-provided ones.';
+
 
 \echo ......restore_system_functions()...
 create or replace
@@ -1970,7 +1980,11 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
--- TODO: Comment
+comment on function veil2.restore_system_functions() is
+'Restore system-provided functions that have been replaced by
+user-provided ones.  The originals for the system-provided functions
+will have been saved as backups by veil2.install_user_functions()';
+
 
 \echo ......install_user_functions()...
 create or replace
@@ -2006,7 +2020,11 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
--- TODO: Comment
+comment on function veil2.install_user_functions() is
+'Install any user-provided functions that are to replace
+system-provided ones.  The original versions of the system-provided
+functions will be saved as backups.';
+
 
 \echo ......function_exists()...
 create or replace
@@ -2028,11 +2046,14 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
--- TODO: Comment
+comment on function veil2.function_exists(text) is
+'Predicate returning true if a function named
+<literal>fn_name</literal> exists in the veil2 schema.';
+
 
 \echo ......view_exists()...
 create or replace
-function veil2.view_exists(fn_name text)
+function veil2.view_exists(vw_name text)
   returns boolean as
 $$
 declare
@@ -2043,7 +2064,7 @@ begin
      from pg_catalog.pg_namespace n
     inner join pg_catalog.pg_class rn -- new reln
        on rn.relnamespace = n.oid
-      and rn.relname = fn_name
+      and rn.relname = vw_name
       and rn.relkind = 'v'
      where n.nspname = 'veil2';
   return found;
@@ -2051,7 +2072,10 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
--- TODO: Comment
+comment on function veil2.view_exists(text) is
+'Predicate returning true if a view named
+<literal>vw_name</literal> exists in the veil2 schema.';
+
 
 \echo ......replace_view()...
 create or replace
@@ -2070,7 +2094,11 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
--- TODO: Comment
+comment on function veil2.replace_view(text, oid) is
+'Create or replace the view named <literal>view_name</literal> based
+on the definition given in <literal>view_oid</literal>.  Used for
+installing user-provided views in place of the veil2
+system-provided ones.'; 
 
 
 \echo ......restore_system_views()...
@@ -2100,7 +2128,11 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
--- TODO: Comment
+comment on function veil2.restore_system_views() is
+
+'Restore system-provided views that have been replaced by
+user-provided ones.  The originals for the system-provided view
+will have been saved as backups by veil2.install_user_views()';
 
 
 \echo ......install_user_views()...
@@ -2123,7 +2155,7 @@ begin
         on vo.relnamespace = n.oid
        and vo.relkind = 'v'
        and v.relname = 'my_' || vo.relname
-      left outer join pg_catalog.pg_class vb -- backup of original proc
+      left outer join pg_catalog.pg_class vb -- backup of original view
         on vb.relnamespace = n.oid
        and vb.relkind = 'v'
        and vb.relname = 'backup_' || vo.relname
@@ -2139,14 +2171,15 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
--- TODO: Comment
-
-
+comment on function veil2.install_user_views() is
+'Install any user-provided views that are to replace
+system-provided ones.  The original versions of the system-provided
+views will be saved as backups.';
 
 
 \echo ......deferred_install()...
 create or replace
-function veil2.deferred_install() returns trigger as
+function veil2.deferred_install_fn() returns trigger as
 $$
 begin
   perform veil2.install_user_functions();
@@ -2156,14 +2189,27 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
--- TODO: Comment
+comment on function veil2.deferred_install_fn() is
+'Install user-provided functions and views.  This is called from an
+after statement trigger so that we do not install the new versions of
+functions until the current versions, which we may be replacing, have
+completed.  This may be overly prudent but it does no harm.'; 
 
 
 create trigger deferred_install_trg
-  after insert on veil2.deferred_install
-  for each statement execute function veil2.deferred_install();
+  after insert
+  on veil2.deferred_install
+  for each statement
+  execute function veil2.deferred_install_fn();
 
--- TODO: Comment
+comment on trigger deferred_install_trg on veil2.deferred_install is
+'This trigger exists to allow inserts into the deferred install table
+to cause user-provided functions and views to be installed after the
+current system-provided functions have completed running.  This is to
+prevent the function that inserts into the table from being
+overwritten while it is still running.  PostgreSQL may handle this
+well, I don''t know - but I see no reason to stress the implementation
+any further than I must.';
 
 
 \echo ...creating veil2 authentication functions...
@@ -2317,7 +2363,7 @@ void makes formatting tests results easier as it makes it easier to
 write queries that call the function that return no rows';
 
 
-\echo ......get_accessor() (placeholder)...
+\echo ......get_accessor()...
 create or replace
 function veil2.get_accessor(
     username in text,
@@ -2348,7 +2394,8 @@ comment on function veil2.get_accessor(text, integer, integer) is
 'Retrieve accessor_id based on username and context.  A user-provided
 version of this, named my_get_accessor() should be created
 specifically for your application.  It will be automatically installed
-when it is first needed.'; 
+when it is first needed.  If you modify your version, you can update
+the system version by calling veil2.install_user_functions().'; 
 
 
 \echo ......create_accessor_session()...
@@ -2710,6 +2757,7 @@ is a temporary table and does not always exist.';
 
 
 \echo ...explicit_mapped_session_privs view...
+-- TODO: Add to docs
 create or replace
 view veil2.explicit_mapped_session_privs as
   select aap.scope_type_id, aap.scope_id,
@@ -2730,6 +2778,7 @@ separate view in order to aid debugging.';
 
 
 \echo ...permitted_assignment_contexts view...
+-- TODO: Add to docs
 create or replace
 view veil2.permitted_assignment_contexts as
    select asp.promoted_scope_type_id, asp.promoted_scope_id
@@ -2763,6 +2812,7 @@ sibling or cousin contexts.';
 
 
 \echo ...explicit_session_privs (view)...
+-- TODO: Add to docs
 create or replace
 view veil2.explicit_session_privs as
   select p.scope_type_id, p.scope_id,
@@ -2890,7 +2940,6 @@ end;
 $$
 language 'plpgsql' security definer volatile;
 
-
 comment on function veil2.load_session_privs(integer, integer, integer) is
 'Load the temporary table session_privileges for session_id, with the
 privileges for _accessor_id.  The temporary table is queried by
@@ -2898,6 +2947,7 @@ security functions in order to determine what access rights the
 connected user has.  If the optional 3rd parameter is provided, use
 that as the session_id of an originating session - this is part of the
 become-user process (see become_user())';
+
 
 \echo ......check_continuation()...
 create or replace
@@ -3156,7 +3206,130 @@ $$
 language 'plpgsql' security definer volatile;
 
 comment on function veil2.hello(integer, integer) is
-'This is used to begin a veil2 session for a database user.';
+'This is used to begin a veil2 session for a database user, ie someone
+who can directly access the database.';
+
+
+\echo ......become_accessor()...
+create or replace
+function veil2.become_accessor(
+    accessor_id in integer,
+    context_type_id in integer,
+    context_id in integer,
+    session_id out integer,
+    session_token out text,
+    success out boolean,
+    errmsg out text)
+  returns record as
+$$
+declare
+  orig_session_id integer;
+  _result boolean;
+begin
+  select sp.session_id
+    into orig_session_id
+    from session_parameters sp;
+    
+  if veil2.i_have_global_priv(1) or
+     veil2.i_have_priv_in_superior_scope(1, context_type_id, context_id)
+  then
+    -- Ensure accessor_id and context are valid
+    select true
+      into _result
+      from veil2.accessor_contexts ac
+     where ac.accessor_id = become_accessor.accessor_id
+       and ac.context_type_id = become_accessor.context_type_id
+       and ac.context_id = become_accessor.context_id;
+    if found then
+      -- Create local copy of current privileges.  This is used to
+      -- ensure that we don't gain more privileges than we started
+      -- with by becoming the new user, ie <become user> privilege
+      -- should not be a mechanism for privilege escalation.
+
+      execute veil2.save_privs_as_orig();
+
+      -- Now create the session.
+      select cas.session_id, cas.session_token
+        into become_accessor.session_id, become_accessor.session_token
+        from veil2.create_accessor_session(
+             become_accessor.accessor_id, 'become',
+	     context_type_id, context_id) cas;
+
+      -- Update sessions to show which was our original session.
+      update veil2.sessions s
+         set session_supplemental = orig_session_id::text,
+	     has_authenticated = true
+       where s.session_id = become_accessor.session_id;
+
+      -- Update sessions to modify the timeout of our original session
+      update veil2.sessions s
+         set expires = now() + sp.parameter_value::interval
+        from veil2.system_parameters sp
+       where s.session_id = orig_session_id
+         and sp.parameter_name = 'shared session timeout';
+
+      -- Load the session privs as though we were the new user.
+      success := veil2.load_session_privs(session_id, accessor_id);
+      if success then
+        execute veil2.filter_privs();
+      else
+        errmsg := 'LOADPRIV';
+      end if;
+    else
+      errmsg := 'INVARGS';
+      success := false;
+    end if;
+  else
+    errmsg := 'NOPRIV';
+    success := false;
+  end if;
+end;
+$$
+language 'plpgsql' security definer volatile
+set client_min_messages = 'error';
+
+comment on function veil2.become_accessor(integer, integer, integer) is
+'Create a new opened session for the given accessor_id and context.
+This allows a suitably privileged accessor to emulate another user.
+The intended use-case for this is in testing and debugging access
+rights.  Note that the new session will not give the connected user
+more privileges than they already have, so the usage of this should
+probably be confined to superusers.  Any other user is likely to get a
+set of privileges that may be less than the user they have become
+would normally get.';
+
+
+\echo ......become_user()...
+create or replace
+function veil2.become_user(
+    username in text,
+    context_type_id in integer,
+    context_id in integer,
+    session_id out integer,
+    session_token out text,
+    success out boolean,
+    errmsg out text)
+  returns record as
+$$
+declare
+  _accessor_id integer;
+begin
+  _accessor_id := veil2.get_accessor(username, context_type_id, context_id);
+
+  select ba.session_id, ba.session_token,
+  	 ba.success, ba.errmsg
+    into become_user.session_id, become_user.session_token,
+         become_user.success, become_user.errmsg
+    from veil2.become_accessor(
+             _accessor_id, context_type_id, context_id) ba;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+comment on function veil2.become_user(text, integer, integer) is
+'See comments for become_accessor().  This is the same but takes a
+username rather than accessor_id.';
+
 
 
 \echo ...creating veil2 privilege testing functions...
@@ -3296,7 +3469,7 @@ $$
 language 'plpgsql' security definer volatile;
 
 comment on function veil2.delete_expired_sessions() is
-'Utility function to clean-up  session data.  This should probably be
+'Utility function to clean-up  session data.  This should be
 run periodically from a batch job.';
 
 
@@ -3312,126 +3485,6 @@ comment on function veil2.bcrypt(text) is
 'Create a bcrypted password from plaintext.  It creates a value that can
 be stored in veil2.authentication_details for use by the
 authenticate_bcrypt() function.';
-
-\echo ......become_accessor()...
-create or replace
-function veil2.become_accessor(
-    accessor_id in integer,
-    context_type_id in integer,
-    context_id in integer,
-    session_id out integer,
-    session_token out text,
-    success out boolean,
-    errmsg out text)
-  returns record as
-$$
-declare
-  orig_session_id integer;
-  _result boolean;
-begin
-  select sp.session_id
-    into orig_session_id
-    from session_parameters sp;
-    
-  if veil2.i_have_global_priv(1) or
-     veil2.i_have_priv_in_superior_scope(1, context_type_id, context_id)
-  then
-    -- Ensure accessor_id and context are valid
-    select true
-      into _result
-      from veil2.accessor_contexts ac
-     where ac.accessor_id = become_accessor.accessor_id
-       and ac.context_type_id = become_accessor.context_type_id
-       and ac.context_id = become_accessor.context_id;
-    if found then
-      -- Create local copy of current privileges.  This is used to
-      -- ensure that we don't gain more privileges than we started
-      -- with by becoming the new user, ie <become user> privilege
-      -- should not be a mechanism for privilege escalation.
-
-      execute veil2.save_privs_as_orig();
-
-      -- Now create the session.
-      select cas.session_id, cas.session_token
-        into become_accessor.session_id, become_accessor.session_token
-        from veil2.create_accessor_session(
-             become_accessor.accessor_id, 'become',
-	     context_type_id, context_id) cas;
-
-      -- Update sessions to show which was our original session.
-      update veil2.sessions s
-         set session_supplemental = orig_session_id::text,
-	     has_authenticated = true
-       where s.session_id = become_accessor.session_id;
-
-      -- Update sessions to modify the timeout of our original session
-      update veil2.sessions s
-         set expires = now() + sp.parameter_value::interval
-        from veil2.system_parameters sp
-       where s.session_id = orig_session_id
-         and sp.parameter_name = 'shared session timeout';
-
-      -- Load the session privs as though we were the new user.
-      success := veil2.load_session_privs(session_id, accessor_id);
-      if success then
-        execute veil2.filter_privs();
-      else
-        errmsg := 'LOADPRIV';
-      end if;
-    else
-      errmsg := 'INVARGS';
-      success := false;
-    end if;
-  else
-    errmsg := 'NOPRIV';
-    success := false;
-  end if;
-end;
-$$
-language 'plpgsql' security definer volatile
-set client_min_messages = 'error';
-
-comment on function veil2.become_accessor(integer, integer, integer) is
-'Create a new opened session for the given accessor_id and context.
-This allows a suitably privileged accessor to emulate another user.
-The intended use-case for this is in testing and debugging access
-rights.  Note that the new session will not give the connected user
-more privileges than they already have, so the usage of this should
-probably be confined to superusers.  Any other user is likely to get a
-set of privileges that may be less than the user they have become
-would normally get.';
-
-
-\echo ......become_user()...
-create or replace
-function veil2.become_user(
-    username in text,
-    context_type_id in integer,
-    context_id in integer,
-    session_id out integer,
-    session_token out text,
-    success out boolean,
-    errmsg out text)
-  returns record as
-$$
-declare
-  _accessor_id integer;
-begin
-  _accessor_id := veil2.get_accessor(username, context_type_id, context_id);
-
-  select ba.session_id, ba.session_token,
-  	 ba.success, ba.errmsg
-    into become_user.session_id, become_user.session_token,
-         become_user.success, become_user.errmsg
-    from veil2.become_accessor(
-             _accessor_id, context_type_id, context_id) ba;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-comment on function veil2.become_user(text, integer, integer) is
-'See comments for become_accessor().  This is the same but takes a
-username rather than accessor_id.';
 
 
 -- Create base meta-data for veil2 schema
@@ -3928,6 +3981,8 @@ select exists (
 $$
 language sql security definer stable;
 
+--TODO: Check that this and the following is still in use and provide
+--comments 
 
 create or replace
 function veil2.have_accessor_contexts()

@@ -388,8 +388,64 @@
     </para>
     <para>
       As described in <link linkend="role_mapping">Contextual Role
-      Mapping</link> above, the role names and role->role mappings
+      Mapping</link> above, the role names and role to role mappings
       that an accessor sees may depend on their authentication context.
+    </para>
+    <para>
+      If your application serves a number of distinct customers, each
+      effectively having their own web site, then the authentication
+      context will be provided by the login page for that web site.
+      For example, if your customers are:
+      <itemizedlist spacing="compact">
+	<listitem>Alicecorp;</listitem>
+	<listitem>Bobcorp;</listitem>
+	<listitem>Carolcorp.</listitem>
+      </itemizedlist>
+      And the login pages are:
+      <itemizedlist spacing="compact">
+	<listitem><literal>
+	  https://myveilprotectedsite/Alicecorp/login;
+	</literal></listitem>
+	<listitem><literal>
+	  https://myveilprotectedsite/Bobcorp/login;
+	</literal></listitem>
+	<listitem><literal>
+	  https://myveilprotectedsite/Carolcorp/login.
+	</literal></listitem>
+      </itemizedlist>
+      Then each login page will provide different context data for the
+      authentication calls.  Assuming that we have defined a corp
+      context with a <literal>context_type_id</literal> of 3, and
+      that the <literal>accessor_ids</literal> for AliceCorp, BobCorp,
+      and CarolCorp are 42, 43, and 44 respectively, then our
+      <literal>veil2.create_session()</literal> calls for each of the
+      login pages will be as follows:
+      <itemizedlist spacing="compact">
+	<listitem>
+	  <literal>
+	    https://myveilprotectedsite/Alicecorp/login;
+	  </literal>
+	  <programlisting>
+select * from veil2.create_session(&lt;username&gt;, 4, 42);	    
+	  </programlisting>
+	</listitem>
+	<listitem>
+	  <literal>
+	    https://myveilprotectedsite/Bobcorp/login;
+	  </literal>
+	  <programlisting>
+select * from veil2.create_session(&lt;username&gt;, 4, 43);	    
+	  </programlisting>
+	</listitem>
+	<listitem>
+	  <literal>
+	    https://myveilprotectedsite/Carolcorp/login;
+	  </literal>
+	  <programlisting>
+select * from veil2.create_session(&lt;username&gt;, 4, 44);	    
+	  </programlisting>
+	</listitem>
+      </itemizedlist>
     </para>
   </sect2>
 </sect1>

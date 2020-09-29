@@ -159,19 +159,19 @@ create table demo.project_assignments (
 
 grant all on table demo.project_assignments to demouser;
 
+alter table demo.project_assignments
+  add constraint project_assignments__role_fk
+  foreign key (role_id) references veil2.roles(role_id);
+
 -- VPD SETUP
 -- Refer to the Veil2 documentation for descriptions of the STEPs
 -- below.  The numbered steps below are described in the "Setting Up A
 -- Veil2' Virtual Private Database" section.
 
--- STEP 1 is installing Veil2
+-- STEP 1 is installing Veil2, then we create the extension in this
+-- database.
 create extension veil2 cascade;
 
-\echo TODO: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-\echo Move this into the appropriate step
-alter table demo.project_assignments add constraint xyzzy
-    foreign key (role_id) references veil2.roles(role_id);
-    
 
 -- STEP 2:
 -- Define scopes

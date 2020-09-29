@@ -4,10 +4,10 @@
   <para>
     Setting up your database to use <literal>Veil2</literal> is a
     fairly straightforward process, and can be done in the following
-    stages:
+    steps:
     <orderedlist>
-      <listitem><link linkend="installation">install</link> the
-      <literal>Veil2</literal> scripts;</listitem> 
+      <listitem><link linkend="installation">install the</link>
+      <literal> Veil2</literal> extension;</listitem> 
       <listitem>identify and define your <link
       linkend="setup_scope_types">scope types</link>;</listitem>
       <listitem>choose and implement your <link
@@ -40,5 +40,277 @@
     Installation is covered in <link linkend="installation">this
     previous section</link>.  The rest follows.
   </para>
-  
+  <sect2>
+    <title>Notes on Customising the <literal>Veil2</literal>
+    Extension</title>
+    <para>
+      <literal>Veil2</literal> is, as initially installed,
+      deliberately and inevitably incomplete.  It cannot provide
+      security for your database until you start customizing it and
+      integrating it with that database.  What
+      <literal>Veil2</literal> provides is a set of mechanisms that
+      solve the standard problems of role and privilege management and
+      of associating and assigning those roles and privileges to
+      users.  It is your job to integrate this, system-provided,
+      functionality with your database schema.
+    </para>
+    <para>
+      As a PostgreSQL extension, allowing customization of
+      <literal>Veil2</literal> is something of a challenge.  The issue
+      is that <literal>Veil2</literal>'s own database objects are
+      expected by PostgreSQL to not be user-modifiable.  This is
+      primarily so that extensions can be upgraded in place using
+      standard extension mechanisms; and also so that backups taken
+      using <literal>pg_dump</literal> can allow a database to be
+      restored by simply re-installing the extension.  What this means
+      is that any modifications you make to database objects that are
+      part of the <literal>Veil2</literal> extension will be lost if
+      you restore from a <literal>pg_dump</literal> backup, or if you
+      upgrade the <literal>Veil2</literal> extension.
+    </para>
+    <para>
+      It is therefore vital that any user modifications are to objects
+      that are not owned by the extension.  To deal with this, we
+      limit the ways in which customizations to
+      <literal>Veil2</literal> are made:
+    </para>
+    <sect3 id="custom_data">
+      <title>Customized Data</title>
+      <para>
+	PostgreSQL allows tables in extensions to contain user-data.
+	Such tables must be registered with the extension mechanism
+	using
+	<literal>pg_catalog.pg_extension_config_dump()</literal>.
+	This allows a <literal>where clause</literal> to be defined
+	which specifies how to identify user-provided entries.
+      </para>
+      <para>
+	All <literal>Veil2</literal> tables are managed in this way,
+	so you can safely add your own data to them.  What you cannot
+	do is extend those tables in other ways such as by adding
+	extra columns or constraints.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Customized Functions</title>
+      <para>
+	Although most <literal>Veil2</literal> functions are not
+	expected to be modified by the user, a small number must
+	provide functionality that is specific to your database
+	schema.  This means that some functionality must be
+	user-provided.
+      </para>
+      <para>
+	The mechanism provided by <literal>Veil2</literal> to allow
+	for user-provided functionaity is to allow users to define
+	their own replacements for built-in <literal>Veil2</literal>
+	functions.  These replacement functions are owned by you
+	and are <emphasis role="bold">not</emphasis> part of the
+	<literal>Veil2</literal> extension.
+      </para>
+      <para>
+	To define your own version of a <literal>Veil2</literal>
+	function, you simply create a new function, with the same
+	function signature, in the <literal>veil2</literal> schema,
+	with the function name prepended with
+	<literal>my_</literal>.
+      </para>
+      <para>
+	The following example is from the <literal>Veil2</literal>
+	demo and redefines the <literal>veil2.get_accessor()</literal>
+	function:
+	<programlisting>
+create or replace
+function veil2.my_get_accessor(
+    username in text,
+    context_type_id in integer,
+    context_id in integer)
+  returns integer as
+$$
+declare
+  _result integer;
+begin
+  select party_id
+    into _result
+    from demo.parties_tbl p
+   where p.party_name = username
+     and p.org_id = context_id
+     and context_type_id = 4;  -- Logins are in org context
+   return _result;
+end;
+$$
+language plpgsql security definer stable leakproof;
+	</programlisting>
+	This provides an <literal>accessor_id</literal> for a user
+	based on their username and the	<link
+	linkend="authentication_context">authentication context</link>
+	for which they are logging-in.
+      </para>
+      <para>
+	Note that in use, your user-provided function will replace the
+	<literal>Veil2</literal> system-provided function.  This means
+	that the name of the function when it is executed will not
+	include the <literal>my_</literal> prefix.  You should not
+	therefore use the function name as a prefix to a parameter
+	name in order to disambiguate a reference (see <ulink
+	url="https://www.postgresql.org/docs/current/plpgsql-implementation.html">this
+	link</ulink> for more details).
+      </para>
+    </sect3>
+    <sect3 id="custom_views">
+      <title>Customized Views</title>
+      <para>
+	Much of the heavy-lifting of managing users' privileges is
+	done through views and materialized views.  By redefining
+	views, we can alter functionality and expand the range of data
+	upon which we operate.
+      </para>
+      <para>
+	For instance, the <literal>veil2.scope_promotions</literal>
+	view identifies the hierarchy of scopes for which privilege
+	promotions are available.  If we have a database which
+	provides scopes for projects and for organizations, the scope
+	promotion for a project might be to the organization which
+	owns the project.  A role assigned in a project context might
+	contain the privilege to view basic organization data, and
+	this privilege would need to be promoted to apply at the
+	organization level.  In order to perform this promotion,
+	<literal>Veil2</literal> needs to know which projects belong
+	to which organizations.  This is what the
+	<literal>scope_promotions</literal> view is intended to
+	provide, but can only do so if user-defined.
+      </para>
+      <para>
+	Just as with functions, views owned by the
+	<literal>Veil2</literal> extension cannot be safely
+	redefined, but again, as with functions, we can create
+	alternative views and have <literal>Veil2</literal> manage them.
+      </para>
+      <para>
+	To override the built-in version of a <literal>Veil2</literal>
+	view, you simply need to define a new view, in the
+	<literal>veil2</literal> schema, with the prefix
+	<literal>my_</literal>.  So, to define new functionality for
+	the view <literal>veil2.scope_promotions</literal>, you would
+	create a new view
+	<literal>veil2.my_scope_promotions</literal>.
+      </para>
+      <para>
+	As an example, here is the definition for
+	<literal>veil2.my_scope_promotions</literal> from the demo:
+	<programlisting>
+create or replace
+view veil2.my_scope_promotions (
+  scope_type_id, scope_id,
+  promoted_scope_type_id, promoted_scope_id
+) as
+select 4, party_id,  -- Promote org to corp scope
+       3, corp_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+union all
+select 4, party_id,  -- Promote root orgs within corps to corp scope
+       3, party_id
+  from demo.parties_tbl
+ where party_type_id = 2
+   and org_id = 100
+   and party_id != 100
+union all
+select 4, party_id,  -- Promotion of org to higher org
+       4, org_id
+  from demo.parties_tbl
+ where party_type_id = 2
+   and party_id != org_id
+union all
+select 5, s.scope_id,   -- Project to corp promotions
+       3, p.corp_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id
+union all
+select 5, s.scope_id,   -- Project to org promotions
+       4, p.org_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id;
+	</programlisting>
+      </para>
+    </sect3>
+    <sect3>
+      <title>Managing User-Provided Functionality</title>
+      <para>
+	To make user-provided functions and views take effect, they
+	must be installed to replace the original system-provided
+	version.  <literal>Veil2</literal> provides 4 functions for
+	low-level management of user-provided functions and views:
+	<itemizedlist>
+	  <listitem>
+	    <literal>veil2.install_user_functions()</literal>
+	    <para>
+	      This function copies all user-provided functions over
+	      their corresponding system-provided couterparts.  Before
+	      doing this, it ensures that a backup copy of the original
+	      system-provided function exists.  Any function defined
+	      in the <literal>veil2</literal> schema with a name
+	      beginning with <literal>my_</literal> that matches a
+	      function without that prefix will be copied.
+	    </para>
+	    <para>
+	      This function should be called after any modification of
+	      your user-provided functions.  It is safe to call this
+	      function any number oftimes.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <literal>veil2.restore_system_functions()</literal>
+	    <para>
+	      Should you need to restore original functions from their
+	      backup copies you should call this function.  This
+	      function exists primarily for use when upgrading the
+	      <literal>Veil2</literal> extension, but if you have
+	      mistakenly overwritten system-provided functionality
+	      with a buggy <literal>my_xxxx()</literal> function you
+	      should use this to restore the original functionality
+	      before dropping or fixing your version.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <literal>veil2.install_user_views()</literal>
+	    <para>
+	      This installs user-provided views in the same way that
+	      <literal>veil2.install_user_functions()</literal>
+	      installs user-provided functions.
+	    </para>
+	    <para>
+	      This function should be called after any modification of
+	      your user-provided views.  It is safe to call this
+	      function any number oftimes.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <literal>veil2.restore_system_views()</literal>
+	    <para>
+	      Restores the original system-provided views from backups
+	      made by <literal>veil2.install_user_views()</literal>.
+	    </para>
+	  </listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	In addition to the manual mechanisms described above, all
+	user-defined functions and views will be automatically 
+	installed by <literal>Veil2</literal> when the system-provided
+	<literal>veil2,get_accessor()</literal> function is first run.
+      </para>
+      <para>
+	This is provided primarily for the case when we restore from a
+	<literal>pg_dump</literal>-based backup.  In such a case, the
+	first attempt by a user to log in will call the
+	system-provided version of this function.  The system-provided
+	version of the function will only be in place during this
+	initiall call, and will have been replaced by the
+	user-provided version on subsequent calls.
+      </para>
+    </sect3>
+  </sect2>
 </sect1>

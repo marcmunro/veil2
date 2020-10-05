@@ -1,5 +1,5 @@
 <sect1 id="link_scopes">
-  <title>Link Your Scopes and Security Contexts</title>
+  <title>Link Your Scopes and Security Contexts (STEP 7)</title>
   <para>
     The <literal>Veil2 <link
     linkend="entity_scope">scopes</link></literal> table is the most

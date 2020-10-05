@@ -1878,9 +1878,6 @@ views.  Note that this will mean that the materialized views will not
 always be up to date, so this is a trade-off that must be evaluated.';
 
 
--- Create the VEIL2 base functions
-
-
 \echo ...creating veil2 user-provided object handling functions...
 \echo ......function_definition()...
 create or replace
@@ -2177,13 +2174,36 @@ system-provided ones.  The original versions of the system-provided
 views will be saved as backups.';
 
 
+\echo ......init()...
+create or replace
+function veil2.init() returns void as
+$$
+begin
+  perform veil2.install_user_functions();
+  perform veil2.install_user_views();
+  execute('refresh materialized view veil2.direct_role_privileges');
+  execute('refresh materialized view veil2.all_role_privs');
+  execute('refresh materialized view veil2.all_scope_promotions');
+  execute('refresh materialized view veil2.all_accessor_privs');
+end;
+$$
+language plpgsql security definer volatile;
+
+comment on function veil2.init() is
+'Perform some basic setup and reset tasks.  This creates
+user-modifiable views that are not already defined and refreshes all
+materialized views.  You should call it any time you have unexpected
+results.  If it fixes your problem then you have a problem with the
+automatic refresh of one of the materialized views.  If not, no harm
+will have been done.';
+
+
 \echo ......deferred_install()...
 create or replace
 function veil2.deferred_install_fn() returns trigger as
 $$
 begin
-  perform veil2.install_user_functions();
-  perform veil2.install_user_views();
+  perform veil2.init();
   return new;
 end;
 $$
@@ -2740,10 +2760,8 @@ begin
     from session_parameters sp;
 exception
   when sqlstate '42P01' then
-    raise notice 'FOUND SESSION %', session_id;
     return;
   when others then
-    raise notice 'NO SESSION FOUND';
     raise;
 end;
 $$
@@ -2756,8 +2774,57 @@ because we cannot create a view on the session_parameters table as it
 is a temporary table and does not always exist.';
 
 
+\echo ......session_privileges()...
+create or replace
+function veil2.session_privileges(
+    session_id out integer,
+    scope_type_id out integer,
+    scope_id out integer,
+    roles out integer[],
+    privs out integer[]
+    )
+  returns setof record as
+$$
+begin
+  for session_privileges.session_id,
+      session_privileges.scope_type_id,
+      session_privileges.scope_id,
+      session_privileges.roles,
+      session_privileges.privs
+  in select sp.session_id,  sp.scope_type_id,
+            sp.scope_id, to_array(sp.roles),
+  	    to_array(sp.privs)
+       from session_privileges sp
+  loop
+    return next;
+  end loop;
+exception
+  when sqlstate '42P01' then
+    return;
+  when others then
+    raise;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+comment on function veil2.session_privileges() is
+'Safe function to return a user-readable version of the privileges for
+the current session.  If no session exists, returns nulls.  We use a
+function in this context because we cannot create a view on the
+session_parameters table as it is a temporary table and does not
+always exist.';
+
+
+\echo ......session_privileges_info (view)...
+create or replace
+view veil2.session_privileges_info as
+select * from veil2.session_privileges();
+
+comment on view veil2.session_privileges_info is
+'Provides a user-friendly view of session_privileges.';
+
+
 \echo ...explicit_mapped_session_privs view...
--- TODO: Add to docs
 create or replace
 view veil2.explicit_mapped_session_privs as
   select aap.scope_type_id, aap.scope_id,
@@ -2772,13 +2839,15 @@ view veil2.explicit_mapped_session_privs as
 
 comment on view veil2.explicit_mapped_session_privs is
 'Lists the explicitly granted roles and privileges for the current
-session, taking into account the session''s mapping context.  This is
+session taking into account the session''s mapping context.  This is
 used in determining the privileges for the session.  It exists as a
 separate view in order to aid debugging.';
 
+revoke all on veil2.explicit_mapped_session_privs from public;
+grant select on veil2.explicit_mapped_session_privs to veil_user;
+
 
 \echo ...permitted_assignment_contexts view...
--- TODO: Add to docs
 create or replace
 view veil2.permitted_assignment_contexts as
    select asp.promoted_scope_type_id, asp.promoted_scope_id
@@ -2797,7 +2866,7 @@ view veil2.permitted_assignment_contexts as
      from veil2.session_context() sc;
 
 comment on view veil2.permitted_assignment_contexts is
-'This returns the set of assignment_contexts which are compatible with
+'This returns the set of assignment contexts which are compatible with
 our session''s login context.  Roles and privileges assigned to our
 accessor that are not part of this set will not apply within this
 session.  An accessor may therefore have completely different sets of
@@ -2805,14 +2874,16 @@ privileges when logged-in in context A, from the set they have in
 context B, even including privileges that have been promoted to global
 scope.
 
-The system-provided version of this view allows a user to be gain
+The system-provided version of this view allows a user to obtain
 privileges from roles assigned in both superior and inferior
 contexts.  What it blocks are privileges from roles assigned in
 sibling or cousin contexts.';
 
+revoke all on veil2.permitted_assignment_contexts from public;
+grant select on veil2.permitted_assignment_contexts to veil_user;
+
 
 \echo ...explicit_session_privs (view)...
--- TODO: Add to docs
 create or replace
 view veil2.explicit_session_privs as
   select p.scope_type_id, p.scope_id,
@@ -2832,6 +2903,9 @@ view veil2.explicit_session_privs as
 comment on view veil2.explicit_session_privs is
 'Identify the set of explicitly granted roles and privileges for the
 connected session.';
+
+revoke all on veil2.explicit_session_privs from public;
+grant select on veil2.explicit_session_privs to veil_user;
 
 
 \echo ......load_session_privs()...
@@ -3835,6 +3909,19 @@ comment on policy system_parameter__select on veil2.system_parameters is
 (assigned in global context) in order to see the data in this table.'; 
 
 
+\echo ......deferred_install...
+
+alter table veil2.deferred_install enable row level security;
+
+create policy deferred_install__all
+    on veil2.deferred_install;
+
+comment on policy deferred_install__all on veil2.deferred_install is
+'No access to this table should be given to normal users';
+
+revoke all on veil2.deferred_install from public;
+
+
 -- Deal with tables that implementors and administrators are expected
 -- to update.
 
@@ -3968,9 +4055,10 @@ select pg_catalog.pg_extension_config_dump(
 -- Functions for checking implementation status.  These are to help
 -- security model implementors.
 
-\echo ....Functions for checking implementation status...
+\echo ...Functions for checking implementation status...
+\echo ......have_user_scope_types()...
 create or replace 
-function veil2.have_user_defined_scopes()
+function veil2.have_user_scope_types()
   returns boolean as
 $$
 -- Have we defined new scope_types:
@@ -3981,117 +4069,12 @@ select exists (
 $$
 language sql security definer stable;
 
---TODO: Check that this and the following is still in use and provide
---comments 
-
-create or replace
-function veil2.have_accessor_contexts()
-  returns boolean as
-$$
--- Does the accessor_contexts view exist?
-select exists (
-  select null
-    from pg_catalog.pg_class c
-   inner join pg_catalog.pg_namespace n
-      on n.oid = c.relnamespace
-   where n.nspname = 'veil2'
-     and c.relname = 'accessor_contexts'
-     and c.relkind = 'v');
-$$
-language sql security definer stable;
-
-create or replace
-function veil2.have_accessor_contexts_comment()
-  returns boolean as
-$$
--- Does the accessor_contexts view exist?
-select pg_catalog.obj_description(c.oid) is not null
-  from pg_catalog.pg_class c
- inner join pg_catalog.pg_namespace n
-    on n.oid = c.relnamespace
- where n.nspname = 'veil2'
-   and c.relname = 'accessor_contexts'
-   and c.relkind = 'v';
-$$
-language sql security definer stable;
+comment on function veil2.have_user_scope_types() is
+'Predicate used to determine whether user-defined scope_types have been
+added to the implementation.';
 
 
-create or replace
-function veil2.define_accessor_contexts()
-  returns void as
-$$
-begin
-  if not veil2.have_accessor_contexts() then
-    execute('create view veil2.accessor_contexts (
-                 accessor_id, context_type_id, context_id
-             ) as
-	       select accessor_id, 1, 0
-	         from veil2.accessors');
-  end if;
-  if not veil2.have_accessor_contexts_comment() then
-    execute($__$
-   comment on view veil2.accessor_contexts is
-'This view lists the allowed session contexts for accessors.  When an
-accessor opens a session, they choose a session context.  This session
-context determines which set of role->role mappings are in play.
-Typically, there will only be one such set, as provided by the default
-implementation of this view.  If however, your application requires
-separate contexts to have different role->role mappings, you should
-modify this view to map your accessors with that context.
-
-Typically this will be used in a situation where your application
-serves a number of different clients, each of which have their own
-role definitions.  Each accessor will belong to one of those clients
-and this view should be modified to make that mapping apparent.
-
-A typical view definition might be:
-  select party_id, 3, client_id
-    from app_schema.parties
-   union all 
-  select party_id, 1, 0
-    from mycorp_schema.superusers;
-
-which would allow those defined in the superusers table to connect in
-the global context, and those defined in the parties table to connect
-in the context of the client that they work for.'
-$__$);
-  end if;
-end;
-$$
-language plpgsql security definer volatile;
-
-comment on function veil2.define_accessor_contexts() is
-'Creates, a dummy version of the accessor_contexts view if it has not
-already been defined.  Also creates a comment for the view if there is
-not already one in place.  This exists to create and comment the view
-which an implementor is supposed to replace.  The view is not created
-as part of the extension as this would make it too difficult to
-modify.'; 
-
-
-create or replace
-function veil2.init() returns void as
-$$
-begin
-  perform veil2.define_accessor_contexts();
-  execute('refresh materialized view veil2.direct_role_privileges');
-  execute('refresh materialized view veil2.all_role_privs');
-  execute('refresh materialized view veil2.all_scope_promotions');
-  execute('refresh materialized view veil2.all_accessor_privs');
-end;
-$$
-language plpgsql security definer volatile;
-
-comment on function veil2.init() is
-'Perform some basic setup and reset tasks.  This creates
-user-modifiable views that are not already defined and refreshes all
-materialized views.  You should call it any time you have unexpected
-results.  If it fixes your problem then you have a problem with the
-automatic refresh of one of the materialized views.  If not, no harm
-will have been done.';
-
-
-
+\echo ......have_user_user_privileges()...
 create or replace
 function veil2.have_user_privileges()
   returns boolean as
@@ -4104,7 +4087,12 @@ select exists (
 $$
 language sql security definer volatile;
 
+comment on function veil2.have_user_privileges() is
+'Predicate used to determine whether any user-defined privileges have
+been created.';
 
+
+\echo ......have_user_user_roles()...
 create or replace
 function veil2.have_user_roles()
   returns boolean as
@@ -4117,7 +4105,12 @@ select exists (
 $$
 language sql security definer volatile;
 
+comment on function veil2.have_user_roles() is
+'Predicate used to determine whether any user-defined roles have
+been created.';
 
+
+\echo ......have_role_privileges()...
 create or replace
 function veil2.have_role_privileges()
   returns boolean as
@@ -4130,6 +4123,12 @@ select exists (
 $$
 language sql security definer volatile;
 
+comment on function veil2.have_role_privileges() is
+'Predicate used to determine whether any user-defined role_privileges
+have been created.';
+
+
+\echo ......have_role_roles()...
 create or replace
 function veil2.have_role_roles()
   returns boolean as
@@ -4140,6 +4139,12 @@ select exists (
 $$
 language sql security definer volatile;
 
+comment on function veil2.have_role_roles() is
+'Predicate used to determine whether any user-defined role_roles (role
+to role mappings) have been created.';
+
+
+\echo ......have_accessors()...
 create or replace
 function veil2.have_accessors()
   returns boolean as
@@ -4150,7 +4155,11 @@ select exists (
 $$
 language sql security definer volatile;
 
+comment on function veil2.have_accessors() is
+'Predicate used to determine whether any accessors have been defined.';
 
+
+\echo ......have_user_scopes()...
 create or replace
 function veil2.have_user_scopes ()
   returns boolean as
@@ -4163,7 +4172,12 @@ select exists (
 $$
 language sql security definer volatile;
 
+comment on function veil2.have_user_scopes() is
+'Predicate used to determine whether any user-defined scopes have been
+created.';
 
+
+\echo ......check_table_security()...
 create or replace
 function veil2.check_table_security()
   returns setof text as
@@ -4195,9 +4209,14 @@ end;
 $$
 language plpgsql security definer stable;
 
+comment on function veil2.check_table_security() is
+'Predicate used to determine whether all user-defined tables have
+security policies in place.';
 
+
+\echo ......implementation_status()...
 create or replace
-function veil2.my_status()
+function veil2.implementation_status()
   returns setof text as
 $$
 declare
@@ -4205,7 +4224,7 @@ declare
   line text;
 begin
   perform veil2.init();
-  if not veil2.have_user_defined_scopes() then
+  if not veil2.have_user_scope_types() then
     ok := false;
     return next 'You need to define some relational scopes (step 2)';
   end if;
@@ -4261,5 +4280,12 @@ end;
 $$
 language plpgsql security definer volatile;
 
+comment on function veil2.implementation_status() is
+'Set returning function that identifies incomplete
+user-implementations.
+
+Call this using select * from veil2.implementation_status();
+
+and it will return a list of things to implement or consider implementing.';
 
 

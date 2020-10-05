@@ -1,5 +1,6 @@
 <sect1 id="setup_accessors">
-  <title>Link Your Users To <literal>Veil2</literal>'s Accessors</title>
+  <title>Link Your Users To <literal>Veil2</literal>'s Accessors (STEP
+  6)</title>
   <para>
     Unlike the situation with roles, <literal>Veil2</literal>'s
     accessors are probably not going to be usable in place of your

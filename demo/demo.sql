@@ -331,11 +331,15 @@ values (7, 5, 1, 0),
        (10, 11, 1, 0),
        (10, 12, 1, 0);
 
+
 -- STEP 6:
 -- Create FK links for veil2.accessors to the demo database tables.
 -- These ensure that veil2.accessors and veil2.authentication_details
 -- are kept in step with the demo parties_tbl table.
 --
+
+xxxxx
+
 alter table veil2.accessors add constraint accessor__party_fk
   foreign key (accessor_id) references demo.parties_tbl (party_id)
   on delete cascade on update cascade;
@@ -427,6 +431,8 @@ create trigger parties_tbl_aut after update on demo.parties_tbl
   
 comment on trigger parties_tbl_aut on demo.parties_tbl is
 'Ensure password changes get propagated to veil2.authentication_details';
+
+select * from veil2.implementation_status();
 
 -- STEP 7:
 -- Link scopes back to the database being secured.
@@ -541,6 +547,9 @@ refresh materialized view veil2.all_accessor_privs;
 -- within the organizational hierarchy.
 
 \echo TODO: DOCUMENT THAT THIS IS NOT TO BE MODIFIED ON EXTENSION UPGRADE
+
+--- CHANGING THIS BREAKS THINGS FOR SIMON!
+
 create or replace
 view veil2.my_scope_promotions (
   scope_type_id, scope_id,
@@ -575,8 +584,6 @@ select 5, s.scope_id,   -- Project to org promotions
   from demo.projects p
  inner join veil2.scopes s
     on s.project_id = p.project_id;
-
-refresh materialized view veil2.all_scope_promotions;
 
 -- STEP 9:
 -- Add row level security on our objects.
@@ -765,9 +772,7 @@ update veil2.authentication_details
        authentication_type = 'bcrypt'
  where accessor_id = 108;
 
---select veil2.install_user_functions();
---select veil2.install_user_views();
-
+select veil2.init();
 \c vpd demouser
 
 -- Log Alice in.

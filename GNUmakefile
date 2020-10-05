@@ -130,7 +130,7 @@ extracts.d:
 	    `bin/extract_sql.sh -d docs docs/extracts | \
 	     cut -d: -f1 | xargs`" >>$@
 
-INTERMEDIATE_FILES += extracts.d
+INTERMEDIATE_FILES += extracts.d 
 
 # Phony target for extracts - makes it easier to build for test and
 # development purposes.
@@ -145,7 +145,7 @@ docs/extracts: $(DATA)
 	@bin/extract_sql.sh docs docs/extracts
 	@touch $@
 
-TARGET_FILES += $(EXTRACTS)
+TARGET_FILES += $(EXTRACTS) docs/extracts/*xml
 TARGET_DIRS += docs/extracts
 
 # Handle the generation of diagrams and coordinate maps.  Coordinate

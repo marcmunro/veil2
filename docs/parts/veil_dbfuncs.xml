@@ -34,6 +34,9 @@
 	<link linkend="func_install_user_views">install_user_views()</link>;
       </listitem>
       <listitem>
+	<link linkend="func_init">init()</link>;
+      </listitem>
+      <listitem>
 	<link linkend="func_deferred_install_fn">deferred_install_fn()</link>.
       </listitem>
     </itemizedlist>
@@ -80,6 +83,9 @@
       </listitem> 
       <listitem>
 	<link linkend="func_session_context">session_context()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_session_privileges">session_privileges()</link>;
       </listitem> 
       <listitem>
 	<link linkend="func_load_session_privs">load_session_privs()</link>;
@@ -145,7 +151,33 @@
     Functions for checking the status of your <literal>Veil2</literal>
     secured database implementation:
     <itemizedlist>
-      TODO
+      <listitem>
+	<link linkend="func_have_user_scope_types">have_user_scope_types()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_have_user_privileges">have_user_privileges()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_have_user_roles">have_user_roles()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_have_role_privileges">have_role_privileges()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_have_role_roles">have_role_roles()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_have_accessors">have_accessors()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_have_user_scopes">have_user_scopes()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_check_table_security">check_table_security()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_implementation_status">implementation_status()</link>.
+      </listitem> 
     </itemizedlist>
   </para>
 
@@ -186,6 +218,10 @@
     <sect3 id="func_install_user_views">
       <title><literal>install_user_views()</literal></title>
       <?sql-definition function veil2.install_user_views sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_init">
+      <title><literal>init()</literal></title>
+      <?sql-definition function veil2.init sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3 id="func_deferred_install_fn">
       <title><literal>deferred_install_fn()</literal></title>
@@ -248,6 +284,10 @@
     <sect3 id="func_session_context">
       <title><literal>session_context()</literal></title>
       <?sql-definition function veil2.session_context sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_session_privileges">
+      <title><literal>session_privileges()</literal></title>
+      <?sql-definition function veil2.session_privileges sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3 id="func_load_session_privs">
       <title><literal>load_session_privs()</literal></title>
@@ -342,6 +382,45 @@
 	<title><literal>role_privileges__aiudt</literal></title>
 	<?sql-definition trigger role_privileges__aiudt sql/veil2--&version_number;.sql ?>
       </sect4>
+    </sect3>
+  </sect2>
+  <sect2 id="implementation_check_functions">
+    <title>Functions For Checking Your Implementation</title>
+    <sect3 id="func_have_user_scope_types">
+      <title><literal>have_user_scope_types()</literal></title>
+      <?sql-definition function veil2.have_user_scope_types sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_have_user_privileges">
+      <title><literal>have_user_privileges()</literal></title>
+      <?sql-definition function veil2.have_user_privileges sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_have_user_roles">
+      <title><literal>have_user_roles()</literal></title>
+      <?sql-definition function veil2.have_user_roles sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_have_role_privileges">
+      <title><literal>have_role_privileges()</literal></title>
+      <?sql-definition function veil2.have_role_privileges sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_have_role_roles">
+      <title><literal>have_role_roles()</literal></title>
+      <?sql-definition function veil2.have_role_roles sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_have_accessors">
+      <title><literal>have_accessors()</literal></title>
+      <?sql-definition function veil2.have_accessors sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_have_user_scopes">
+      <title><literal>have_user_scopes()</literal></title>
+      <?sql-definition function veil2.have_user_scopes sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_check_table_security">
+      <title><literal>check_table_security()</literal></title>
+      <?sql-definition function veil2.check_table_security sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_implementation_status">
+      <title><literal>implementation_status()</literal></title>
+      <?sql-definition function veil2.implementation_status sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
 </sect1>

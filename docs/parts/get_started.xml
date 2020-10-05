@@ -12,6 +12,15 @@ dbname# create extension veil2 cascade;
     <literal>Veil2</literal>'s extension dependencies are also
     installed.
   </para>
+  <para>
+    As an alterantive you could just run the sql script that is part
+    of the extension.  The author can see no value in doing this
+    though unless you want to hack on <literal>Veil2</literal>
+    internals.  You are, of course, quite welcome to do this and the
+    author would be pleased to chat with you about it.  By all means,
+    release your own, improved, fork, or contribute fixes and
+    improvements back to the author.
+  </para>
   <sect2 id="compatibility">
     <title>Compatible PostgreSQL versions</title>
     <para>
@@ -103,7 +112,8 @@ $ sudo make install
 	If you want to hack on <literal>Veil2</literal>, please do.
 	You will find the <literal>GNUmakefile</literal> file in
 	the <literal>Veil2</literal> root directory a good place to
-	start looking.
+	start looking into its components and how it all fits
+	together.
       </para>
       <para>
 	Since <literal>Veil2</literal> is entirely implemented in
@@ -212,6 +222,8 @@ all tests passed.
 	<programlisting>
 $ make drop TESTDB=whateverdbnameyoulike
 	</programlisting>
+	Be quite sure that you want to drop this database.  DO NOT DO
+	THIS ON A PRODUCTION SERVER.
       </para>
       <para>
 	If you are in an environment without <literal>make</literal>
@@ -247,6 +259,12 @@ $ psql -d whateverdbnameyoulike -f demo/demo.sql
       This installs the demo database, and links it to the
       <literal>Veil2</literal> database objects.  The demo database is
       now ready to use.
+    </para>
+    <para>
+      It is worth looking at the source code,
+      <literal>demo/demo.sql</literal>, for the demo as it provides
+      examples of most of the steps you will need to follow to
+      implement your own solution.
     </para>
     <sect3 id="demouser-access">
       <title>Allowing Access For The Demo User</title>

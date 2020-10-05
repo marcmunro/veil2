@@ -1,5 +1,5 @@
 <sect1 id="setup_authent">
-  <title>Setting Up Authentication and Session Management</title>
+  <title>Setting Up Authentication and Session Management (STEP 3)</title>
   <para>
     <literal>Veil2</literal> provides built-in mechanisms for
     authentication and session management.  You can choose to use
@@ -72,14 +72,23 @@
       If your users do not all authenticate in the same context you
       will need to redefine the <literal><link
       linkend="view_accessor_contexts">veil2.accessor_contexts</link></literal>
-      view.  This view associates accessors with <link
-      linkend="authentication_context">authentication
-      contexts</link>.  Step 3 in the demo provides a good example of
-      this.
+      view by defining your own version
+      <literal>veil2.my_accessor_contexts</literal>.  This view
+      associates accessors with <link
+      linkend="authentication_context">authentication contexts</link>.
+      Step 3 in the demo provides a good example of this.
+    </para>
+    <para>
+      To make your version of the view take effect, as described <link
+      linkend="use_func_init">here</link>, use the <literal><link
+      linkend="func_init">veil2.init()</link></literal> function:
+      <programlisting>
+vpd=$ select veil2.init();
+      </programlisting>
     </para>
   </sect2>
   <sect2>
-    <title>Define Your <literal>get_accessor()</literal> Function</title>
+    <title>Define Your <literal>my_get_accessor()</literal> Function</title>
     <para>
       For user authentication purposes <literal>Veil2</literal> needs
       the <literal>accessor_id</literal> for the <literal><link
@@ -92,7 +101,13 @@
       <literal>accessor_id</literal> for a username.  The
       <literal>
 	<link linkend="func_get_accessor">get_accessor()</link></literal>
-      function is that function. 
+      function is that function.
+    </para>
+    <para>
+      Your version of this function will be called
+      <literal>veil2.my_get_accessor()</literal>.  As described above
+      you make it current by calling <literal><link
+      linkend="func_init">veil2.init()</link></literal>.
     </para>
   </sect2>
   <sect2 id="session_management">
@@ -212,8 +227,9 @@ select * from session where result = 0;
 	</programlisting>
 	<para>
 	  For an example of this, take a look at the
-	  <literal>Veil2</literal> unit tests.  The database user
-	  <literal>veil2_alice</literal> is set up as a dedicated
+	  <literal>Veil2</literal> unit tests (in file
+	  <literal>tests/test_session.sql</literal>).  The database
+	  user <literal>veil2_alice</literal> is set up as a dedicated
 	  session user (as well as a shared session user).
 	</para>
       </para>
@@ -241,10 +257,12 @@ select * from session where result = 0;
       </listitem>
       <listitem>
 	<para>
-	  Implement <literal><link
+	  Redefine <literal><link
 	  linkend="func_get_accessor">get_accessor()</link></literal>
-	  to retrieve <literal>accessor_id</literal>s based on
-	  usernames or whatever.
+	  by implementing your own
+	  <literal>veil.my_get_accessor()</literal> function to
+	  retrieve <literal>accessor_id</literal>s based on usernames
+	  or whatever.
 	</para>
       </listitem>
       <listitem>

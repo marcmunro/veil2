@@ -1,5 +1,5 @@
 <sect1 id="setup_roles">
-  <title>Integrate And/Or Create Roles</title>
+  <title>Integrate And/Or Create Roles (STEP 5)</title>
   <para>
     The demo chooses to use only <literal>Veil2</literal>'s role
     tables for its roles implementation.  This makes things very
@@ -37,21 +37,12 @@
 	      small.
 	    </para>
 	    <para>
-	      Probably the best way to do this is to add a column to
-	      <literal>veil2.roles</literal> which references your
-	      existing roles table.  Use a foreign key relationship to
-	      ensure that the <literal>Veil2</literal> table is kept
-	      in step with your existing table.  Use the <literal>on
-	      delete cascade</literal> and <literal>on update
-	      cascade</literal> clauses to the foreign key.
-	    </para>
-	    <para>
-	      You will also need an insert trigger on the existing
-	      roles table to populate <literal>veil2.roles</literal>
-	      when new roles are created.  This trigger needs to be
-	      smart enough to create contiguous
-	      <literal>role_id</literal>s and re-use any deleted ones
-	      in order to keep the role bitmaps reasonably small.
+	      You will need to create a table that maps between 
+	      <literal>veil2.roles</literal> and your database's roles
+	      table(s).  Use foreign key relationships and triggers to
+	      ensure that your mapping table is kept in step with your
+	      existing table and the <literal>veil2.roles</literal>
+	      table. 
 	    </para>
 	    <para>
 	      For some examples of how the triggers can be constructed
@@ -80,9 +71,7 @@
       <para>
 	The key to this is to use views and instead-of triggers to
 	make the <literal>Veil2</literal> table function in the same
-	way as your existing table.  You will probably need to add
-	columns to <literal>veil2.roles</literal> and you will need to
-	change many existing foreign key relationships.
+	way as your existing table.
       </para>
       <para>
 	As with the previous option, this will require some serious
@@ -96,8 +85,7 @@
       <para>
 	This is conceptually the simplest approach but the amount of
 	work will very much depend on your existing system and its
-	needs.  Remember: you can add whatever columns you need to
-	<literal>veil2.roles</literal>.
+	needs.
       </para>
       <para>
 	The demo chooses to use <literal>Veil2</literal>'s

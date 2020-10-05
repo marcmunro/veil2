@@ -9,27 +9,26 @@
   <para>
     It links to your database through functions, triggers and foreign
     keys, and provides fast mechanisms to identify, load and test a
-    user's privileges.  Much of this is easily extensible through
-    built-in mechanisms but even where it is not, you should feel free
-    to modify the code yourself to match your needs.
+    user's privileges.
   </para>
-  <para id="hack-it-yourself">
+  <para>
     It is important to realize at this point that
-    <literal>Veil2</literal> is not an application or a product.  It
-    is a foundation for <emphasis>you</emphasis> to build on.  If there
-    are updates or bug-fixes they will be to specific pieces of
-    functionality which you can choose to replace piecemeal or not at
-    all (this document will be updated to describe each such update
-    in detail).  There is no rolling-release or automated update
-    for you to worry about breaking, and all of its parts are
-    user-serviceable.  You will not void your warranty by tweaking it
-    as there is no warranty.  Once you have taken it out of the box it
-    is yours and you can and should (subject to the terms of the GPL
-    V3) treat it as such.  You are expected to add columns to the
-    tables, and add new tables and new functionality.  You are
-    expected to add to the session management functions to meet your
-    own requirements (but if you want to distribute your changes,
-    they must be under the same license).  So have at it!
+    <literal>Veil2</literal> is not a complete application or a
+    product: it cannot be used stand-alone and can only be integrated
+    into your database by careful work on your part.  You will need to
+    define the links between <literal>Veil2</literal> and your
+    database schema, and you will need to provide
+    <literal>Veil2</literal> with customized functions and views to
+    make this integration work.
+  </para>
+  <para>
+    To aid in this, <literal>Veil2</literal> provides for
+    user-provided views and functions to take precedence over the
+    built-in system-provided ones.  This mechanism aims to provide
+    maximum flexibility while still allowing <literal>Veil2</literal>
+    to be distributed as a PostgreSQL extension.  This means that
+    <literal>Veil2</literal> bug-fixes and upgrades can be easily
+    applied to your database without breaking your customizations.
   </para>
   <para>
     There is various documentation to help you with this:
@@ -48,7 +47,7 @@
     your implementation.
   </para>
   <sect2>
-    <title>How Does It Work?</title>
+    <title>How It Works - An Overview</title>
     <para>
       <literal>Veil2</literal> works by:
       <itemizedlist>
@@ -71,8 +70,12 @@
       What this means is that when Alice tries to select the user
       record for Bob, Alice will only see that record if she has been
       assigned the necessary privilege to view Bob's user record in an
-      appropriate context.  As each user's privilege assignments will
+      appropriate scope.  As each user's privilege assignments will
       be different, each user will see a different subset of data.
+    </para>
+    <para>
+      The following sections provide more detail on each of the above
+      list items.
     </para>
     <sect3>
       <title>Knowing The User</title>
@@ -86,11 +89,13 @@
 	If they are not, the user will have access to no data.
       </para>
       <para>
-	By calling the appropriate session management functions, with
-	appropriate authentication tokens, <literal>Veil2</literal>
-	session parameters will be set up in temporary tables.  These
-	session parameters include session privileges with one record
-	for each scope in which the user has such privileges.
+	By calling the appropriate session management functions with
+	appropriate authentication tokens, a <literal>Veil2</literal>
+	session will be created.  This causes session parameters to be
+	set up in temporary tables from which they can be quickly
+	retrieved.  These session parameters include session
+	privileges with one record for each scope in which the user
+	has privileges.
       </para>
       <para>
 	The set of privileges in each scope is stored in a single
@@ -99,29 +104,29 @@
 	privilege.  Tests for the presence of a privilege in a bitmap
 	are very fast.
       </para>
-      <para>
-	At the start of each session, the user's privileges are
-	determined.  This is based upon the roles that have been
-	assigned to them, and the contexts of those role assignments.
-	To make this process as fast as possible a number of
-	materialized views are used which map roles to their sets of
-	privileges in various contexts.  By loading from these
-	materialized views, the overhead of determining a large set of
-	potential privileges is much reduced, and since the
-	materialized views record sets of privileges in bitmaps,
-	rather than individual records, this overhead becomes quite
-	manageable.  The materialized views are automatically updated
-	whenever role->role and role->privilege assignments are
-	modified which will tend to be relatively infrequently.
-      </para>
     </sect3>
     <sect3>
       <title>Contextual Privileges Per User</title>
       <para>
-	Each privilege assigned to a user operates within a scope that
+	At the start of each session, the user's privileges are
+	determined based upon the roles that have been assigned to
+	them, and the contexts of those role assignments.  To make
+	this process as fast as possible, a number of materialized
+	views are used which map roles to their sets of privileges in
+	various contexts.  By loading from these materialized views,
+	the overhead of determining a large set of potential
+	privileges is much reduced, and since the materialized views
+	record sets of privileges in bitmaps rather than individual
+	records, this overhead becomes quite manageable.  The
+	materialized views are automatically updated whenever
+	role->role and role->privilege assignments are modified which
+	should be relatively infrequently.
+      </para>
+      <para>
+	Each privilege assigned to a user acts within a scope that
 	depends on the context in which it was assigned.  Some
 	scopes will allow all records in a table to be seen or
-	manipulated and some will allow large, small or smaller
+	manipulated, and some will allow large, small or smaller
 	subsets of data to be seen.
       </para>
     </sect3>
@@ -132,7 +137,7 @@
 	in a bitmap, and tests for the presence of a privilege in the
 	bitmap are very fast.  The security rules for a relation will
 	typically be defined something like this (from the demo):
-	<programlisting>
+	<programlisting id="table_security_example">
 alter table demo.projects enable row level security;
 
 create policy projects__select
@@ -146,10 +151,11 @@ create policy projects__select
       </para>
       <para>
 	Each of the test functions is checking whether the user has
-	the privilege, <literal>select projects</literal>, to view the
-	current record.  Tests are made in global scope, then corp
-	scope of the owning corp, then org scope of the owning org,
-	and finally in project scope of the project itself.  Each of 
+	the privilege, <literal>select projects</literal> (privilege
+	21), to view the current record.  Tests are made in global
+	scope, then corp scope (scope type 3) of the owning corp, then
+	org scope (scope type 4) of the owning org, and finally in
+	project scope (scope type 5) of the project itself.  Each of
 	these tests causes a different bitmap in the users session
 	privileges to be checked.
       </para>
@@ -159,14 +165,64 @@ create policy projects__select
 	small compared with the cost of retrieving the record in the
 	first place and will often be effectively unmeasurable.
       </para>
+      <para>
+	Note that you should not rely solely on the VPD implementation
+	to limit the number of records returned from a query to your
+	user.  Your application should be constructing
+	<literal>where</literal>-clauses that only return records that
+	your user is entitled to see.  That is, your
+	<literal>Veil2</literal> implementation should act as a final 
+	back-stop safety check, and not as, a hidden, part of your
+	system's functionality.
+      </para>
+      <para>
+	There are 2 reasons for this:
+	<orderedlist>
+	  <listitem>
+	    performance;
+	    <para>
+	      Relying on <literal>Veil2</literal> to filter unsuitable
+	      records means that your <literal>where</literal>-clauses
+	      are essentially incomplete, which in turn means that the
+	      RDBMS has not been given all of the information that it
+	      needs in order to best optimize your queries.
+	    </para>
+	    <para>
+	      Furthermore, if <literal>Veil2</literal> is
+	      filtering-out records from the result-set then we are
+	      unnecessarily retrieving those records, and are having
+	      to process them in order to determine their
+	      unsuitability.  This is an unncessary overhead.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    security.
+	    <para>
+	      If our queries are running slower than they should
+	      because <literal>Veil2</literal> is having to filter-out
+	      unsuitable records, it may be possible for an attacker
+	      to use a timing attack to determine the existence of
+	      records they are not entitled to see.
+	    </para>
+	    <para>
+	      For the truly security conscious, you may want to modify
+	      the privilege testing functions so that attempts to view
+	      records to which you have no access, result in logs
+	      being recorded.  Such logs would be essentially unusable
+	      and would become a significant overhead, if significant
+	      numbers of queries required results to be filtered.
+	    </para>
+	  </listitem>
+	</orderedlist>
+      </para>
     </sect3>
     <sect3>
       <title>Individually Securing Each Relation</title>
       <para>
 	Every table and view is given its own individual security
-	definition.  For tables, they will be much as shown above but
+	definition.  For tables, they will be much as shown <link linkend="table_security_example">above</link> but
 	will include definitions for insert, update and delete as well
-	as select, as shown above.
+	as select.
       </para>
       <para>
 	Views are secured in a similar way, but with the privilege
@@ -208,10 +264,11 @@ create policy projects__select
       <title>Integration of Role Handling</title>
       <para>
 	<literal>Veil2</literal> has its own view of what roles should
-	do and look like.  If your own system uses roles for its
-	existing access control purposes, you will have to somehow
-	integrate your system's role requirements with those of
-	<literal>Veil2</literal>.  You essentially have three choices:
+	do and what they should look like.  If your own system uses
+	roles for its existing access control purposes, you will have
+	to somehow integrate your system's role requirements with
+	those of <literal>Veil2</literal>.  You essentially have three
+	choices:
 	<itemizedlist>
 	  <listitem>
 	    <para>
@@ -242,20 +299,13 @@ create policy projects__select
 	      <literal>Veil2</literal> roles. 
 	    </para>
 	    <para>
-	      As with the previous option you will probably need to
-	      extend the <literal>Veil2</literal> tables to add extra
-	      fields for the needs of your existing system.  The
-	      advantage of this is that you will end up with a cleaner
-	      system, with fewer moving parts.  The downside is that
-	      your applications will probably require more refactoring.
+	      The advantage of this is that you will end up with a
+	      cleaner system, with fewer moving parts.  The downside
+	      is that your applications will probably require more
+	      refactoring.
 	    </para>
 	  </listitem>
 	</itemizedlist>
-      </para>
-      <para>
-	This, depending on how it is tackled, has the potential to be
-	the most difficult and invasive of all the changes you will
-	need to make.
       </para>
     </sect3>
     <sect3>
@@ -284,10 +334,10 @@ create policy projects__select
 	You will be applying access control to each relation in your
 	system.  Some of them may benefit from data denormalization to
 	improve the performance of the security tests.  Typically you
-	may want to add ownership columns to some tables so that
-	ownership can be determined without the need for extra joins.
-	If an access control function has to perform extra queries for
-	each row returned, performance may suffer.
+	may want to add ownership columns to some of your tables so
+	that ownership can be determined without the need for extra
+	joins.  If an access control function has to perform extra
+	queries for each row returned, performance may suffer.
       </para>
     </sect3>
     <sect3>

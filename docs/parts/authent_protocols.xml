@@ -644,10 +644,12 @@
     <title>Dedicated Database Sessions</title>
     <para>
       If you are accessing your secured database using dedicated
-      database connections, things are much simpler.  With a dedicated
-      database connection you are the sole user of the connection, and
-      there is no need for a complex create-open-close protocol dance,
-      to prevent your credentials from being used by someone else.
+      database connections, things are much simpler than for <link
+      linkend="shared_session_management">shared sessions</link>.
+      With a dedicated database connection you are the sole user of
+      the connection, and there is no need for a complex
+      create-open-close protocol dance, to prevent your credentials
+      from being used by someone else.
     </para>
     <para>
       Typically, dedicated database connections will be used for

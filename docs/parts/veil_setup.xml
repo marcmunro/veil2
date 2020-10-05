@@ -294,6 +294,19 @@ select 5, s.scope_id,   -- Project to org promotions
 	      made by <literal>veil2.install_user_views()</literal>.
 	    </para>
 	  </listitem>
+	  <listitem id="use_func_init">
+	    <literal>veil2.init()</literal>
+	    <para>
+	      This installs all user-provided views and functions and
+	      also refreshes all materialized views.  Call this
+	      function any time that you modify one of your
+	      user-provided views or functions.  This will install
+	      your latest versions and ensure that everything is ready
+	      to go.  This function can safely be called any time that
+	      you may doubt whether you have the latest versions of
+	      your views and functions in use.
+	    </para>
+	  </listitem>
 	</itemizedlist>
       </para>
       <para>
@@ -312,5 +325,36 @@ select 5, s.scope_id,   -- Project to org promotions
 	user-provided version on subsequent calls.
       </para>
     </sect3>
+  </sect2>
+  <sect2>
+    <title>Checking The State of Your Implementation</title>
+    <para>
+      There are a significant number of steps needed to complete your
+      implementation.  To help you track your progress, and determine
+      which steps have still to be taken, you can call the function
+      <literal><link
+		   linkend="func_implementation_status">implementation_status()</link></literal>.
+      This function returns records for each steps that have still to
+      be performed.  Note that it cannot tell you anything about the
+      <emphasis>correctness</emphasis> of your implementation; it just
+      helps you to identify what steps you have not yet begun.
+    </para>
+    <para>
+      Here is an example of its output, from the demo before step 7 is
+      performed:
+      <programlisting>
+	                  implementation_status                  
+---------------------------------------------------------
+ You need to create user scopes (step 7)
+ You need to redefine the scope_promotions view (step 8)
+ The following tables have no security policies:
+     - demo.projects
+     - demo.project_assignments
+     - demo.party_types
+     - demo.parties_tbl
+(8 rows)
+
+      </programlisting>
+    </para>
   </sect2>
 </sect1>

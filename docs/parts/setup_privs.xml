@@ -1,5 +1,5 @@
 <sect1 id="setup_privs">
-  <title>Create Initial Privileges</title>
+  <title>Create Initial Privileges (STEP 4)</title>
   <para>
     This is a pretty simple step.  As a starting point, we should
     create data access privileges for each table and view in our
@@ -15,7 +15,7 @@
     manually (do not use a sequence), and if you need to delete some
     privileges, try to subsequently re-use the original ids.  Note
     that <literal>Veil2</literal> defines a number of its own
-    privileges.  They should generally be left alone.
+    privileges.  They should be left alone.
   </para>
   <para>
     At this point you need to make the decision for each relation
@@ -26,9 +26,8 @@
   <para>
     You may find that you are unable to determine a suitable scope for
     some relations.  If so, leave it as null.  When you test your
-    system, with an unprivileged use, you will probably have no access
-    to this relation, and the scope that it needs will become
-    apparent.
+    system with an unprivileged user, you will have no access to this
+    relation, and the scope that it needs will become apparent.
   </para>
   <para>
     The demo sets a (very) minimal set of privileges.  Look for STEP 4

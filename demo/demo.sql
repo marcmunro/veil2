@@ -338,18 +338,30 @@ values (7, 5, 1, 0),
 -- are kept in step with the demo parties_tbl table.
 --
 
-xxxxx
+-- We cannot add the FK directly to the accessors table as the new fk
+-- would not be preserved by a restore from pg_dump.  Instead we have
+-- to create a new table.
 
-alter table veil2.accessors add constraint accessor__party_fk
-  foreign key (accessor_id) references demo.parties_tbl (party_id)
-  on delete cascade on update cascade;
+create table veil2.accessor_party_map (
+  accessor_id		integer not null
+);
 
-comment on constraint accessor__party_fk on veil2.accessors is
-'FK to parties_tbl.  This ensures that updates and deletes in parties_tbl are
-propagated to veil2.accessors.  This is to ensure that all users in
-parties_tbl are known to veil2 for the purpose of authentication, etc.';
+alter table veil2.accessor_party_map
+  add constraint accessor_party_map__pk
+  primary key(accessor_id);
+  
+alter table veil2.accessor_party_map
+  add constraint accessor_party_map__accessor_fk
+  foreign key(accessor_id)
+  references veil2.accessors(accessor_id)
+  on delete cascade;
 
--- Create triggers on demo.parties_tbl to populate veil2.accessors
+alter table veil2.accessor_party_map
+  add constraint accessor_party_map__party_fk
+  foreign key(accessor_id)
+  references demo.parties_tbl (party_id);
+  
+-- Create triggers on demo.parties_tbl to keep veil2.accessors in step.
 create or replace
 function demo.parties_tbl_ai () returns trigger as
 $$
@@ -357,6 +369,12 @@ begin
   insert
     into veil2.accessors
         (accessor_id, username)
+  select new.party_id, new.party_name
+   where new.party_type_id = 1;
+
+  insert
+    into veil2.accessor_party_map
+        (accessor_id)
   select new.party_id, new.party_name
    where new.party_type_id = 1;
 
@@ -382,7 +400,10 @@ create trigger parties_tbl_ait after insert on demo.parties_tbl
   
 comment on trigger parties_tbl_ait on demo.parties_tbl is
 'Ensure inserts into demo.parties_tbl, get propagated to veil2.accessors';
-  
+
+-- WE SHOULD ALSO HANDLE UPDATES TO THE PARTY_ID AND DELETIONS.  THIS
+-- IS LEFT AS AN EXERCISE FOR THE READER.
+
 -- Create initial accessor records from current parties_tbl records
 insert into veil2.accessors
       (accessor_id, username)

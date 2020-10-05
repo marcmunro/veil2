@@ -36,22 +36,17 @@
   <sect2>
     <title>Create Foreign-Key Links to Your Users</title>
     <para>
-      For each user table that you have you will need to create a
-      foreign key link from <literal><link
-      linkend="entity_accessor">veil2.accessors</link></literal>.  If
-      you have multiple users tables this will be more complex, but
-      the aim is to have a single accessor entry for each user.
+      You will need to create a link between each of your user tables
+      and the <literal>veil2.accessors</literal> table.  Typically you
+      will create one or more mapping tables, with triggers to ensure
+      that changes in your user tables are propagated to
+      <literal>veil2.accessors</literal> and
+      <literal>veil2.authentication_details</literal>.
     </para>
     <para>
       You may be able to use the same id for
       <literal>accessors</literal> as you currently use for for your
       users table.  Do so if you can.  The demo does this.
-    </para>
-    <para>
-      You should use the <literal>on delete cascade</literal> and
-      <literal>on update cascade</literal> options on the foreign key
-      constraint so that updates and deletions on your users table are
-      reflected in <literal>veil2.accessors</literal>.
     </para>
     <para>
       Take a look at the code for the demo (in
@@ -66,11 +61,6 @@
       <literal>veil2.accessors</literal> records to also be created.
       Insert triggers on your users tables will achieve this.  A fine
       example can be found in the demo.
-    </para>
-    <para>
-      Note that you do not need update and delete triggers as long as
-      you create your FK with the <literal>on delete cascade</literal>
-      and <literal>on update cascade</literal> options.
     </para>
   </sect2>
   <sect2>

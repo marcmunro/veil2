@@ -10,9 +10,9 @@
     contexts</link> provided or implied by the data model.
   </para>
   <para>
-    The simplest, and recommended, way to implement these links is by
-    adding foreign-key columns and relationships to the <literal>Veil2
-    <link linkend="entity_scope">scopes</link></literal> table.
+    The recommended, way to implement these links is by extending the
+    scopes table using inheritence, and adding foreign-key columns and
+    relationships to the new table.
   </para>
   <para>
     Look for STEP 7 in the file <literal>demo/demo.sql</literal>.
@@ -20,18 +20,23 @@
   <sect2>
     <title>Create Foreign Key Links</title>
     <para>
-      For each relational security context, you will add columns to
-      the <literal>scopes</literal> table.  For instance if you have a
-      project context based on a user's membership of projects, and
-      you <literal>project</literal> table has an integer
+      You will start by creating a table that inherits from
+      <literal>veil2.scopes</literal>.  To this you will add columns
+      that reference your tables.  For instance if you have a project
+      context based on a user's membership of projects, and you
+      <literal>project</literal> table has an integer
       <literal>project_id</literal> field as its primary key, you
       would do the following:
       <programlisting>
-alter table veil2.scopes
-  add column project_id integer;
+create table veil2.scope_links (
+  project_id integer
+) inherits (veil2.scopes);
 
-alter table veil2.scopes
-  add constraint scope__project_fk
+-- You will need to create PK and FK constraints to match those in the 
+-- parent veil2.scopes table.
+
+alter table veil2.scope_links
+  add constraint scope_link__project_fk
   foreign key (project_id)
   references projects(project_id)
   on update cascade on delete cascade;
@@ -48,7 +53,7 @@ alter table veil2.scopes
       with the appropriate scope type.  A check constraint like the
       following should be used:
       <programlisting>
-alter table veil2.scopes
+alter table veil2.scope_links
   add constraint scope__check_project_fk_type
   check (case when scope_type_id = 6 then
               project_id is not null
@@ -74,7 +79,7 @@ alter table veil2.scopes
       projects.  Something like this:
       <programlisting>
 insert 
-  into veil2.scopes
+  into veil2.scope_links
       (scope_type_id, scope_id, project_id)
 select 6, nextval('veil2.scope_id_seq'), project_id
   from projects p
@@ -95,10 +100,11 @@ select 6, nextval('veil2.scope_id_seq'), project_id
   <sect2>
     <title>In Summary</title>
     <para>
-      For each relational context you will add foreign key columns,
-      create foreign key and check constraints, create an insert
-      trigger and populate the <literal>scopes</literal> table
-      records.
+      You will extend the <literal>veil2.scopes</literal> table using
+      inheritence and then for each relational context you will add
+      foreign key columns, create foreign key and check constraints,
+      create an insert trigger and populate the
+      <literal>scopes</literal> table records.
     </para>
   </sect2>
 </sect1>

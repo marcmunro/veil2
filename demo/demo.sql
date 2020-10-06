@@ -458,40 +458,53 @@ select * from veil2.implementation_status();
 -- STEP 7:
 -- Link scopes back to the database being secured.
 
+create table veil2.scope_links (
+  party_id 	integer,
+  project_id	integer
+) inherits (veil2.scopes);
 
--- 5.1 Parties:
---     this handles corp and org contexts
+alter table veil2.scope_links add constraint scope_link__pk
+  primary key(scope_type_id, scope_id);
 
+alter table veil2.scope_links add constraint scope_link__type_fk
+  foreign key(scope_type_id)
+  references veil2.scope_types;
 
-alter table veil2.scopes
-  add column party_id integer;
-
-comment on column veil2.scopes.party_id is
-'Foreign key column to parties_tbl for use in corp and org contexts.';
-
-alter table veil2.scopes
-  add constraint scope__party_fk
+alter table veil2.scope_links
+  add constraint scope_link__party_fk
   foreign key (party_id)
   references demo.parties_tbl(party_id)
   on update cascade on delete cascade;
 
-comment on constraint scope__party_fk on veil2.scopes is
-'FK to parties_tbl for contexts that are party-specific.';
+alter table veil2.scope_links
+  add constraint scope_link__project_fk
+  foreign key (project_id)
+  references demo.projects(project_id)
+  on update cascade on delete cascade;
 
-alter table veil2.scopes
-  add constraint scope__check_fk_type
-  check (case when scope_type_id in (3, 4) then
+comment on column veil2.scope_links.party_id is
+'Foreign key column to parties_tbl for use in corp and org contexts.';
+
+comment on column veil2.scope_links.project_id is
+'Foreign key column to projects for use in project context.';
+
+alter table veil2.scope_links
+  add constraint scope_link__check_fk_type
+  check (case
+         when scope_type_id in (3, 4) then
               party_id is not null
+	 when scope_type_id = 5 then
+	      project_id is not null
 	 else true end);
 
-comment on constraint scope__check_fk_type
-  on veil2.scopes is
-'Ensure that party-specific contexts have an FK.';
+comment on constraint scope_link__check_fk_type
+  on veil2.scope_links is
+'Ensure that party or project-specific contexts have an appropriate FK.';
 
 
 -- Create initial security contexts
 insert
-  into veil2.scopes
+  into veil2.scope_links
       (scope_type_id, scope_id, party_id)
 select 3, party_id, party_id  -- These are all corp scopes
   from demo.parties_tbl
@@ -499,42 +512,28 @@ select 3, party_id, party_id  -- These are all corp scopes
    and org_id = 100;     -- root corp or first level below root
 
 insert
-  into veil2.scopes
+  into veil2.scope_links
       (scope_type_id, scope_id, party_id)
 select 4, party_id, party_id  -- These are all org scopes
   from demo.parties_tbl
  where party_type_id = 2;  -- This includes corps which are also orgs
 
--- READER EXERCISE: create insert triggers on parties_tbl for new corps
--- and orgs. 
-
--- 5.2 Projects:
---     this handles project context
-alter table veil2.scopes
-  add column project_id integer;
-
-comment on column veil2.scopes.project_id is
-'Foreign key column to projects for use in project context.';
-
-alter table veil2.scopes
-  add constraint scope__project_fk
-  foreign key (project_id)
-  references demo.projects(project_id)
-  on update cascade on delete cascade;
-
 insert
-  into veil2.scopes
+  into veil2.scope_links
       (scope_type_id, scope_id, project_id)
 select 5, project_id, project_id
   from demo.projects;
 
--- Now we redefine all_accessor_roles to include project assignments.
+-- READER EXERCISE: create triggers on parties_tbl and projects for
+-- to automatically propagate inserts updates and deletes back to the
+-- scope_links tables.
+
+
+-- Now we define all_accessor_roles to include project assignments.
 -- With this done, the veil2.load_session_privs() function will see
 -- the project_assignments and add these to the set of privileges seen
 -- for a connected user.
 
-\echo TODO: DOCUMENT THAT THIS IS NOT TO BE MODIFIED ON EXTENSION UPGRADE
-\echo ALSO ANY PREVIOUSLY MODIFIED VIEWS
 create or replace
 view veil2.all_accessor_roles (
   accessor_id, role_id, context_type_id, context_id
@@ -597,13 +596,13 @@ union all
 select 5, s.scope_id,   -- Project to corp promotions
        3, p.corp_id
   from demo.projects p
- inner join veil2.scopes s
+ inner join veil2.scope_links s
     on s.project_id = p.project_id
 union all
 select 5, s.scope_id,   -- Project to org promotions
        4, p.org_id
   from demo.projects p
- inner join veil2.scopes s
+ inner join veil2.scope_links s
     on s.project_id = p.project_id;
 
 -- STEP 9:
@@ -774,7 +773,7 @@ values (1, 114, 10),  -- S.1 Simon, pm
        (1, 117, 7),   -- S.1 Steve, member (employee)
        (2, 117, 7);   -- S2.1 Steve, member (employee)
 
-select * from veil2.my_status();
+select * from veil2.implementation_status();
 
 -- TESTS
 

@@ -97,28 +97,36 @@ project.  This table as created by the Veil2 database creation scripts
 is incomplete.  It needs additional columns to link itself with the
 scopes it is protecting.
 
-For each relational scope type that you create, you should create
-foreign key relationships from this table back to your protected
-database.  There are a number of ways to do this.  Probably the
-simplest is to add nullable columns to this table for each type of
+Your implementation must link this scopes table to the tables in your
+database that provide your scopes.  For instance a users table or a
+projects table.
+
+The approved method for linking your tables to the veil2 scopes table
+is by defining your own veil2 table that inherits from scopes.  Your
+inherited table will provide foreign key relationships back to your
+protected database.  There are a number of ways to do this.  Probably
+the simplest is to add nullable columns to this table for each type of
 relational context key and then add appropriate foreign key and check
 constraints.
 
 For example to implement a corp context with a foreign key back to your
 corporations table:
 
-    alter table veil2.scopes 
-      add column corp_id integer;
+    create table veil2.scope_corps (
+      column corp_id integer
+    ) inherits (veil2.scopes);
 
-    alter table veil2.scopes 
-      add constraint scope__corp_fk
+    -- create pk and fks for the new table based on those for veil2.scopes
+
+    alter table veil2.scope_corps_link
+      add constraint scope_corps__corp_fk
       foreign key (corp_id)
       references my_schema.corporations(corp_id);
 
     -- Ensure that for corp context types we have a corp_id
     -- (assume corp_context has scope_type_id = 3)
-    alter table veil2.scopes 
-      add constraint scope__corp_chk
+    alter table veil2.scope_corps 
+      add constraint scope_corp__corp_chk
       check ((scope_type_id != 3) 
           or ((scope_type_id = 3) and (corp_id is not null)));
 
@@ -145,6 +153,45 @@ data.  This might be a party, or a project, or a department.';
 
 revoke all on veil2.scopes from public;
 grant select on veil2.scopes to veil_user;
+
+
+\echo ......context_exists_chk() (function)...
+create or replace
+function veil2.context_exists_chk()
+  -- Expected TG_ARGS is _trg_name text
+  returns trigger as
+$$
+begin
+  if not exists (
+      select null
+        from veil2.scopes a
+       where a.scope_type_id = new.context_type_id
+         and a.scope_id = new.context_id)
+  then
+    -- Pseudo Integrity Constraint Violation
+    raise using
+            message = TG_OP || ' on table "' ||
+	    	      TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME ||
+		      '" violates foreign key constraint "' ||
+		      TG_ARGV[0] || '"',
+		detail = 'Key (scope_type_id, scope_id)=(' ||
+		         new.context_type_id || ', ' ||
+			 new.context_id || 
+			 ') is not present in table "veil2.scopes"',
+		errcode = '23503';
+  end if;
+  return new;
+end;
+$$
+language 'plpgsql' security definer stable;
+
+-- TODO: Add to docs
+-- TODO: add for other context and scope fks.
+comment on function veil2.context_exists_chk() is
+'Trigger to be used instead of FK-constraints against the scopes
+table.  This is because we expect to use inheritence to extend the
+scopes table to contain references to user-provided tables, and
+inheritencs does not work well with foreign-key constraints.';
 
 
 \echo ......privileges...
@@ -326,18 +373,17 @@ alter table veil2.context_roles add constraint context_role__role_fk
   foreign key(role_id)
   references veil2.roles(role_id);
 
-alter table veil2.context_roles add constraint context_role__context_fk
-  foreign key(context_type_id, context_id)
-  references veil2.scopes(scope_type_id, scope_id)
-  on delete cascade on update cascade;
+create trigger context_role__context_fk
+  before insert or update on veil2.context_roles
+  for each row execute function
+    veil2.context_exists_chk('context_role__context_fk');
 
-comment on constraint context_role__context_fk
-  on veil2.context_roles is
-'Since contexts may be updated or deleted as a result of transactions
-in our secured database, we must allow such updates or deletions to
-cascade to this table as well.  The point of this is that the
-application need not know about fk relationships that are internal to
-Veil2.';
+comment on trigger context_role__context_fk on veil2.context_roles is
+'This trigger is in place of a foreign-key constraint against the
+scopes table.  We use this rather than the FK as we expect the scopes
+table to be extended through inheritence which does not play nicely
+with FK-constraints.';
+
 
 revoke all on veil2.context_roles  from public;
 grant select on veil2.context_roles to veil_user;
@@ -422,10 +468,16 @@ alter table veil2.role_roles
   foreign key(assigned_role_id)
   references veil2.roles(role_id);
 
-alter table veil2.role_roles
-  add constraint role_role__context_fk
-  foreign key(context_type_id, context_id)
-  references veil2.scopes(scope_type_id, scope_id);
+create trigger role_role__context_fk
+  before insert or update on veil2.role_roles
+  for each row execute function
+    veil2.context_exists_chk('role_role__context_fk');
+
+comment on trigger role_role__context_fk on veil2.role_roles is
+'This trigger is in place of a foreign-key constraint against the
+scopes table.  We use this rather than the FK as we expect the scopes
+table to be extended through inheritence which does not play nicely
+with FK-constraints.';
 
 revoke all on veil2.role_roles from public;
 grant select on veil2.role_roles to veil_user;
@@ -623,19 +675,17 @@ cascade to this table as well.  The point of this is that the
 application need not know about fk relationships that are internal to
 Veil2.';
 
-alter table veil2.accessor_roles
-  add constraint accessor_role__context_fk
-  foreign key(context_type_id, context_id)
-   references veil2.scopes(scope_type_id, scope_id)
-   on delete cascade on update cascade;
+create trigger accessor_role__context_fk
+  before insert or update on veil2.accessor_roles
+  for each row execute function
+    veil2.context_exists_chk('accessor_role__context_fk');
 
-comment on constraint accessor_role__context_fk
-  on veil2.accessor_roles is
-'Since contexts may be updated or deleted as a result of transactions
-in our secured database, we must allow such updates or deletions to
-cascade to this table as well.  The point of this is that the
-application need not know about fk relationships that are internal to
-Veil2.';
+comment on trigger accessor_role__context_fk on veil2.accessor_roles is
+'This trigger is in place of a foreign-key constraint against the
+scopes table.  We use this rather than the FK as we expect the scopes
+table to be extended through inheritence which does not play nicely
+with FK-constraints.';
+
 
 revoke all on veil2.accessor_roles from public;
 grant select on veil2.accessor_roles to veil_user;

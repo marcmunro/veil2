@@ -8,10 +8,17 @@
   <para>
     The scope of an assigned privilege is related to a specific subset
     of data, so that each privilege assignment will give access to
-    that specific subset.  The scope may be all-encompassing or very
-    specific.  It may give access to thousands of records; to just a
-    few; or even to none.  And privileges may be assigned multiple
-    times, in different scopes.
+    that specific data subset.  The scope may be all-encompassing or
+    very specific.  It may give access to thousands of records; to
+    just a few; or even to none.  And privileges may be assigned
+    multiple times, in different scopes.
+  </para>
+  <para>
+    For example, you may be given the <literal>select user
+    data</literal> privilege in a scope that grants you access to
+    only your user data: <emphasis>personal scope</emphasis>; or to
+    only user data for users employed in your department:
+    <emphasis>departmental scope</emphasis>. 
   </para>
   <para>
     Scopes may be created from almost any definable subset of your
@@ -20,7 +27,7 @@
     defined in terms of parties and their relationships either to
     other parties, or to specific artifacts described by your
     database.  For example, a person's relationship to the company
-    they work for, or their membership of a project team.
+    they work for, or their membership of a department or project team.
   </para>
   <para>
     Having scopes associated with privileges means that the

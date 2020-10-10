@@ -141,7 +141,7 @@
       </listitem> 
       <listitem>
 	<link
-	    linkend="func_refresh_scope_promotions">refresh_scope_promotions()</link>;
+	    linkend="func_refresh_superior_scopes">refresh_superior_scopes()</link>;
       </listitem> 
       <listitem>
 	<link
@@ -361,11 +361,11 @@
 	<?sql-definition trigger accessor_roles__aiudt sql/veil2--&version_number;.sql ?>
       </sect4>
     </sect3>
-    <sect3 id="func_refresh_scope_promotions">
+    <sect3 id="func_refresh_superior_scopes">
       <title>Refresh Scope Promotions</title>
       <sect4>
-	<title><literal>refresh_scope_promotions()</literal></title>
-	<?sql-definition function veil2.refresh_scope_promotions sql/veil2--&version_number;.sql ?>
+	<title><literal>refresh_superior_scopes()</literal></title>
+	<?sql-definition function veil2.refresh_superior_scopes sql/veil2--&version_number;.sql ?>
       </sect4>
       <sect4>
 	<title><literal>scopes__aiudt</literal></title>

@@ -71,12 +71,12 @@ create table projects (
   project_name	  text
 );
 
--- create my_scope_promotions view to show above org hierarchy and
+-- create my_superior_scopes view to show above org hierarchy and
 -- proj->dept mapping
 create or replace
-view veil2.my_scope_promotions (
+view veil2.my_superior_scopes (
   scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id
+  superior_scope_type_id, superior_scope_id
 ) as
 select s1.scope_type_id, oh.org_id,
        s2.scope_type_id, oh.superior_org_id
@@ -96,13 +96,13 @@ create trigger org_hierarchy__aiudt
   after insert or update or delete or truncate
   on org_hierarchy
   for each statement
-  execute procedure veil2.refresh_scope_promotions();
+  execute procedure veil2.refresh_superior_scopes();
 
 create trigger projects__aiudt
   after insert or update or delete or truncate
   on projects
   for each statement
-  execute procedure veil2.refresh_scope_promotions();
+  execute procedure veil2.refresh_superior_scopes();
 
 --\echo ...creating test parties...
 insert into veil2.accessors

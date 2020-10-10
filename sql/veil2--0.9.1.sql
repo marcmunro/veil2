@@ -65,11 +65,10 @@ thought of as the ''level'' of a scope.
 
 Insert one record into this table for each type of scope that you wish
 to implement.  Veil2 comes with 2 built-in scope types: for global and
-personal contexts.';
+personal scopes.';
 
 revoke all on veil2.scope_types from public;
 grant select on veil2.scope_types to veil_user;
---grant all on veil2.scope_types to demouser;
 
 
 \echo ......scopes...
@@ -1169,41 +1168,41 @@ A typical view definition might be:
     from mycorp_schema.superusers;
 
 which would allow those defined in the superusers table to connect in
-the global context, and those defined in the parties table to connect
+the global scope, and those defined in the parties table to connect
 in the context of the client that they work for.';
 
 
-\echo ......scope_promotions...
+\echo ......superior_scopes...
 create or replace
-view veil2.scope_promotions (
+view veil2.superior_scopes (
   scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id
+  superior_scope_type_id, superior_scope_id
 ) as
 select null::integer, null::integer,
        null::integer, null::integer
 where false;
 
-comment on view veil2.scope_promotions is
-'This view lists all possible direct scope promotions.  It is used
-for privilege promotion when a role that is assigned in a restricted
-security context has privileges that must be applied in a less
-restricted scope.  Note that promotion to global scope is always
-possible and is not managed through this view.
+comment on view veil2.superior_scopes is
+'This view identified superior scopes for determining the scope
+hierarchy.  This is used for determing how to promote privileges when
+privilege promotion is needed, which happens when a role that is
+assigned in a restricted security context has privileges that must be
+applied in a less restricted scope.  Note that promotion to global
+scope is always possible and is not managed through this view.
 
-VPD Implementation Notes:
-If you have restricted scopes which are sub-scopes of less
-restricted ones, and you need privilege promotion for privileges
-assigned in the restricted context to the less restricted one, you
-should redefine this view to show which scopes may be promoted to
-which other scopes.  For example if you have a corp scope type and a
-dept scope type which is a sub-scope of it, and your departments table
-identifies the corp_id for each deprtment, you would redefine your
-view something like this:
+VPD Implementation Notes: If you have restricted scopes which are
+sub-scopes of less restricted ones, and you need privilege promotion
+for privileges assigned in the restricted context to the less
+restricted one, you must override this view to show which scopes may
+be promoted to which other scopes.  For example if you have a corp
+scope type and a dept scope type which is a sub-scope of it, and your
+departments table identifies the corp_id for each deprtment, you would
+define your over-riding view something like this:
 
     create or replace
-    view veil2.scope_promotions (
+    view veil2.my_superior_scopes (
       scope_type_id, scope_id,
-      promoted_scope_type_id, promoted_scope_id
+      superior_scope_type_id, superior_scope_id
     ) as
     select 96, -- dept scope type id
            department_id,
@@ -1212,41 +1211,41 @@ view something like this:
       from departments;
 
 Note that any multi-level context promotions will be handled by
-veil2.all_scope_promotions which you should have no need to modify.';
+veil2.all_superior_scopes which you should have no need to modify.';
 
-revoke all on veil2.scope_promotions from public;
-grant select on veil2.scope_promotions to veil_user;
+revoke all on veil2.superior_scopes from public;
+grant select on veil2.superior_scopes to veil_user;
 
 
-\echo ......all_scope_promotions...
+\echo ......all_superior_scopes...
 create or replace
-view veil2.all_scope_promotions_v (
+view veil2.all_superior_scopes_v (
   scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id,
+  superior_scope_type_id, superior_scope_id,
   is_type_promotion
 ) as
-with recursive recursive_scope_promotions as
+with recursive recursive_superior_scopes as
   (
     select scope_type_id, scope_id,
-           promoted_scope_type_id, promoted_scope_id,
-	   scope_type_id != promoted_scope_type_id
-      from veil2.scope_promotions
+           superior_scope_type_id, superior_scope_id,
+	   scope_type_id != superior_scope_type_id
+      from veil2.superior_scopes
      union
     select rsp.scope_type_id, rsp.scope_id,
-           sp.promoted_scope_type_id, sp.promoted_scope_id,
-	   sp.scope_type_id != sp.promoted_scope_type_id
-      from recursive_scope_promotions rsp
-     inner join veil2.scope_promotions sp
-        on sp.scope_type_id = rsp.promoted_scope_type_id
-       and sp.scope_id = rsp.promoted_scope_id
-     where not (    sp.promoted_scope_type_id = rsp.promoted_scope_type_id
-                and sp.promoted_scope_id = rsp.promoted_scope_id)
+           sp.superior_scope_type_id, sp.superior_scope_id,
+	   sp.scope_type_id != sp.superior_scope_type_id
+      from recursive_superior_scopes rsp
+     inner join veil2.superior_scopes sp
+        on sp.scope_type_id = rsp.superior_scope_type_id
+       and sp.scope_id = rsp.superior_scope_id
+     where not (    sp.superior_scope_type_id = rsp.superior_scope_type_id
+                and sp.superior_scope_id = rsp.superior_scope_id)
   )
 select *
-  from recursive_scope_promotions;
+  from recursive_superior_scopes;
 
-comment on view veil2.all_scope_promotions_v is
-'This takes the simple custom view veil2.scope_promotions and makes it
+comment on view veil2.all_superior_scopes_v is
+'This takes the simple custom view veil2.superior_scopes and makes it
 recursive so that if context a contains scope b and scope b contains
 scope c, then this view will return rows for scope c promoting to
 both scope b and scope a.  
@@ -1256,19 +1255,19 @@ You should not need to modify this view when creating your custom VPD
 implementation.';
 
 create or replace
-view veil2.all_scope_promotions_vv as
-select * from veil2.all_scope_promotions_v;
+view veil2.all_superior_scopes_vv as
+select * from veil2.all_superior_scopes_v;
 
-comment on view veil2.all_scope_promotions_vv is
-'Exactly as veil2.all_scope_promotions_v.  The _vv suffix indicates
+comment on view veil2.all_superior_scopes_vv is
+'Exactly as veil2.all_superior_scopes_v.  The _vv suffix indicates
 that this is a true view, not relying on any materialized views.';
 
 create 
-materialized view veil2.all_scope_promotions
-as select * from veil2.all_scope_promotions_v;
+materialized view veil2.all_superior_scopes
+as select * from veil2.all_superior_scopes_v;
 
-comment on materialized view veil2.all_scope_promotions is
-'This takes the simple custom view veil2.scope_promotions and makes it
+comment on materialized view veil2.all_superior_scopes is
+'This takes the simple custom view veil2.superior_scopes and makes it
 recursive so that if context a contains context b and context b contains
 context c, then this view will return rows for context c promoting to
 both context b and context a.  
@@ -1278,12 +1277,12 @@ It is automatically refreshed when the veil2.scopes table is modified.
 You should not need to modify this view when creating your custom VPD
 implementation.'; 
 
-revoke all on veil2.all_scope_promotions from public;
-grant select on veil2.all_scope_promotions to veil_user;
-revoke all on veil2.all_scope_promotions_v from public;
-grant select on veil2.all_scope_promotions_v to veil_user;
-revoke all on veil2.all_scope_promotions_vv from public;
-grant select on veil2.all_scope_promotions_vv to veil_user;
+revoke all on veil2.all_superior_scopes from public;
+grant select on veil2.all_superior_scopes to veil_user;
+revoke all on veil2.all_superior_scopes_v from public;
+grant select on veil2.all_superior_scopes_v to veil_user;
+revoke all on veil2.all_superior_scopes_vv from public;
+grant select on veil2.all_superior_scopes_vv to veil_user;
 
 
 \echo ......scope_tree...
@@ -1293,16 +1292,16 @@ with recursive
 top_scopes as
   (
     select distinct
-           sp.promoted_scope_id as root_scope_id,
-	   sp.promoted_scope_type_id as root_scope_type_id,
+           sp.superior_scope_id as root_scope_id,
+	   sp.superior_scope_type_id as root_scope_type_id,
 	   st.scope_type_name as root_scope_type_name,
-	   st.scope_type_name || '.' || sp.promoted_scope_id as root_full_name
-      from veil2.scope_promotions sp
+	   st.scope_type_name || '.' || sp.superior_scope_id as root_full_name
+      from veil2.superior_scopes sp
      inner join veil2.scope_types st
-        on st.scope_type_id = sp.promoted_scope_type_id
-     where (sp.promoted_scope_type_id, sp.promoted_scope_id) not in (
+        on st.scope_type_id = sp.superior_scope_type_id
+     where (sp.superior_scope_type_id, sp.superior_scope_id) not in (
         select sp2.scope_type_id, sp2.scope_id
-	  from veil2.scope_promotions sp2)
+	  from veil2.superior_scopes sp2)
   ),
 recursive_part as
   (
@@ -1321,9 +1320,9 @@ recursive_part as
 	   rp.path || '(' || sp.scope_type_id || '.' || sp.scope_id || ')',
 	   length(st.scope_type_name || '.' || sp.scope_id) + path_length
       from recursive_part rp
-     inner join veil2.scope_promotions sp
-        on sp.promoted_scope_id = rp.scope_id
-       and sp.promoted_scope_type_id = rp.scope_type_id
+     inner join veil2.superior_scopes sp
+        on sp.superior_scope_id = rp.scope_id
+       and sp.superior_scope_type_id = rp.scope_type_id
      inner join veil2.scope_types st
         on st.scope_type_id = sp.scope_type_id
   )
@@ -1384,7 +1383,7 @@ select accessor_id, role_id,
 
 comment on view veil2.all_accessor_roles is
 'Provides all of an accessor''s explicit role assignments, ie it does
-not provide the personal_context role.  This view is used by the veil2
+not provide the personal_scope role.  This view is used by the veil2
 access control functions, and when adding new security context types,
 this view is all that should usually need to be modified.
 
@@ -1463,21 +1462,21 @@ promoted_privs as
     select pp.accessor_id, pp.assignment_context_type_id,
            pp.assignment_context_id, pp.mapping_context_type_id,
 	   pp.mapping_context_id, pp.privilege_id,
-	   asp.promoted_scope_type_id as promoted_scope_type_id,
-	   asp.promoted_scope_id as promoted_scope_id,
+	   asp.superior_scope_type_id as superior_scope_type_id,
+	   asp.superior_scope_id as superior_scope_id,
 	   bitmap_of(pp.privilege_id) as promoted_privs
       from promotable_privs pp
      inner join veil2.privileges p
         on p.privilege_id = pp.privilege_id
-     inner join veil2.all_scope_promotions asp
+     inner join veil2.all_superior_scopes asp
        on asp.scope_type_id = pp.assignment_context_type_id
       and asp.scope_id = pp.assignment_context_id
-      and asp.promoted_scope_type_id = p.promotion_scope_type_id
+      and asp.superior_scope_type_id = p.promotion_scope_type_id
       and asp.is_type_promotion
     group by pp.accessor_id, pp.assignment_context_type_id,
              pp.assignment_context_id, pp.mapping_context_type_id,
 	     pp.mapping_context_id, pp.privilege_id,
-	     asp.promoted_scope_type_id, asp.promoted_scope_id
+	     asp.superior_scope_type_id, asp.superior_scope_id
 )
 select accessor_id,
        -- The assignment fields give the context of the role
@@ -1510,7 +1509,7 @@ select accessor_id,
 select accessor_id,
        assignment_context_type_id, assignment_context_id,
        mapping_context_type_id, mapping_context_id, 
-       promoted_scope_type_id, promoted_scope_id,
+       superior_scope_type_id, superior_scope_id,
        null, promoted_privs, 'promoted'
   from promoted_privs;
 
@@ -1564,7 +1563,7 @@ select accessor_id,
 
 comment on view veil2.all_accessor_privs_v is
 'Show all roles and privileges assigned to all accessors in all
-contexts, excepting the implied personal context.';
+contexts, excepting the implied personal scope.';
 
 create or replace
 view veil2.all_accessor_privs_v_info (
@@ -1617,7 +1616,7 @@ materialized view veil2.all_accessor_privs
 
 comment on materialized view veil2.all_accessor_privs is
 'Show all roles and privileges assigned to all accessors in all
-contexts, excepting the implied personal context.';
+contexts, excepting the implied personal scope.';
 
 create or replace
 view veil2.all_accessor_privs_info (
@@ -1733,7 +1732,7 @@ select accessor_id, 2, 1, accessor_id
   from veil2.accessors;
 
 comment on view veil2.all_accessor_roles_plus is
-'As all_accessor_roles but also showing personal_context role for each
+'As all_accessor_roles but also showing personal_scope role for each
 accessor.  This is a developer view, aimed at development and
 debugging.';
 
@@ -1749,7 +1748,7 @@ select aar.accessor_id, rp.privilege_id,
        aar.context_id as ass_cntxt_id,
        coalesce(p.promotion_scope_type_id,
                 aar.context_type_id) as scope_type_id,
-       coalesce(asp.promoted_scope_id,
+       coalesce(asp.superior_scope_id,
 	        aar.context_id) as scope_id,
        rc.primary_role_id as ass_role_id,
        rc.assigned_role_id as priv_bearing_role_id,
@@ -1770,10 +1769,10 @@ select aar.accessor_id, rp.privilege_id,
     on rc.assigned_role_id = rp.role_id
  inner join veil2.all_accessor_roles_plus aar
     on aar.role_id = rc.primary_role_id
-  left outer join veil2.all_scope_promotions asp
+  left outer join veil2.all_superior_scopes asp
     on asp.scope_type_id = aar.context_type_id
    and asp.scope_id = aar.context_id
-   and asp.promoted_scope_type_id = p.promotion_scope_type_id
+   and asp.superior_scope_type_id = p.promotion_scope_type_id
    and asp.is_type_promotion;
 
 comment on view veil2.privilege_assignments is
@@ -1815,21 +1814,21 @@ comment on function veil2.refresh_accessor_privs() is
 data.';
 
 
-\echo ...refresh_scope_promotions()...
+\echo ...refresh_superior_scopes()...
 create or replace
-function veil2.refresh_scope_promotions()
+function veil2.refresh_superior_scopes()
   returns trigger
 as
 $$
 begin
-  refresh materialized view veil2.all_scope_promotions;
+  refresh materialized view veil2.all_superior_scopes;
   refresh materialized view veil2.all_accessor_privs;
   return new;
 end;
 $$
 language 'plpgsql' security definer volatile leakproof;
 
-comment on function veil2.refresh_scope_promotions() is
+comment on function veil2.refresh_superior_scopes() is
 'Trigger function to refresh materialized views that provide or use
 privilege promotion data.';
 
@@ -1894,7 +1893,7 @@ create trigger scopes__aiudt
   after insert or update or delete or truncate
   on veil2.scopes
   for each statement
-  execute procedure veil2.refresh_scope_promotions();
+  execute procedure veil2.refresh_superior_scopes();
 
 comment on trigger scopes__aiudt on veil2.scopes is
 'Refresh materialized views that are constructed from the
@@ -2233,7 +2232,7 @@ begin
   perform veil2.install_user_views();
   execute('refresh materialized view veil2.direct_role_privileges');
   execute('refresh materialized view veil2.all_role_privs');
-  execute('refresh materialized view veil2.all_scope_promotions');
+  execute('refresh materialized view veil2.all_superior_scopes');
   execute('refresh materialized view veil2.all_accessor_privs');
 end;
 $$
@@ -2503,17 +2502,17 @@ begin
 	 create_accessor_session.context_type_id,
 	 create_accessor_session.context_id,
          case when sp.parameter_value = '1' then 1
-         else coalesce(asp.promoted_scope_type_id,
+         else coalesce(asp.superior_scope_type_id,
 	               create_accessor_session.context_type_id) end,
          case when sp.parameter_value = '1' then 0
-         else coalesce(asp.promoted_scope_id,
+         else coalesce(asp.superior_scope_id,
 	               create_accessor_session.context_id) end,
 	 false
     from veil2.system_parameters sp
-    left outer join veil2.all_scope_promotions asp
+    left outer join veil2.all_superior_scopes asp
       on asp.scope_type_id = create_accessor_session.context_type_id
      and asp.scope_id = create_accessor_session.context_id
-     and asp.promoted_scope_type_id = sp.parameter_value::integer
+     and asp.superior_scope_type_id = sp.parameter_value::integer
      and asp.is_type_promotion
    where sp.parameter_name = 'mapping context target scope type'
   returning session_parameters.session_id,
@@ -2717,9 +2716,9 @@ begin
   superior_scopes as
     (
       select np.scope_type_id, np.scope_id,
-             asp.promoted_scope_type_id, asp.promoted_scope_id
+             asp.superior_scope_type_id, asp.superior_scope_id
         from new_privs np
-       inner join veil2.all_scope_promotions asp
+       inner join veil2.all_superior_scopes asp
           on asp.scope_type_id = np.scope_type_id
          and asp.scope_id = np.scope_id
        union
@@ -2736,8 +2735,8 @@ begin
   	   union_of(op.privs) as privs
         from superior_scopes ss
        inner join orig_privileges op
-          on op.scope_type_id = ss.promoted_scope_type_id
-         and (   op.scope_id = ss.promoted_scope_id
+          on op.scope_type_id = ss.superior_scope_type_id
+         and (   op.scope_id = ss.superior_scope_id
               or op.scope_type_id = 2)  -- Personal scope: do not test scope_id
       group by ss.scope_type_id, ss.scope_id
     ),
@@ -2896,21 +2895,31 @@ separate view in order to aid debugging.';
 revoke all on veil2.explicit_mapped_session_privs from public;
 grant select on veil2.explicit_mapped_session_privs to veil_user;
 
+\echo ...explicit_mapped_session_privs_info view...
+create or replace
+view veil2.explicit_mapped_session_privs_info as
+  select scope_type_id, scope_id,
+	 to_array(roles) as roles, to_array(privs) as privs,
+	 assignment_context_type_id, assignment_context_id
+    from veil2.explicit_mapped_session_privs;
+
+-- TODO: Comments and grants
+
 
 \echo ...permitted_assignment_contexts view...
 create or replace
 view veil2.permitted_assignment_contexts as
-   select asp.promoted_scope_type_id, asp.promoted_scope_id
+   select asp.superior_scope_type_id, asp.superior_scope_id
      from veil2.session_context() sc
-    inner join veil2.all_scope_promotions asp
+    inner join veil2.all_superior_scopes asp
        on asp.scope_type_id = sc.login_context_type_id
       and asp.scope_id = sc.login_context_id
     union all
     select asp.scope_type_id, asp.scope_id
      from veil2.session_context() sc
-    inner join veil2.all_scope_promotions asp
-       on asp.promoted_scope_type_id = sc.login_context_type_id
-      and asp.promoted_scope_id = sc.login_context_id
+    inner join veil2.all_superior_scopes asp
+       on asp.superior_scope_type_id = sc.login_context_type_id
+      and asp.superior_scope_id = sc.login_context_id
     union all
    select sc.login_context_type_id, sc.login_context_id
      from veil2.session_context() sc;
@@ -2941,12 +2950,12 @@ view veil2.explicit_session_privs as
     from veil2.session_context() sc
    cross join veil2.explicit_mapped_session_privs p
    where sc.login_context_type_id = 1  -- login context is global
-       or p.scope_type_id = 1 -- global context assignments always apply
+       or p.scope_type_id = 1 -- global scope assignments always apply
        or (p.assignment_context_type_id, -- the assignment is from a
                                          -- context at or below the
 					 -- login context 
 	   p.assignment_context_id) in
-	  (select pac.promoted_scope_type_id, pac.promoted_scope_id
+	  (select pac.superior_scope_type_id, pac.superior_scope_id
 	     from veil2.permitted_assignment_contexts pac)
    group by p.scope_type_id, p.scope_id;
 
@@ -2954,8 +2963,14 @@ comment on view veil2.explicit_session_privs is
 'Identify the set of explicitly granted roles and privileges for the
 connected session.';
 
-revoke all on veil2.explicit_session_privs from public;
-grant select on veil2.explicit_session_privs to veil_user;
+
+create or replace
+view veil2.explicit_session_privs_info as
+  select scope_type_id, scope_id,
+         to_array(roles) as roles, to_array(privs) as privs
+    from veil2.explicit_session_privs;
+
+-- TODO: comments and grants
 
 
 \echo ......load_session_privs()...
@@ -3481,7 +3496,7 @@ language 'sql' security definer stable leakproof;
 
 comment on function veil2.i_have_global_priv(integer) is
 'Predicate to determine whether the connected user has the given
-privilege in the global context.  This always returns a record.';
+privilege in the global scope.  This always returns a record.';
 
 
 \echo ......i_have_priv_in_scope()...
@@ -3521,11 +3536,11 @@ declare
 begin
   select true
     into have_priv
-    from veil2.all_scope_promotions asp
+    from veil2.all_superior_scopes asp
    cross join session_parameters p
    inner join session_privileges sp
-      on sp.scope_type_id = asp.promoted_scope_type_id
-     and sp.scope_id = asp.promoted_scope_id
+      on sp.scope_type_id = asp.superior_scope_type_id
+     and sp.scope_id = asp.superior_scope_id
    where p.is_open
      and asp.scope_type_id = _scope_type_id
      and asp.scope_id = _scope_id
@@ -3541,7 +3556,7 @@ comment on function veil2.i_have_priv_in_superior_scope(integer, integer, intege
 privilege in a scope that is superior to the given scope.  This does not
 check for the privilege in a global scope as it is assumed that such a
 test will have already been performed.  Note that due to the join on
-all_scope_promotions this function may incur some small measurable
+all_superior_scopes this function may incur some small measurable
 overhead.';
 
 
@@ -3615,18 +3630,18 @@ authenticate_bcrypt() function.';
 
 insert into veil2.scope_types
        (scope_type_id, scope_type_name, description)
-values (1, 'global context',
-        'Assignments made in the global context apply globally: that is ' ||
+values (1, 'global scope',
+        'Assignments made in the global scope apply globally: that is ' ||
 	'there are no limitions based on data ownership applied to ' ||
 	'these assignments'),
-       (2, 'personal context',
-        'Privileges assigned in personal context apply to the personal ' ||
+       (2, 'personal scope',
+        'Privileges assigned in personal scope apply to the personal ' ||
         'data of the user.  If they have the ''select_parties'' ' ||
-	'privilege assigned only in personal context, they will be ' ||
+	'privilege assigned only in personal scope, they will be ' ||
 	'able to see only their own party record.  All parties are ' || 
 	'expected to have the same rights to their own data, so we ' ||
-        'do not explicitly assign rights in personal context, instead ' ||
-	'we assume that the ''personal_context'' role has been ' ||
+        'do not explicitly assign rights in personal scope, instead ' ||
+	'we assume that the ''personal_scope'' role has been ' ||
 	'assigned to every party.  This role is special in that it ' ||
 	'should not be assigned in any other context, and so ' ||
        	'is defined as not enabled.');
@@ -3700,7 +3715,7 @@ insert into veil2.roles
        (role_id, role_name, implicit, immutable, description)
 values (0, 'connect', false, true, 'Allow minimal access to the system.'),
        (1, 'superuser', false, true, 'An all-encompassing role.'),
-       (2, 'personal_context', true, true,
+       (2, 'personal_scope', true, true,
         'An implicitly assigned, to all users, role that allows ' ||
 	'access to a user''s own information'),
        (3, 'visitor', true, false,
@@ -3717,7 +3732,7 @@ values (4, 2, 'veil2_viewer', false, true,
 insert into veil2.role_privileges
        (role_id, privilege_id)
 values (0, 0),
-       (2, 10)  -- personal_context gives select to accessors table
+       (2, 10)  -- personal_scope gives select to accessors table
        ;
 
 -- Set up veil2_viewer rights
@@ -3772,7 +3787,7 @@ create policy scope__select
 
 comment on policy scope__select on veil2.scopes is
 'Require privilege ''select scopes'' in global scope
-(assigned in global context), in order to see the data in this table.';
+(assigned in global scope), in order to see the data in this table.';
 
 
 \echo ......privileges...
@@ -3785,7 +3800,7 @@ create policy privilege__select
 
 comment on policy privilege__select on veil2.privileges is
 'Require privilege ''select privilege'' in global scope
-(assigned in global context), in order to see the data in this table.';
+(assigned in global scope), in order to see the data in this table.';
 
 
 \echo ......role_types...
@@ -3798,7 +3813,7 @@ create policy role_type__select
 
 comment on policy role_type__select on veil2.role_types is
 'Require privilege ''select role_type'' in global scope
-(assigned in global context), in order to see the data in this table.';
+(assigned in global scope), in order to see the data in this table.';
 
 
 \echo ......roles...
@@ -3811,7 +3826,7 @@ create policy role__select
 
 comment on policy role__select on veil2.roles is
 'Require privilege ''select roles'' in global scope
-(assigned in global context), in order to see the data in this table.';
+(assigned in global scope), in order to see the data in this table.';
 
 
 \echo ......context_roles...
@@ -3844,7 +3859,7 @@ create policy role_privilege__select
 
 comment on policy role_privilege__select on veil2.role_privileges is
 'Require privilege ''select role_privileges'' in global scope
-(assigned in global context), in order to see the data in this table.';
+(assigned in global scope), in order to see the data in this table.';
 
 
 \echo ......role_roles...
@@ -3877,7 +3892,7 @@ create policy accessor__select
 
 comment on policy accessor__select on veil2.accessors is
 'Require privilege ''select accessors'' in global scope
-(assigned in global context) or personal scope, in order to see the data
+(assigned in global scope) or personal scope, in order to see the data
 in this table.'; 
 
 
@@ -3893,7 +3908,7 @@ create policy authentication_type__select
 
 comment on policy authentication_type__select on veil2.authentication_types is
 'Require privilege ''select authentication_types'' in global scope
-(assigned in global context) in order to see the data in this table.'; 
+(assigned in global scope) in order to see the data in this table.'; 
 
 
 \echo ......authentication_details...
@@ -3909,7 +3924,7 @@ create policy authentication_detail__select
 comment on policy authentication_detail__select
   on veil2.authentication_details is
 'Require privilege ''select authentication_details'' in global scope
-(assigned in global context) in order to see the data in this table.'; 
+(assigned in global scope) in order to see the data in this table.'; 
 
 
 \echo ......accessor_roles...
@@ -3925,7 +3940,7 @@ create policy accessor_role__select
 
 comment on policy accessor_role__select on veil2.accessor_roles is
 'Require privilege ''select accessor_roles'' in global scope
-(assigned in global context) in order to see the data in this table.'; 
+(assigned in global scope) in order to see the data in this table.'; 
 
 
 \echo ......sessions...
@@ -3940,7 +3955,7 @@ create policy session__select
 
 comment on policy session__select on veil2.sessions is
 'Require privilege ''select sessions'' in global scope
-(assigned in global context) or personal scope, in order to see the data
+(assigned in global scope) or personal scope, in order to see the data
 in this table.'; 
 
 
@@ -3956,7 +3971,7 @@ create policy system_parameter__select
 
 comment on policy system_parameter__select on veil2.system_parameters is
 'Require privilege ''select system_parameters'' in global scope
-(assigned in global context) in order to see the data in this table.'; 
+(assigned in global scope) in order to see the data in this table.'; 
 
 
 \echo ......deferred_install...
@@ -4310,11 +4325,11 @@ begin
     ok := false;
     return next 'You need to create user scopes (step 7)';
   end if;
-  if not veil2.view_exists('my_scope_promotions') then
+  if not veil2.view_exists('my_superior_scopes') then
     ok := false;
-    return next 'You need to redefine the scope_promotions view (step 8)';
+    return next 'You need to redefine the superior_scopes view (step 8)';
   else
-    execute('refresh materialized view veil2.all_scope_promotions');
+    execute('refresh materialized view veil2.all_superior_scopes');
   end if;
   if ok then
     return next 'Your Veil2 basic implemementation seems to be complete.';

@@ -51,10 +51,10 @@
 	  linkend="view_accessor_contexts">accessor_contexts</link>;</listitem> 
       <listitem>
       <link
-	  linkend="view_scope_promotions">scope_promotions</link>;</listitem> 
+	  linkend="view_superior_scopes">superior_scopes</link>;</listitem> 
       <listitem>
       <link
-	  linkend="view_all_scope_promotions">all_scope_promotions</link>;</listitem> 
+	  linkend="view_all_superior_scopes">all_superior_scopes</link>;</listitem> 
       <listitem>
       <link
 	  linkend="view_scope_tree">scope_tree</link>;</listitem> 
@@ -156,26 +156,26 @@
       <?sql-definition view veil2.accessor_contexts sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
-  <sect2 id="view_scope_promotions">
+  <sect2 id="view_superior_scopes">
     <title>Scope Promotions View</title>
     <sect3>
-      <title><literal>scope_promotions</literal></title>
-      <?sql-definition view veil2.scope_promotions sql/veil2--&version_number;.sql ?>
+      <title><literal>superior_scopes</literal></title>
+      <?sql-definition view veil2.superior_scopes sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
-  <sect2 id="view_all_scope_promotions">
+  <sect2 id="view_all_superior_scopes">
     <title>All Scope Promotions Views</title>
     <sect3>
-      <title><literal>all_scope_promotions_vv</literal></title>
-      <?sql-definition view veil2.all_scope_promotions_vv sql/veil2--&version_number;.sql ?>
+      <title><literal>all_superior_scopes_vv</literal></title>
+      <?sql-definition view veil2.all_superior_scopes_vv sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3>
-      <title><literal>all_scope_promotions_v</literal></title>
-      <?sql-definition view veil2.all_scope_promotions_v sql/veil2--&version_number;.sql ?>
+      <title><literal>all_superior_scopes_v</literal></title>
+      <?sql-definition view veil2.all_superior_scopes_v sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3>
-      <title><literal>all_scope_promotions</literal></title>
-      <?sql-definition view veil2.all_scope_promotions sql/veil2--&version_number;.sql ?>
+      <title><literal>all_superior_scopes</literal></title>
+      <?sql-definition view veil2.all_superior_scopes sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
   <sect2 id="view_scope_tree">

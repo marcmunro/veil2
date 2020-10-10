@@ -10,9 +10,9 @@
     contexts</link> provided or implied by the data model.
   </para>
   <para>
-    The recommended, way to implement these links is by extending the
-    scopes table using inheritence, and adding foreign-key columns and
-    relationships to the new table.
+    As described below, the recommended way to implement these links
+    is by extending the scopes table using inheritence and adding
+    foreign-key columns and relationships to the new table.
   </para>
   <para>
     Look for STEP 7 in the file <literal>demo/demo.sql</literal>.
@@ -23,7 +23,7 @@
       You will start by creating a table that inherits from
       <literal>veil2.scopes</literal>.  To this you will add columns
       that reference your tables.  For instance if you have a project
-      context based on a user's membership of projects, and you
+      context based on a user's membership of projects, and your
       <literal>project</literal> table has an integer
       <literal>project_id</literal> field as its primary key, you
       would do the following:
@@ -85,16 +85,18 @@ select 6, nextval('veil2.scope_id_seq'), project_id
   from projects p
  where not exists (
     select null
-      from veil2.scopes s
+      from veil2.scope_links s
      where s.project_id = p.project_id);
       </programlisting>
       Note that you would have to create the sequence used above as
       this is not provided for you by default.
     </para>
     <para>
-      The not-exists clause is worth using as you will be able to
-      safely re-run this insert at any time if your tables get out of
-      step.
+      Although the not-exists clause in the above insert is not
+      strictly necessary as there will be no existing records in
+      <literal>scope_links</literal> when you start, it is worth
+      including as it means that you will be able to safely re-run
+      this insert at any time if your tables get out of step.
     </para>
   </sect2>
   <sect2>

@@ -28,6 +28,7 @@
 <!ENTITY setup_accessors       	SYSTEM "parts/setup_accessors.xml">
 <!ENTITY setup_context_links   	SYSTEM "parts/setup_context_links.xml">
 <!ENTITY setup_scope_promotions SYSTEM "parts/setup_scope_promotions.xml">
+<!ENTITY setup_oddities         SYSTEM "parts/setup_oddities.xml">
 <!ENTITY secure_tables          SYSTEM "parts/secure_tables.xml">
 <!ENTITY secure_views           SYSTEM "parts/secure_views.xml">
 <!ENTITY assign_roles           SYSTEM "parts/assign_roles.xml">
@@ -108,6 +109,7 @@
   &setup_accessors;
   &setup_context_links;
   &setup_scope_promotions;
+  &setup_oddities;
   &secure_tables;
   &secure_views;
   &assign_roles;

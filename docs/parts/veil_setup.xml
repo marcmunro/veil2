@@ -22,8 +22,10 @@
       linkend="setup_accessors"><literal>veil2.accessors</literal></link>;</listitem> 
       <listitem><link linkend="link_scopes">link your scopes and
       security contexts</link>;</listitem>
-      <listitem>create <link linkend="scope_promotions">scope
-      promotion</link> mechanisms;</listitem>
+      <listitem>define your <link linkend="superior_scopes">scope
+      hierarchy</link>;</listitem>
+      <listitem>deal with <link linkend="oddities">oddities and corner
+      cases</link>;</listitem> 
       <listitem><link linkend="secure_tables">secure your
       tables</link>;</listitem> 
       <listitem><link linkend="secure_views">secure your
@@ -40,7 +42,7 @@
     Installation is covered in <link linkend="installation">this
     previous section</link>.  The rest follows.
   </para>
-  <sect2>
+  <sect2 id="customization">
     <title>Notes on Customising the <literal>Veil2</literal>
     Extension</title>
     <para>
@@ -91,7 +93,7 @@
 	extra columns or constraints.
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="custom-functions">
       <title>Customized Functions</title>
       <para>
 	Although most <literal>Veil2</literal> functions are not
@@ -157,7 +159,7 @@ language plpgsql security definer stable leakproof;
 	link</ulink> for more details).
       </para>
     </sect3>
-    <sect3 id="custom_views">
+    <sect3 id="custom-views">
       <title>Customized Views</title>
       <para>
 	Much of the heavy-lifting of managing users' privileges is
@@ -166,7 +168,7 @@ language plpgsql security definer stable leakproof;
 	upon which we operate.
       </para>
       <para>
-	For instance, the <literal>veil2.scope_promotions</literal>
+	For instance, the <literal>veil2.superior_scopes</literal>
 	view identifies the hierarchy of scopes for which privilege
 	promotions are available.  If we have a database which
 	provides scopes for projects and for organizations, the scope
@@ -177,7 +179,7 @@ language plpgsql security definer stable leakproof;
 	organization level.  In order to perform this promotion,
 	<literal>Veil2</literal> needs to know which projects belong
 	to which organizations.  This is what the
-	<literal>scope_promotions</literal> view is intended to
+	<literal>superior_scopes</literal> view is intended to
 	provide, but can only do so if user-defined.
       </para>
       <para>
@@ -191,18 +193,18 @@ language plpgsql security definer stable leakproof;
 	view, you simply need to define a new view, in the
 	<literal>veil2</literal> schema, with the prefix
 	<literal>my_</literal>.  So, to define new functionality for
-	the view <literal>veil2.scope_promotions</literal>, you would
+	the view <literal>veil2.superior_scopes</literal>, you would
 	create a new view
-	<literal>veil2.my_scope_promotions</literal>.
+	<literal>veil2.my_superior_scopes</literal>.
       </para>
       <para>
 	As an example, here is the definition for
-	<literal>veil2.my_scope_promotions</literal> from the demo:
+	<literal>veil2.my_superior_scopes</literal> from the demo:
 	<programlisting>
 create or replace
-view veil2.my_scope_promotions (
+view veil2.my_superior_scopes (
   scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id
+  superior_scope_type_id, superior_scope_id
 ) as
 select 4, party_id,  -- Promote org to corp scope
        3, corp_id
@@ -346,7 +348,7 @@ select 5, s.scope_id,   -- Project to org promotions
 	                  implementation_status                  
 ---------------------------------------------------------
  You need to create user scopes (step 7)
- You need to redefine the scope_promotions view (step 8)
+ You need to redefine the superior_scopes view (step 8)
  The following tables have no security policies:
      - demo.projects
      - demo.project_assignments

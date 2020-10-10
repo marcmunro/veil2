@@ -119,7 +119,7 @@ where party_name like '%Bob%';
       application and continuing to develop it, you are likely to
       create and drop your own database objects as they change.  Be
       aware that through the <literal>veil2.accessors</literal> table
-      and <literal>veil2.scope_promotions</literal> view,
+      and <literal>veil2.superior_scopes</literal> view,
       <literal>veil2</literal> (and possibly other objects) is tightly
       coupled with your application schema. 
     </para>

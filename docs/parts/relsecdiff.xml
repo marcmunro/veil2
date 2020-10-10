@@ -149,7 +149,7 @@
     </para>
     <para>
       In a relational security model, access rights are managed in
-      multiple ways, some of them implicit:
+      multiple ways:
     </para>
     <itemizedlist>
       <listitem>
@@ -220,11 +220,11 @@
       and they should therefore be simple to administer.
     </para>
     <para>
-      Perhaps more important, is how easy it is to change a user's
+      Perhaps more important is how easy it is to change a user's
       access rights.  If we decide that a certain class of user should
       no longer have access to certain data, this can usually be
       implemented by simply changing role to role or role to
-      privileges mappings.  Normally no code ever has to be written or
+      privilege mappings.  Normally no code ever has to be written or
       modified as every single test for a user's access rights is
       implemented the same way, based upon relationships between data.
     </para>
@@ -236,8 +236,8 @@
       In our <emphasis><link
       linkend="Traditional">traditional</link></emphasis> system, all
       access controls are managed by the application.  Although this
-      will usually be a data-driven process, the decision to allow
-      access or not will often involve factors that are
+      may be a data-driven process, the decision to allow access or
+      not will often involve factors that are
       <emphasis>external</emphasis> to the database: the application
       will have to make decisions based upon rules, and those rules
       may be, at least partly, hard-coded into the application.
@@ -259,12 +259,12 @@
     <para>
       Access controls on functions are similar to the access controls
       of the traditional system.  The difference is that the database
-      provides a decision to the application, rather than (some of)
-      the data to make that decision.  The application, when
-      determining which menu entries should be greyed-out for a user
-      in the <literal>Project Management</literal> menu of
-      <literal>Project X</literal>, would execute a query something
-      like:
+      directly provides a decision to the application, rather than
+      providing (some of) the base data for the application to make
+      that decision.  The application, when determining which menu
+      entries should be greyed-out for a user in the <literal>Project
+      Management</literal> menu of <literal>Project X</literal>, would
+      execute a query something like:
       <programlisting language="sql">
 	select i_have_priv_in_scope('exec pm-menu-item1', 'Project X'),
 	       i_have_priv_in_scope('exec pm-menu-item2', 'Project X'),
@@ -291,10 +291,10 @@
       the application fails to properly limit your access, the
       database will act as a backstop.  If you have not been given
       access to a record, then no matter how you try you will not be
-      able to see or manipulate it (the fact that different users
+      able to see or manipulate it.  The fact that different users
       may see different data from the same query is why this is
       sometimes called a Virtual Private Database (VPD)
-      implementation).
+      implementation.
     </para>
     <para>
       The application is not off the hook though.  The application
@@ -311,10 +311,14 @@
     System?</title>
     <para>
       In our <emphasis><link
-      linkend="Traditional">traditional</link></emphasis> system, all
-      access controls are managed by limiting the user’s access to
-      specific functions, and the restrictions are primarily
-      implemented in code that runs on the application server.
+      linkend="Traditional">traditional</link></emphasis> system, 
+      access controls are primarily managed by limiting the user’s
+      access to specific functions, and the restrictions are primarily
+      implemented in code that runs on the application server.  Where
+      privileges are required for access to specific data,
+      <literal>where-clauses</literal> may be dynamically added to
+      queries based on those privileges or on flags whose values are
+      based on those privileges.
     </para>
     <para>
       With a relational security model, access to data is limited
@@ -331,8 +335,8 @@
       control rules are built from a common framework using a single
       set of guiding principles.  Although it is possible to implement
       special cases there is rarely any need.  This is because the
-      access control mechanisms are based on the simple mechanism of
-      privileges with scope, which is highly flexible.
+      access control mechanisms are based on the highly flexible
+      mechanism of privileges with scope.
     </para>
   </sect2>
   <sect2 id="ease_of_reasoning">

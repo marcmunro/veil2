@@ -1,7 +1,7 @@
 <sect1 id="assign_roles">
-  <title>Assign Initial Roles</title>
+  <title>Assign Initial Roles (STEP 12)</title>
   <para>
-    Finally, we assign some initial roles to users.  See STEP 11 in
+    Finally, we assign some initial roles to users.  See STEP 12 in
     file <literal>demo/demo.sql</literal>.
   </para>
   <sect2>

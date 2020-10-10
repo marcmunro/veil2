@@ -68,10 +68,10 @@ insert into demo.parties_tbl
        (party_id, party_type_id, corp_id, 
         org_id, party_name, password)
 values (100, 2, 100, 100, 'Veil Corp', null),
-       (101, 2, 100, 100, 'Secured Corp', null),
-       (102, 2, 100, 100, 'Protected Corp', null),
-       (103, 2, 100, 101, 'Secured Top Div', null),
-       (104, 2, 100, 101, 'Secured 2nd Div', null),
+       (101, 2, 101, 101, 'Secured Corp', null),
+       (102, 2, 102, 102, 'Protected Corp', null),
+       (103, 2, 101, 101, 'Secured Top Div', null),
+       (104, 2, 101, 101, 'Secured 2nd Div', null),
        (105, 2, 101, 103, 'Department S', null),
        (106, 2, 101, 103, 'Department S2', null),
        (107, 2, 101, 104, 'Department s (lower)', null),
@@ -502,15 +502,17 @@ comment on constraint scope_link__check_fk_type
 'Ensure that party or project-specific contexts have an appropriate FK.';
 
 
--- Create initial security contexts
+-- Create initial security contexts...
+-- ...for corps...
 insert
   into veil2.scope_links
       (scope_type_id, scope_id, party_id)
 select 3, party_id, party_id  -- These are all corp scopes
   from demo.parties_tbl
- where party_type_id = 2  -- organisation
-   and org_id = 100;     -- root corp or first level below root
+ where party_type_id = 2    -- organisation
+   and party_id = corp_id;  -- This is a corp
 
+-- ...for orgs...
 insert
   into veil2.scope_links
       (scope_type_id, scope_id, party_id)
@@ -518,6 +520,7 @@ select 4, party_id, party_id  -- These are all org scopes
   from demo.parties_tbl
  where party_type_id = 2;  -- This includes corps which are also orgs
 
+-- ...for projects...
 insert
   into veil2.scope_links
       (scope_type_id, scope_id, project_id)
@@ -566,32 +569,21 @@ refresh materialized view veil2.all_accessor_privs;
 -- Note that the second part of the union below allows scope promotion
 -- within the organizational hierarchy.
 
-\echo TODO: DOCUMENT THAT THIS IS NOT TO BE MODIFIED ON EXTENSION UPGRADE
-
---- CHANGING THIS BREAKS THINGS FOR SIMON!
-
 create or replace
-view veil2.my_scope_promotions (
+view veil2.my_superior_scopes (
   scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id
+  superior_scope_type_id, superior_scope_id
 ) as
 select 4, party_id,  -- Promote org to corp scope
        3, corp_id
   from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
  where party_type_id = 2
 union all
-select 4, party_id,  -- Promote root orgs within corps to corp scope
-       3, party_id
-  from demo.parties_tbl
- where party_type_id = 2
-   and org_id = 100
-   and party_id != 100
-union all
 select 4, party_id,  -- Promotion of org to higher org
        4, org_id
   from demo.parties_tbl
  where party_type_id = 2
-   and party_id != org_id
+   and party_id != org_id  -- Cannot promote to self
 union all
 select 5, s.scope_id,   -- Project to corp promotions
        3, p.corp_id
@@ -605,7 +597,61 @@ select 5, s.scope_id,   -- Project to org promotions
  inner join veil2.scope_links s
     on s.project_id = p.project_id;
 
+
 -- STEP 9:
+-- Deal with oddities and corner-cases
+
+-- The Veil Corp party is treated as a special case.  If a user is
+-- logged in to Veil Corp but has privileges assigned in the context
+-- of other Corps, they will retain all of those privileges.  This is
+-- because Veil-Corp is the owner of the demo-system and provides
+-- management services to all of the subsidiary (customer) corps.  A
+-- Veil-Corp employee should be able to perform database operations
+-- for those Corps that they have been given access rights without
+-- having to log in as a user for those corporations.
+--
+-- In the normal scheme of things, a user which has been assigned
+-- roles in a context that is not directly related to their
+-- authentication context, will appear to not have those roles.  This
+-- normal behaviour is deliberate and aims to reduce opportunities for
+-- privilege escalation.
+
+-- Customize assignment_contexts: the final select in the union below
+-- allows those users authenticating in the context of Veil Corp to
+-- retain all roles and privileges assigned in other contexts.
+create or replace
+view veil2.my_permitted_assignment_contexts as
+   select asp.superior_scope_type_id, asp.superior_scope_id
+     from veil2.session_context() sc
+    inner join veil2.all_superior_scopes asp
+       on asp.scope_type_id = sc.login_context_type_id
+      and asp.scope_id = sc.login_context_id
+    union all
+    select asp.scope_type_id, asp.scope_id
+     from veil2.session_context() sc
+    inner join veil2.all_superior_scopes asp
+       on asp.superior_scope_type_id = sc.login_context_type_id
+      and asp.superior_scope_id = sc.login_context_id
+    union all
+   select sc.login_context_type_id, sc.login_context_id
+     from veil2.session_context() sc
+    union all
+   select -- Special case for when you log in to Veil-Corp: you get
+   	  -- all of the privileges you have been assigned for other
+	  -- corps
+	  3, party_id
+     from demo.parties_tbl 
+    where party_type_id = 2
+      and party_id = corp_id  -- Party is a corp
+      and party_id != 100     -- Party is not Veil Crop
+      and exists (
+       select null
+         from veil2.session_context() sc
+        where sc.login_context_type_id = 4
+          and sc.login_context_id = 100);
+
+
+-- STEP 10:
 -- Add row level security on our objects.
 
 alter table demo.party_types enable row level security;
@@ -653,8 +699,21 @@ create policy project_assignments__select
         or veil2.i_have_priv_in_scope(21, 5, project_id)
 	or veil2.i_have_priv_in_superior_scope(21, 5, project_id));
 
+-- No access to scope_links except through triggers, etc
+create policy scope_links__all
+    on veil2.scope_links
+   for all;
 
--- STEP 10:
+alter table veil2.scope_links enable row level security;
+
+-- Ditto accessor_party_map
+create policy accessor_party_map__all
+    on veil2.accessor_party_map
+   for all;
+
+alter table veil2.accessor_party_map enable row level security;
+
+-- STEP 11:
 -- Create secured views into user-facing parts of Veil2
 -- ??????????
 -- These are:
@@ -741,7 +800,7 @@ select ar.accessor_id, r.role_name,
     or veil2.i_have_priv_in_scope(20, 4, context_id);
 
 
--- Step 11
+-- Step 12
 -- Assigning roles.
 
 -- Give all persons the connect role
@@ -793,114 +852,6 @@ update veil2.authentication_details
  where accessor_id = 108;
 
 select veil2.init();
-\c vpd demouser
 
--- Log Alice in.
-\echo Creating session for Alice...
-select *
-  from veil2.create_session('Alice', 'bcrypt', 4, 100) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd1');
-
-\echo ...Alice is a global superuser...
-
-select session_id, scope_type_id, scope_id,
-       to_array(roles) as roles, to_array(privs) as privs
-  from session_privileges ;
-
-\echo ...Alice should see all parties...
-
-select 'Alice sees: ', * from demo.parties;
-
--- Log Bob in.
-\echo Creating session for Bob...
-select *
-  from veil2.create_session('Bob', 'plaintext', 4, 101) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd2') o1
- cross join veil2.open_connection(c.session_id, 2,
-             encode(digest(c.session_token || to_hex(2), 'sha1'),
-	     	    'base64')) o2;
-
-\echo ...Bob is a superuser for secured corp...
-
-select session_id, scope_type_id, scope_id,
-       to_array(roles) as roles, to_array(privs) as privs
-  from session_privileges ;
-
-\echo ...Bob should see all parties within secured corp...
- 
-select 'Bob sees: ', * from demo.parties;
-
-
--- Log Carol in.
-\echo Creating session for Carol...
-select *
-  from veil2.create_session('Carol', 'plaintext', 4, 102) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd3') o1;
-
-\echo ...Carol is a superuser for protected corp...
-
-select session_id, scope_type_id, scope_id,
-       to_array(roles) as roles, to_array(privs) as privs
-  from session_privileges ;
-
-\echo ...Carol should see all parties within protected corp...
- 
-select 'Carol sees: ', * from demo.parties;
-
--- Log Eve in.
-\echo Creating session for Eve...
-select *
-  from veil2.create_session('Eve', 'plaintext', 4, 100) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
-
-\echo ...Eve is a superuser for secured corp and protected corp...
-
-select session_id, scope_type_id, scope_id,
-       to_array(roles) as roles, to_array(privs) as privs
-  from session_privileges ;
-
-\echo ...Eve should see all parties within both corps...
- 
-select 'Eve sees: ', * from demo.parties;
-
-
--- Log Sue in.
-\echo Creating session for Sue...
-select *
-  from veil2.create_session('Sue', 'plaintext', 4, 105) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd5') o1;
-
-\echo ...Sue is a superuser for Dept S...
-
-select session_id, scope_type_id, scope_id,
-       to_array(roles) as roles, to_array(privs) as privs
-  from session_privileges ;
-
-\echo ...Sue should see all parties within Dept S...
-
-select 'Sue sees: ', * from demo.parties;
-
--- Log Simon in.
-\echo Creating session for Simon...
-select *
-  from veil2.create_session('Simon', 'plaintext', 4, 105) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd7') o1;
-
-\echo ...Simon is a Project Manager for Project S.1...
-
-select session_id, scope_type_id, scope_id,
-       to_array(roles) as roles, to_array(privs) as privs
-  from session_privileges ;
-
-\echo ...Simon should see his own party record, and that of the org...
-select 'Simon sees: ', * from demo.parties;
-
-\echo ...Simon should see only the project he manages...
-select 'Simon sees: ', * from demo.projects;
-
-\echo ...Simon should see only assignments for the project he manages...
-select 'Simon sees: ', * from demo.project_assignments;
-
-\echo ...Simon should see only assignments for the project he manages...
-select 'Simon sees: ', * from demo.party_types;
-
+\set show_rows 0
+\ir demo_test.sql

@@ -1,5 +1,5 @@
 <sect1 id="secure_views">
-  <title>Secure Your Views</title>
+  <title>Secure Your Views (STEP 11)</title>
   <para>
     Just as with tables, user-facing views should be secured.  You can
     do this either explicitly, by adding privilege testing functions to

@@ -248,7 +248,7 @@
       get good performance.
     </para>
     <para>
-      <literal>Veil2</literal> provides 2 built-in security security
+      <literal>Veil2</literal> provides 2 built-in security 
       contexts:
     </para>
     <sect3 id="global-context">

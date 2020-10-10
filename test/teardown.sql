@@ -12,7 +12,7 @@ select accessor_id, role_id,
 select veil2.restore_system_views();
 select veil2.restore_system_functions();
 
-drop view veil2.my_scope_promotions;
+drop view veil2.my_superior_scopes;
 drop table org_hierarchy;
 delete from veil2.accessor_roles where accessor_id < 0;
 delete from veil2.authentication_details where accessor_id < 0;;

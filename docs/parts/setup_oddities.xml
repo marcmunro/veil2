@@ -1,0 +1,133 @@
+<sect1 id="oddities">
+  <title>Deal With Oddities And Corner Cases (STEP 9)</title>
+  <para>
+    For many <literal>Veil2</literal>-protected database, there will
+    be no oddities or corner-cases, for some though all of the
+    customizations done up til now will still not be enough to give
+    you the functionality you need.
+  </para>
+  <para>
+    If this is the situation you face, and you need even more
+    <link linkend="customization">customization</link>, this is the
+    time to do it.
+  </para>
+  <para>
+    In this step you will alter and extend <literal>Veil2</literal>
+    functionality by redefining built-in <link
+    linkend="custom-functions">functions</link> and <link
+    linkend="custom-views">views</link>.  Note that doing so comes
+    with a certain amount of maintenance overhead.  If you upgrade the
+    <literal>Veil2</literal> extension you will need to ensure that
+    your redefined functions and views continue to play nicely with
+    the rest of <literal>Veil2</literal>, and that they incorporate
+    any changes or bugfixes that may be appropriate if and when the
+    extension is upgraded.
+  </para>
+  <para>
+    The demo provides a useful example of this.  Look for the text
+    "STEP 9" in the file <literal>demo/demo.sql</literal>.
+  </para>
+  <sect2>
+    <title>An Example From The Veil Demo</title>
+    <para>
+      The Veil Demo application creates a database that is intended
+      for a Software as a Service (Saas) application.  Each corporate
+      customer has its own Virtual Private Database, so employees of
+      one corporation cannot see or manipulate data from other
+      corporations.
+    </para>
+    <para>
+      To ease administration, employees of the Veil Corp Corporation,
+      which owns the system, will be able to manage the data of their
+      client corporations without having to log in as employees of
+      those client corporations.  We could allow this by tweaking the
+      scope hierarchy but it is cleaner to handle this as a special
+      case.
+    </para>
+    <para>
+      What we do is customize the <literal><link
+      linkend="view_permitted_assignment_contexts">permitted_assignment_contexts</link></literal>
+      view, which is used to determine the set of assignment contexts
+      which are compatible with our session's <link
+      linkend="authentication_context">authentication context</link>.
+    </para>
+    <para>
+      Here is our custom definition:
+      <programlisting>
+create or replace
+view veil2.my_permitted_assignment_contexts as
+   select asp.superior_scope_type_id, asp.superior_scope_id
+     from veil2.session_context() sc
+    inner join veil2.all_superior_scopes asp
+       on asp.scope_type_id = sc.login_context_type_id
+      and asp.scope_id = sc.login_context_id
+    union all
+    select asp.scope_type_id, asp.scope_id
+     from veil2.session_context() sc
+    inner join veil2.all_superior_scopes asp
+       on asp.superior_scope_type_id = sc.login_context_type_id
+      and asp.superior_scope_id = sc.login_context_id
+    union all
+   select sc.login_context_type_id, sc.login_context_id
+     from veil2.session_context() sc
+    union all
+   select -- Special case for when you log in to Veil-Corp: you get
+   	  -- all of the privileges you have been assigned for other
+	  -- corps
+	  3, party_id
+     from demo.parties_tbl 
+    where party_type_id = 2
+      and party_id = corp_id  -- Party is a corp
+      and party_id != 100     -- Party is not Veil Crop
+      and exists (
+       select null
+         from veil2.session_context() sc
+        where sc.login_context_type_id = 4
+          and sc.login_context_id = 100);
+      </programlisting>
+    </para>
+    <para>
+      This adds an extra union to the existing definition.  This final
+      clause treats logins in the context of Veil Corp to be a special
+      case.  Note that if the underlying view is ever modified by an
+      extension upgrade, this view, which copies and extends the
+      underlying code, must be similarly updated.  It is
+      <emphasis>your</emphasis> responsibility to make sure this
+      happens. 
+    </para>
+    <para>
+      You may be wondering at this point how you would know that this
+      was the best way of tackling this particular problem.  The
+      answer is that you need to look in detail at the underlying code
+      for <literal>Veil2</literal>.  There are no short-cuts.  If you
+      need special functionality you are going to have to implement it
+      and figure out how to integrate it with <literal>Veil2</literal>
+      for yourself.  Though you might want to try the contact links
+      provided elsewhere in this document, as you
+      <emphasis>might</emphasis> be able to get help from the author.
+    </para>
+    <para>
+      In this case, the authors figured out that the contents of
+      <literal><link
+      linkend="entity_session_privilege">session_privileges</link></literal>
+      did not match the <literal><link
+      linkend="view_all_accessor_privs">all_accessor_privs</link></literal>
+      view for the accessor, Eve.  It became obvious that something
+      was filtering out some of Eve's privileges, so by examining the
+      authentication functions, and eventually drilling in to
+      <literal><link
+      linkend="func_load_session_privs">load_session_privs()</link></literal>,
+      we figured that the change needed would be to the view
+      <literal><link
+      linkend="view_explicit_session_privs">explicit_session_privs</link></literal>.
+      This, in turn, lead us to the view that we eventually
+      customized.
+    </para>
+    <para>
+      Note that you are not likely to really do this as the 9th step;
+      it is much more likely that you will find the need to do this
+      after you have done everything else and discovered the
+      corner-case or oddity that you had peviously overlooked.
+    </para>
+  </sect2>
+</sect1>

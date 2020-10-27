@@ -965,16 +965,15 @@ with recursive assigned_roles (
 	   bitmap(primary_role_id) + assigned_role_id as roles_encountered
       from veil2.role_roles
      union all
-    select rr.primary_role_id, ar.assigned_role_id,
-           rr.context_type_id, rr.context_id,
-	   roles_encountered + ar.assigned_role_id
-      from veil2.role_roles rr
-     inner join assigned_roles ar
-             on ar.primary_role_id = rr.assigned_role_id
-	    and (   ar.context_type_id = 1
-	         or (    ar.context_type_id = rr.context_type_id
-	             and ar.context_id = rr.context_id))
-     where not ar.roles_encountered ?  ar.assigned_role_id
+    select ar.primary_role_id, rr.assigned_role_id,
+    	   ar.context_type_id, ar.context_id,
+	   ar.roles_encountered + rr.assigned_role_id
+      from assigned_roles ar
+     inner join veil2.role_roles rr
+        on rr.primary_role_id = ar.assigned_role_id
+       and rr.context_type_id = ar.context_type_id
+       and rr.context_id = ar.context_id
+       and not ar.roles_encountered ? rr.assigned_role_id
   ),
   superuser_roles (primary_role_id, assigned_role_id) as
   (

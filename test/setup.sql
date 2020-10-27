@@ -195,6 +195,7 @@ select accessor_id, role_id,
        -6, project_id
   from project_assignments;
 
+
 create trigger project_assignments__aiudt
   after insert or update or delete or truncate
   on project_assignments

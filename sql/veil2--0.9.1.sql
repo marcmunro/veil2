@@ -1547,172 +1547,6 @@ revoke all on veil2.all_accessor_roles from public;
 grant select on veil2.all_accessor_roles to veil_user;
 
 
-\echo ......all_context_privs...
-create or replace
-view veil2.all_context_privs as
-    -- We retrieve 2 distinct pairs of context keys: one for the
-    -- scope within which the privilge applies (which for directly
-    -- assigned roles and privileges is the context of the
-    -- assignment), and one for the role->role mappings, which may be
-    -- in a different context.  Note that global_privs below are those
-    -- privs which automatically promote to global scope regardless of
-    -- the context in which they are assigned.
-with direct_privs(
-    accessor_id, assignment_context_type_id,
-    assignment_context_id, mapping_context_type_id,
-    mapping_context_id, roles,
-    privs, global_privs, promotable_privs) as
-  (
-    -- Provides all accessor roles and privs in all contexts, without
-    -- privilege promotion, identifying the context of the original
-    -- role assignment, and the context of role->role mappings.  Note
-    -- that a null mapping context should be interpreted as meaning
-    -- that the role mapping applies in all contexts.
-    select aar.accessor_id, aar.context_type_id,
-           aar.context_id, arp.mapping_context_type_id,
-           arp.mapping_context_id, union_of(arp.roles),
-           union_of(arp.privileges),
-           union_of(arp.global_privileges),
-           union_of(arp.promotable_privileges)
-      from veil2.all_accessor_roles aar
-     inner join veil2.all_role_privs arp
-        on arp.role_id = aar.role_id
-     group by aar.accessor_id, aar.context_type_id, aar.context_id,
-              arp.mapping_context_type_id, arp.mapping_context_id
-  ),
-promotable_privs as
-  (
-    -- Provides a row for each promotable privilege (ie privilege that
-    -- may be promoted).
-    select dp.accessor_id, dp.assignment_context_type_id,
-           dp.assignment_context_id, dp.mapping_context_type_id,
-           dp.mapping_context_id, 
-           bits(dp.promotable_privs) as privilege_id
-      from direct_privs dp
-     where promotable_privs is not null
-  ),
-promoted_privs as
-  (
-    -- Provides bitmaps of promoted privileges, identifying the scope
-    -- to which they have been promoted as well as the assignment and
-    -- mapping contexts.
-    select pp.accessor_id, pp.assignment_context_type_id,
-           pp.assignment_context_id, pp.mapping_context_type_id,
-	   pp.mapping_context_id, pp.privilege_id,
-	   asp.superior_scope_type_id as superior_scope_type_id,
-	   asp.superior_scope_id as superior_scope_id,
-	   bitmap_of(pp.privilege_id) as promoted_privs
-      from promotable_privs pp
-     inner join veil2.privileges p
-        on p.privilege_id = pp.privilege_id
-     inner join veil2.all_superior_scopes asp
-       on asp.scope_type_id = pp.assignment_context_type_id
-      and asp.scope_id = pp.assignment_context_id
-      and asp.superior_scope_type_id = p.promotion_scope_type_id
-      and asp.is_type_promotion
-    group by pp.accessor_id, pp.assignment_context_type_id,
-             pp.assignment_context_id, pp.mapping_context_type_id,
-	     pp.mapping_context_id, pp.privilege_id,
-	     asp.superior_scope_type_id, asp.superior_scope_id
-)
-select accessor_id,
-       -- The assignment fields give the context of the role
-       -- assignment from which the privs are derived.
-       assignment_context_type_id,
-       assignment_context_id,
-       -- The mapping fields give the scope of role->role mappings
-       -- which must map the context of the session.  If these are
-       -- null, they match all session contexts.
-       mapping_context_type_id,
-       mapping_context_id,
-       -- The scope fields give the scope within which the privilege
-       -- applies.  For direct privileges, this is the same as the
-       -- assignment context.
-       assignment_context_type_id as scope_type_id,
-       assignment_context_id as scope_id,
-       roles, privs,'direct' as source
-  from direct_privs
- union all
-       -- The following gives those privileges that have been
-       -- promoted to global scope regardless of how they were
-       -- assigned  .
-select accessor_id,
-       assignment_context_type_id, assignment_context_id,
-       mapping_context_type_id, mapping_context_id,
-       1, 0, -- Global scope
-       null, global_privs, 'global'
-  from direct_privs
- union all
-select accessor_id,
-       assignment_context_type_id, assignment_context_id,
-       mapping_context_type_id, mapping_context_id, 
-       superior_scope_type_id, superior_scope_id,
-       null, promoted_privs, 'promoted'
-  from promoted_privs;
-
-comment on view veil2.all_context_privs is
-'This is an internal view aimed to help development and debugging.
-There should be no need to give anyone other than developers any
-access to this.';
-
-create or replace
-view veil2.all_context_privs_info (
-  accessor_id, assignment_context_type_id,
-  assignment_context_id, mapping_context_type_id,
-  mapping_context_id, scope_type_id,
-  scope_id, roles,
-  privs, source) as
-select accessor_id, assignment_context_type_id,
-       assignment_context_id, mapping_context_type_id,
-       mapping_context_id, scope_type_id,
-       scope_id, to_array(roles),
-       to_array(privs), source
-  from veil2.all_context_privs;
-  
-comment on view veil2.all_context_privs_info is
-'As veil2.direct_role_privileges_v with bitmaps shown as arrays.  Info
-views are intended as developer-readable versions of the non-info
-views.';
-
-revoke all on veil2.all_context_privs from public;
-grant select on veil2.all_context_privs to veil_user;
-revoke all on veil2.all_context_privs_info from public;
-grant select on veil2.all_context_privs_info to veil_user;
-
-
-\echo ......all_accessor_privs...
-create or replace
-view veil2.all_accessor_privs_v (
-  accessor_id,
-  assignment_context_type_id, assignment_context_id,
-  mapping_context_type_id, mapping_context_id,
-  scope_type_id, scope_id,
-  roles,  privs) as
-select accessor_id,
-       assignment_context_type_id, assignment_context_id,
-       mapping_context_type_id, mapping_context_id,
-       scope_type_id, scope_id,
-       union_of(roles),  union_of(privs)
-  from veil2.all_context_privs
- group by accessor_id, assignment_context_type_id, assignment_context_id,
-  mapping_context_type_id, mapping_context_id,
-  scope_type_id, scope_id;
-
-comment on view veil2.all_accessor_privs_v is
-'Show all roles and privileges assigned to all accessors in all
-contexts, excepting the implied personal context role.';
-
-
-
-create
-materialized view veil2.all_accessor_privs
-  as select * from veil2.all_accessor_privs_v;
-
-comment on materialized view veil2.all_accessor_privs is
-'Show all roles and privileges assigned to all accessors in all
-contexts, excepting the implied personal context.';
-
-
 
 
 create or replace
@@ -2084,7 +1918,6 @@ as
 $$
 begin
   refresh materialized view veil2.all_superior_scopes;
-  --refresh materialized view veil2.all_accessor_privs;
   return new;
 end;
 $$
@@ -2104,7 +1937,6 @@ $$
 begin
   refresh materialized view veil2.direct_role_privileges;
   refresh materialized view veil2.all_role_privs;
-  --refresh materialized view veil2.all_accessor_privs;
   return new;
 end;
 $$
@@ -2477,7 +2309,6 @@ begin
   execute('refresh materialized view veil2.direct_role_privileges');
   execute('refresh materialized view veil2.all_role_privs');
   execute('refresh materialized view veil2.all_superior_scopes');
-  execute('refresh materialized view veil2.all_accessor_privs');
 end;
 $$
 language plpgsql security definer volatile;

@@ -868,9 +868,7 @@ privileges for the superuser role.  This does not show privileges
 arising from role to role assignments.
 
 This view will not normally be used; instead the materialized view
-direct_role_privileges should be used.
-
-Note the use of bitmap_of() to aggregate privilege_ids.';
+direct_role_privileges should be used.';
 
 create or replace
 view veil2.direct_role_privileges_v_info (
@@ -978,20 +976,6 @@ with recursive assigned_roles (
 	             and ar.context_id = rr.context_id))
      where not ar.roles_encountered ?  ar.assigned_role_id
   ),
-  all_assigned_roles (
-    primary_role_id, assigned_role_id,
-    context_type_id, context_id) as
-  (
-    -- to above query, add assignment of each role to itself
-    -- Since this applies in all mapping contexts, we provide null as
-    -- the context ids
-    select primary_role_id, assigned_role_id,
-           context_type_id, context_id
-      from assigned_roles
-     union all
-    select role_id, role_id, null, null
-      from veil2.roles
-  ),
   superuser_roles (primary_role_id, assigned_role_id) as
   (
     select 1, role_id
@@ -1001,7 +985,7 @@ with recursive assigned_roles (
   )
 select primary_role_id, assigned_role_id,
        context_type_id, context_id
-  from all_assigned_roles
+  from assigned_roles
  union all
 select primary_role_id, assigned_role_id,
        1, 0
@@ -1489,8 +1473,7 @@ group by st.scope_type_id;
 
 comment on view veil2.promotable_privileges is
 'Provide bitmaps of those privileges that may be promoted, mapped to the
-context types to which they should promote.  This is not used elsewhere
-in veil2 but may be useful for visualising data.';
+context types to which they should promote.';
 
 create view veil2.promotable_privileges_info (
   scope_type_id, privilege_ids)

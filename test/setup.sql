@@ -196,12 +196,6 @@ select accessor_id, role_id,
   from project_assignments;
 
 
-create trigger project_assignments__aiudt
-  after insert or update or delete or truncate
-  on project_assignments
-  for each statement
-  execute procedure veil2.refresh_accessor_privs();
-
 
 --\echo ......creating test roles...
 -- Insert some more test roles

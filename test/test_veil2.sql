@@ -53,7 +53,7 @@ select * from veil2.init();
 
 
 \if :test_views
-  \ir test_views.sql
+--  \ir test_views.sql
 \endif
 
 

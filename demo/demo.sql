@@ -469,15 +469,6 @@ select party_id, role_id, 5, project_id
 -- Ensure updates to project_assignments are reflected in the
 -- all_accessor_privs materialized view.
 
-create trigger project_assignment__aiudt
-  after insert or update or delete or truncate
-  on demo.project_assignments
-  for each statement
-  execute procedure veil2.refresh_accessor_privs();
-
--- And update the matview now.
-refresh materialized view veil2.all_accessor_privs;
-
 -- READER EXERCISE: create insert triggers on projects table for new
 -- projects. 
 

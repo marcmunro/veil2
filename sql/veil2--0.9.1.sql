@@ -2076,24 +2076,6 @@ grant select on veil2.privilege_assignments to veil_user;
 \echo ...creating materialized view refresh functions...
 
 
-\echo ...refresh_accessor_privs()...
-create or replace
-function veil2.refresh_accessor_privs()
-  returns trigger
-as
-$$
-begin
-  refresh materialized view veil2.all_accessor_privs;
-  return new;
-end;
-$$
-language 'plpgsql' security definer volatile leakproof;
-
-comment on function veil2.refresh_accessor_privs() is
-'Trigger function to refresh materialized views based on accessor_role
-data.';
-
-
 \echo ...refresh_superior_scopes()...
 create or replace
 function veil2.refresh_superior_scopes()
@@ -2102,7 +2084,7 @@ as
 $$
 begin
   refresh materialized view veil2.all_superior_scopes;
-  refresh materialized view veil2.all_accessor_privs;
+  --refresh materialized view veil2.all_accessor_privs;
   return new;
 end;
 $$
@@ -2122,7 +2104,7 @@ $$
 begin
   refresh materialized view veil2.direct_role_privileges;
   refresh materialized view veil2.all_role_privs;
-  refresh materialized view veil2.all_accessor_privs;
+  --refresh materialized view veil2.all_accessor_privs;
   return new;
 end;
 $$
@@ -2187,24 +2169,6 @@ dropped, and other mechanisms used to refresh the affected materialized
 views.  Note that this will mean that the materialized views will not
 always be up to date, so this is a trade-off that must be evaluated.';
 
-
-\echo ......on accessor_roles...
-create trigger accessor_roles__aiudt
-  after insert or update or delete or truncate
-  on veil2.accessor_roles
-  for each statement
-  execute procedure veil2.refresh_accessor_privs();
-
-comment on trigger accessor_roles__aiudt on veil2.accessor_roles is
-'Refresh materialized views that are constructed from the
-accessor_roles table.
-
-VPD Implementation Notes:
-As accessor_roles may be updated moderately frequently, the overhead of
-this trigger may prove to be significant.  If so, you may choose to
-drop it and use other mechanisms to refresh the affected materialized
-views.  Note that this will mean that the materialized views will not
-always be up to date, so this is a trade-off that must be evaluated.';
 
 
 \echo ...creating veil2 user-provided object handling functions...

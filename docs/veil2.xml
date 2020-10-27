@@ -23,10 +23,10 @@
 <!ENTITY veil_setup 	       	SYSTEM "parts/veil_setup.xml">
 <!ENTITY setup_authent         	SYSTEM "parts/setup_authent.xml">
 <!ENTITY setup_contexts        	SYSTEM "parts/setup_contexts.xml">
-<!ENTITY setup_privs           	SYSTEM "parts/setup_privs.xml">
-<!ENTITY setup_roles           	SYSTEM "parts/setup_roles.xml">
 <!ENTITY setup_accessors       	SYSTEM "parts/setup_accessors.xml">
 <!ENTITY setup_context_links   	SYSTEM "parts/setup_context_links.xml">
+<!ENTITY setup_privs           	SYSTEM "parts/setup_privs.xml">
+<!ENTITY setup_roles           	SYSTEM "parts/setup_roles.xml">
 <!ENTITY setup_scope_promotions SYSTEM "parts/setup_scope_promotions.xml">
 <!ENTITY setup_oddities         SYSTEM "parts/setup_oddities.xml">
 <!ENTITY secure_tables          SYSTEM "parts/secure_tables.xml">
@@ -104,11 +104,11 @@
   &veil_setup;
   &setup_contexts;
   &setup_authent;
-  &setup_privs;
-  &setup_roles;
   &setup_accessors;
   &setup_context_links;
   &setup_scope_promotions;
+  &setup_privs;
+  &setup_roles;
   &setup_oddities;
   &secure_tables;
   &secure_views;

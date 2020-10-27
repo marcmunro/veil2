@@ -1,5 +1,5 @@
 <sect1 id="superior_scopes">
-  <title>Define Your Scope Hierarchy (STEP 8)</title>
+  <title>Define Your Scope Hierarchy (STEP 6)</title>
   <para>
     In your database, you are likely to have a hierarchy of <link
     linkend="scopes">scopes</link>.  What this means is that one scope
@@ -42,7 +42,7 @@
     <para>
       You will define this view as the union of a number of selects.
       Each select will represent a single type of superior scope.  The
-      following example is from the demo.  See STEP 8 in the file
+      following example is from the demo.  See STEP 6 in the file
       <literal>demo/demo.sql</literal>.
       <programlisting>
 create or replace

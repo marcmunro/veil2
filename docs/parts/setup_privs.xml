@@ -1,5 +1,5 @@
 <sect1 id="setup_privs">
-  <title>Create Initial Privileges (STEP 4)</title>
+  <title>Create Initial Privileges (STEP 7)</title>
   <para>
     This is a pretty simple step.  As a starting point, we should
     create data access privileges for each table and view in our
@@ -30,7 +30,7 @@
     relation, and the scope that it needs will become apparent.
   </para>
   <para>
-    The demo sets a (very) minimal set of privileges.  Look for STEP 4
+    The demo sets a (very) minimal set of privileges.  Look for STEP 7
     in the file <literal>demo/demo.sql</literal>.
   </para>
   <sect2>

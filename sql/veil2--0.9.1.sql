@@ -14,8 +14,6 @@
 -- Although technically it is evil to create roles within extensions,
 -- the veil_user role is so intrinsic to veil2 that it is a necessity.
 -- Please don't hate me for it.
-
-\echo ...veil2 roles...
 do
 $$
 declare
@@ -319,7 +317,8 @@ may not be explicitly assigned.';
 
 comment on column veil2.roles.immutable is
 'Whether this role is considered unmodifiable.  Such roles may not be
-the primary role in a role_role assignment.';
+the primary role in a role_role assignment, ie you cannot assign other
+roles to them.';
 
 comment on column veil2.roles.description is
 'For any role whose purpose cannot easily be determined from the
@@ -825,7 +824,7 @@ create type veil2.session_params_t as (
 --    constructed.  Sometimes this will itself depend on materialized
 --    views.
 --  - xxx_vv
---    This is an equivelent to xxx_v, which uses no materialised views
+--    This is an equivalent to xxx_v, which uses no materialised views
 --    itself.  This view exists as a development/debug tool.
 --
 
@@ -834,7 +833,7 @@ create type veil2.session_params_t as (
 create or replace
 view veil2.direct_role_privileges_v (
     role_id, privileges, global_privileges,
-    promotable_privileges) as
+    promotable_privileges, implicit) as
 with all_role_privileges (role_id, privilege_id) as
   (
     select 1, privilege_id    -- implied privs for superuser role
@@ -843,18 +842,24 @@ with all_role_privileges (role_id, privilege_id) as
      union
     select role_id, privilege_id
       from veil2.role_privileges
+     where role_id != 1
   )
-select arp.role_id, bitmap_of(p.privilege_id),
-       bitmap_of(case when p.promotion_scope_type_id = 1
-       		 then p.privilege_id else null end),
-       bitmap_of(case
-                 when p.promotion_scope_type_id is null then null
-                 when p.promotion_scope_type_id = 1 then null
-                 else p.privilege_id end)
+select r.role_id, coalesce(bitmap_of(p.privilege_id), bitmap()),
+       coalesce(bitmap_of(case when p.promotion_scope_type_id = 1
+       		          then p.privilege_id else null end),
+		bitmap()),
+       coalesce(bitmap_of(case
+                          when p.promotion_scope_type_id is null then null
+                          when p.promotion_scope_type_id = 1 then null
+                          else p.privilege_id end),
+		bitmap()),
+       r.implicit
   from all_role_privileges arp
  inner join veil2.privileges p
     on p.privilege_id = arp.privilege_id
- group by arp.role_id;
+ right outer join veil2.roles r
+               on r.role_id = arp.role_id
+ group by r.role_id;
 
 comment on view veil2.direct_role_privileges_v is
 'Returns all privileges, along with some basic privilege promotion data,
@@ -862,20 +867,24 @@ that are assigned directly to each role, including the implied
 privileges for the superuser role.  This does not show privileges
 arising from role to role assignments.
 
+This view will not normally be used; instead the materialized view
+direct_role_privileges should be used.
+
 Note the use of bitmap_of() to aggregate privilege_ids.';
 
 create or replace
 view veil2.direct_role_privileges_v_info (
     role_id, privileges, global_privileges,
-    promotable_privileges) as
+    promotable_privileges, implicit) as
 select role_id, to_array(privileges),
-       to_array(global_privileges), to_array(promotable_privileges)
+       to_array(global_privileges), to_array(promotable_privileges),
+       implicit
   from veil2.direct_role_privileges_v;
 
 comment on view veil2.direct_role_privileges_v_info is
 'As veil2.direct_role_privileges_v with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
-views.';
+views, and show the contents of bitmaps as arrays of integers.';
 
 create or replace
 view veil2.direct_role_privileges_vv as
@@ -891,15 +900,16 @@ such sets of views.';
 create or replace
 view veil2.direct_role_privileges_vv_info (
     role_id, privileges, global_privileges,
-    promotable_privileges) as
+    promotable_privileges, implicit) as
 select role_id, to_array(privileges),
-       to_array(global_privileges), to_array(promotable_privileges)
+       to_array(global_privileges), to_array(promotable_privileges),
+       implicit
   from veil2.direct_role_privileges_vv;
 
 comment on view veil2.direct_role_privileges_vv_info is
 'As veil2.direct_role_privileges_vv with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
-views.';
+views, and show the contents of bitmaps as arrays of integers.';
 
 create 
 materialized view veil2.direct_role_privileges
@@ -914,15 +924,18 @@ comment on materialized view veil2.direct_role_privileges is
 create or replace
 view veil2.direct_role_privileges_info (
     role_id, privileges, global_privileges,
-    promotable_privileges) as
+    promotable_privileges, implicit) as
 select role_id, to_array(privileges),
-       to_array(global_privileges), to_array(promotable_privileges)
+       to_array(global_privileges), to_array(promotable_privileges),
+       implicit
   from veil2.direct_role_privileges;
 
 comment on view veil2.direct_role_privileges_info is
 'As veil2.direct_role_privileges with bitmaps shown as arrays.  Info
 views are intended as developer-readable versions of the non-info
-views.';
+views, and show the contents of bitmaps as arrays of integers.';
+
+
 
 
 revoke all on veil2.direct_role_privileges from public;
@@ -937,6 +950,7 @@ revoke all on veil2.direct_role_privileges_vv from public;
 grant select on veil2.direct_role_privileges_vv to veil_user;
 revoke all on veil2.direct_role_privileges_vv_info from public;
 grant select on veil2.direct_role_privileges_vv_info to veil_user;
+
 
 \echo ......all_role_roles...
 create or replace
@@ -1011,7 +1025,150 @@ revoke all on veil2.all_role_roles from public;
 grant select on veil2.all_role_roles to veil_user;
 
 
+create or replace
+view veil2.all_mapping_contexts as
+-- Identify the set of valid contexts for role->role mappings.
+select s.scope_type_id as context_type_id,
+       s.scope_id as context_id
+  from veil2.system_parameters sp
+ inner join veil2.scopes s
+    on s.scope_type_id = sp.parameter_value::integer
+ where sp.parameter_name = 'mapping context target scope type';
+
+-- TODO: comment, grants, docs, etc
+
+
 \echo ......all_role_privs...
+
+create or replace
+view veil2.all_role_privs_v (
+    role_id, roles,
+    privileges, global_privileges,
+    promotable_privileges, mapping_context_type_id,
+    mapping_context_id, implicit) as
+with recursive role_mappings as
+  (
+    -- Return all role->role mappings including those that are mapped
+    -- indirectly via other roles.
+    select rr.primary_role_id, rr.assigned_role_id,
+    	   rr.context_type_id, rr.context_id,
+           bitmap(rr.primary_role_id) +
+	       rr.assigned_role_id as encountered_roles
+      from veil2.role_roles rr
+     union all
+    select rm.primary_role_id, rr.assigned_role_id,
+    	   rm.context_type_id, rm.context_id,
+    	   rm.encountered_roles + rr.assigned_role_id
+      from role_mappings rm
+     inner join veil2.role_roles rr
+        on rr.primary_role_id = rm.assigned_role_id
+       and rr.context_type_id = rm.context_type_id
+       and rr.context_id = rm.context_id
+       and not rm.encountered_roles ? rr.assigned_role_id
+  ),
+mapped_role_privs as
+  (
+    -- Return roles and privs that are mapped through role->roles
+    -- as bitmaps
+    select rm.primary_role_id,
+           bitmap_of(rm.assigned_role_id) + rm.primary_role_id as roles,
+	   union_of(drpa.privileges) + drpp.privileges as privs,
+	   union_of(drpa.global_privileges) +
+	       drpp.global_privileges as global_privs,
+	   union_of(drpa.promotable_privileges) +
+	       drpp.promotable_privileges as promotable_privs,
+	   rm.context_type_id, rm.context_id,
+	   drpp.implicit
+      from role_mappings rm
+     inner join veil2.direct_role_privileges drpp
+        on drpp.role_id = rm.primary_role_id
+     inner join veil2.direct_role_privileges drpa
+        on drpa.role_id = rm.assigned_role_id
+     group by rm.primary_role_id, rm.context_type_id,
+     	      rm.context_id, drpp.privileges,
+	      drpp.global_privileges, drpp.promotable_privileges,
+	      drpp.implicit
+  ),
+unmapped_role_privs as
+  (
+    -- Return roles and privs that are *not* mapped through
+    -- role->roles as bitmaps.  For implicit roles there will be no
+    -- mapping information.
+    -- The first part of the union is for explicitly assignable
+    -- roles.
+    select drp.role_id as primary_role_id, bitmap(drp.role_id) as roles,
+           drp.privileges as privs,
+	   drp.global_privileges as global_privs,
+	   drp.promotable_privileges as promotable_privs,
+	   mc.context_type_id, mc.context_id,
+	   drp.implicit
+      from veil2.direct_role_privileges drp
+     cross join veil2.all_mapping_contexts mc
+     where not drp.implicit
+       and not exists (
+        select null
+          from mapped_role_privs mrp
+	 where mrp.primary_role_id = drp.role_id
+	   and mrp.context_type_id = mc.context_type_id
+	   and mrp.context_id = mc.context_id)
+     union all
+    -- This part of the union is for implicit roles for which there are
+    -- no role->role mappings in a given context.  Any such roles that
+    -- have context-specific role->role mappings will be returned by
+    -- the mapped_role_privs cte above.  This union exists as a
+    -- catch-all for implicit roles.  The way to use this is to prefer
+    -- any row returned for the role that provides a context, and only
+    -- if there is no such row should we use rows returned below (with
+    -- nulls for the context fields).
+    select drp.role_id as primary_role_id, bitmap(drp.role_id) as roles,
+           drp.privileges as privs,
+	   drp.global_privileges as global_privs,
+	   drp.promotable_privileges as promotable_privs,
+	   null, null,
+	   drp.implicit
+      from veil2.direct_role_privileges drp
+     where drp.implicit
+  ),
+superuser_roles as
+  (
+    -- Return the set of roles that are implicitly assigned to the
+    -- superuser role.
+    select bitmap_of(role_id) as roles
+      from veil2.roles
+     where role_id != 0
+       and not implicit
+  ),
+all_role_privs as
+  (
+    select primary_role_id,
+           case when primary_role_id = 1
+                 then (select roles from superuser_roles)
+	         else roles
+           end,
+           privs, global_privs, promotable_privs,
+           context_type_id, context_id,
+	   implicit
+      from unmapped_role_privs
+     union all
+     select mrp.primary_role_id,
+           case when mrp.primary_role_id = 1
+                 then (select roles from superuser_roles)
+	         else mrp.roles
+           end,
+           mrp.privs, mrp.global_privs, mrp.promotable_privs,
+           mrp.context_type_id, mrp.context_id,
+	   mrp.implicit
+      from veil2.system_parameters sp
+     inner join mapped_role_privs mrp
+        on mrp.context_type_id = sp.parameter_value::integer
+     where sp.parameter_name = 'mapping context target scope type'
+  )
+select *
+  from all_role_privs;
+
+
+/*
+
 create or replace
 view veil2.all_role_privs_v (
   role_id, roles,
@@ -1031,6 +1188,7 @@ select arr.primary_role_id,
     on (   drp.role_id = arr.assigned_role_id
         or drp.role_id = arr.primary_role_id)
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
+*/
 
 comment on view veil2.all_role_privs_v is
 'This is simply the aggregation of all role->role mappings as provided
@@ -1042,13 +1200,13 @@ create or replace
 view veil2.all_role_privs_v_info (
   role_id, roles,
   privileges, global_privileges, 
-  promotable_privileges, context_type_id,
-  context_id
+  promotable_privileges, mapping_context_type_id,
+  mapping_context_id, implicit
 ) as
 select role_id, to_array(roles),
   to_array(privileges), to_array(global_privileges), 
-  to_array(promotable_privileges), context_type_id,
-  context_id
+  to_array(promotable_privileges), mapping_context_type_id,
+  mapping_context_id, implicit
 from veil2.all_role_privs_v;
 
 comment on view veil2.all_role_privs_v_info is
@@ -1076,6 +1234,8 @@ select arr.primary_role_id,
     on (   drp.role_id = arr.assigned_role_id
         or drp.role_id = arr.primary_role_id)
  group by arr.primary_role_id, arr.context_type_id, arr.context_id;
+
+-- TODO: re-implement the above __vv view
 
 comment on view veil2.all_role_privs_vv is
 'Exactly as veil2.all_role_privs_v.  The _vv suffix indicates
@@ -1110,13 +1270,13 @@ create or replace
 view veil2.all_role_privs_info (
   role_id, roles,
   privileges, global_privileges, 
-  promotable_privileges, context_type_id,
-  context_id
+  promotable_privileges, mapping_context_type_id,
+  mapping_context_id, implicit
 ) as
 select role_id, to_array(roles),
   to_array(privileges), to_array(global_privileges), 
-  to_array(promotable_privileges), context_type_id,
-  context_id
+  to_array(promotable_privileges), mapping_context_type_id,
+  mapping_context_id, implicit
 from veil2.all_role_privs;
 
 comment on view veil2.all_role_privs_info is
@@ -1432,8 +1592,8 @@ with direct_privs(
     -- that a null mapping context should be interpreted as meaning
     -- that the role mapping applies in all contexts.
     select aar.accessor_id, aar.context_type_id,
-           aar.context_id, arp.context_type_id,
-           arp.context_id, union_of(arp.roles),
+           aar.context_id, arp.mapping_context_type_id,
+           arp.mapping_context_id, union_of(arp.roles),
            union_of(arp.privileges),
            union_of(arp.global_privileges),
            union_of(arp.promotable_privileges)
@@ -1441,7 +1601,7 @@ with direct_privs(
      inner join veil2.all_role_privs arp
         on arp.role_id = aar.role_id
      group by aar.accessor_id, aar.context_type_id, aar.context_id,
-              arp.context_type_id, arp.context_id
+              arp.mapping_context_type_id, arp.mapping_context_id
   ),
 promotable_privs as
   (
@@ -1563,7 +1723,7 @@ select accessor_id,
 
 comment on view veil2.all_accessor_privs_v is
 'Show all roles and privileges assigned to all accessors in all
-contexts, excepting the implied personal scope.';
+contexts, excepting the implied personal context role.';
 
 create or replace
 view veil2.all_accessor_privs_v_info (
@@ -1616,7 +1776,7 @@ materialized view veil2.all_accessor_privs
 
 comment on materialized view veil2.all_accessor_privs is
 'Show all roles and privileges assigned to all accessors in all
-contexts, excepting the implied personal scope.';
+contexts, excepting the implied personal context.';
 
 create or replace
 view veil2.all_accessor_privs_info (
@@ -1649,6 +1809,222 @@ revoke all on veil2.all_accessor_privs_vv from public;
 grant select on veil2.all_accessor_privs_vv to veil_user;
 revoke all on veil2.all_accessor_privs_vv_info from public;
 grant select on veil2.all_accessor_privs_vv_info to veil_user;
+
+
+
+create or replace
+view veil2.all_role_mapping_contexts as
+with all_accessor_role_contexts as
+  (
+    select distinct context_type_id, context_id
+      from veil2.all_accessor_roles
+  ),
+target_context_type as
+  (
+    select parameter_value::integer as context_type_id
+      from veil2.system_parameters 
+     where parameter_name = 'mapping context target scope type'
+  ),
+promoted_mapping_contexts as
+  (
+    -- The set of accessor_role_contexts that promote to our target
+    -- context type.
+    select aarc.context_type_id, aarc.context_id,
+           ss.superior_scope_type_id as mapping_context_type_id,
+	   ss.superior_scope_id as mapping_context_id
+      from all_accessor_role_contexts aarc
+     cross join target_context_type tct
+     inner join veil2.all_superior_scopes ss
+        on ss.scope_type_id = aarc.context_type_id
+       and ss.scope_id = aarc.context_id
+       and ss.superior_scope_type_id = tct.context_type_id
+  ),
+matched_mapping_contexts as
+  (
+    -- The set of accessor_role_contexts that match our target
+    -- context type.
+    select aarc.context_type_id, aarc.context_id,
+           aarc.context_type_id as mapping_context_type_id,
+	   aarc.context_id as mapping_context_id
+      from target_context_type tct
+     inner join all_accessor_role_contexts aarc
+        on aarc.context_type_id = tct.context_type_id
+  ),
+global_mapping_contexts as
+  (
+    -- The set of accessor_role_contexts that are assigned in global
+    -- context and therefore match all mapping contexts.
+    select aarc.context_type_id, aarc.context_id,
+    	   amc.context_type_id as mapping_context_type_id,
+    	   amc.context_id as mapping_context_id
+      from all_accessor_role_contexts aarc
+     cross join veil2.all_mapping_contexts amc
+     where aarc.context_type_id = 1
+       and aarc.context_id = 0
+  )/*,
+implicit_mapping_contexts as
+  (
+    select 2, 0,
+    	   amc.context_type_id as mapping_context_type_id,
+    	   amc.context_id as mapping_context_id
+      from veil2.all_mapping_contexts amc
+  )*/
+select *
+  from matched_mapping_contexts
+ union all
+select *
+  from promoted_mapping_contexts
+ union all
+select *
+  from global_mapping_contexts
+-- union all
+--select *
+--  from implicit_mapping_contexts
+;
+
+-- TODO: comment, grants, docs, etc
+
+
+create or replace
+view veil2.base_accessor_role_privs as
+with explicit_accessor_role_privs as
+  (
+    select aar.accessor_id, aar.role_id,
+    	   aar.context_type_id as assignment_context_type_id,
+    	   aar.context_id as assignment_context_id,
+	   armc.mapping_context_type_id,
+	   armc.mapping_context_id,
+	   arp.roles, arp.privileges,
+	   arp.global_privileges, arp.promotable_privileges
+      from veil2.all_accessor_roles aar
+     inner join veil2.all_role_mapping_contexts armc
+        on (   armc.context_type_id = aar.context_type_id
+            and armc.context_id = aar.context_id)
+
+	or (    armc.context_type_id = 1
+	    and armc.context_id = 0) 
+     inner join veil2.all_role_privs arp
+        on arp.role_id = aar.role_id
+      and arp.mapping_context_type_id = armc.mapping_context_type_id
+      and arp.mapping_context_id = armc.mapping_context_id
+  ),
+implicit_accessor_role_privs as
+  (
+    select a.accessor_id, 2 as role_id,
+    	   2 as assignment_context_type_id,
+	   a.accessor_id as assignment_context_id,
+	   arp.mapping_context_type_id,
+    	   arp.mapping_context_id,
+	   arp.roles, arp.privileges,
+	   arp.global_privileges, arp.promotable_privileges
+           from veil2.accessors a
+     inner join veil2.all_role_privs arp
+        on arp.role_id = 2
+       and (   (    arp.mapping_context_type_id is null
+	        and arp.mapping_context_id is null)
+	    or (arp.mapping_context_type_id, arp.mapping_context_id) in
+	            (select context_type_id, context_id
+		       from veil2.all_mapping_contexts))
+  ),
+visitor_role_privs as
+  (
+    select null::integer as accessor_id, 3 as role_id,
+           null::integer as assignment_context_type_id,
+           null::integer as assignment_context_id,
+    	   arp.mapping_context_type_id,
+        	   arp.mapping_context_id,
+    	   arp.roles, arp.privileges,
+    	   arp.global_privileges, arp.promotable_privileges
+      from veil2.all_role_privs arp
+     where arp.role_id = 3
+  )
+select *
+  from explicit_accessor_role_privs 
+ union all
+select *
+  from implicit_accessor_role_privs
+ union all
+select *
+  from visitor_role_privs;
+
+-- TODO: comment, grants, docs, etc
+
+create or replace
+view veil2.all_accessor_role_privs as
+with base_accessor_role_privs as
+  (
+    select *
+      from veil2.base_accessor_role_privs
+  ),
+direct_accessor_role_privs as
+  (
+    -- roles and privs
+    select accessor_id, role_id,
+    	   assignment_context_type_id, assignment_context_id,
+	   mapping_context_type_id, mapping_context_id,
+	   assignment_context_type_id as scope_type_id,
+	   assignment_context_id as scope_id,
+	   roles, privileges,
+	   'direct' as type
+      from base_accessor_role_privs
+  ),
+global_accessor_role_privs as
+  (
+    select accessor_id, role_id,
+    	   assignment_context_type_id, assignment_context_id,
+	   mapping_context_type_id, mapping_context_id,
+	   1 as scope_type_id, 0 as scope_id,
+	   null::bitmap as roles, global_privileges as privileges,
+	   'global' as type
+      from base_accessor_role_privs
+     where not is_empty(global_privileges)
+  ),
+promotable_privs as
+  (
+    select privilege_id, promotion_scope_type_id
+      from veil2.privileges
+     where promotion_scope_type_id is not null
+       and promotion_scope_type_id != 1
+  ),
+promoted_accessor_role_privs as
+  (
+    select arp.accessor_id, arp.role_id,
+    	   arp.assignment_context_type_id, arp.assignment_context_id,
+	   arp.mapping_context_type_id, arp.mapping_context_id,
+	   coalesce(ss.superior_scope_type_id,
+		    arp.assignment_context_type_id) as scope_id,
+	   coalesce(ss.superior_scope_id,
+		    arp.assignment_context_id) as scope_id,
+	   null::bitmap as roles,
+	   bitmap_of(pp.privilege_id) as privileges,
+	   'promoted' as type
+      from direct_accessor_role_privs arp
+     inner join promotable_privs pp
+        on arp.privileges ? pp.privilege_id
+      left outer join veil2.superior_scopes ss
+        on ss.scope_type_id = arp.assignment_context_type_id
+       and ss.scope_id = arp.assignment_context_id
+       and ss.superior_scope_type_id = pp.promotion_scope_type_id
+       and ss.superior_scope_type_id != arp.assignment_context_type_id
+     group by arp.accessor_id, arp.role_id,
+    	      arp.assignment_context_type_id, arp.assignment_context_id,
+	      arp.mapping_context_type_id, arp.mapping_context_id,
+	      pp.promotion_scope_type_id, ss.superior_scope_type_id,
+	      ss.superior_scope_id
+  )
+select *
+  from direct_accessor_role_privs
+ union all
+select *
+  from global_accessor_role_privs
+ union all
+select *
+  from promoted_accessor_role_privs;
+
+-- TODO: docs, info views, matviews, grants
+
+
+
 
 
 \echo ......role_chains...
@@ -2872,19 +3248,100 @@ select * from veil2.session_privileges();
 comment on view veil2.session_privileges_info is
 'Provides a user-friendly view of session_privileges.';
 
+grant select on veil2.session_privileges_info to veil_user;
+
+/*
+
+-- TODO: Document this - matview not possible as it handles personal
+-- context.
+-- TODO: Remove mapping context stuff from session_context and views?
+
+create or replace
+view veil2.assignment_mapping_contexts (
+    assignment_context_type_id, assignment_context_id,
+    mapping_context_type_id, mapping_context_id) as
+with mapping_context_type as
+  (
+    select parameter_value::integer as mapping_context_type_id
+      from veil2.system_parameters 
+     where parameter_name = 'mapping context target scope type'
+  ),
+target_scopes as
+  (
+    select -- Note that global_scope is not expected to appear in
+           -- all_superior_scopes). 
+           -- TODO: ADD NOTE TO THIS EFFECT IN DOCUMENTATION AND COMMENTS
+	   ss.scope_type_id, ss.scope_id,
+           ss.superior_scope_type_id, ss.superior_scope_id
+      from mapping_context_type mct
+     inner join veil2.all_superior_scopes ss
+        on ss.superior_scope_type_id = mct.mapping_context_type_id
+  )
+select -- Mappings for assignment contexts when mapping_context_type
+       -- is not global 
+       scope_type_id, scope_id,
+       superior_scope_type_id, superior_scope_id
+  from target_scopes
+ union
+select -- Map from global scope to itself
+       1, 0, 1, 0 
+ union 
+select -- Map from all assignment contexts to global scope
+       s.scope_type_id, s.scope_id, 1, 0
+  from mapping_context_type mct
+ cross join veil2.scopes s
+ where mct.mapping_context_type_id = 1
+ union
+select -- Map for personal scope based on login context
+       2, sc.accessor_id,
+       ts.superior_scope_type_id, ts.superior_scope_id
+  from veil2.session_context() sc
+ inner join target_scopes ts
+    on ts.scope_type_id = sc.login_context_type_id
+   and ts.scope_id = sc.login_context_id
+ union 
+ select 2, sc.accessor_id,
+ 	1, 0
+  from mapping_context_type mct
+ cross join veil2.session_context() sc
+ where mct.mapping_context_type_id = 1;
+   
+-- This gives the full set of privs and roles for the accessor without
+-- taking into account whether the assignment context is appropriate.
+-- This seems much simpler than what we currently have.
+
+select aap.scope_type_id, aap.scope_id,
+       to_array(union_of(aap.roles)), to_array(union_of(aap.privs))
+  from veil2.session_context() sc
+ inner join veil2.all_accessor_privs aap
+    on aap.accessor_id = sc.accessor_id
+ inner join veil2.assignment_mapping_contexts amc
+    on (   aap.mapping_context_type_id is null
+        or (    amc.assignment_context_type_id = aap.assignment_context_type_id
+            and amc.assignment_context_id = aap.assignment_context_id
+            and amc.mapping_context_type_id = aap.mapping_context_type_id
+            and amc.mapping_context_id = aap.mapping_context_id))
+ group by aap.scope_type_id, aap.scope_id;
+
+
+    and (   aap.mapping_context_type_id is null
+         or (    aap.mapping_context_type_id = sc.mapping_context_type_id
+	     and aap.mapping_context_id = sc.mapping_context_id));
+   
+*/
 
 \echo ...explicit_mapped_session_privs view...
 create or replace
 view veil2.explicit_mapped_session_privs as
-  select aap.scope_type_id, aap.scope_id,
-	     aap.roles, aap.privs,
-	     assignment_context_type_id, assignment_context_id
-	from veil2.session_context() sc
-   inner join veil2.all_accessor_privs aap
-      on aap.accessor_id = sc.accessor_id
-	 and (   aap.mapping_context_type_id is null
-          or (    aap.mapping_context_type_id = sc.mapping_context_type_id
-	          and aap.mapping_context_id = sc.mapping_context_id));
+select aap.scope_type_id, aap.scope_id,
+       aap.roles, aap.privs,
+       assignment_context_type_id, assignment_context_id
+  from veil2.session_context() sc
+ inner join veil2.all_accessor_privs aap
+     on aap.accessor_id = sc.accessor_id
+    and (   aap.mapping_context_type_id is null
+         or (    aap.mapping_context_type_id = sc.mapping_context_type_id
+	     and aap.mapping_context_id = sc.mapping_context_id));
 
 comment on view veil2.explicit_mapped_session_privs is
 'Lists the explicitly granted roles and privileges for the current
@@ -3036,6 +3493,34 @@ begin
       select *
         from veil2.explicit_session_privs
     ),
+  implicit_session_privs as
+    (
+      -- TODO: WIP - integrate this into the query, replacing the
+      -- current all_session_privs CTE.
+      -- If all_role_privs for implicit roles has a context that
+      -- matches the mapping_context for our login, we return that
+      -- row, otherwise we return the row for the null context.
+      select arp.*,
+         row_number() over
+           (
+	     -- Determine whther we prefer an explicit context mapping
+	     -- (we do if there is one), or the null context).  We
+	     -- will want only rows with a row_number() of 1.
+    	     partition by role_id order by
+                 case when arp.mapping_context_type_id = sc.mapping_context_type_id
+                      and arp.mapping_context_id = sc.mapping_context_id
+    	         then 0 -- matching context
+    	         else 1 -- null context
+    	         end
+	   ) as rownum
+        from session_context sc
+       inner join veil2.all_role_privs arp
+          on arp.implicit
+         and coalesce(arp.mapping_context_type_id,
+                      sc.mapping_context_type_id) = sc.mapping_context_type_id
+         and coalesce(arp.mapping_context_id,
+                      sc.mapping_context_id) = sc.mapping_context_id
+    ),
   all_session_privs as
     (
       select *
@@ -3046,6 +3531,8 @@ begin
 	from veil2.all_role_privs arp
        cross join session_context sc
        where arp.role_id = 2
+       -- TODO Filter context to login context
+       -- and use implicit rather than the explicit role_id
     ),
   have_connect as
     (
@@ -3061,6 +3548,133 @@ begin
          roles, privs
     from all_session_privs
    where (select have_connect from have_connect);
+
+  if found then
+    if _need_filter then
+      -- We are in a become-user session.  We need to filter the privs
+      -- of the user we became, with the privs of the session we came
+      -- from so that we do not gain privileges the originating
+      -- session did not have.
+      execute veil2.filter_privs();
+    end if;
+    return true;
+  else
+    execute veil2.reset_session();
+    return false;
+  end if;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+create or replace
+function veil2.load_session_privs(
+    session_id in integer,
+    _accessor_id in integer,
+    _prev_session_id in integer default null)
+  returns bool as
+$$
+declare
+  _prev_accessor_id integer;
+  _prevprev_accessor_id integer;
+  _need_filter boolean := false;
+begin
+  execute veil2.reset_session();
+  insert
+    into session_parameters
+        (accessor_id, session_id,
+         login_context_type_id, login_context_id,
+	 mapping_context_type_id, mapping_context_id,
+	 is_open)
+  select _accessor_id, load_session_privs.session_id,
+         login_context_type_id, login_context_id,
+         mapping_context_type_id, mapping_context_id,
+	 true
+    from veil2.sessions s
+   where s.session_id = load_session_privs.session_id;
+
+  if _prev_session_id is not null then
+    select accessor_id,
+      	   case when s.authent_type = 'become'
+	        then s.session_supplemental::integer
+	        else null
+	   end
+      into _prev_accessor_id,
+      	   _prevprev_accessor_id
+      from veil2.sessions
+     where session_id = _prev_session_id;
+    -- Recurse to load privs of originating session.
+    if veil2.load_session_privs(
+           _prev_session_id, _prev_accessor_id,
+	   _prevprev_accessor_id)
+    then
+      -- Save originating session privs for later filtering.
+      execute veil2.save_privs_as_orig();
+      _need_filter := true;
+    else
+      return false;
+    end if;
+  end if;
+  with session_context as
+    (
+      select *
+        from veil2.session_context() sc
+       where sc.session_id = load_session_privs.session_id
+         and sc.accessor_id = _accessor_id
+    ),
+  all_session_privs as
+    (
+      select aarp.scope_type_id, aarp.scope_id,
+      	     union_of(roles) as roles,
+	     union_of(privileges) as privs,
+	     aarp.mapping_context_type_id,
+	     aarp.mapping_context_id
+        from session_context sc
+       inner join veil2.all_accessor_role_privs aarp
+         on aarp.accessor_id = sc.accessor_id
+        and (   (    aarp.mapping_context_type_id = sc.mapping_context_type_id
+                 and aarp.mapping_context_id = sc.mapping_context_id)
+             or (    aarp.mapping_context_type_id is null
+                 and aarp.mapping_context_id is null))
+      group by aarp.scope_type_id, aarp.scope_id,
+               aarp.mapping_context_type_id, aarp.mapping_context_id
+    ),
+  filtered_session_privs as
+    (
+      -- This eliminates any scopes that should not apply given our
+      -- authentication context.  This could be built into the
+      -- all_session_privs query, but making it explicit does little
+      -- damage to performance and makes for easier comprehension.
+      select *
+        from all_session_privs asp
+       where -- Implicit role assignment
+	     (    mapping_context_type_id is null
+              and mapping_context_id is null)
+	  or -- mapping context is global context
+	     (    mapping_context_type_id = 1
+              and mapping_context_id = 0)
+	  or -- assignment scope matches our session mapping context
+	     exists (
+	         select null
+		   from veil2.all_role_mapping_contexts armc
+		  where armc.context_type_id = asp.scope_type_id
+		    and armc.context_id = asp.scope_id
+		    and armc.mapping_context_type_id =
+		    	    asp.mapping_context_type_id
+		    and armc.mapping_context_id = asp.mapping_context_id)
+    ),
+  have_connect as
+    (
+      select privs ? 0 as have_connect
+        from filtered_session_privs
+    )
+  insert
+    into session_privileges
+        (session_id, scope_type_id, scope_id,
+  	 roles, privs)
+  select load_session_privs.session_id, scope_type_id, scope_id,
+         roles, privs
+    from filtered_session_privs
+   where exists (select null from have_connect where have_connect);
 
   if found then
     if _need_filter then
@@ -3631,17 +4245,17 @@ authenticate_bcrypt() function.';
 insert into veil2.scope_types
        (scope_type_id, scope_type_name, description)
 values (1, 'global scope',
-        'Assignments made in the global scope apply globally: that is ' ||
-	'there are no limitions based on data ownership applied to ' ||
-	'these assignments'),
+        'Assignments made in the global context apply globally (in ' ||
+       'global scope): that is there are no limitions based on data '  ||
+       'ownership applied to these assignments'),
        (2, 'personal scope',
-        'Privileges assigned in personal scope apply to the personal ' ||
+        'Privileges assigned in personal context apply to the personal ' ||
         'data of the user.  If they have the ''select_parties'' ' ||
-	'privilege assigned only in personal scope, they will be ' ||
+	'privilege assigned only in personal context, they will be ' ||
 	'able to see only their own party record.  All parties are ' || 
 	'expected to have the same rights to their own data, so we ' ||
-        'do not explicitly assign rights in personal scope, instead ' ||
-	'we assume that the ''personal_scope'' role has been ' ||
+        'do not explicitly assign rights in personal context, instead ' ||
+	'we assume that the ''personal_context'' role has been ' ||
 	'assigned to every party.  This role is special in that it ' ||
 	'should not be assigned in any other context, and so ' ||
        	'is defined as not enabled.');
@@ -3670,7 +4284,7 @@ values ('bcrypt', true,
 insert into veil2.privileges
        (privilege_id, privilege_name,
         promotion_scope_type_id, description)
-values (0, 'connect', 1,
+values (0, 'connect', null,
         'May connect to the database to execute queries.'),
        (1, 'become user', null,
         'May execute the become_user function.  This should only ' ||
@@ -3715,7 +4329,7 @@ insert into veil2.roles
        (role_id, role_name, implicit, immutable, description)
 values (0, 'connect', false, true, 'Allow minimal access to the system.'),
        (1, 'superuser', false, true, 'An all-encompassing role.'),
-       (2, 'personal_scope', true, true,
+       (2, 'personal_context', true, true,
         'An implicitly assigned, to all users, role that allows ' ||
 	'access to a user''s own information'),
        (3, 'visitor', true, false,
@@ -4091,6 +4705,10 @@ select pg_catalog.pg_extension_config_dump(
            'veil2.roles',
 	   'where role_id > 4
                or role_id < 0');
+
+select pg_catalog.pg_extension_config_dump(
+           'veil2.role_types',
+	   'where role_type_id not in (1, 2)');
 
 \echo ......role_privileges...
 select pg_catalog.pg_extension_config_dump(

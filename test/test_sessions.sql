@@ -21,6 +21,16 @@
 begin;
 select '...test veil2 session handling...';
 
+create or replace
+function test_privs() returns void as
+$$
+begin
+
+end;
+$$
+language plpgsql security definer;
+
+
 select plan(93);
 
 -- Perform a reset session without returning a row.  This ensures the
@@ -160,7 +170,9 @@ update veil2.authentication_types
  where shortname = 'plaintext';
 
 -- Try creating and opening a session with valid credentials and
--- connect privilege - to establish that this works before the next test.
+-- connect privilege - to establish that this works before the next
+-- test.
+
 with session as
   (
     select o.*
@@ -566,6 +578,7 @@ union all
 select is(veil2.i_have_priv_in_scope(25, -4, -41), true,
          'Bob should have priv 25 in context -4,-41');
 
+
 -- connect as eve
 with session as
   (
@@ -621,7 +634,6 @@ select is(o.success, true, 'Bob''s session should have continued')
               encode(digest(session_token || to_hex(2), 'sha1'),
 	             'base64')) o;
 
-
 -- ...contextual role mapppings...
 -- We will use eve with some new role assignments
 delete from veil2.accessor_roles where accessor_id = -2;
@@ -642,8 +654,19 @@ values (6, 8, -3, -3),
 
 -- Update target scope
 update veil2.system_parameters
-   set parameter_value = '3'
+   set parameter_value = '-3'
  where parameter_name = 'mapping context target scope type';
+
+-- Odd query structure so that no rows are returned but function is
+-- called.
+with init as
+  (
+    select 1 as result from veil2.init()
+  )
+select null
+  from init
+ where result != 1;
+
 
 -- connect as eve for scope -3,-3
 with session as

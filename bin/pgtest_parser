@@ -40,7 +40,6 @@ awk '
 	 failing = 1
 	 failures[suite] = failures[suite] + 1
 	 printf("\n")
-	 next
     }
     BEGIN { i = 0; extra = 0; missing = 0 }
     /^##/
@@ -58,6 +57,7 @@ awk '
      }
      /^not ok/ {
          record_failure()
+	 next
      }
      /^psql:.*:[0-9][0-9]*: ERROR:/ {
          if ($0 ~ /extension.*already exists/) {
@@ -66,6 +66,7 @@ awk '
  	 }
 	 else {
              record_failure()
+	     next
          }
      }
      /^#/ {

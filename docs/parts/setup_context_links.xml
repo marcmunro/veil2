@@ -1,5 +1,5 @@
 <sect1 id="link_scopes">
-  <title>Link Your Scopes and Security Contexts (STEP 7)</title>
+  <title>Link Your Scopes and Security Contexts (STEP 5)</title>
   <para>
     The <literal>Veil2 <link
     linkend="entity_scope">scopes</link></literal> table is the most
@@ -15,7 +15,7 @@
     foreign-key columns and relationships to the new table.
   </para>
   <para>
-    Look for STEP 7 in the file <literal>demo/demo.sql</literal>.
+    Look for STEP 5 in the file <literal>demo/demo.sql</literal>.
   </para>
   <sect2>
     <title>Create Foreign Key Links</title>

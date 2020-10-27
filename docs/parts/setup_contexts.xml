@@ -21,7 +21,7 @@
     Note that <literal>Veil2</literal> provides 2 default scopes: for
     global and personal scopes.
   </para>
-  <para>
+  <para id="role_mapping_context">
     Consider also your <link
     linkend="authentication_context">authentication contexts</link>
     and <link linkend="role_mapping">role mapping</link> contexts.
@@ -40,8 +40,8 @@
   <para>
     The demo sets up 3 relational scopes.  Look for "STEP 2" in the
     file <literal>demo/demo.sql</literal>.  It uses distinct
-    authentication contexts (based on org and corp contexts) but keeps
-    a single common role mapping implementation.
+    authentication contexts (based on org and corp contexts) and
+    defines role to role mappings within corp contexts.
   </para>
   <sect2>
     <title>In Summary</title>
@@ -56,9 +56,9 @@
 	<listitem>
 	  <para>
 	    Define how your role mapping context is promoted from
-	    authentication contexts in the <literal>system
-	    parameter</literal>: <quote><literal>mapping context
-	    target scope type</literal></quote>.
+	    authentication contexts in the system parameter:
+	    <quote><literal>mapping context target scope
+	    type</literal></quote>.
 	  </para>
 	</listitem>
       </itemizedlist>

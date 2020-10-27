@@ -1,6 +1,6 @@
 <sect1 id="setup_accessors">
   <title>Link Your Users To <literal>Veil2</literal>'s Accessors (STEP
-  6)</title>
+  4)</title>
   <para>
     Unlike the situation with roles, <literal>Veil2</literal>'s
     accessors are probably not going to be usable in place of your
@@ -31,7 +31,7 @@
     </itemizedlist>
   </para>
   <para>
-    Look for STEP 6 in the file <literal>demo/demo.sql</literal>.
+    Look for STEP 4 in the file <literal>demo/demo.sql</literal>.
   </para>
   <sect2>
     <title>Create Foreign-Key Links to Your Users</title>
@@ -50,8 +50,7 @@
     </para>
     <para>
       Take a look at the code for the demo (in
-      <literal>demo/demo.sql</literal>) for details (following the
-      comment <quote>STEP 6:</quote>).
+      <literal>demo/demo.sql</literal>) for details.
     </para>
   </sect2>
   <sect2>

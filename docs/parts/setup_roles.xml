@@ -1,11 +1,11 @@
 <sect1 id="setup_roles">
-  <title>Integrate And/Or Create Roles (STEP 5)</title>
+  <title>Integrate And/Or Create Roles (STEP 8)</title>
   <para>
     The demo chooses to use only <literal>Veil2</literal>'s role
     tables for its roles implementation.  This makes things very
     simple, but may be unhelpful as an example.  The author apologises
     but there are some things you will have to do for yourselves.
-    Look for  STEP 5 in the file <literal>demo/demo.sql</literal>.
+    Look for  STEP 8 in the file <literal>demo/demo.sql</literal>.
   </para>
   <sect2>
     <title>Integrating Existing Roles</title>
@@ -101,7 +101,7 @@
     </sect3>
   </sect2>
   <sect2>
-    <title>Create New Roles</title>
+    <title>Create New Roles and Mappings</title>
     <para>
       If your application has user-level roles (roles that are
       assigned to users), you may be able to re-use them.  You will
@@ -119,12 +119,20 @@
       You will then need to create role->role mappings, making your
       function-level roles available to your user-level roles.  You
       will do this by creating records in
-      <literal>veil2.role_roles</literal>. 
+      <literal>veil2.role_roles</literal>.
     </para>
     <para>
       As with privileges, you should keep the range of
       <literal>role_ids</literal> as small as possible, allocating them
       contiguously and re-use ids for records that get deleted.
+    </para>
+    <para>
+      Note that if you have defined that role to role mappings are done
+      in anything other than the global context (as described <link
+      linkend="role_mapping_context">here</link>) your role to role
+      mappings may need to be repeated for each context.  Your role
+      names may also need to be customized for those contexts.  This
+      is shown in the demo; look for the text STEP 8.
     </para>
   </sect2>
   <sect2>

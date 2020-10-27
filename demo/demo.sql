@@ -193,6 +193,10 @@ values (3, 'corp scope',
        (5, 'project scope',
         'For access to data that is specific to to project members.');
 
+-- Make role-_role mappings work at the corp context level.
+update veil2.system_parameters
+   set parameter_value = 3
+ where parameter_name = 'mapping context target scope type';
 
 
 -- STEP 3 is defining authentication data and functions (and session
@@ -247,92 +251,6 @@ language plpgsql security definer stable leakproof;
 
 
 -- STEP 4:
--- Define privileges.  Note that priv_ids below 16 are used for veil2
--- objects.
-
-insert into veil2.privileges
-       (privilege_id, privilege_name,
-        promotion_scope_type_id, description)
-values (16, 'select party_types',
-        1, 'Allow select on demo.party_types'),
-       (17, 'select parties',
-        null, 'Allow select on demo.parties'),
-       (18, 'select roles',
-        null, 'Allow select on the roles view'),
-       (19, 'select role_roles',
-        null, 'Allow select on the role_roles view'),
-       (20, 'select party_roles',
-        null, 'Allow select on the party_roles view'),
-       (21, 'select projects',
-        null, 'Allow select on the projects table'),
-       (22, 'select project_assignments',
-        null, 'Allow select on the project_assignments table'),
-       (23, 'select orgs',
-        4, 'Allow select on parties that are orgs');
-
--- Priv 23 is intended to allow project members to see the org that
--- owns the project even if they have not been given select-party
--- privilege in any other context.
-
--- STEP 5:
--- Link to/create initial roles
-
-insert
-  into veil2.roles
-       (role_id, role_type_id, role_name,
-        implicit, immutable, description)
-values (5, 1, 'party viewer',
-        false, true, 'can view party information'),
-       (6, 1, 'role viewer',
-        false, true, 'can view roles and assignments'),
-       (7, 1, 'employee',
-        false, false, 'can perform minimal employee duties'),
-       (8, 1, 'administration auditor',
-        false, false, 'can view administration data'),
-       (9, 1, 'administrator',
-        false, false, 'can manage administration data'),
-       (10, 1, 'project manager',
-        false, false, 'manages projects'),
-       (11, 1, 'project viewer',
-        false, true, 'can view project data'),
-       (12, 1, 'project manipulator',
-        false, true, 'can manipulate project data');
-
-insert into veil2.role_privileges
-       (role_id, privilege_id)
-values (5, 16),  -- party viewer -> select_party_types
-       (5, 17),  -- party viewer -> select_parties
-       (6, 18),  -- role viewer -> select_roles
-       (6, 19),  -- role viewer -> select role_roles
-       (6, 20),  -- role viewer -> select party_roles
-       (11, 16), -- project viewer -> select_party_types
-       (11, 23), -- project viewer -> select_orgs
-       (11, 21), -- project viewer -> select_projects
-       (12, 21), -- project manipulator -> select projects
-       (12, 22), -- project manipulator -> select project assignments
-       (2, 13),  -- personal context -> select accessor_roles
-       (2, 17),  -- personal context -> select parties
-       (2, 22);  -- personal context -> select project_assignments
-
--- All of these are going to be assigned globally.  What this means is
--- that everyone's role->role mappings are the same.  If we had
--- context-specific role mappings, then each corp (or whatever) could
--- define their roles differently.  Only do this if you need to: it
--- makes things very confusing for an administrator.
-insert into veil2.role_roles
-       (primary_role_id, assigned_role_id,
-        context_type_id, context_id)
-values (7, 5, 1, 0),
-       (8, 5, 1, 0),
-       (8, 6, 1, 0),
-       (9, 5, 1, 0),
-       (9, 6, 1, 0),
-       (7, 11, 1, 0),
-       (10, 11, 1, 0),
-       (10, 12, 1, 0);
-
-
--- STEP 6:
 -- Create FK links for veil2.accessors to the demo database tables.
 -- These ensure that veil2.accessors and veil2.authentication_details
 -- are kept in step with the demo parties_tbl table.
@@ -455,7 +373,7 @@ comment on trigger parties_tbl_aut on demo.parties_tbl is
 
 select * from veil2.implementation_status();
 
--- STEP 7:
+-- STEP 5:
 -- Link scopes back to the database being secured.
 
 create table veil2.scope_links (
@@ -564,7 +482,7 @@ refresh materialized view veil2.all_accessor_privs;
 -- projects. 
 
 
--- STEP 8:
+-- STEP 6:
 -- Deal with scope promotions
 -- Note that the second part of the union below allows scope promotion
 -- within the organizational hierarchy.
@@ -574,9 +492,16 @@ view veil2.my_superior_scopes (
   scope_type_id, scope_id,
   superior_scope_type_id, superior_scope_id
 ) as
+select 3, corp_id,   -- Promote client corps to veil corp.
+       3, 100
+  from demo.parties_tbl
+ where party_type_id = 2
+   and corp_id = org_id
+   and corp_id != 100  -- Do not promote veil corp
+union all
 select 4, party_id,  -- Promote org to corp scope
        3, corp_id
-  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+  from demo.parties_tbl 
  where party_type_id = 2
 union all
 select 4, party_id,  -- Promotion of org to higher org
@@ -596,6 +521,132 @@ select 5, s.scope_id,   -- Project to org promotions
   from demo.projects p
  inner join veil2.scope_links s
     on s.project_id = p.project_id;
+
+
+-- STEP 7:
+-- Define privileges.  Note that priv_ids below 16 are used for veil2
+-- objects.
+
+insert into veil2.privileges
+       (privilege_id, privilege_name,
+        promotion_scope_type_id, description)
+values (16, 'select party_types',
+        1, 'Allow select on demo.party_types'),
+       (17, 'select parties',
+        null, 'Allow select on demo.parties'),
+       (18, 'select roles',
+        null, 'Allow select on the roles view'),
+       (19, 'select role_roles',
+        null, 'Allow select on the role_roles view'),
+       (20, 'select party_roles',
+        null, 'Allow select on the party_roles view'),
+       (21, 'select projects',
+        null, 'Allow select on the projects table'),
+       (22, 'select project_assignments',
+        null, 'Allow select on the project_assignments table'),
+       (23, 'select orgs',
+        4, 'Allow select on parties that are orgs');
+
+-- Priv 23 is intended to allow project members to see the org that
+-- owns the project even if they have not been given select-party
+-- privilege in any other context.
+
+
+-- STEP 8:
+-- Create some new role_types.  These allow us to differentiate
+-- between user and function-level roles and could be used, for
+-- example, in views to differentiate between roles that can be
+-- renamed within a spcecific context, and those that cannot.
+insert
+  into veil2.role_types
+       (role_type_id, role_type_name, description)
+values (3, 'Function-level role',
+        'Demo App Role for access control to specific functions/data'),
+       (4, 'User-level role',
+        'Demo App Role that will be assigned to accessors');
+
+-- Create some initial roles
+insert
+  into veil2.roles
+       (role_id, role_type_id, role_name,
+        implicit, immutable, description)
+values (5, 3, 'party viewer',
+        false, true, 'can view party information'),
+       (6, 3, 'role viewer',
+        false, true, 'can view roles and assignments'),
+       (7, 4, 'employee',
+        false, false, 'can perform minimal employee duties'),
+       (8, 4, 'administration auditor',
+        false, false, 'can view administration data'),
+       (9, 4, 'administrator',
+        false, false, 'can manage administration data'),
+       (10, 4, 'project manager',
+        false, false, 'manages projects'),
+       (11, 4, 'project viewer',
+        false, true, 'can view project data'),
+       (12, 4, 'project manipulator',
+        false, true, 'can manipulate project data'),
+       (13, 3, 'dummy fn role 1',
+        false, true, 'For demo purposes'),
+       (14, 3, 'dummy fn role 2',
+        false, true, 'For demo purposes'),
+       (15, 3, 'dummy fn role 3',
+        false, true, 'For demo purposes'),
+       (16, 4, 'dummy user role 1',
+        false, false, 'For demo purposes');
+
+insert into veil2.role_privileges
+       (role_id, privilege_id)
+values (5, 16),  -- party viewer -> select_party_types
+       (5, 17),  -- party viewer -> select_parties
+       (6, 18),  -- role viewer -> select_roles
+       (6, 19),  -- role viewer -> select role_roles
+       (6, 20),  -- role viewer -> select party_roles
+       (11, 16), -- project viewer -> select_party_types
+       (11, 23), -- project viewer -> select_orgs
+       (11, 21), -- project viewer -> select_projects
+       (12, 21), -- project manipulator -> select projects
+       (12, 22), -- project manipulator -> select project assignments
+       (2, 13),  -- personal context -> select accessor_roles
+       (2, 17),  -- personal context -> select parties
+       (2, 22);  -- personal context -> select project_assignments
+
+-- We define a base set of role->role mappings in global context,
+-- though these are not actually used.  Then we create copies in the
+-- contexts of each of our corps along with some corp-specific
+-- mappings so that we can test and demonstrate the mechanism.
+--
+insert into veil2.role_roles
+       (primary_role_id, assigned_role_id,
+        context_type_id, context_id)
+values (7, 5, 1, 0),  -- In global context
+       (8, 5, 1, 0),
+       (8, 6, 1, 0),
+       (9, 5, 1, 0),
+       (9, 6, 1, 0),
+       (7, 11, 1, 0),
+       (10, 11, 1, 0),
+       (10, 12, 1, 0),
+       (7, 5, 3, 101),   -- The same in context of Secured Corp
+       (8, 5, 3, 101),
+       (8, 6, 3, 101),
+       (9, 5, 3, 101),
+       (9, 6, 3, 101),
+       (7, 11, 3, 101),
+       (10, 11, 3, 101),
+       (10, 12, 3, 101),
+       (7, 5, 3, 102),-- Ditto in context of Protected Corp
+       (8, 5, 3, 102),
+       (8, 6, 3, 102),
+       (9, 5, 3, 102),
+       (9, 6, 3, 102),
+       (7, 11, 3, 102),
+       (10, 11, 3, 102),
+       (10, 12, 3, 102),
+       (16, 13, 3, 101),  -- user role 1 gets fn roles 1 & 2 in Secured Corp
+       (16, 14, 3, 101),
+       (16, 14, 3, 102),  -- user role 1 gets fn roles 2 & 3 in Protected Corp
+       (16, 15, 3, 102);
 
 
 -- STEP 9:
@@ -819,7 +870,11 @@ values (108, 1, 1, 0),     -- Alice is global superuser
        (109, 1, 3, 101),   -- Bob is superuser for Secured Corp
        (110, 1, 3, 102),   -- Carol is superuser for Protected Corp
        (111, 1, 3, 101),   -- Eve is superuser for Secured Corp
-       (111, 1, 3, 102),   -- and for Protected Corp
+       (111, 1, 3, 102),   --  and for Protected Corp
+       (111, 16, 3, 101),  --  and has dummy user role 1
+       (111, 16, 3, 102),  --   for each corp.
+       (114, 16, 3, 101),  -- Simon has dummy user role 1
+       (114, 16, 3, 102),  --   for each corp.
        (112, 1, 4, 105);   -- Sue is superuser for dept S.
 
 -- Assign project roles

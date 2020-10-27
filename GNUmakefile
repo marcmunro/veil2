@@ -257,7 +257,7 @@ drop:
 unit: db
 	@echo "Performing unit tests..."
 	@psql -X -v test=$(TEST) -f test/test_veil2.sql \
-		-d $(TESTDB) 2>&1| bin/pgtest_parser
+		-d $(TESTDB) 2>&1 | bin/pgtest_parser
 
 
 ##

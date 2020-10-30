@@ -1024,6 +1024,35 @@ select s.scope_type_id as context_type_id,
 \echo ......all_role_privs...
 
 create or replace
+view veil2.new_all_role_privs as
+with superuser_privs as
+  (
+    select bitmap_of(privilege_id) as privileges
+      from veil2.privileges
+     where privilege_id != 0  -- Superuser does not automatically get connect
+  )
+select r.role_id as role_id,
+       rr.context_type_id as mapping_context_type_id,
+       rr.context_id as mapping_context_id,
+       coalesce(bitmap_of(rr.assigned_role_id),
+                bitmap(r.role_id)) as roles,
+       case
+       when r.role_id = 1 then (select privileges from superuser_privs)
+       else coalesce(bitmap_of(rp.privilege_id),
+		     bitmap())
+       end as privileges
+  from veil2.roles r
+  left outer join veil2.all_role_roles rr
+    on rr.primary_role_id = r.role_id 
+  left join veil2.role_privileges rp
+    on rp.role_id = r.role_id
+    or rp.role_id = rr.assigned_role_id
+ group by r.role_id, rr.context_type_id,
+       rr.context_id;
+-- TODO: Grants, docs, usage, deprecation of direct_role_privs,
+-- deprecation of old version, matview.
+
+create or replace
 view veil2.all_role_privs_v (
     role_id, roles,
     privileges, global_privileges,
@@ -3058,6 +3087,328 @@ begin
 end;
 $$
 language 'plpgsql' security definer volatile;
+
+
+
+
+create or replace
+function veil2.load_session_privs(
+    session_id in integer,
+    _accessor_id in integer,
+    _prev_session_id in integer default null)
+  returns bool as
+$$
+declare
+  _prev_accessor_id integer;
+  _prevprev_accessor_id integer;
+  _need_filter boolean := false;
+begin
+  execute veil2.reset_session();
+  insert
+    into session_parameters
+        (accessor_id, session_id,
+         login_context_type_id, login_context_id,
+	 mapping_context_type_id, mapping_context_id,
+	 is_open)
+  select _accessor_id, load_session_privs.session_id,
+         login_context_type_id, login_context_id,
+         mapping_context_type_id, mapping_context_id,
+	 true
+    from veil2.sessions s
+   where s.session_id = load_session_privs.session_id;
+
+  if _prev_session_id is not null then
+    select accessor_id,
+      	   case when s.authent_type = 'become'
+	        then s.session_supplemental::integer
+	        else null
+	   end
+      into _prev_accessor_id,
+      	   _prevprev_accessor_id
+      from veil2.sessions
+     where session_id = _prev_session_id;
+    -- Recurse to load privs of originating session.
+    if veil2.load_session_privs(
+           _prev_session_id, _prev_accessor_id,
+	   _prevprev_accessor_id)
+    then
+      -- Save originating session privs for later filtering.
+      execute veil2.save_privs_as_orig();
+      _need_filter := true;
+    else
+      return false;
+    end if;
+  end if;
+
+  with session_context as
+    (
+      select *
+        from veil2.session_context() sc
+    ),
+  base_accessor_privs as
+    (
+      select aar.accessor_id, aar.role_id, 
+             aar.context_type_id as assignment_context_type_id,
+             aar.context_id as assignment_context_id,
+             arp.mapping_context_type_id,
+             arp.mapping_context_id,
+             arp.roles,
+             arp.privileges
+        from session_context sc
+       inner join veil2.all_session_roles aar
+          on aar.accessor_id = sc.accessor_id
+       inner join veil2.new_all_role_privs arp
+          on arp.role_id = aar.role_id
+         and (   (    arp.mapping_context_type_id = sc.mapping_context_type_id
+                  and arp.mapping_context_id = sc.mapping_context_id)
+	      or (    arp.mapping_context_type_id = 1
+                  and arp.mapping_context_id = 0)
+	      or (    arp.mapping_context_type_id is null
+                  and arp.mapping_context_id is null))
+    ),
+  promoted_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, ss.superior_scope_id as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id != 1
+       inner join veil2.all_superior_scopes ss
+          on ss.scope_type_id = bap.assignment_context_type_id
+         and ss.scope_id = bap.assignment_context_id
+         and ss.superior_scope_type_id = pp.scope_type_id
+	 and ss.is_type_promotion
+    ),
+  global_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, 0 as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id = 1
+    ),  
+  all_role_privs as
+    (
+      select accessor_id, 
+      	     mapping_context_type_id, mapping_context_id,
+  	     assignment_context_type_id as scope_type_id,
+             assignment_context_id as scope_id,
+             roles + role_id as roles,  privileges
+        from base_accessor_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from promoted_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from global_privs
+    ),
+  grouped_role_privs as
+    (
+      select accessor_id,
+             scope_type_id, scope_id,
+             union_of(roles) as roles, union_of(privileges) as privileges
+        from all_role_privs
+       group by accessor_id,
+                scope_type_id, scope_id
+    ),
+  have_connect as
+    (
+      select true as have_connect
+        from session_context sc
+       cross join grouped_role_privs grp
+       where grp.privileges ? 0  -- Have connect priv
+         and (   -- have priv in global scope
+	         (    grp.scope_type_id = 1
+	         and grp.scope_id = 0)
+	      or -- have priv in login context
+	         (    grp.scope_type_id = sc.login_context_type_id
+	          and grp.scope_id = sc.login_context_id)
+	      or -- have priv in superior scope to login context
+	         exists (
+	          select null
+		    from veil2.all_superior_scopes ass
+		   where ass.scope_type_id = sc.login_context_type_id
+		     and ass.scope_id = sc.login_context_id
+		     and ass.superior_scope_type_id = grp.scope_type_id
+		     and ass.superior_scope_id = grp.scope_id))
+       limit 1
+    )
+  insert
+    into session_privileges
+        (session_id, scope_type_id, scope_id,
+  	 roles, privs)
+  select load_session_privs.session_id, scope_type_id, scope_id,
+         roles, privileges
+    from grouped_role_privs
+   where exists (select null from have_connect where have_connect);
+
+  if found then
+    if _need_filter then
+      -- We are in a become-user session.  We need to filter the privs
+      -- of the user we became, with the privs of the session we came
+      -- from so that we do not gain privileges the originating
+      -- session did not have.
+      execute veil2.filter_privs();
+    end if;
+    return true;
+  else
+    execute veil2.reset_session();
+    return false;
+  end if;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+
+
+
+
+
+
+-- TODO: Move this above load_session_privs
+create or replace
+view veil2.all_session_roles as
+with session_context as
+  (
+    select *
+      from veil2.session_context() sc
+  ),
+assignment_contexts_for_session as
+  (
+    select login_context_type_id as context_type_id,
+    	     login_context_id as context_id
+      from session_context sc
+     union all
+    select ass.superior_scope_type_id,
+    	     ass.superior_scope_id
+      from session_context sc
+     inner join veil2.all_superior_scopes ass
+        on ass.scope_type_id = sc.login_context_type_id
+	 and ass.scope_id = sc.login_context_id
+     union all
+    select ass.scope_type_id,
+    	     ass.scope_id
+      from session_context sc
+     inner join veil2.all_superior_scopes ass
+        on ass.superior_scope_type_id = sc.login_context_type_id
+	 and ass.superior_scope_id = sc.login_context_id
+     union all
+    select 1, 0
+     union all
+    select 2, accessor_id
+      from session_context
+  )
+select aar.accessor_id, aar.role_id,
+       aar.context_type_id, aar.context_id
+  from session_context sc
+ inner join veil2.all_accessor_roles aar
+    on aar.accessor_id = sc.accessor_id
+ inner join assignment_contexts_for_session acfs 
+       -- This should really be a semi-join but it can only return 1
+       -- row so all is well.
+     on -- Matching login context and assignment context
+        (    acfs.context_type_id = aar.context_type_id
+         and acfs.context_id = aar.context_id)
+     or -- login context is is global, so all assignments apply
+        (    sc.login_context_type_id = 1
+	 and sc.login_context_id = 0)
+     or -- role is superuser, so we get it anyway
+        (    aar.role_id = 1
+         and acfs.context_type_id = 1)
+ union all
+select sc.accessor_id, 2,   -- Personal context role
+       2, sc.accessor_id    -- Personal scope for accessor
+  from session_context sc;
+  
+
+create or replace
+view new_all_accessor_privs as
+with base_accessor_privs as
+  (
+    select aar.accessor_id,
+           aar.context_type_id as assignment_context_type_id,
+           aar.context_id as assignment_context_id,
+           arp.mapping_context_type_id,
+           arp.mapping_context_id,
+           arp.roles,
+           arp.privileges
+      from veil2.all_accessor_roles aar
+     inner join veil2.new_all_role_privs arp
+        on arp.role_id = aar.role_id
+  ),
+promoted_privs as
+  (
+    select bap.accessor_id, bap.mapping_context_type_id,
+    	   bap.mapping_context_id, pp.scope_type_id,
+	   ss.superior_scope_id as scope_id,
+	   bap.privileges * pp.privilege_ids as privileges
+      from base_accessor_privs bap
+     inner join veil2.promotable_privileges pp
+        on not is_empty(bap.privileges * pp.privilege_ids)
+       and pp.scope_type_id != 1
+     inner join veil2.superior_scopes ss
+        on ss.scope_type_id = bap.assignment_context_type_id
+       and ss.scope_id = bap.assignment_context_id
+       and ss.superior_scope_type_id = pp.scope_type_id
+  ),
+global_privs as
+  (
+    select bap.accessor_id, bap.mapping_context_type_id,
+    	   bap.mapping_context_id, pp.scope_type_id,
+	   0 as scope_id,
+	   bap.privileges * pp.privilege_ids as privileges
+      from base_accessor_privs bap
+     inner join veil2.promotable_privileges pp
+        on not is_empty(bap.privileges * pp.privilege_ids)
+       and pp.scope_type_id = 1
+  ),  
+all_role_privs as
+  (
+    select accessor_id,
+    	   mapping_context_type_id, mapping_context_id,
+	   assignment_context_type_id as scope_type_id,
+           assignment_context_id as scope_id,
+       	   roles,  privileges
+      from base_accessor_privs
+     union all
+    select accessor_id, 
+           mapping_context_type_id, mapping_context_id,
+	   scope_type_id, scope_id,
+       	   null::bitmap as roles, privileges
+      from promoted_privs
+     union all
+    select accessor_id, 
+           mapping_context_type_id, mapping_context_id,
+	   scope_type_id, scope_id,
+       	   null::bitmap as roles, privileges
+      from global_privs
+  )
+select accessor_id,
+       mapping_context_type_id, mapping_context_id,
+       scope_type_id, scope_id,
+       union_of(roles) as roles, union_of(privileges) as privileges
+  from all_role_privs
+ where accessor_id = 114
+ group by accessor_id,
+          mapping_context_type_id, mapping_context_id,
+          scope_type_id, scope_id;
+  
+-- TODO: Make this available as a view after fixing it based on latest
+-- version in scratch.sql
+
+
 
 comment on function veil2.load_session_privs(integer, integer, integer) is
 'Load the temporary table session_privileges for session_id, with the

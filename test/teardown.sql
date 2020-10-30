@@ -1,6 +1,5 @@
 \echo ...removing test objects and data...
 
-
 -- Reset veil2 views to original definitions
 create or replace
 view veil2.all_accessor_roles (

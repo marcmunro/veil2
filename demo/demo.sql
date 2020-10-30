@@ -159,10 +159,6 @@ create table demo.project_assignments (
 
 grant all on table demo.project_assignments to demouser;
 
-alter table demo.project_assignments
-  add constraint project_assignments__role_fk
-  foreign key (role_id) references veil2.roles(role_id);
-
 -- VPD SETUP
 -- Refer to the Veil2 documentation for descriptions of the STEPs
 -- below.  The numbered steps below are described in the "Setting Up A
@@ -254,11 +250,15 @@ language plpgsql security definer stable leakproof;
 -- Create FK links for veil2.accessors to the demo database tables.
 -- These ensure that veil2.accessors and veil2.authentication_details
 -- are kept in step with the demo parties_tbl table.
---
 
 -- We cannot add the FK directly to the accessors table as the new fk
 -- would not be preserved by a restore from pg_dump.  Instead we have
--- to create a new table.
+-- to create a new table.  Note that since we use the same accessor_id
+-- value in our demo tables as Veil2 uses itself, the mapping is
+-- trivial (accessor_id to itself).  If your application is unable to
+-- use Veil's accessor_id, the mapping table would have to map from
+-- the Veil accessor_id to your user_id (ie it would contain 2
+-- columns) and each foreign key below would be on a different column.
 
 create table veil2.accessor_party_map (
   accessor_id		integer not null
@@ -373,6 +373,7 @@ comment on trigger parties_tbl_aut on demo.parties_tbl is
 
 select * from veil2.implementation_status();
 
+
 -- STEP 5:
 -- Link scopes back to the database being secured.
 
@@ -450,13 +451,13 @@ select 5, project_id, project_id
 -- scope_links tables.
 
 
--- Now we define all_accessor_roles to include project assignments.
+-- Now we modify all_accessor_roles to include project assignments.
 -- With this done, the veil2.load_session_privs() function will see
 -- the project_assignments and add these to the set of privileges seen
 -- for a connected user.
 
 create or replace
-view veil2.all_accessor_roles (
+view veil2.my_all_accessor_roles (
   accessor_id, role_id, context_type_id, context_id
 ) as
 select accessor_id, role_id,
@@ -548,6 +549,14 @@ values (16, 'select party_types',
 -- between user and function-level roles and could be used, for
 -- example, in views to differentiate between roles that can be
 -- renamed within a spcecific context, and those that cannot.
+
+-- Link project_assignments to roles.  Your assignment to a project
+-- comes with one or more roles that define what you can do on/with
+-- the project.
+alter table demo.project_assignments
+  add constraint project_assignments__role_fk
+  foreign key (role_id) references veil2.roles(role_id);
+
 insert
   into veil2.role_types
        (role_type_id, role_type_name, description)

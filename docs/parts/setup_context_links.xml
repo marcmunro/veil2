@@ -100,13 +100,38 @@ select 6, nextval('veil2.scope_id_seq'), project_id
     </para>
   </sect2>
   <sect2>
+    <title>Update the <literal>all_accessor_roles</literal> View</title>
+    <para>
+      If you have role assignments that are not managed solely through
+      the <literal>veil2.accessor_roles</literal> table, you will need
+      to modify the <literal>all_accessor_roles</literal> view.  For
+      example, in the demo, roles are assigned in project context
+      using the <literal>demo.project_assignments</literal> table.
+    </para>
+    <para>
+      To enable the creation of custom security contexts,
+      <literal>Veil2</literal> determines an accessor's roles and the
+      contexts in which they apply from the
+      <literal>veil2.all_accessor_roles</literal> view, which you can
+      modify by providing your own
+      <literal>veil2.my_all_accessor_roles</literal>.
+    </para>
+    <para>
+      In the demo we make this view return results from both the
+      <literal>veil2.accessor_roles</literal> and the
+      <literal>demo.project_assignments</literal> tables.
+    </para>
+  </sect2>
+  <sect2>
     <title>In Summary</title>
     <para>
       You will extend the <literal>veil2.scopes</literal> table using
       inheritence and then for each relational context you will add
       foreign key columns, create foreign key and check constraints,
       create an insert trigger and populate the
-      <literal>scopes</literal> table records.
+      <literal>scopes</literal> table records.  You may also need to
+      create a custom view:
+      <literal>veil2.my_all_accessor_roles</literal>.
     </para>
   </sect2>
 </sect1>

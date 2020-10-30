@@ -233,7 +233,6 @@ select role_id, 'dept_' || role_name, -4, -41
  where role_name in ('test_role_5', 'test_role_6');
 
 
-alter table veil2.role_roles disable trigger role_roles__aiudt;
 -- 1->2
 insert into veil2.role_roles
       (primary_role_id, assigned_role_id, context_type_id, context_id)
@@ -283,7 +282,6 @@ select p.role_id, a.role_id, 1, 0
    and a.role_name = 'test_role_5';
 
 -- 6->5 in corp context of -3
-alter table veil2.role_roles enable trigger role_roles__aiudt;
 insert into veil2.role_roles
       (primary_role_id, assigned_role_id, context_id, context_type_id)
 select p.role_id, a.role_id, -3, -3

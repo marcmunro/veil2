@@ -96,7 +96,7 @@ select 5, s.scope_id,   -- Project to org promotions
       <itemizedlist>
 	<listitem>
 	  <para>
-	    Define your custome <literal>my_superior_scopes</literal>
+	    Define your custom <literal>my_superior_scopes</literal>
 	    view.
 	  </para>
 	</listitem>

@@ -678,16 +678,6 @@ with session as
 select is(success, true, 'Eve should be authenticated (login -3, -3)')
   from session;
 
-/*
-\pset tuples_only false
-\pset format aligned
-
-select * from veil2.session_privileges_info;
-\i scratch.sql
-commit;
-\q
-*/
-
 
 -- Ensure Eve has roles for scope -3, -3 but not -3, -31
 with sess as

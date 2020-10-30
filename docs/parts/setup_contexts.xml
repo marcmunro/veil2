@@ -18,8 +18,8 @@
     be able to find a scope.
   </para>
   <para>
-    Note that <literal>Veil2</literal> provides 2 default scopes: for
-    global and personal scopes.
+    Note that <literal>Veil2</literal> provides 2 default scope types:
+    for global and personal scopes.
   </para>
   <para id="role_mapping_context">
     Consider also your <link
@@ -41,7 +41,8 @@
     The demo sets up 3 relational scopes.  Look for "STEP 2" in the
     file <literal>demo/demo.sql</literal>.  It uses distinct
     authentication contexts (based on org and corp contexts) and
-    defines role to role mappings within corp contexts.
+    defines role to role mappings within corp contexts.  TODO: rewrite
+    this bit.
   </para>
   <sect2>
     <title>In Summary</title>

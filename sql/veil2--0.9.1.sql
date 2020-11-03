@@ -799,8 +799,9 @@ create type veil2.session_privileges_t as (
 comment on type veil2.session_privileges_t is
 'Records the privileges for active sessions in each assigned context.
 
-This type is used for the generation of a session_privileges temporary
-table which is populated by Veil2''s session management functions.';
+This type is used for the generation of a veil2_session_privileges
+temporary table which is populated by Veil2''s session management
+functions.';
  
 \echo ......session_params_t(type)...
 create type veil2.session_params_t as (
@@ -1858,29 +1859,98 @@ create or replace
 function veil2.reset_session()
   returns void as
 $$
+declare
+  rowcount integer;
+  dummy integer;
 begin
-  create temporary table if not exists session_parameters
-    of veil2.session_params_t;
-  truncate table session_parameters;
-  create temporary table if not exists session_privileges
-    of veil2.session_privileges_t;
-  truncate table session_privileges;
+  select count(*)
+    into rowcount
+    from pg_catalog.pg_class c
+   where c.relname in ('veil2_session_privileges',
+       	     	       'veil2_session_parameters',
+		       'veil2_orig_privileges');
+  if rowcount = 0 then
+    -- All is well, the temp tables do not exist, let's create them.
+    create temporary table veil2_session_privileges
+      of veil2.session_privileges_t;
+    create temporary table veil2_orig_privileges
+      of veil2.session_privileges_t;
+    create temporary table veil2_session_parameters
+      of veil2.session_params_t;
+    execute 'grant select on veil2_session_privileges to veil_user;';
+    execute 'grant select on veil2_session_parameters to veil_user;';
+  elsif rowcount != 3 then
+    -- There should be 3 tables with these names.  Any other value
+    -- suggests that someone is trying to hack us.
+    raise exception 'SECURITY: Possible temp table hack.  Relation count is %', rowcount;
+  else
+    -- OK, we have the expected temp tables.  Now make sure they are
+    -- really temp tables and that we don't have unexpected
+    -- privileges.
 
-  execute 'grant select on session_privileges to veil_user;';
-  execute 'grant select on session_parameters to veil_user;';
+    select 1
+      into dummy
+      from pg_catalog.pg_class c
+     where c.relname in ('veil2_session_privileges',
+       	     	         'veil2_session_parameters',
+		         'veil2_orig_privileges')
+       and not (relkind = 'r' and relpersistence = 't');
+    if found then
+      raise exception 'SECURITY: Possible temp table hack.  Unexpected relation type';
+    end if;
+    -- Now check that we don't have unexpected privileges
+    with recursive my_roles as
+    (
+      -- Identify all roles that I have been assigned, and whether
+      -- they have superuser privileges.
+      select me as role, superuser
+        from me
+      union all
+     select am.roleid, r.rolsuper
+       from my_roles mr
+      inner join pg_catalog.pg_auth_members am
+         on am.member = mr.role
+      inner join pg_catalog.pg_roles r
+         on r.oid = am.roleid
+    ),
+  me as
+    (
+      -- Retrieve the oid for the connected user.
+      select usesysid as me,
+             usesuper as superuser
+        from pg_catalog.pg_user
+       where usename = session_user
+    )
+    select 1
+      into dummy
+      from pg_catalog.pg_class c
+     cross join aclexplode(c.relacl) p
+     inner join my_roles mr
+        on mr.role = p.grantee
+       and not mr.superuser  -- If we are superuser, we don't care
+                             -- about our privs
+       and p.privilege_type != 'SELECT' -- Select priv is expected
+     where c.relname in ('veil2_session_privileges',
+       	     	         'veil2_session_parameters',
+		         'veil2_orig_privileges');
+    if found then
+      raise exception 'SECURITY: Possible temp table hack.  Unexpected privileges on relation';
+    end if;
+    -- We get here only if all is well.  Clear the primary session
+    -- temp tables.
+    
+    truncate table veil2_session_privileges;
+    truncate table veil2_session_parameters;
+  end if;
 end;
 $$
 language 'plpgsql' security definer
 set client_min_messages = 'error';
 
 comment on function veil2.reset_session() is
-'Ensure our session_parameters temp table has been created, and then
-clear it.  Note that notices about session_parameters already existing
-are not sent to the client.
-
-Note that the return type is not relevant but using bool rather than
-void makes formatting tests results easier as it makes it easier to
-write queries that call the function that return no rows';
+'Ensure our temp tables exist, are of the expected type (temporary
+tables) and that the session user has no unexpected access rights on
+them, and clear them.';
 
 
 \echo ......get_accessor()...
@@ -1940,10 +2010,10 @@ begin
   execute veil2.reset_session();  -- ignore result
 
   -- Regardless of validity of accessor_id, we create a
-  -- session_parameters record to prevent fishing for valid
+  -- veil2_session_parameters record to prevent fishing for valid
   -- accessor_ids.
   insert
-    into session_parameters
+    into veil2_session_parameters
         (accessor_id, session_id,
 	 login_context_type_id, login_context_id,
 	 mapping_context_type_id, mapping_context_id,
@@ -1966,9 +2036,9 @@ begin
      and asp.superior_scope_type_id = sp.parameter_value::integer
      and asp.is_type_promotion
    where sp.parameter_name = 'mapping context target scope type'
-  returning session_parameters.session_id,
-            session_parameters.mapping_context_type_id,
-            session_parameters.mapping_context_id
+  returning veil2_session_parameters.session_id,
+            veil2_session_parameters.mapping_context_type_id,
+            veil2_session_parameters.mapping_context_id
        into create_accessor_session.session_id,
             _mapping_context_type_id,
 	    _mapping_context_id;
@@ -2049,7 +2119,6 @@ $$
 declare
   _accessor_id integer;
 begin
-  execute veil2.reset_session();
   -- Generate session_id and session_token and establish whether
   -- username was valid.
   _accessor_id := veil2.get_accessor(username, context_type_id, context_id);
@@ -2155,14 +2224,14 @@ function veil2.filter_privs()
   returns void as
 $$
 begin
-  -- We are going to update session_privileges to remove any roles and
-  -- privileges that do not exist in orig_privileges.  This is part of
+  -- We are going to update veil2_session_privileges to remove any roles and
+  -- privileges that do not exist in veil2_orig_privileges.  This is part of
   -- the become user process, to ensure that become user cannot lead
   -- to privilege escalation.
   with new_privs as
     (
       select sp.scope_type_id, sp.scope_id
-        from session_privileges sp
+        from veil2_session_privileges sp
     ),
   superior_scopes as
     (
@@ -2185,7 +2254,7 @@ begin
              union_of(op.roles) as roles,
   	   union_of(op.privs) as privs
         from superior_scopes ss
-       inner join orig_privileges op
+       inner join veil2_orig_privileges op
           on op.scope_type_id = ss.superior_scope_type_id
          and (   op.scope_id = ss.superior_scope_id
               or op.scope_type_id = 2)  -- Personal scope: do not test scope_id
@@ -2196,12 +2265,12 @@ begin
       select sp.session_id, sp.scope_type_id, sp.scope_id,
              sp.roles * ap.roles as roles,
              sp.privs * ap.privs as privs
-        from session_privileges sp
+        from veil2_session_privileges sp
        inner join allowable_privs ap
           on ap.scope_type_id = sp.scope_type_id
          and ap.scope_id = sp.scope_id
     )
-  update session_privileges sp
+  update veil2_session_privileges sp
      set roles = fp.roles,
          privs = fp.privs
     from final_privs fp
@@ -2212,8 +2281,8 @@ $$
 language 'plpgsql' security definer volatile;
 
 comment on function veil2.filter_privs() is
-'Remove any privileges from session_privileges that would not be
-provided by orig_privileges.  This is part of the become user
+'Remove any privileges from veil2_session_privileges that would not be
+provided by veil2_orig_privileges.  This is part of the become user
 functionality.  We perform this filtering in order to ensure that a
 user cannot increase their privileges using become user.';
 
@@ -2223,17 +2292,15 @@ create or replace
 function veil2.save_privs_as_orig () returns void as
 $$
 begin
-  create temporary table if not exists orig_privileges as
-  select * from session_privileges where false;
-  truncate table orig_privileges;
-  insert into orig_privileges select * from session_privileges;
+  truncate table veil2_orig_privileges;
+  insert into veil2_orig_privileges select * from veil2_session_privileges;
 end;
 $$
 language 'plpgsql' security definer volatile;
 
 comment on function veil2.save_privs_as_orig() is
-'Save the current contents of the session_privileges table to
-orig_privileges.  This is part of the become user process.';
+'Save the current contents of the veil2_session_privileges table to
+veil2_orig_privileges.  This is part of the become user process.';
 
 
 \echo ......session_context()...
@@ -2257,7 +2324,7 @@ begin
 	   session_context.login_context_id,
          session_context.mapping_context_type_id,
 	   session_context.mapping_context_id
-    from session_parameters sp;
+    from veil2_session_parameters sp;
 exception
   when sqlstate '42P01' then
     return;
@@ -2270,7 +2337,7 @@ language 'plpgsql' security definer volatile;
 comment on function veil2.session_context() is
 'Safe function to return the context of the current session.  If no
 session exists, returns nulls.  We use a function in this context
-because we cannot create a view on the session_parameters table as it
+because we cannot create a view on the veil2_session_parameters table as it
 is a temporary table and does not always exist.';
 
 
@@ -2294,7 +2361,7 @@ begin
   in select sp.session_id,  sp.scope_type_id,
             sp.scope_id, to_array(sp.roles),
   	    to_array(sp.privs)
-       from session_privileges sp
+       from veil2_session_privileges sp
   loop
     return next;
   end loop;
@@ -2311,7 +2378,7 @@ comment on function veil2.session_privileges() is
 'Safe function to return a user-readable version of the privileges for
 the current session.  If no session exists, returns nulls.  We use a
 function in this context because we cannot create a view on the
-session_parameters table as it is a temporary table and does not
+veil2_session_parameters table as it is a temporary table and does not
 always exist.';
 
 
@@ -2340,7 +2407,7 @@ declare
 begin
   execute veil2.reset_session();
   insert
-    into session_parameters
+    into veil2_session_parameters
         (accessor_id, session_id,
          login_context_type_id, login_context_id,
 	 mapping_context_type_id, mapping_context_id,
@@ -2481,7 +2548,7 @@ begin
        limit 1
     )
   insert
-    into session_privileges
+    into veil2_session_privileges
         (session_id, scope_type_id, scope_id,
   	 roles, privs)
   select load_session_privs.session_id, scope_type_id, scope_id,
@@ -2646,7 +2713,7 @@ select accessor_id,
 
 
 comment on function veil2.load_session_privs(integer, integer, integer) is
-'Load the temporary table session_privileges for session_id, with the
+'Load the temporary table veil2_session_privileges for session_id, with the
 privileges for _accessor_id.  The temporary table is queried by
 security functions in order to determine what access rights the
 connected user has.  If the optional 3rd parameter is provided, use
@@ -2698,7 +2765,7 @@ declare
   can_connect bool;
 begin
   success := false;
-  update session_parameters  -- If anything goes wrong from here on, 
+  update veil2_session_parameters  -- If anything goes wrong from here on, 
   	 		     -- the session will be have no access
 			     -- rights.
      set is_open = false;
@@ -2779,8 +2846,8 @@ begin
     end if;
     
     if not success then
-      delete from session_privileges;
-      delete from session_parameters;
+      delete from veil2_session_privileges;
+      delete from veil2_session_parameters;
     end if;
     -- Regardless of the success of the preceding checks we record the
     -- use of the latest nonce.  If all validations succeeded, we
@@ -2843,7 +2910,7 @@ create or replace
 function veil2.close_connection() returns boolean as
 $$
 begin
-  update session_parameters
+  update veil2_session_parameters
      set is_open = false;
   return true;
 end;
@@ -2900,9 +2967,6 @@ begin
          set expires = now() + '1 day'::interval,
  	    has_authenticated = true
        where session_id = _session_id;
-
-       execute 'grant select on session_parameters to veil_user;';
-       execute 'grant select on session_privileges to veil_user;';
     end if;
   end if;
   return success;
@@ -2933,7 +2997,7 @@ declare
 begin
   select sp.session_id
     into orig_session_id
-    from session_parameters sp;
+    from veil2_session_parameters sp;
     
   if veil2.i_have_global_priv(1) or
      veil2.i_have_priv_in_superior_scope(1, context_type_id, context_id)
@@ -3038,13 +3102,9 @@ username rather than accessor_id.';
 
 
 \echo ...creating veil2 privilege testing functions...
--- Ensure the session_parameters and session _privileges temp tables
+-- Ensure the veil2_session_parameters and session _privileges temp tables
 -- exist as they are needed in order to compile the following functions.
-create temporary table if not exists session_parameters
-    of veil2.session_params_t;
-
-create temporary table if not exists session_privileges
-    of veil2.session_privileges_t;
+select veil2.reset_session();
 
 \echo ......i_have_global_priv()...
 create or replace
@@ -3053,8 +3113,8 @@ function veil2.i_have_global_priv(priv integer)
 $$
   select coalesce(
   (select privs ? priv
-    from session_privileges v
-   cross join session_parameters p
+    from veil2_session_privileges v
+   cross join veil2_session_parameters p
    where p.is_open
      and v.scope_type_id = 1), false);
 $$
@@ -3075,8 +3135,8 @@ function veil2.i_have_priv_in_scope(
 $$
 select coalesce((
   select privs ? priv
-    from session_privileges v
-   cross join session_parameters p
+    from veil2_session_privileges v
+   cross join veil2_session_parameters p
    where p.is_open
      and v.scope_type_id = _scope_type_id
      and v.scope_id = _scope_id),
@@ -3103,8 +3163,8 @@ begin
   select true
     into have_priv
     from veil2.all_superior_scopes asp
-   cross join session_parameters p
-   inner join session_privileges sp
+   cross join veil2_session_parameters p
+   inner join veil2_session_privileges sp
       on sp.scope_type_id = asp.superior_scope_type_id
      and sp.scope_id = asp.superior_scope_id
    where p.is_open
@@ -3135,8 +3195,8 @@ function veil2.i_have_personal_priv(
 $$
 select coalesce((
   select privs ? priv
-    from session_privileges v
-   cross join session_parameters p
+    from veil2_session_privileges v
+   cross join veil2_session_parameters p
    where p.is_open
      and v.scope_type_id = 2
      and v.scope_id = _accessor_id),
@@ -3909,7 +3969,7 @@ begin
     return next line;
   end loop;
   if ok then
-    return next 'Have you secured your views?.';
+    return next 'Have you secured your views?';
   end if;
 end;
 $$

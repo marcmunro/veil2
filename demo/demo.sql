@@ -484,6 +484,7 @@ view veil2.my_superior_scopes (
   scope_type_id, scope_id,
   superior_scope_type_id, superior_scope_id
 ) as
+/*
 select 3, corp_id,   -- Promote client corps to veil corp.
        3, 100
   from demo.parties_tbl
@@ -491,6 +492,7 @@ select 3, corp_id,   -- Promote client corps to veil corp.
    and corp_id = org_id
    and corp_id != 100  -- Do not promote veil corp
 union all
+*/
 select 4, party_id,  -- Promote org to corp scope
        3, corp_id
   from demo.parties_tbl 

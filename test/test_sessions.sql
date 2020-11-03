@@ -43,16 +43,16 @@ select null
   from reset_session
  where result != 1;
 
-select is((select count(*) from session_parameters)::integer,
-           0, 'Expecting empty session_parameters table');
+select is((select count(*) from veil2_session_parameters)::integer,
+           0, 'Expecting empty veil2_session_parameters table');
 
-insert into session_parameters(accessor_id) values (1);
+insert into veil2_session_parameters(accessor_id) values (1);
 
 -- Ensure that we can see the inserted session record.
-select is((select count(*) from session_parameters)::integer,
-          1, 'Expecting 1 session_parameters row');
+select is((select count(*) from veil2_session_parameters)::integer,
+          1, 'Expecting 1 veil2_session_parameters row');
 
--- Test that resetting session causes session_parameters record to be
+-- Test that resetting session causes veil2_session_parameters record to be
 -- removed.
 with reset_session as
   (
@@ -63,8 +63,8 @@ select null
  where result != 1;
 
 -- Create_session
-select is((select count(*) from session_parameters)::integer,
-           0, 'Expecting empty session_parameters table(2)');
+select is((select count(*) from veil2_session_parameters)::integer,
+           0, 'Expecting empty veil2_session_parameters table(2)');
 
 with session as (select * from veil2.create_session('gerry', 'wibble'))
 select is ((session_id is not null),
@@ -75,17 +75,17 @@ select is((session_token is not null),
           true, 'create_session() returns session token')
   from session;
 
--- Check that session_parameters are defined but there is no actual
+-- Check that veil2_session_parameters are defined but there is no actual
 -- session created following the above create_session() call.
 with session_params as
   (
     select *
-      from session_parameters
+      from veil2_session_parameters
   ),
 sessions as
   (
     select sp.session_id as reported_session_id, s.session_id
-      from session_parameters sp
+      from veil2_session_parameters sp
      left outer join veil2.sessions s
         on s.session_id = sp.session_id
   )
@@ -111,12 +111,12 @@ select is((session.session_token is not null),
 with session_params as
   (
     select *
-      from session_parameters
+      from veil2_session_parameters
   ),
 sessions as
   (
     select sp.session_id as reported_session_id, s.session_id
-      from session_parameters sp
+      from veil2_session_parameters sp
      left outer join veil2.sessions s
         on s.session_id = sp.session_id
   )
@@ -134,12 +134,12 @@ select is((session_id is null), false,
 with session_params as
   (
     select *
-      from session_parameters
+      from veil2_session_parameters
   ),
 session as
   (
     select os.*
-      from session_parameters sp
+      from veil2_session_parameters sp
      cross join veil2.open_connection(sp.session_id, 1, 'wibble') os
   )
 select is(success, false, 'Authentication should have failed(1)')
@@ -191,7 +191,7 @@ create temporary table mytest_session (
   session_id1 integer, session_id2 integer);
 
 insert into mytest_session (session_id1)
-select session_id from session_parameters;
+select session_id from veil2_session_parameters;
 
 -- Disconnect and reconnect the above session.  Since this is a
 -- continuation of an existing session, we use the continuation
@@ -235,7 +235,7 @@ select is(errmsg is null, true,
 
 -- Record the second session_id.
 update mytest_session
-   set session_id2 = (select session_id from session_parameters);
+   set session_id2 = (select session_id from veil2_session_parameters);
 
 -- Switch to the original session
 with session as
@@ -625,7 +625,7 @@ select is(veil2.i_have_priv_in_scope(25, -4, -41), true,
           'Bob should have priv 25 in context -4,-41 (2)');
 
 select is(accessor_id, -5, 'Eve should now have Bob''s accessor_id')
-  from session_parameters;
+  from veil2_session_parameters;
 
 -- ......continuation...
 select is(o.success, true, 'Bob''s session should have continued')
@@ -683,7 +683,7 @@ select is(success, true, 'Eve should be authenticated (login -3, -3)')
 with sess as
   (
     select *
-      from session_privileges
+      from veil2_session_privileges
      where scope_type_id = -3
   )
 select is(1, (select count(*)::integer from sess),
@@ -724,7 +724,7 @@ select is(s.success, true, 'Eve should be authenticated (login -3, -31)')
 with sess as
   (
     select *
-      from session_privileges
+      from veil2_session_privileges
      where scope_type_id = -3
   )
 select is(1, (select count(*)::integer from sess),

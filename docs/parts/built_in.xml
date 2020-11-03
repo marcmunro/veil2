@@ -1,0 +1,193 @@
+<sect1 id="Implementation">
+  <title>The Veil2 Implementation: What You Need To Know</title>
+  <para>
+    Although <literal>Veil2</literal> is built to be customized and
+    modified by you, it comes with a number of built-in assumptions,
+    rules and limitations.  These exist to provide a sane starting
+    point for your implementation.
+  </para>
+  <sect2>
+    <title id="physical_authentication_context">Authentication
+    Contexts</title>
+    <para>
+      The <link linkend="veil2-concepts">concepts section</link>
+      describes <link linkend="authentication_context">authentication
+      contexts</link> as a means to associate different users with
+      different organizations.
+    </para>
+    <para>
+      If your application serves a number of distinct customers, each
+      effectively having their own web site, then the authentication
+      context will be provided by the login page for that web site.
+      For example, if your customers are:
+      <itemizedlist spacing="compact">
+	<listitem>Alicecorp;</listitem>
+	<listitem>Bobcorp;</listitem>
+	<listitem>Carolcorp.</listitem>
+      </itemizedlist>
+      And the login pages are:
+      <itemizedlist spacing="compact">
+	<listitem><literal>
+	  https://myveilprotectedsite/Alicecorp/login;
+	</literal></listitem>
+	<listitem><literal>
+	  https://myveilprotectedsite/Bobcorp/login;
+	</literal></listitem>
+	<listitem><literal>
+	  https://myveilprotectedsite/Carolcorp/login.
+	</literal></listitem>
+      </itemizedlist>
+      Then each login page will provide different context data for the
+      authentication calls.  Assuming that we have defined a corp
+      context with a <literal>context_type_id</literal> of 3, and
+      that the <literal>accessor_ids</literal> for AliceCorp, BobCorp,
+      and CarolCorp are 42, 43, and 44 respectively, then our
+      <literal>veil2.create_session()</literal> calls for each of the
+      login pages will be as follows:
+      <itemizedlist spacing="compact">
+	<listitem>
+	  <literal>
+	    https://myveilprotectedsite/Alicecorp/login;
+	  </literal>
+	  <programlisting>
+select * from veil2.create_session(&lt;username&gt;, 4, 42);	    
+	  </programlisting>
+	</listitem>
+	<listitem>
+	  <literal>
+	    https://myveilprotectedsite/Bobcorp/login;
+	  </literal>
+	  <programlisting>
+select * from veil2.create_session(&lt;username&gt;, 4, 43);	    
+	  </programlisting>
+	</listitem>
+	<listitem>
+	  <literal>
+	    https://myveilprotectedsite/Carolcorp/login;
+	  </literal>
+	  <programlisting>
+select * from veil2.create_session(&lt;username&gt;, 4, 44);	    
+	  </programlisting>
+	</listitem>
+      </itemizedlist>
+    </para>
+    <sect3>
+      <title>Associating Accessors With Their Authentication Context</title>
+      <para>
+	The association between an accessor and their authentication
+	context is entirely user-defined.  <literal>Veil2</literal>
+	relies on the <literal>veil2.my_get_accessor()</literal>
+	function to return an accessor_id for a given combination of
+	username and authentication context.  For an example of this,
+	you should look at the <literal>Veil2</literal> demo
+	(following the text <quote><literal>STEP 3</literal></quote>
+	in the file <literal>demo/demo.sql</literal>).
+      </para>
+      <para>
+	Note that many <literal>Veil2</literal> implementations will
+	not need to use seperate authentication contexts.  In such a
+	case your <literal>veil2.my_get_accessor()</literal> function
+	should simply insist on the context being global
+	(<literal>context_type_id = 1</literal> and
+	<literal>context_id = 0</literal>).
+      </para>
+    </sect3>
+  </sect2>
+  <sect2>
+    <title>Assignment Contexts</title>
+    <para>
+      Each role assignment in <literal>Veil2</literal> happens within
+      a specific assignment context.
+    </para>
+  </sect2>
+  <sect2>
+    <title id="physical_role_mapping">Role Mappings and Mapping Contexts</title>
+    <para>
+      As described <link linkend="role_mapping">here</link>,
+      <literal>Veil2</literal> allows roles to be mapped to other
+      roles, and for those role mappings to be different for different
+      users.
+    </para>
+    <para>
+      The purpose of this is to allow different groups of users to be
+      able to separately manage their own role->role mappings.  For
+      instance, if one company allows Customer Service Reps to provide
+      financial incentives to their customers and another does not,
+      the first company might assign the <literal>Manage
+      Discounts</literal> role to the <literal>Customer Service
+      Rep</literal> role, while the other would not.
+    </para>
+    <para>
+      If your <literal>Veil2</literal> protected system is providing
+      distinct virtual databases for a number of independent clients,
+      this is an important feature.
+    </para>
+    <para>
+      <literal>Veil2</literal> allows this by providing different
+      mapping contexts to apply to different groups of users.  The
+      mapping context that applies for a given role assignmen depends
+      on:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    the <literal>mapping context target scope type</literal>
+	    system parameter;
+	  </para>
+	  <para>
+	    This parameter (recorded in
+	    <literal>veil2.system_parameters</literal>) specifies
+	    scope type that will apply to mapping contexts.  By
+	    default this is <literal>global scope</literal> which
+	    means that <emphasis>all</emphasis> accessors will see
+	    the same role->role mappings.  If you don't need different
+	    mapping contexts, you should leave this setting alone.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    the context of the role assignment;
+	  </para>
+	  <para>
+	    Each role is assigned in a specific context.  The mapping
+	    context that applies to a role in a given assignment
+	    context will be the context of the first superior scope
+	    that matches our <literal>mapping context target scope
+	    type</literal>.
+	  </para>
+	  <para>
+	    For example, imagine a scope hierarchy that goes from
+	    corporation, to division, to department, to project.  If
+	    our mapping context is at the division level, then the
+	    <literal>Project Manager</literal> role assigned for a
+	    project within department S, division South, would have
+	    a mapping context of department S.  This would mean that
+	    the Project Manager role in department S might have
+	    different sub-roles from the same Project Manager role in
+	    Department Y.
+	  </para>
+	</listitem>
+	<listitem>
+	  TODO: DISTINGUISH BETWEEN AUTHENTICATION AND LOGIN CONTEXTS 
+	  <para>
+	    the user's <link
+	    linkend="physical_authentication_context">authentication
+	    context</link>.
+	  </para>
+	  <para>
+	    A user's authentication context determines which role
+	    assignments are considered valid.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+  <sect2>
+    <title>Built-In Security Contexts</title>
+  </sect2>
+  <sect2>
+    <title>Login Contexts</title>
+  </sect2>
+  <sect2>
+    <title>Built-In Roles</title>
+  </sect2>
+</sect1>

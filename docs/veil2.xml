@@ -17,6 +17,7 @@
 <!ENTITY whyuse_veil 	       	SYSTEM "parts/whyuse_veil.xml">
 <!ENTITY veil_concepts 	       	SYSTEM "parts/veil_concepts.xml">
 <!ENTITY whatis_veil 	       	SYSTEM "parts/whatis_veil.xml">
+<!ENTITY built_in        	SYSTEM "parts/built_in.xml">
 <!ENTITY how_difficult 	       	SYSTEM "parts/how_difficult.xml">
 <!ENTITY get_started 	       	SYSTEM "parts/get_started.xml">
 <!ENTITY veil_demo 	       	SYSTEM "parts/veil_demo.xml">
@@ -98,6 +99,7 @@
   &whyuse_veil;
   &veil_concepts;
   &whatis_veil;
+  &built_in;
   &how_difficult;
   &get_started;
   &veil_demo;

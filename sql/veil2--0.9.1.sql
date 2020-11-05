@@ -40,6 +40,31 @@ comment on schema veil2 is
 revoke all on schema veil2 from public;
 grant usage on schema veil2 to veil_user;
 
+
+create or replace
+function veil2.ok() returns boolean
+     as '$libdir/veil2', 'veil2_ok'
+     language C stable strict;
+
+comment on function veil2.ok() is
+'Predicate to indicate whether veil2.reset_session() has been
+successfully called for this session.  If not none of the
+i_have_privilege functions will return true.  
+
+This exists as a stand-alone function so that it may be used by
+user-defined functions.';
+
+
+create or replace
+function veil2.reset_session() returns void
+     as '$libdir/veil2', 'veil2_reset_session'
+     language C volatile strict security definer;
+
+
+
+
+
+
 -- Create the VEIL2 schema tables
 
 \echo ......scope_types...
@@ -1683,8 +1708,6 @@ $$
 begin
   perform veil2.install_user_functions();
   perform veil2.install_user_views();
-  --execute('refresh materialized view veil2.direct_role_privileges');
-  --execute('refresh materialized view veil2.all_role_privs');
   execute('refresh materialized view veil2.all_superior_scopes');
 end;
 $$
@@ -1856,19 +1879,23 @@ is an appropriate authentication.';
 
 \echo ......reset_session()...
 create or replace
-function veil2.reset_session()
+function veil2.old_reset_session()
   returns void as
 $$
 declare
   rowcount integer;
-  dummy integer;
+  secured integer;
 begin
-  select count(*)
-    into rowcount
+  select count(*)::integer,
+         sum(case when c.relacl is null then 1 else 0 end)
+    into rowcount, secured
     from pg_catalog.pg_class c
    where c.relname in ('veil2_session_privileges',
        	     	       'veil2_session_parameters',
-		       'veil2_orig_privileges');
+		       'veil2_orig_privileges')
+     and c.relkind = 'r'
+     and c.relpersistence = 't';
+
   if rowcount = 0 then
     -- All is well, the temp tables do not exist, let's create them.
     create temporary table veil2_session_privileges
@@ -1877,8 +1904,6 @@ begin
       of veil2.session_privileges_t;
     create temporary table veil2_session_parameters
       of veil2.session_params_t;
-    execute 'grant select on veil2_session_privileges to veil_user;';
-    execute 'grant select on veil2_session_parameters to veil_user;';
   elsif rowcount != 3 then
     -- There should be 3 tables with these names.  Any other value
     -- suggests that someone is trying to hack us.
@@ -1888,52 +1913,7 @@ begin
     -- really temp tables and that we don't have unexpected
     -- privileges.
 
-    select 1
-      into dummy
-      from pg_catalog.pg_class c
-     where c.relname in ('veil2_session_privileges',
-       	     	         'veil2_session_parameters',
-		         'veil2_orig_privileges')
-       and not (relkind = 'r' and relpersistence = 't');
-    if found then
-      raise exception 'SECURITY: Possible temp table hack.  Unexpected relation type';
-    end if;
-    -- Now check that we don't have unexpected privileges
-    with recursive my_roles as
-    (
-      -- Identify all roles that I have been assigned, and whether
-      -- they have superuser privileges.
-      select me as role, superuser
-        from me
-      union all
-     select am.roleid, r.rolsuper
-       from my_roles mr
-      inner join pg_catalog.pg_auth_members am
-         on am.member = mr.role
-      inner join pg_catalog.pg_roles r
-         on r.oid = am.roleid
-    ),
-  me as
-    (
-      -- Retrieve the oid for the connected user.
-      select usesysid as me,
-             usesuper as superuser
-        from pg_catalog.pg_user
-       where usename = session_user
-    )
-    select 1
-      into dummy
-      from pg_catalog.pg_class c
-     cross join aclexplode(c.relacl) p
-     inner join my_roles mr
-        on mr.role = p.grantee
-       and not mr.superuser  -- If we are superuser, we don't care
-                             -- about our privs
-       and p.privilege_type != 'SELECT' -- Select priv is expected
-     where c.relname in ('veil2_session_privileges',
-       	     	         'veil2_session_parameters',
-		         'veil2_orig_privileges');
-    if found then
+    if secured != 3 then
       raise exception 'SECURITY: Possible temp table hack.  Unexpected privileges on relation';
     end if;
     -- We get here only if all is well.  Clear the primary session
@@ -2910,6 +2890,7 @@ create or replace
 function veil2.close_connection() returns boolean as
 $$
 begin
+  perform veil2.reset_session();
   update veil2_session_parameters
      set is_open = false;
   return true;
@@ -3108,41 +3089,32 @@ select veil2.reset_session();
 
 \echo ......i_have_global_priv()...
 create or replace
-function veil2.i_have_global_priv(priv integer)
-  returns bool as
-$$
-  select coalesce(
-  (select privs ? priv
-    from veil2_session_privileges v
-   cross join veil2_session_parameters p
-   where p.is_open
-     and v.scope_type_id = 1), false);
-$$
-language 'sql' security definer stable leakproof;
+function veil2.i_have_global_priv(integer) returns boolean
+     as '$libdir/veil2', 'veil2_i_have_global_priv'
+     language C security definer stable leakproof;
 
 comment on function veil2.i_have_global_priv(integer) is
 'Predicate to determine whether the connected user has the given
 privilege in the global scope.  This always returns a record.';
 
 
+\echo ......i_have_personal_priv()...
+create or replace
+function veil2.i_have_personal_priv(integer, integer) returns boolean
+     as '$libdir/veil2', 'veil2_i_have_personal_priv'
+     language C security definer stable leakproof;
+
+comment on function veil2.i_have_personal_priv(integer, integer) is
+'Predicate to determine whether the connected user has the given
+privilege in the personal scope.';
+
+
+
 \echo ......i_have_priv_in_scope()...
 create or replace
-function veil2.i_have_priv_in_scope(
-    priv integer,
-    _scope_type_id integer,
-    _scope_id integer)
-  returns bool as
-$$
-select coalesce((
-  select privs ? priv
-    from veil2_session_privileges v
-   cross join veil2_session_parameters p
-   where p.is_open
-     and v.scope_type_id = _scope_type_id
-     and v.scope_id = _scope_id),
-   false);
-$$
-language 'sql' security definer stable leakproof;
+function veil2.i_have_priv_in_scope(integer, integer, integer) returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_scope'
+     language C security definer stable leakproof;
 
 comment on function veil2.i_have_priv_in_scope(integer, integer, integer) is
 'Predicate to determine whether the connected user has the given
@@ -3151,33 +3123,13 @@ privilege in the given scope.';
 
 \echo ......i_have_priv_in_superior_scope()...
 create or replace
-function veil2.i_have_priv_in_superior_scope(
-    priv integer,
-    _scope_type_id integer,
-    _scope_id integer)
-  returns bool as
-$$
-declare
-  have_priv bool;
-begin
-  select true
-    into have_priv
-    from veil2.all_superior_scopes asp
-   cross join veil2_session_parameters p
-   inner join veil2_session_privileges sp
-      on sp.scope_type_id = asp.superior_scope_type_id
-     and sp.scope_id = asp.superior_scope_id
-   where p.is_open
-     and asp.scope_type_id = _scope_type_id
-     and asp.scope_id = _scope_id
-     and sp.privs ? priv
-   limit 1;
-  return found;
-end
-$$
-language 'plpgsql' security definer stable leakproof;
+function veil2.i_have_priv_in_superior_scope(integer, integer, integer) 
+     returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_superior_scope'
+     language C security definer stable leakproof;
 
-comment on function veil2.i_have_priv_in_superior_scope(integer, integer, integer) is
+comment on function veil2.i_have_priv_in_superior_scope(
+	   	         integer, integer, integer) is
 'Predicate to determine whether the connected user has the given
 privilege in a scope that is superior to the given scope.  This does not
 check for the privilege in a global scope as it is assumed that such a
@@ -3185,28 +3137,6 @@ test will have already been performed.  Note that due to the join on
 all_superior_scopes this function may incur some small measurable
 overhead.';
 
-
-\echo ......i_have_personal_priv()...
-create or replace
-function veil2.i_have_personal_priv(
-    priv integer,
-    _accessor_id integer)
-  returns bool as
-$$
-select coalesce((
-  select privs ? priv
-    from veil2_session_privileges v
-   cross join veil2_session_parameters p
-   where p.is_open
-     and v.scope_type_id = 2
-     and v.scope_id = _accessor_id),
-   false);
-$$
-language 'sql' security definer stable leakproof;
-
-comment on function veil2.i_have_personal_priv(integer, integer) is
-'Predicate to determine whether the connected user has the given
-privilege in the personal scope.';
 
 
 \echo ...creating veil2 admin and helper functions...

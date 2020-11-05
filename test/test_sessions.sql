@@ -21,6 +21,7 @@
 begin;
 select '...test veil2 session handling...';
 
+
 create or replace
 function test_privs() returns void as
 $$
@@ -31,7 +32,7 @@ $$
 language plpgsql security definer;
 
 
-select plan(93);
+select plan(95);
 
 -- Perform a reset session without returning a row.  This ensures the
 -- temporary table is created.
@@ -720,6 +721,11 @@ with session as
 select is(s.success, true, 'Eve should be authenticated (login -3, -31)')
   from session s;
 
+select is(true, veil2.i_have_priv_in_superior_scope(4, -6, -62),
+          'Eve should have priv 4 in a scope superior to -6, -62');
+
+select is(false, veil2.i_have_priv_in_superior_scope(4, -6, -61),
+          'Eve should not have priv 4 in a scope superior to -6, -61');
 
 with sess as
   (

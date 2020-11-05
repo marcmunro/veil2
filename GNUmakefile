@@ -61,11 +61,19 @@ Makefile.global: ./configure
 # PGXS stuff
 #
 
-EXTENSION=veil2
+EXTENSION = veil2
+MODULE_big = veil2
+SOURCES = src/veil2.c src/query.c
+MODULEDIR = extension
+VEIL2_LIB = $(addsuffix $(DLSUFFIX), veil2)
+
+OBJS = $(SOURCES:%.c=%.o)
+BITCODES = $(SOURCES:%.c=%.bc)
+
 PG_CONFIG := $(shell ./find_pg_config)
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 DATA = $(wildcard sql/veil2--*.sql)
-TARGET_FILES := PG_CONFIG PG_VERSION
+TARGET_FILES := PG_CONFIG PG_VERSION $(OBJS) $(BITCODES) $(VEIL2_LIB)
 
 include $(PGXS)
 

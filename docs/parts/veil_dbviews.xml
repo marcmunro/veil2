@@ -1,29 +1,9 @@
 <sect1>
   <title>Veil2 Views</title>
   <para>
-    Many of the views in <literal>Veil2</literal> come in 3 flavours:
-    <itemizedlist>
-      <listitem><literal>&lt;basename&gt;</literal>;</listitem>
-      <listitem><literal>&lt;basename&gt;_v</literal>;</listitem>
-      <listitem><literal>&lt;basename&gt;_vv</literal>.</listitem>
-    </itemizedlist>
-  </para>
-  <para>
-    This naming convention is used to distinguish between materialized
-    and non-materialized views.  A view with a
-    <literal>_vv</literal> suffix is completely non-materialized and
-    depends on no materialized views.  A view with a
-    <literal>_v</literal> suffix is not materialized itself, but
-    <emphasis>may</emphasis> depend on materialized views in its
-    definition.   A view with no suffix will be the materialized
-    version (if there are matching <literal>_v</literal> and
-    <literal>_vv</literal> definitions).
-  </para>
-  <para>
-    The distinction is particularly useful when debugging materialized
-    view refresh mechanisms.  If there is a difference between the
-    rows returned by any of these views, at least one materialized
-    view needs to be refreshed.
+    For performance some of the views in <literal>Veil2</literal> are
+    materialized.  Such views also come in a non-materialized version,
+    which has the same name with a <literal>_v</literal> suffix.
   </para>
   <para>
     There are also views named with a <literal>_info</literal> suffix.
@@ -38,83 +18,43 @@
     <literal>veil2/sql/veil2--&version_number;.sql</literal>:
     <itemizedlist>
       <listitem>
-      <link
-	  linkend="view_direct_role_privileges">direct_role_privileges</link>;</listitem>
+	<link linkend="view_all_role_roles">all_role_roles</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_all_role_roles">all_role_roles</link>;</listitem> 
+	<link linkend="view_all_role_privileges">all_role_privileges</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_all_role_privs">all_role_privs</link>;</listitem> 
+	<link linkend="view_accessor_contexts">accessor_contexts</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_accessor_contexts">accessor_contexts</link>;</listitem> 
+	<link linkend="view_superior_scopes">superior_scopes</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_superior_scopes">superior_scopes</link>;</listitem> 
+	<link linkend="view_all_superior_scopes">all_superior_scopes</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_all_superior_scopes">all_superior_scopes</link>;</listitem> 
+	<link linkend="view_scope_tree">scope_tree</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_scope_tree">scope_tree</link>;</listitem> 
+	<link linkend="view_promotable_privileges">promotable_privilege</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_promotable_privileges">promotable_privileges</link>;</listitem> 
+	<link linkend="view_all_accessor_roles">all_accessor_roles</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_all_accessor_roles">all_accessor_roles</link>;</listitem> 
+	<link linkend="view_role_chains">role_chains</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_all_context_privs">all_context_privs</link>;</listitem> 
+	<link linkend="view_all_accessor_privs">all_accessor_privs</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_all_accessor_privs">all_accessor_privs</link>;</listitem> 
+	<link linkend="view_all_session_roles">all_session_roles</link>;
+      </listitem>
       <listitem>
-      <link
-	  linkend="view_role_chains">role_chains</link>;</listitem> 
-      <listitem>
-      <link
-	  linkend="view_all_accessor_roles_plus">all_accessor_roles_plus</link>;</listitem> 
-      <listitem>
-      <link linkend="view_privilege_assignments">privilege_assignments</link>;</listitem>
-      <listitem>
-      <link linkend="view_session_privileges_info">session_privileges_info</link>;</listitem>
-      <listitem>
-      <link linkend="view_explicit_mapped_session_privs">explicit_mapped_session_privs</link>;</listitem>
-      <listitem>
-      <link linkend="view_permitted_assignment_contexts">permitted_assignment_contexts</link>;</listitem>
-      <listitem>
-      <link linkend="view_explicit_session_privs">explicit_session_privs</link>.</listitem>
+	<link linkend="view_session_privileges_info">session_privileges_info</link>.
+      </listitem>
     </itemizedlist>
   </para>
-  <sect2 id="view_direct_role_privileges">
-    <title>Direct Role Privileges Views</title>
-    <sect3>
-      <title><literal>direct_role_privileges_vv</literal></title>
-      <?sql-definition view veil2.direct_role_privileges_vv sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>direct_role_privileges_vv_info</literal></title>
-      <?sql-definition view veil2.direct_role_privileges_vv_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>direct_role_privileges_v</literal></title>
-      <?sql-definition view veil2.direct_role_privileges_v sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>direct_role_privileges_v_info</literal></title>
-      <?sql-definition view veil2.direct_role_privileges_v_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>direct_role_privileges</literal></title>
-      <?sql-definition view veil2.direct_role_privileges sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>direct_role_privileges_info</literal></title>
-      <?sql-definition view veil2.direct_role_privileges_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-  </sect2>
   <sect2 id="view_all_role_roles">
     <title>All Role Roles View</title>
     <sect3>
@@ -122,31 +62,15 @@
       <?sql-definition view veil2.all_role_roles sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
-  <sect2 id="view_all_role_privs">
-    <title>All Role Privs Views</title>
+  <sect2 id="view_all_role_privileges">
+    <title>All Role Privileges Views</title>
     <sect3>
-      <title><literal>all_role_privs_vv</literal></title>
-      <?sql-definition view veil2.all_role_privs_vv sql/veil2--&version_number;.sql ?>
+      <title><literal>all_role_privileges</literal></title>
+      <?sql-definition view veil2.all_role_privileges sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3>
-      <title><literal>all_role_privs_vv_info</literal></title>
-      <?sql-definition view veil2.all_role_privs_vv_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_role_privs_v</literal></title>
-      <?sql-definition view veil2.all_role_privs_v sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_role_privs_v_info</literal></title>
-      <?sql-definition view veil2.all_role_privs_v_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_role_privs</literal></title>
-      <?sql-definition view veil2.all_role_privs sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_role_privs_info</literal></title>
-      <?sql-definition view veil2.all_role_privs_info sql/veil2--&version_number;.sql ?>
+      <title><literal>all_role_privileges_info</literal></title>
+      <?sql-definition view veil2.all_role_privileges_info sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
   <sect2 id="view_accessor_contexts">
@@ -157,18 +81,14 @@
     </sect3>
   </sect2>
   <sect2 id="view_superior_scopes">
-    <title>Scope Promotions View</title>
+    <title>Superior Scopes View</title>
     <sect3>
       <title><literal>superior_scopes</literal></title>
       <?sql-definition view veil2.superior_scopes sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
   <sect2 id="view_all_superior_scopes">
-    <title>All Scope Promotions Views</title>
-    <sect3>
-      <title><literal>all_superior_scopes_vv</literal></title>
-      <?sql-definition view veil2.all_superior_scopes_vv sql/veil2--&version_number;.sql ?>
-    </sect3>
+    <title>All Superior Scopes Views</title>
     <sect3>
       <title><literal>all_superior_scopes_v</literal></title>
       <?sql-definition view veil2.all_superior_scopes_v sql/veil2--&version_number;.sql ?>
@@ -207,56 +127,11 @@
       <?sql-definition view veil2.all_accessor_roles_plus sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
-  <sect2 id="view_all_context_privs">
-    <title>All Context Privs Views</title>
-    <sect3>
-      <title><literal>all_context_privs</literal></title>
-      <?sql-definition view veil2.all_context_privs sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_context_privs_info</literal></title>
-      <?sql-definition view veil2.all_context_privs_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-  </sect2>
-  <sect2 id="view_all_accessor_privs">
-    <title>All Accessor Privs Views</title>
-    <sect3>
-      <title><literal>all_accessor_privs_vv</literal></title>
-      <?sql-definition view veil2.all_accessor_privs_vv sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_accessor_privs_vv_info</literal></title>
-      <?sql-definition view veil2.all_accessor_privs_vv_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_accessor_privs_v</literal></title>
-      <?sql-definition view veil2.all_accessor_privs_v sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_accessor_privs_v_info</literal></title>
-      <?sql-definition view veil2.all_accessor_privs_v_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_accessor_privs</literal></title>
-      <?sql-definition view veil2.all_accessor_privs sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3>
-      <title><literal>all_accessor_privs_info</literal></title>
-      <?sql-definition view veil2.all_accessor_privs_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-  </sect2>
   <sect2 id="view_role_chains">
     <title>Role Chains View</title>
     <sect3>
       <title><literal>role_chains</literal></title>
       <?sql-definition view veil2.role_chains sql/veil2--&version_number;.sql ?>
-    </sect3>
-  </sect2>
-  <sect2 id="view_all_accessor_roles_plus">
-    <title>All Accessor Roles Plus</title>
-    <sect3>
-      <title><literal>all_accessor_roles_plus</literal></title>
-      <?sql-definition view veil2.all_accessor_roles_plus sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
   <sect2 id="view_privilege_assignments">
@@ -266,32 +141,24 @@
       <?sql-definition view veil2.privilege_assignments sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
+
+  <sect2 id="view_all_accessor_privs">
+    <title>All Accessor Privs Views</title>
+    <sect3>
+      <title><literal>all_accessor_privs</literal></title>
+      <?sql-definition view veil2.all_accessor_privs sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3>
+      <title><literal>all_accessor_privs_info</literal></title>
+      <?sql-definition view veil2.all_accessor_privs_info sql/veil2--&version_number;.sql ?>
+    </sect3>
+  </sect2>
+  <sect2 id="view_all_session_roles">
+    <title><literal>all_session_roles</literal></title>
+    <?sql-definition view veil2.all_session_roles sql/veil2--&version_number;.sql ?>
+  </sect2>
   <sect2 id="view_session_privileges_info">
-    <title>Session Privileges Info View</title>
-    <sect3>
-      <title><literal>session_privileges_info</literal></title>
-      <?sql-definition view veil2.session_privileges_info sql/veil2--&version_number;.sql ?>
-    </sect3>
-  </sect2>
-  <sect2 id="view_explicit_mapped_session_privs">
-    <title>Explicit Mapped Session Privs View</title>
-    <sect3>
-      <title><literal>explicit_mapped_session_privs</literal></title>
-      <?sql-definition view veil2.explicit_mapped_session_privs sql/veil2--&version_number;.sql ?>
-    </sect3>
-  </sect2>
-  <sect2 id="view_permitted_assignment_contexts">
-    <title>Permitted Assignment Contexts View</title>
-    <sect3>
-      <title><literal>permitted_assignment_contexts</literal></title>
-      <?sql-definition view veil2.permitted_assignment_contexts sql/veil2--&version_number;.sql ?>
-    </sect3>
-  </sect2>
-  <sect2 id="view_explicit_session_privs">
-    <title>Explicit Session Privs View</title>
-    <sect3>
-      <title><literal>explicit_session_privs</literal></title>
-      <?sql-definition view veil2.explicit_session_privs sql/veil2--&version_number;.sql ?>
-    </sect3>
+    <title><literal>session_privileges_info</literal></title>
+    <?sql-definition view veil2.session_privileges_info sql/veil2--&version_number;.sql ?>
   </sect2>
 </sect1>

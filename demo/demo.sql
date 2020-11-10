@@ -524,24 +524,24 @@ select 5, s.scope_id,   -- Project to org promotions
 insert into veil2.privileges
        (privilege_id, privilege_name,
         promotion_scope_type_id, description)
-values (16, 'select party_types',
+values (20, 'select party_types',
         1, 'Allow select on demo.party_types'),
-       (17, 'select parties',
+       (21, 'select parties',
         null, 'Allow select on demo.parties'),
-       (18, 'select roles',
+       (22, 'select roles',
         null, 'Allow select on the roles view'),
-       (19, 'select role_roles',
+       (23, 'select role_roles',
         null, 'Allow select on the role_roles view'),
-       (20, 'select party_roles',
+       (24, 'select party_roles',
         null, 'Allow select on the party_roles view'),
-       (21, 'select projects',
+       (25, 'select projects',
         null, 'Allow select on the projects table'),
-       (22, 'select project_assignments',
+       (26, 'select project_assignments',
         null, 'Allow select on the project_assignments table'),
-       (23, 'select orgs',
+       (27, 'select orgs',
         4, 'Allow select on parties that are orgs');
 
--- Priv 23 is intended to allow project members to see the org that
+-- Priv 27 is intended to allow project members to see the org that
 -- owns the project even if they have not been given select-party
 -- privilege in any other context.
 
@@ -599,19 +599,19 @@ values (5, 3, 'party viewer',
 
 insert into veil2.role_privileges
        (role_id, privilege_id)
-values (5, 16),  -- party viewer -> select_party_types
-       (5, 17),  -- party viewer -> select_parties
-       (6, 18),  -- role viewer -> select_roles
-       (6, 19),  -- role viewer -> select role_roles
-       (6, 20),  -- role viewer -> select party_roles
-       (11, 16), -- project viewer -> select_party_types
-       (11, 23), -- project viewer -> select_orgs
-       (11, 21), -- project viewer -> select_projects
-       (12, 21), -- project manipulator -> select projects
-       (12, 22), -- project manipulator -> select project assignments
+values (5, 20),  -- party viewer -> select_party_types
+       (5, 21),  -- party viewer -> select_parties
+       (6, 22),  -- role viewer -> select_roles
+       (6, 23),  -- role viewer -> select role_roles
+       (6, 24),  -- role viewer -> select party_roles
+       (11, 20), -- project viewer -> select_party_types
+       (11, 27), -- project viewer -> select_orgs
+       (11, 25), -- project viewer -> select_projects
+       (12, 25), -- project manipulator -> select projects
+       (12, 26), -- project manipulator -> select project assignments
        (2, 13),  -- personal context -> select accessor_roles
-       (2, 17),  -- personal context -> select parties
-       (2, 22);  -- personal context -> select project_assignments
+       (2, 21),  -- personal context -> select parties
+       (2, 26);  -- personal context -> select project_assignments
 
 -- We define a base set of role->role mappings in global context,
 -- though these are not actually used.  Then we create copies in the
@@ -654,6 +654,7 @@ values (7, 5, 1, 0),  -- In global context
 -- STEP 9:
 -- Deal with oddities and corner-cases
 
+/*
 -- The Veil Corp party is treated as a special case.  If a user is
 -- logged in to Veil Corp but has privileges assigned in the context
 -- of other Corps, they will retain all of those privileges.  This is
@@ -702,7 +703,7 @@ view veil2.my_permitted_assignment_contexts as
          from veil2.session_context() sc
         where sc.login_context_type_id = 4
           and sc.login_context_id = 100);
-
+*/
 
 -- STEP 10:
 -- Add row level security on our objects.
@@ -712,7 +713,7 @@ alter table demo.party_types enable row level security;
 create policy party_type__select
     on demo.party_types
    for select
- using (veil2.i_have_global_priv(16));
+ using (veil2.i_have_global_priv(20));
 
 
 alter table demo.parties_tbl enable row level security;
@@ -720,14 +721,14 @@ alter table demo.parties_tbl enable row level security;
 create policy parties_tbl__select
     on demo.parties_tbl
    for select
- using (   veil2.i_have_global_priv(17)
-        or veil2.i_have_priv_in_scope(17, 2, party_id)
-        or veil2.i_have_priv_in_scope(17, 3, corp_id)
-        or veil2.i_have_priv_in_scope(17, 4, org_id)
-        or veil2.i_have_priv_in_scope(17, 4, party_id) -- View the org itself
-        or veil2.i_have_personal_priv(17, party_id)
+ using (   veil2.i_have_global_priv(21)
+        or veil2.i_have_priv_in_scope(21, 2, party_id)
+        or veil2.i_have_priv_in_scope(21, 3, corp_id)
+        or veil2.i_have_priv_in_scope(21, 4, org_id)
+        or veil2.i_have_priv_in_scope(21, 4, party_id) -- View the org itself
+        or veil2.i_have_personal_priv(21, party_id)
 	or (    party_type_id = 2    -- View an org that owns a project
-	    and veil2.i_have_priv_in_scope(23, 4, party_id)));
+	    and veil2.i_have_priv_in_scope(27, 4, party_id)));
 
 
 -- READER EXERCISE: secure inserts, updates and deletes
@@ -737,20 +738,20 @@ alter table demo.projects enable row level security;
 create policy projects__select
     on demo.projects
    for select
- using (   veil2.i_have_global_priv(21)
-        or veil2.i_have_priv_in_scope(21, 3, corp_id)
-        or veil2.i_have_priv_in_scope(21, 4, org_id)
-        or veil2.i_have_priv_in_scope(21, 5, project_id));
+ using (   veil2.i_have_global_priv(25)
+        or veil2.i_have_priv_in_scope(25, 3, corp_id)
+        or veil2.i_have_priv_in_scope(25, 4, org_id)
+        or veil2.i_have_priv_in_scope(25, 5, project_id));
 
 alter table demo.project_assignments enable row level security;
 
 create policy project_assignments__select
     on demo.project_assignments
    for select
- using (   veil2.i_have_global_priv(22)
-        or veil2.i_have_priv_in_scope(22, 2, party_id)
-        or veil2.i_have_priv_in_scope(21, 5, project_id)
-	or veil2.i_have_priv_in_superior_scope(21, 5, project_id));
+ using (   veil2.i_have_global_priv(26)
+        or veil2.i_have_priv_in_scope(26, 2, party_id)
+        or veil2.i_have_priv_in_scope(25, 5, project_id)
+	or veil2.i_have_priv_in_superior_scope(25, 5, project_id));
 
 -- No access to scope_links except through triggers, etc
 create policy scope_links__all
@@ -790,7 +791,7 @@ select rt.role_type_name, r.role_name,
   from veil2.roles r
  inner join veil2.role_types rt
          on rt.role_type_id = r.role_type_id
- where veil2.i_have_global_priv(18);
+ where veil2.i_have_global_priv(22);
 
 -- WE SHOULD ALSO CREATE INSTEAD-OF TRIGGERS FOR THIS.  THAT IS LEFT
 -- AS AN EXERCISE FOR THE READER.
@@ -819,9 +820,9 @@ select pr.role_name, ar.role_name,
          on ar.role_id = rr.assigned_role_id
  inner join veil2.scope_types st
          on st.scope_type_id = rr.context_type_id
- where veil2.i_have_global_priv(19)
-    or veil2.i_have_priv_in_scope(19, 3, context_id)
-    or veil2.i_have_priv_in_scope(19, 4, context_id);
+ where veil2.i_have_global_priv(23)
+    or veil2.i_have_priv_in_scope(23, 3, context_id)
+    or veil2.i_have_priv_in_scope(23, 4, context_id);
 
 -- WE SHOULD ALSO CREATE INSTEAD-OF TRIGGERS FOR THIS.  THAT IS LEFT
 -- AS AN EXERCISE FOR THE READER.
@@ -848,9 +849,9 @@ select ar.accessor_id, r.role_name,
          on r.role_id = ar.role_id
  inner join veil2.scope_types st
          on st.scope_type_id = ar.context_type_id
- where veil2.i_have_global_priv(20)
-    or veil2.i_have_priv_in_scope(20, 3, context_id)
-    or veil2.i_have_priv_in_scope(20, 4, context_id);
+ where veil2.i_have_global_priv(24)
+    or veil2.i_have_priv_in_scope(24, 3, context_id)
+    or veil2.i_have_priv_in_scope(24, 4, context_id);
 
 
 -- Step 12

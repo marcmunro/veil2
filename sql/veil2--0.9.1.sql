@@ -41,29 +41,6 @@ revoke all on schema veil2 from public;
 grant usage on schema veil2 to veil_user;
 
 
-create or replace
-function veil2.ok() returns boolean
-     as '$libdir/veil2', 'veil2_ok'
-     language C stable strict;
-
-comment on function veil2.ok() is
-'Predicate to indicate whether veil2.reset_session() has been
-successfully called for this session.  If not none of the
-i_have_privilege functions will return true.  
-
-This exists as a stand-alone function so that it may be used by
-user-defined functions.';
-
-
-create or replace
-function veil2.reset_session() returns void
-     as '$libdir/veil2', 'veil2_reset_session'
-     language C volatile strict security definer;
-
-
-
-
-
 
 -- Create the VEIL2 schema tables
 
@@ -180,7 +157,6 @@ grant select on veil2.scopes to veil_user;
 \echo ......context_exists_chk() (function)...
 create or replace
 function veil2.context_exists_chk()
-  -- Expected TG_ARGS is _trg_name text
   returns trigger as
 $$
 begin
@@ -207,8 +183,6 @@ end;
 $$
 language 'plpgsql' security definer stable;
 
--- TODO: Add to docs
--- TODO: add for other context and scope fks.
 comment on function veil2.context_exists_chk() is
 'Trigger to be used instead of FK-constraints against the scopes
 table.  This is because we expect to use inheritence to extend the
@@ -437,11 +411,7 @@ within a specific security context: consider that the database may be
 storing data for separate groups of parties (eg companies) and the
 role->role assignment may therefore need to be specific to those groups
 (eg a customer liaison role in one company may need different privileges
-from a similar role in another company).
-
-You should not normally query this table directly; instead use the
-(TODO:  rewrite this) direct_role_privilges view which deals with implied assignments for the
-superuser role.';
+from a similar role in another company).';
 
 alter table veil2.role_privileges add constraint role_privilege__pk
   primary key(role_id, privilege_id);
@@ -626,10 +596,10 @@ create table veil2.authentication_details (
 );
 
 comment on table veil2.authentication_details is
-'Types of auhentication available for individual parties, along with
+'Types of authentication available for individual parties, along with
 whatever authentication tokens are needed for that form of
-authentication.  Because this table stores authentication tables, access
-to it must be as thoroughly locked down as possible.';
+authentication.  Because this table stores authentication tables,
+access to it must be as thoroughly locked down as possible.';
 
 comment on column veil2.authentication_details.authentication_type is
 'Identifies a specific authentication type.  More than 1 authentication
@@ -842,14 +812,6 @@ create type veil2.session_params_t as (
 
 -- Create the VEIL2 schema views, including matviews
 -- 
--- Note that there are often multiple versions of equivalent views
--- defined below.   Where a user facing view xxx is a materialized
--- view, there may also be definitions for:
---  - xxx_v
---    This will be the view from which the materialized view is
---    constructed.  Sometimes this will itself depend on materialized
---    views.
---
 
 
 \echo ......all_role_roles...
@@ -968,13 +930,16 @@ select accessor_id, 1, 0
   from veil2.accessors;
 
 comment on view veil2.accessor_contexts is
-'This view lists the allowed session contexts for accessors.  When an
-accessor opens a session, they choose a session context.  This session
-context determines which set of role->role mappings are in play.
-Typically, there will only be one such set, as provided by the default
-implementation of this view.  If however, your application requires
-separate contexts to have different role->role mappings, you should
-modify this view to map your accessors with that context.
+'This view lists the allowed session contexts for accessors.  The
+system-provided version of this view should be overridden by the user
+by providing an equivalent view called veil2.my_accessor_contexts.
+
+When an accessor opens a session, they choose a session context.  This
+session context determines which set of role->role mappings are in
+play.  Typically, there will only be one such set, as provided by the
+default implementation of this view.  If however, your application
+requires separate contexts to have different role->role mappings, you
+should modify this view to map your accessors with that context.
 
 Typically this will be used in a situation where your application
 serves a number of different clients, each of which have their own
@@ -1017,7 +982,7 @@ for privileges assigned in the restricted context to the less
 restricted one, you must override this view to show which scopes may
 be promoted to which other scopes.  For example if you have a corp
 scope type and a dept scope type which is a sub-scope of it, and your
-departments table identifies the corp_id for each deprtment, you would
+departments table identifies the corp_id for each department, you would
 define your over-riding view something like this:
 
     create or replace
@@ -1221,6 +1186,24 @@ revoke all on veil2.all_accessor_roles from public;
 grant select on veil2.all_accessor_roles to veil_user;
 
 
+\echo ......all_accessor_roles_plus...
+create or replace
+view veil2.all_accessor_roles_plus as
+select accessor_id, role_id,
+       context_type_id, context_id
+  from veil2.all_accessor_roles
+ union all
+select accessor_id, 2, 1, accessor_id
+  from veil2.accessors;
+
+comment on view veil2.all_accessor_roles_plus is
+'As all_accessor_roles but also showing personal_scope role for each
+accessor.';
+
+revoke all on veil2.all_accessor_roles_plus from public;
+grant select on veil2.all_accessor_roles_plus to veil_user;
+
+
 \echo ......role_chains...
 create or replace
 view veil2.role_chains as
@@ -1291,25 +1274,6 @@ revoke all on veil2.role_chains from public;
 grant select on veil2.role_chains to veil_user;
 
 
-\echo ......all_accessor_roles_plus...
-create or replace
-view veil2.all_accessor_roles_plus as
-select accessor_id, role_id,
-       context_type_id, context_id
-  from veil2.all_accessor_roles
- union all
-select accessor_id, 2, 1, accessor_id
-  from veil2.accessors;
-
-comment on view veil2.all_accessor_roles_plus is
-'As all_accessor_roles but also showing personal_scope role for each
-accessor.  This is a developer view, aimed at development and
-debugging.';
-
-revoke all on veil2.all_accessor_roles_plus from public;
-grant select on veil2.all_accessor_roles_plus to veil_user;
-
-
 \echo ......privilege_assignments...
 create or replace
 view veil2.privilege_assignments as
@@ -1362,6 +1326,104 @@ run:
 
 revoke all on veil2.privilege_assignments from public;
 grant select on veil2.privilege_assignments to veil_user;
+
+
+\echo ......all_accessor_privs...
+create or replace
+view veil2.all_accessor_privs as
+with base_accessor_privs as
+  (
+    select aar.accessor_id,
+           aar.context_type_id as assignment_context_type_id,
+           aar.context_id as assignment_context_id,
+           arp.mapping_context_type_id,
+           arp.mapping_context_id,
+           arp.roles,
+           arp.privileges
+      from veil2.all_accessor_roles aar
+     inner join veil2.all_role_privileges arp
+        on arp.role_id = aar.role_id
+  ),
+promoted_privs as
+  (
+    select bap.accessor_id, bap.mapping_context_type_id,
+    	   bap.mapping_context_id, pp.scope_type_id,
+	   ss.superior_scope_id as scope_id,
+	   bap.privileges * pp.privilege_ids as privileges
+      from base_accessor_privs bap
+     inner join veil2.promotable_privileges pp
+        on not is_empty(bap.privileges * pp.privilege_ids)
+       and pp.scope_type_id != 1
+     inner join veil2.superior_scopes ss
+        on ss.scope_type_id = bap.assignment_context_type_id
+       and ss.scope_id = bap.assignment_context_id
+       and ss.superior_scope_type_id = pp.scope_type_id
+  ),
+global_privs as
+  (
+    select bap.accessor_id, bap.mapping_context_type_id,
+    	   bap.mapping_context_id, pp.scope_type_id,
+	   0 as scope_id,
+	   bap.privileges * pp.privilege_ids as privileges
+      from base_accessor_privs bap
+     inner join veil2.promotable_privileges pp
+        on not is_empty(bap.privileges * pp.privilege_ids)
+       and pp.scope_type_id = 1
+  ),  
+all_role_privs as
+  (
+    select accessor_id,
+    	   mapping_context_type_id, mapping_context_id,
+	   assignment_context_type_id as scope_type_id,
+           assignment_context_id as scope_id,
+       	   roles,  privileges
+      from base_accessor_privs
+     union all
+    select accessor_id, 
+           mapping_context_type_id, mapping_context_id,
+	   scope_type_id, scope_id,
+       	   null::bitmap as roles, privileges
+      from promoted_privs
+     union all
+    select accessor_id, 
+           mapping_context_type_id, mapping_context_id,
+	   scope_type_id, scope_id,
+       	   null::bitmap as roles, privileges
+      from global_privs
+  )
+select accessor_id,
+       mapping_context_type_id, mapping_context_id,
+       scope_type_id, scope_id,
+       union_of(roles) as roles, union_of(privileges) as privileges
+  from all_role_privs
+ where accessor_id = 114
+ group by accessor_id,
+          mapping_context_type_id, mapping_context_id,
+          scope_type_id, scope_id;
+  
+comment on view veil2.all_accessor_privs is
+'Shows all roles and privileges, in all possible contexts, for the
+currently connected accessor.';
+
+revoke all on veil2.all_accessor_privs from public;
+grant select on veil2.all_accessor_privs to veil_user;
+
+
+\echo ......all_accessor_privs_info...
+create or replace
+view veil2.all_accessor_privs_info as
+select accessor_id,
+       mapping_context_type_id, mapping_context_id,
+       to_array(roles) as roles,
+       to_array(privileges) as privileges
+  from veil2.all_accessor_privs;
+
+comment on view veil2.all_accessor_privs_info is
+'Developer view that shows all roles and privileges, in all possible
+contexts, for the currently connected accessor.';
+
+revoke all on veil2.all_accessor_privs_info from public;
+grant select on veil2.all_accessor_privs_info to veil_user;
 
 
 \echo ...creating materialized view refresh functions...
@@ -1877,60 +1939,31 @@ is an appropriate authentication.';
 
 \echo ...creating veil2 session functions...
 
+\echo ...ok()...
+create or replace
+function veil2.ok() returns boolean
+     as '$libdir/veil2', 'veil2_ok'
+     language C stable strict;
+
+comment on function veil2.ok() is
+'Predicate to indicate whether veil2.reset_session() has been
+successfully called for this session.  If not, none of the
+C language i_have_privilege functions will return true.  
+
+This exists as a stand-alone function so that it may be used by
+user-defined functions.';
+
+
 \echo ......reset_session()...
 create or replace
-function veil2.old_reset_session()
-  returns void as
-$$
-declare
-  rowcount integer;
-  secured integer;
-begin
-  select count(*)::integer,
-         sum(case when c.relacl is null then 1 else 0 end)
-    into rowcount, secured
-    from pg_catalog.pg_class c
-   where c.relname in ('veil2_session_privileges',
-       	     	       'veil2_session_parameters',
-		       'veil2_orig_privileges')
-     and c.relkind = 'r'
-     and c.relpersistence = 't';
-
-  if rowcount = 0 then
-    -- All is well, the temp tables do not exist, let's create them.
-    create temporary table veil2_session_privileges
-      of veil2.session_privileges_t;
-    create temporary table veil2_orig_privileges
-      of veil2.session_privileges_t;
-    create temporary table veil2_session_parameters
-      of veil2.session_params_t;
-  elsif rowcount != 3 then
-    -- There should be 3 tables with these names.  Any other value
-    -- suggests that someone is trying to hack us.
-    raise exception 'SECURITY: Possible temp table hack.  Relation count is %', rowcount;
-  else
-    -- OK, we have the expected temp tables.  Now make sure they are
-    -- really temp tables and that we don't have unexpected
-    -- privileges.
-
-    if secured != 3 then
-      raise exception 'SECURITY: Possible temp table hack.  Unexpected privileges on relation';
-    end if;
-    -- We get here only if all is well.  Clear the primary session
-    -- temp tables.
-    
-    truncate table veil2_session_privileges;
-    truncate table veil2_session_parameters;
-  end if;
-end;
-$$
-language 'plpgsql' security definer
-set client_min_messages = 'error';
+function veil2.reset_session() returns void
+     as '$libdir/veil2', 'veil2_reset_session'
+     language C volatile strict security definer;
 
 comment on function veil2.reset_session() is
 'Ensure our temp tables exist, are of the expected type (temporary
-tables) and that the session user has no unexpected access rights on
-them, and clear them.';
+tables); that the session user has no unexpected access rights on
+them; and clear them.';
 
 
 \echo ......get_accessor()...
@@ -1987,11 +2020,11 @@ declare
   _mapping_context_id integer;
   supplemental_fn text;
 begin
-  execute veil2.reset_session();  -- ignore result
+  execute veil2.reset_session();
 
   -- Regardless of validity of accessor_id, we create a
-  -- veil2_session_parameters record to prevent fishing for valid
-  -- accessor_ids.
+  -- veil2_session_parameters record.  This is to prevent fishing for
+  -- valid accessor_ids.
   insert
     into veil2_session_parameters
         (accessor_id, session_id,
@@ -2321,6 +2354,69 @@ because we cannot create a view on the veil2_session_parameters table as it
 is a temporary table and does not always exist.';
 
 
+\echo ......(view) all_session_roles...
+create or replace
+view veil2.all_session_roles as
+with session_context as
+  (
+    select *
+      from veil2.session_context() sc
+  ),
+assignment_contexts_for_session as
+  (
+    select login_context_type_id as context_type_id,
+    	     login_context_id as context_id
+      from session_context sc
+     union all
+    select ass.superior_scope_type_id,
+    	     ass.superior_scope_id
+      from session_context sc
+     inner join veil2.all_superior_scopes ass
+        on ass.scope_type_id = sc.login_context_type_id
+	 and ass.scope_id = sc.login_context_id
+     union all
+    select ass.scope_type_id,
+    	     ass.scope_id
+      from session_context sc
+     inner join veil2.all_superior_scopes ass
+        on ass.superior_scope_type_id = sc.login_context_type_id
+	 and ass.superior_scope_id = sc.login_context_id
+     union all
+    select 1, 0
+     union all
+    select 2, accessor_id
+      from session_context
+  )
+select aar.accessor_id, aar.role_id,
+       aar.context_type_id, aar.context_id
+  from session_context sc
+ inner join veil2.all_accessor_roles aar
+    on aar.accessor_id = sc.accessor_id
+ inner join assignment_contexts_for_session acfs 
+       -- This should really be a semi-join but it can only return 1
+       -- row so all is well.
+     on -- Matching login context and assignment context
+        (    acfs.context_type_id = aar.context_type_id
+         and acfs.context_id = aar.context_id)
+     or -- login context is is global, so all assignments apply
+        (    sc.login_context_type_id = 1
+	 and sc.login_context_id = 0)
+     or -- role is superuser, so we get it anyway
+        (    aar.role_id = 1
+         and acfs.context_type_id = 1)
+ union all
+select sc.accessor_id, 2,   -- Personal context role
+       2, sc.accessor_id    -- Personal scope for accessor
+  from session_context sc;
+
+comment on view veil2.all_session_roles is
+'Return all roles assigned to the currently authenticated accessor
+that apply given the accessor''s session_context.';
+
+revoke all on veil2.all_role_roles from public;
+grant select on veil2.all_role_roles to veil_user;
+
+
 \echo ......session_privileges()...
 create or replace
 function veil2.session_privileges(
@@ -2365,10 +2461,11 @@ always exist.';
 \echo ......session_privileges_info (view)...
 create or replace
 view veil2.session_privileges_info as
-select * from veil2.session_privileges();
+select *
+  from veil2.session_privileges();
 
 comment on view veil2.session_privileges_info is
-'Provides a user-friendly view of session_privileges.';
+'Provides a user-readable view of session_privileges.';
 
 grant select on veil2.session_privileges_info to veil_user;
 
@@ -2554,144 +2651,6 @@ $$
 language 'plpgsql' security definer volatile;
 
 
-
-
-
-
-
--- TODO: Move this above load_session_privs
-create or replace
-view veil2.all_session_roles as
-with session_context as
-  (
-    select *
-      from veil2.session_context() sc
-  ),
-assignment_contexts_for_session as
-  (
-    select login_context_type_id as context_type_id,
-    	     login_context_id as context_id
-      from session_context sc
-     union all
-    select ass.superior_scope_type_id,
-    	     ass.superior_scope_id
-      from session_context sc
-     inner join veil2.all_superior_scopes ass
-        on ass.scope_type_id = sc.login_context_type_id
-	 and ass.scope_id = sc.login_context_id
-     union all
-    select ass.scope_type_id,
-    	     ass.scope_id
-      from session_context sc
-     inner join veil2.all_superior_scopes ass
-        on ass.superior_scope_type_id = sc.login_context_type_id
-	 and ass.superior_scope_id = sc.login_context_id
-     union all
-    select 1, 0
-     union all
-    select 2, accessor_id
-      from session_context
-  )
-select aar.accessor_id, aar.role_id,
-       aar.context_type_id, aar.context_id
-  from session_context sc
- inner join veil2.all_accessor_roles aar
-    on aar.accessor_id = sc.accessor_id
- inner join assignment_contexts_for_session acfs 
-       -- This should really be a semi-join but it can only return 1
-       -- row so all is well.
-     on -- Matching login context and assignment context
-        (    acfs.context_type_id = aar.context_type_id
-         and acfs.context_id = aar.context_id)
-     or -- login context is is global, so all assignments apply
-        (    sc.login_context_type_id = 1
-	 and sc.login_context_id = 0)
-     or -- role is superuser, so we get it anyway
-        (    aar.role_id = 1
-         and acfs.context_type_id = 1)
- union all
-select sc.accessor_id, 2,   -- Personal context role
-       2, sc.accessor_id    -- Personal scope for accessor
-  from session_context sc;
-  
-
-create or replace
-view new_all_accessor_privs as
-with base_accessor_privs as
-  (
-    select aar.accessor_id,
-           aar.context_type_id as assignment_context_type_id,
-           aar.context_id as assignment_context_id,
-           arp.mapping_context_type_id,
-           arp.mapping_context_id,
-           arp.roles,
-           arp.privileges
-      from veil2.all_accessor_roles aar
-     inner join veil2.all_role_privileges arp
-        on arp.role_id = aar.role_id
-  ),
-promoted_privs as
-  (
-    select bap.accessor_id, bap.mapping_context_type_id,
-    	   bap.mapping_context_id, pp.scope_type_id,
-	   ss.superior_scope_id as scope_id,
-	   bap.privileges * pp.privilege_ids as privileges
-      from base_accessor_privs bap
-     inner join veil2.promotable_privileges pp
-        on not is_empty(bap.privileges * pp.privilege_ids)
-       and pp.scope_type_id != 1
-     inner join veil2.superior_scopes ss
-        on ss.scope_type_id = bap.assignment_context_type_id
-       and ss.scope_id = bap.assignment_context_id
-       and ss.superior_scope_type_id = pp.scope_type_id
-  ),
-global_privs as
-  (
-    select bap.accessor_id, bap.mapping_context_type_id,
-    	   bap.mapping_context_id, pp.scope_type_id,
-	   0 as scope_id,
-	   bap.privileges * pp.privilege_ids as privileges
-      from base_accessor_privs bap
-     inner join veil2.promotable_privileges pp
-        on not is_empty(bap.privileges * pp.privilege_ids)
-       and pp.scope_type_id = 1
-  ),  
-all_role_privs as
-  (
-    select accessor_id,
-    	   mapping_context_type_id, mapping_context_id,
-	   assignment_context_type_id as scope_type_id,
-           assignment_context_id as scope_id,
-       	   roles,  privileges
-      from base_accessor_privs
-     union all
-    select accessor_id, 
-           mapping_context_type_id, mapping_context_id,
-	   scope_type_id, scope_id,
-       	   null::bitmap as roles, privileges
-      from promoted_privs
-     union all
-    select accessor_id, 
-           mapping_context_type_id, mapping_context_id,
-	   scope_type_id, scope_id,
-       	   null::bitmap as roles, privileges
-      from global_privs
-  )
-select accessor_id,
-       mapping_context_type_id, mapping_context_id,
-       scope_type_id, scope_id,
-       union_of(roles) as roles, union_of(privileges) as privileges
-  from all_role_privs
- where accessor_id = 114
- group by accessor_id,
-          mapping_context_type_id, mapping_context_id,
-          scope_type_id, scope_id;
-  
--- TODO: Make this available as a view after fixing it based on latest
--- version in scratch.sql
-
-
-
 comment on function veil2.load_session_privs(integer, integer, integer) is
 'Load the temporary table veil2_session_privileges for session_id, with the
 privileges for _accessor_id.  The temporary table is queried by
@@ -2699,6 +2658,9 @@ security functions in order to determine what access rights the
 connected user has.  If the optional 3rd parameter is provided, use
 that as the session_id of an originating session - this is part of the
 become-user process (see become_user())';
+
+
+
 
 
 \echo ......check_continuation()...
@@ -2826,6 +2788,8 @@ begin
     end if;
     
     if not success then
+      -- Cannot truncate these as they are in use by the current
+      -- transaction. 
       delete from veil2_session_privileges;
       delete from veil2_session_parameters;
     end if;
@@ -2981,6 +2945,7 @@ begin
     from veil2_session_parameters sp;
     
   if veil2.i_have_global_priv(1) or
+     veil2.i_have_priv_in_scope(1, context_type_id, context_id) or
      veil2.i_have_priv_in_superior_scope(1, context_type_id, context_id)
   then
     -- Ensure accessor_id and context are valid
@@ -3273,9 +3238,7 @@ values (0, 'connect', false, true, 'Allow minimal access to the system.'),
        (1, 'superuser', false, true, 'An all-encompassing role.'),
        (2, 'personal_context', true, true,
         'An implicitly assigned, to all users, role that allows ' ||
-	'access to a user''s own information'),
-       (3, 'visitor', true, false,
-        'Default role for unauthenticated visitors');
+	'access to a user''s own information');
 
 -- Veil-specific roles
 insert

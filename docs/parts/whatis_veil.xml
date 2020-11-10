@@ -1,15 +1,16 @@
 <sect1 id="whatis">
   <title>What is <literal>Veil2</literal> And What Does It Provide?</title>
   <para>
-    <literal>Veil2</literal> is a collection of database objects that
-    provides an implementation of roles, privileges, contexts, scopes
-    and session management that can be used with minimal extra
+    <literal>Veil2</literal> is a collection of database objects,
+    written in C and SQL, that provides an implementation of roles,
+    privileges, contexts, scopes and session management that can be
+    used to secure your database with relatively little custom
     implementation work.
   </para>
   <para>
     It links to your database through functions, triggers and foreign
-    keys, and provides fast mechanisms to identify, load and test a
-    user's privileges.
+    keys, and provides fast, tested, mechanisms to identify, load and
+    test a user's privileges in various scopes.
   </para>
   <para>
     It is important to realize at this point that
@@ -27,8 +28,9 @@
     built-in system-provided ones.  This mechanism aims to provide
     maximum flexibility while still allowing <literal>Veil2</literal>
     to be distributed as a PostgreSQL extension.  This means that
-    <literal>Veil2</literal> bug-fixes and upgrades can be easily
-    applied to your database without breaking your customizations.
+    future <literal>Veil2</literal> bug-fixes and upgrades can be
+    easily applied to your database without breaking your
+    customizations.
   </para>
   <para>
     There is various documentation to help you with this:
@@ -86,14 +88,15 @@
 	<link linkend="shared_session_management">shared</link>
 	database connections.  It is up to the user or the user's
 	application to ensure that the session protocols are followed.
-	If they are not, the user will have access to no data.
+	If they are not, the user will have access to no data at all,
+	or access to data based on another user's access rights.
       </para>
       <para>
 	By calling the appropriate session management functions with
 	appropriate authentication tokens, a <literal>Veil2</literal>
 	session will be created.  This causes session parameters to be
-	set up in temporary tables from which they can be quickly
-	retrieved.  These session parameters include session
+	set up in secure temporary tables from which they can be
+	quickly retrieved.  These session parameters include session
 	privileges with one record for each scope in which the user
 	has privileges.
       </para>
@@ -110,17 +113,12 @@
       <para>
 	At the start of each session, the user's privileges are
 	determined based upon the roles that have been assigned to
-	them, and the contexts of those role assignments.  To make
-	this process as fast as possible, a number of materialized
-	views are used which map roles to their sets of privileges in
-	various contexts.  By loading from these materialized views,
-	the overhead of determining a large set of potential
-	privileges is much reduced, and since the materialized views
-	record sets of privileges in bitmaps rather than individual
-	records, this overhead becomes quite manageable.  The
-	materialized views are automatically updated whenever
-	role->role and role->privilege assignments are modified which
-	should be relatively infrequently.
+	them, and the contexts of those role assignments.  This is a
+	highly optimized process, using pre-built bitmaps and
+	materialized views.  These materialized views are
+	automatically updated whenever role->role and role->privilege
+	assignments are modified which should be relatively
+	infrequently.
       </para>
       <para>
 	Each privilege assigned to a user acts within a scope that
@@ -162,8 +160,8 @@ create policy projects__select
       <para>
 	Although having so many tests performed for each record
 	returned might seem like a significant overhead, in fact it is
-	small compared with the cost of retrieving the record in the
-	first place and will often be effectively unmeasurable.
+	very small compared with the cost of retrieving the record in
+	the first place and will often be effectively unmeasurable.
       </para>
       <para>
 	Note that you should not rely solely on the VPD implementation
@@ -192,7 +190,8 @@ create policy projects__select
 	      filtering-out records from the result-set then we are
 	      unnecessarily retrieving those records, and are having
 	      to process them in order to determine their
-	      unsuitability.  This is an unncessary overhead.
+	      unsuitability.  This would be a large and unncessary
+	      overhead.
 	    </para>
 	  </listitem>
 	  <listitem>
@@ -208,9 +207,10 @@ create policy projects__select
 	      For the truly security conscious, you may want to modify
 	      the privilege testing functions so that attempts to view
 	      records to which you have no access, result in logs
-	      being recorded.  Such logs would be essentially unusable
-	      and would become a significant overhead, if significant
-	      numbers of queries required results to be filtered.
+	      being recorded.  Note though that such logs would be
+	      essentially unusable and would become a significant
+	      overhead, if significant numbers of queries required
+	      results to be filtered.
 	    </para>
 	  </listitem>
 	</orderedlist>
@@ -229,8 +229,8 @@ create policy projects__select
 	testing functions defined in the view itself.  Sometimes using
 	views can improve the performance of the privilege tests as
 	they can be incorporated more deeply within the view, meaning
-	that the tests do not have to be executed for every row
-	returned.
+	that the tests do not have to be executed for every row used
+	by the view's query.
       </para>
     </sect3>
   </sect2>
@@ -238,7 +238,11 @@ create policy projects__select
     <title>Refactoring Your Systems To Use <literal>Veil2</literal></title>
     <para>
       Integrating your systems with <literal>Veil2</literal> is not a
-      trivial task.
+      trivial task, but it is straightforward.  Once you have
+      understood at least the <link linkend="veil2-concepts">core
+      concepts</link>, you can simply follow the steps described in
+      the <link linkend="setup">Setting Up A <literal>Veil2</literal>
+      Virtual Private Database - Overview</link> section. 
     </para>
     <para>
       This section describes the major areas that you will need to
@@ -331,13 +335,14 @@ create policy projects__select
     <sect3>
       <title>Performance Denormalizations</title>
       <para>
-	You will be applying access control to each relation in your
+	You will be applying access controls to each relation in your
 	system.  Some of them may benefit from data denormalization to
 	improve the performance of the security tests.  Typically you
 	may want to add ownership columns to some of your tables so
 	that ownership can be determined without the need for extra
 	joins.  If an access control function has to perform extra
-	queries for each row returned, performance may suffer.
+	queries for each row returned, performance is likely to
+	suffer.
       </para>
     </sect3>
     <sect3>
@@ -361,12 +366,12 @@ create policy projects__select
       <para>
 	Create appropriate roles one function at a time and ensure
 	that they have sufficient access to get the job done.  Assign
-	these in the lowest security contexts possible and ensure that
-	they work.  Check that they work in higher contexts.  Remove
-	any existing code that implements access controls for that
-	functionality.  If all is well, remove those privileges from
-	your super-role and ensure that everyone can still do their
-	jobs.  Rinse and repeat.
+	these in the most restrictive security contexts possible and
+	ensure that they work.  Check that they also work in
+	higher-level contexts.  Remove any existing code that
+	implements access controls for that functionality.  If all is
+	well, remove those privileges from your super-role and ensure
+	that everyone can still do their jobs.  Rinse and repeat.
       </para>
     </sect3>
   </sect2>

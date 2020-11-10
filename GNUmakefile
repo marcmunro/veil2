@@ -8,6 +8,8 @@
 #
 # For a list of targets use make help.
 #
+# TODO: Improve/rewrite comments in here.
+#       Update help target for new stuff
 # Most of this makefile is concerned with building the html
 # documentation.  The basic process is simple, but is complicated by
 # Marc's wish to automatically create html maps from dia ERD diagrams
@@ -37,7 +39,7 @@
 # Default target
 all:
 
-.PHONY: help list docs images extracts clean distclean
+.PHONY: help list docs deps images extracts clean distclean doxygen
 
 
 ##
@@ -55,6 +57,10 @@ Makefile.global: ./configure
 ./configure:
 	autoconf
 
+# What constitutes general garbage files.
+garbage_files := \\\#*  .\\\#*  *~ 
+AUTOCONF_TARGETS := Makefile.global ./configure autom4te.cache \
+		    config.log config.status
 
 
 ##
@@ -63,19 +69,54 @@ Makefile.global: ./configure
 
 EXTENSION = veil2
 MODULE_big = veil2
-SOURCES = src/veil2.c src/query.c
 MODULEDIR = extension
 VEIL2_LIB = $(addsuffix $(DLSUFFIX), veil2)
-
-OBJS = $(SOURCES:%.c=%.o)
-BITCODES = $(SOURCES:%.c=%.bc)
 
 PG_CONFIG := $(shell ./find_pg_config)
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 DATA = $(wildcard sql/veil2--*.sql)
-TARGET_FILES := PG_CONFIG PG_VERSION $(OBJS) $(BITCODES) $(VEIL2_LIB)
+TARGET_FILES := PG_CONFIG PG_VERSION $(OBJS) $(VEIL2_LIB)
 
 include $(PGXS)
+
+
+##
+# C Language building stuff
+#
+SOURCES = $(wildcard src/*.c)
+HEADERS = $(wildcard src/*.h)
+OBJS = $(SOURCES:%.c=%.o)
+DEPS = $(SOURCES:%.c=%.d)
+BITCODES = $(SOURCES:%.c=%.bc)
+
+INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
+
+# Hmmmm.  This appears necessary.  It wasn't needed before I added
+# the deps handling stuff so this is a bit baffling.  Does no harm
+# tho'.
+all: $(BITCODES)
+
+# Build per-source dependency files for inclusion
+# This ignores header files and any other non-local files (such as
+# postgres include files).  
+%.d: %.c
+	@echo Recreating $@
+	@$(SHELL) -ec "$(CC) -MM -MT $*.o $(CPPFLAGS) $< | \
+		xargs -n 1 | grep '^[^/]' | \
+		sed -e '1,$$ s/$$/ \\\\/' -e '$$ s/ \\\\$$//' \
+		    -e '2,$$ s/^/  /' | \
+		sed 's!$*.o!& $@!g'" > $@
+
+# Target used by recursive call from deps target below.  
+make_deps: $(DEPS)
+	@>/dev/null # Prevent the 'Nothing to be done for...' msg
+
+# Target that rebuilds all dep files unconditionally.  
+deps: 
+	rm -f $(DEPS)
+	$(MAKE) MAKEFLAGS="$(MAKEFLAGS)" make_deps
+
+include $(DEPS)
 
 
 ##
@@ -94,10 +135,29 @@ STYLESHEET_IMPORTER = docs/system-stylesheet.xsl
 VERSION_FILE = docs/version.sgml
 VERSION_NUMBER := $(shell cut -d" " -f1 VERSION)
 HTMLDIR = html
-TARGET_FILES += $(HTMLDIR)/* 
-TARGET_DIRS += $(HTMLDIR)
+ANCHORS_DIR = docs/anchors
+TARGET_FILES += $(HTMLDIR)/* doxy.tag $(ANCHORS_DIR)/*
+TARGET_DIRS += $(HTMLDIR)/doxygen $(HTMLDIR) $(ANCHORS_DIR)
 
 INTERMEDIATE_FILES += $(STYLESHEET_IMPORTER) $(VERSION_FILE)
+
+# Create doxygen-based docs for the C-language stuff.  We use the
+# doxygen tag file as a proxy for the output document set.
+#
+doxy.tag: $(SOURCES) $(HEADERS)
+	mkdir -p $(HTMLDIR)//doxygen 2>/dev/null
+	doxygen docs/Doxyfile || \
+	    (echo "Doxygen fails: is it installed?"; exit 2)
+
+$(ANCHORS_DIR): doxy.tag $(DOC_SOURCES) 
+	@echo "Recreating doxygen anchor files..."
+	@mkdir -p $(ANCHORS_DIR)
+	@bin/get_doxygen_anchors.sh doxy.tag docs $(ANCHORS_DIR)
+
+doxygen: doxy.tag $(ANCHORS_DIR)
+	@>/dev/null # Prevent the 'Nothing to be done for...' msg
+
+
 
 # Build the version entity for the docbook documentation.  This is
 # included into the docbook source.
@@ -176,7 +236,6 @@ TARGET_IMAGES := $(patsubst $(DIAGRAMS_DIR)%, $(HTMLDIR)%, $(DIAGRAM_IMAGES))
 #
 $(HTMLDIR)/%: $(DIAGRAMS_DIR)/% 
 	@[ -d html ] || mkdir html # Create the directory, if needed.
-	echo XXXX $(DIAGRAMS_DIR)
 	cp $< $@
 
 # Intermediate file used for creating maps from our diagrams.
@@ -221,7 +280,8 @@ images: $(DIAGRAM_IMAGES)
 # html files.
 #
 $(HTMLDIR)/index.html: $(DOC_SOURCES) $(VERSION_FILE) $(VEIL2_STYLESHEET) \
-		 $(STYLESHEET_IMPORTER) $(TARGET_IMAGES) $(EXTRACTS)
+		 $(STYLESHEET_IMPORTER) $(TARGET_IMAGES) $(EXTRACTS) \
+		 $(ANCHORS_DIR)
 	@[ -d html ] || mkdir html # Create the directory, if needed.
 	@echo XSLTPROC "<docbook sources>.xml -->" $@
 	$(XSLTPROC) $(XSLTPROCFLAGS) --output html/ \
@@ -239,7 +299,7 @@ $(HTMLDIR)/mapped: $(HTMLDIR)/index.html $(DIAGRAM_MAPS)
 # built, including the ERD diagram map.
 #
 docs: $(STYLESHEET_IMPORTER) $(VERSION_FILE) extracts \
-	$(HTMLDIR)/index.html $(HTMLDIR)/mapped
+	$(HTMLDIR)/index.html $(HTMLDIR)/mapped doxygen 
 
 
 ##
@@ -272,12 +332,10 @@ unit: db
 # clean targets
 #
 
-# What constitutes general garbage files.
-garbage_files := \\\#*  .\\\#*  *~ 
-AUTOCONF_TARGETS := Makefile.global ./configure autom4te.cache \
-		    config.log config.status
+SUBDIRS = src docs
 
-clean:
+# Clean target that does not conflict with the same target from PGXS
+local_clean:
 	@echo $(SUBDIRS)
 	@for i in $(SUBDIRS); do \
 	   echo Cleaning $${i}...; \
@@ -286,6 +344,9 @@ clean:
 	echo Cleaning intermediate and target files...
 	@rm -f $(INTERMEDIATE_FILES) $(TARGET_FILES) 2>/dev/null || true
 	@rmdir $(TARGET_DIRS) 2>/dev/null || true
+
+# Make PGXS clean target use our cleanup target.
+clean: local_clean
 
 distclean: clean
 	echo Cleaning autoconf files...
@@ -300,14 +361,16 @@ distclean: clean
 list help:
 	@echo "\n\
  Major targets for this makefile are:\n\n\
- help         - show this list of major targets\n\
- db           - build standalone '$(TESTDB)' database\n\
- drop         - drop standalone '$(TESTDB)' database\n\
- unit         - run unit tests (uses '$(TESTDB)' database, takes FLAGS variable)\n\
-   test       - ditto (a synonym for unit)\n\
- docs         - create html documentation\n\
- images       - create all diagram images from sources\n\
- extracts     - create all doc extracts sql scripts\n\
- clean        - clean out unwanted files\n\
+ help      - show this list of major targets\n\
+ db        - build standalone '$(TESTDB)' database\n\
+ deps      - Recreate the xxx.d dependency files\n\
+ drop      - drop standalone '$(TESTDB)' database\n\
+ unit      - run unit tests (uses '$(TESTDB)' database, takes FLAGS variable)\n\
+ test      - ditto (a synonym for unit)\n\
+ docs      - create html documentation (including doxygen docs\n\
+ doxygen   - create doxygen html documentation only\n\
+ images    - create all diagram images from sources\n\
+ extracts  - create all doc extracts sql scripts\n\
+ clean     - clean out unwanted files\n\
 \n\
 "

@@ -55,7 +55,7 @@ $ pgxn install veil2
 	</programlisting>
       </para>
     </sect3>
-    <sect3 id="download from pgxn">
+    <sect3>
       <title>Downloading from PGXN</title>
       <para>
 	You can download <literal>Veil2</literal> from PGXN from <ulink
@@ -81,7 +81,7 @@ $ unzip Veil2-n.n.zip
 	repository and then you will be able to install.
       </para>
     </sect3>
-    <sect3 id="installation">
+    <sect3>
       <title>Installation</title>
       <para>
 	Assuming that you have the PGXS extension building

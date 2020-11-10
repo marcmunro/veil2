@@ -13,28 +13,28 @@
 
 begin;
 select '...test Veil2 views...';
-select plan(44);
+select plan(13);
 
 select is(array_length(to_array(privileges), 1), 1,
           'Expecting connect role to have only 1 privilege')
-  from veil2.direct_role_privileges 
+  from veil2.all_role_privileges 
  where role_id = 0;
 
 select is(bitmin(privileges), 0,
        'Expecting connect role to have connect privilege') 
-  from veil2.direct_role_privileges
+  from veil2.all_role_privileges
  where role_id = 0;
 
 select is(0, cnt,
        'Expecting no other roles to have connect privilege') 
   from (select count(*)::integer as cnt
-          from veil2.direct_role_privileges
+          from veil2.all_role_privileges
          where role_id != 0
 	   and privileges ? 0) x;
 
 select is(array_length(to_array(drp.privileges), 1), x.cnt,
           'Expecting superuser role to have all but connect privilege')
-  from veil2.direct_role_privileges drp
+  from veil2.all_role_privileges drp
  cross join (select count(*)::integer as cnt
                from veil2.privileges
 	      where privilege_id != 0) x
@@ -55,8 +55,11 @@ target_role_privs as (
   ),
 direct_role_privs as (
     select role_id, privileges
-      from veil2.direct_role_privileges
-     where role_id in (select role_id from target_role_privs)),
+      from veil2.all_role_privileges
+     where role_id in (select role_id from target_role_privs)
+           -- Ignore role_privs for mappings other than global
+       and coalesce(mapping_context_type_id, 1) = 1  
+  ),
 all_role_privs as (
     select role_id, bits(privileges) as privilege_id
       from direct_role_privs
@@ -130,13 +133,14 @@ select is((select count(*)
 	      and aar.context_id = -3)::integer,
 	  1, 'Accessor -3 should have role 8 in corp context -3');
 
+/* OLD TESTS FROM PREVIOUS INCARMATION OF VIEWS 
 -- Accessor -6 has been granted role 8 for project -61
 -- Check that role and priv assignments happen in the appropriate
 -- contexts, with proper handling of privilege promotion
 with all_roles as
   (
-    select assignment_context_type_id as context_type_id,
-           assignment_context_id as context_id,
+    select mapping_context_type_id as context_type_id,
+           mapping_context_id as context_id,
     	   bits(roles) role_id
       from veil2.all_accessor_privs
      where accessor_id = -6
@@ -144,10 +148,10 @@ with all_roles as
   ),
 expand_privs as
   (
-    select assignment_context_type_id as context_type_id,
-           assignment_context_id as context_id,
+    select mapping_context_type_id as context_type_id,
+           mapping_context_id as context_id,
 	   scope_type_id, scope_id, 
-           bits(privs) priv_id
+           bits(privileges) priv_id
       from veil2.all_accessor_privs
      where accessor_id = -6
   ),
@@ -399,7 +403,7 @@ select is((select count(*)
 	    where context_type_id = -5
 	      and privilege_name = 'test_privilege_5')::integer, 
 	  2, 'Expect priv5 to exist in dept contexts');	  
-
+*/
 select * from finish();
 
 

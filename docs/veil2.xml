@@ -50,8 +50,9 @@
   <sect1 id="introduction">
     <title>Introduction</title>
     <para>
-      <literal>Veil2</literal> is a Postgres add-on for implementing
-      relational security systems.
+      <literal>Veil2</literal> is a Postgres <ulink
+      url="https://pgxn.org/dist/veil2/">extension</ulink> for
+      implementing relational security systems.
     </para>
     <para>
       A <link linkend="what-is-relational-security">relational
@@ -92,6 +93,13 @@
       <literal>Veil2</literal> the implementation of access control
       rules becomes trivial.
     </para>
+    <para>
+      <literal>Veil2</literal> is mostly implemented in SQL and
+      PL/pgSQL, with a small amount of security-critical code written
+      in C.  It is designed to be fast, flexible and customizable, and
+      aims to make the security of your system better, faster, more
+      complete and easier to understand.
+    </para>
   </sect1>
 
   &whatisrelsec;
@@ -131,6 +139,22 @@
     &veil_dbtables;
     &veil_dbviews;
     &veil_dbfuncs;
+  </appendix>
+  <appendix>
+    <title><literal>Veil2</literal> C Implementation</title>
+    <para>
+      A small core of <literal>Veil2</literal> functionality is
+      implemented in C for security reasons.  This is done to ensure
+      that our session privileges data structures cannot be tampered
+      with (unless you have superuser rights in which case you can't
+      be stopped anyway).
+    </para>
+    <para>
+      The C implementation is documented internally using
+      <ulink url="https://www.doxygen.nl/index.html">Doxygen</ulink>.
+      You can access that documentation <ulink
+      url="doxygen/html/index.html">here</ulink>.
+    </para>
   </appendix>
   &authent_protocols;
   &change_history;

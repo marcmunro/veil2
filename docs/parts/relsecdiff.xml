@@ -60,7 +60,7 @@
           Since all access to the database is through the application
           this is the obvious place to put all access controls.
 	  Application servers provide functionally-rich environments
-	  which would seem to make this the obviously correct and
+	  which would seem to make this the obviously correct, and
 	  possibly the only viable approach.
         </para>
       </listitem>

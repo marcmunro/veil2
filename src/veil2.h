@@ -1,14 +1,35 @@
 /**
+ * @file   veil2.h
+ * \code
+ *     Author:       Marc Munro
+ *     Copyright (c) 2020 Marc Munro
+ *     License:      GPL v3
+ * 
+ * \endcode
+ * @brief  
+ * Root header file for veil2.
+ * 
+ */
+
+
+
+/**
  * A Fetch_fn is a function that processes records, one at a time,
  * returned from a query.
  */
 typedef bool (Fetch_fn)(HeapTuple, TupleDesc, void *);
 
 
-
+/**
+ * This is for queries that return tuples containing a pair of
+ * integers.  It is passed as a fn_param value to veil2_query() and
+ * processed by a Fetch_fn().
+ */
 typedef struct {
-	int f1;
-	int f2;
+	/** Unnamed integer field */
+	int f1;   
+    /** Unnamed, integer field */
+	int f2;   
 } tuple_2ints;
 
 

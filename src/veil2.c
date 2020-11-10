@@ -23,28 +23,49 @@
 
 PG_MODULE_MAGIC;
 
+/* These definitions are up here rather than immediately preceding the
+ * function declarations themselves as this code seems to confuse
+ * Doxygen's call graph stuff.
+ */
+PG_FUNCTION_INFO_V1(veil2_ok); 
+PG_FUNCTION_INFO_V1(veil2_reset_session);
+PG_FUNCTION_INFO_V1(veil2_i_have_global_priv);
+PG_FUNCTION_INFO_V1(veil2_i_have_personal_priv);
+PG_FUNCTION_INFO_V1(veil2_i_have_priv_in_scope);
+PG_FUNCTION_INFO_V1(veil2_i_have_priv_in_superior_scope);
+
+
 /**
  * Used to record whether the current session's temporary tables have
- * been properly initialised.  If not the privilege testing functions
- * will always return false.
+ * been properly initialised using veil2_reset_session().  If not the
+ * privilege testing functions veil2_i_have_global_priv(),
+ * veil2_i_have_personal_priv(), veil2_i_have_priv_in_scope() and
+ * veil2_i_have_priv_in_superior_scope() will always return false.
+ * If you need to implement your own pl/pgsql base privilege testing
+ * function, it should call veil2_ok() to ensure that privileges have
+ * been correctly set up.
+ *
+ * The primary reason for this variable to exist is to ensure that a
+ * user cannot trick the privileges functions by creating their own
+ * session_privileges table.
  */
 static bool is_ok = false;
 
-PG_FUNCTION_INFO_V1(veil2_ok);
+
 /** 
- * <code>veil2_ok() returns bool</code>
- * Predicate to indicate whether the current session has been properly
- * set up.
+ * This is a Fetch_fn() for dealing with tuples containing 2 integers.
+ * Its job is to populate the p_result parameter with 2 integers
+ * from a Postgres SPI query.
  * 
- * @return <code>bool</code> true if this session has been set up.
+ * @param tuple  The ::HeapTuple returned from a Postgres SPI query.
+ * This will contain a tuple of 2 integers.
+ * @param tupdesc The ::TupleDesc returned from the same Postgres SPI query
+ * @param p_result Pointer to a ::tuple_2ints struct into which the 2
+ * integers from the SPI query will be placed.
+ *
+ * @return <code>bool</code> false, indicating to veil2_query() that
+ * no more rows are expected.
  */
-Datum
-veil2_ok(PG_FUNCTION_ARGS)
-{
-
-    PG_RETURN_BOOL(is_ok);
-}
-
 static bool
 fetch_2ints(HeapTuple tuple, TupleDesc tupdesc, void *p_result)
 {
@@ -56,6 +77,11 @@ fetch_2ints(HeapTuple tuple, TupleDesc tupdesc, void *p_result)
 	return false;  // No need to continue processing after this
 }
 
+
+/** 
+ * Create the temporary tables used for recording session privileges
+ * and parameters.
+ */
 static void
 create_temp_tables()
 {
@@ -79,6 +105,10 @@ create_temp_tables()
 		NULL, NULL);
 }
 
+/** 
+ * Truncate the veil2_session_privileges and veil2_session_parameters
+ * temporary tables.
+ */
 static void
 truncate_temp_tables()
 {
@@ -94,7 +124,33 @@ truncate_temp_tables()
 		NULL, NULL);
 }
 
-PG_FUNCTION_INFO_V1(veil2_reset_session);
+
+/** 
+ * <code>veil2_ok() returns bool</code>
+ * Predicate to indicate whether the current session has been properly
+ * initialized by veil2_reset_session().  It tests the static variable
+ * ::is_ok.
+ * 
+ * @return <code>bool</code> true if this session has been set up.
+ */
+Datum
+veil2_ok(PG_FUNCTION_ARGS)
+{
+
+    PG_RETURN_BOOL(is_ok);
+}
+
+/** 
+ * <code>veil2.reset_session() returns void</code> 
+ *
+ * Resets a postgres session prior to the recording of session
+ * privilege information.  This ensures that the Veil2 temporary
+ * tables, on which our security depends, exist and have not been
+ * tamperered with.  Unless this function succeeds, the privilege
+ * testing functions veil2_i_have_global_priv(),
+ * veil2_i_have_personal_priv(), veil2_i_have_priv_in_scope() and
+ * veil2_i_have_priv_in_superior_scope() will always return false.
+ */
 Datum
 veil2_reset_session(PG_FUNCTION_ARGS)
 {
@@ -103,6 +159,7 @@ veil2_reset_session(PG_FUNCTION_ARGS)
 	int processed;
 	bool pushed;
 	
+	is_ok = false;
 	ok = veil2_spi_connect(&pushed);
 	if (ok != SPI_OK_CONNECT) {
 		ereport(ERROR,
@@ -180,7 +237,12 @@ veil2_reset_session(PG_FUNCTION_ARGS)
     PG_RETURN_VOID();
 }
 
-PG_FUNCTION_INFO_V1(veil2_i_have_global_priv);
+/** 
+ * <code>veil2.i_have_global_priv(priv) returns bool</code> 
+ *
+ * Predicate to determine whether the current session user has a given
+ * privilege, <code>priv</code>, with global scope.
+ */
 Datum
 veil2_i_have_global_priv(PG_FUNCTION_ARGS)
 {
@@ -227,7 +289,13 @@ veil2_i_have_global_priv(PG_FUNCTION_ARGS)
 }
 
 
-PG_FUNCTION_INFO_V1(veil2_i_have_personal_priv);
+/** 
+ * <code>veil2.i_have_personal_priv(priv) returns bool</code> 
+ *
+ * Predicate to determine whether the current session user has a given
+ * privilege, <code>priv</code>, in their personal scope (ie for data
+ * pertaining to themselves).
+ */
 Datum
 veil2_i_have_personal_priv(PG_FUNCTION_ARGS)
 {
@@ -276,7 +344,14 @@ veil2_i_have_personal_priv(PG_FUNCTION_ARGS)
 }
 
 
-PG_FUNCTION_INFO_V1(veil2_i_have_priv_in_scope);
+/** 
+ * <code>veil2.i_have_priv)in_scope(priv, scope_type_id, scope_id) 
+ *     returns bool</code> 
+ *
+ * Predicate to determine whether the current session user has a given
+ * privilege, <code>priv</code>, in a specific scope
+ * (<code>scope_type_id</code>, <code>scope_id</code>).
+ */
 Datum veil2_i_have_priv_in_scope(PG_FUNCTION_ARGS)
 {
 	static void *saved_plan = NULL;
@@ -328,7 +403,14 @@ Datum veil2_i_have_priv_in_scope(PG_FUNCTION_ARGS)
 }
 
 
-PG_FUNCTION_INFO_V1(veil2_i_have_priv_in_superior_scope);
+/** 
+ * <code>veil2.i_have_priv)in_superior_scope(priv, scope_type_id, scope_id) 
+ *     returns bool</code> 
+ *
+ * Predicate to determine whether the current session user has a given
+ * privilege, <code>priv</code>, in a superior scope to that supplied: 
+ * <code>scope_type_id</code>, <code>scope_id</code>.
+ */
 Datum veil2_i_have_priv_in_superior_scope(PG_FUNCTION_ARGS)
 {
 	static void *saved_plan = NULL;

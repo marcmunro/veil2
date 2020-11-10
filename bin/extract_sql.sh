@@ -8,6 +8,7 @@
 #
 # Usage:
 #  extract_sql.sh [-d|-D] <docs_dir> <target_dir>
+#  extract_sql.sh -1 <objtype> <objname> <sourcefile>
 #
 # This is very tightly bound to Marc's SQL coding style.  It does the
 # job but is pretty fragile.
@@ -47,6 +48,10 @@ extract_definition ()
 	      if ("'$1'" == "function") {
 	          # This is terrible code, irretrievably tied to
 		  # Marc''s sql coding style.  Oh well.
+	          if (reading && ($0 ~ / language C/)) {
+		      # The end of a C language function
+		      reading = 0
+		  }
 	          if (($0 ~ /^language/) ||
 		      ($0 ~ /^set /)) {
 	              if (reading) printf("\n")

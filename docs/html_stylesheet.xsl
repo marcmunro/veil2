@@ -245,6 +245,33 @@ Custom docbook stylesheet for html for Veil2 docs.
     <xsl:apply-templates select="document($filename)/extract/*"/>
   </xsl:template>
 
+  <xsl:template match="processing-instruction('doxygen-ulink')">
+    <xsl:variable name="type">
+      <xsl:value-of select="substring-before(., ' ')"/>
+    </xsl:variable>
+    <xsl:variable name="name">
+      <xsl:value-of select="substring-before(
+			        substring-after(., ' '),
+				' ')"/>
+    </xsl:variable>
+    <xsl:variable name="content">
+      <xsl:value-of select="substring-after(
+			        substring-after(., ' '),
+				' ')"/>
+    </xsl:variable>
+    <xsl:variable name="anchorfile">
+      <!-- Read the anchorfile -->
+      <xsl:value-of select="document(concat('anchors/', $type, '_',
+	                                     $name, '.anchor'))"/>
+    </xsl:variable>
+    <!-- Create the link to the anchor -->
+    <a class="ulink"
+       target="_top"
+       href="{concat('doxygen/html/', $anchorfile)}">
+      <xsl:value-of select="$content"/>
+    </a>
+  </xsl:template>
+
 
   <!-- MM: The following hack is to ensure a DOCTYPE header in each
        chunk.  There ought to be a better way to do this but I haven't

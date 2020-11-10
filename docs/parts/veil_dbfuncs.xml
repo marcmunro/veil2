@@ -1,9 +1,21 @@
 <sect1>
   <title>Veil2 Functions and Triggers</title>
+
   <para>
     The following functions, defined in
     <literal>sql/veil2--&version_number;.sql</literal>, are for
-    managing user-provided database objects (functions and views):
+    managing Referential Integrity:
+    <itemizedlist>
+      <listitem>
+	<link linkend="func_context_exists_chk">context_exists_chk()</link>;
+      </listitem> 
+    </itemizedlist>
+  </para>
+
+  <para>
+    These functions are for managing user-provided database objects
+    (functions and views):  
+
     <itemizedlist>
       <listitem>
 	<link linkend="func_function_definition">function_definition()</link>;
@@ -40,7 +52,11 @@
 	<link linkend="func_deferred_install_fn">deferred_install_fn()</link>.
       </listitem>
     </itemizedlist>
+  </para>
+
+  <para>
     These functions are for authentication handling:
+    
     <itemizedlist>
       <listitem>
 	<link linkend="func_authenticate_false">authenticate_false()</link>;
@@ -55,8 +71,15 @@
 	<link linkend="func_authenticate">authenticate()</link>.
       </listitem>
     </itemizedlist>
+  </para>
+
+  <para>
     These functions are for session handling:
+
     <itemizedlist>
+      <listitem>
+	<link linkend="func_ok">ok()</link>;
+      </listitem>
       <listitem>
 	<link linkend="func_reset_session">reset_session()</link>;
       </listitem>
@@ -109,23 +132,30 @@
 	<link linkend="become_user">become_user()</link>.
       </listitem>
     </itemizedlist>
+  </para>
+
+  <para>
     These functions are for testing session privileges:
     <itemizedlist>
       <listitem>
 	<link linkend="i_have_global_priv">i_have_global_priv()</link>;
       </listitem> 
       <listitem>
+	<link linkend="i_have_personal_priv">i_have_personal_priv()</link>;
+      </listitem> 
+      <listitem>
 	<link linkend="i_have_priv_in_scope">i_have_priv_in_scope()</link>;
       </listitem> 
       <listitem>
 	<link
-	    linkend="i_have_priv_in_superior_scope">i_have_priv_in_superior_scope()</link>;
-      </listitem> 
-      <listitem>
-	<link linkend="i_have_personal_priv">i_have_personal_priv()</link>.
+	    linkend="i_have_priv_in_superior_scope">i_have_priv_in_superior_scope()</link>.
       </listitem> 
     </itemizedlist>
+  </para>
+
+  <para>
     Utility and administration functions:
+
     <itemizedlist>
       <listitem>
 	<link linkend="delete_expired_sessions">delete_expired_sessions()</link>;
@@ -134,20 +164,20 @@
 	<link linkend="bcrypt">bcrypt()</link>.
       </listitem> 
     </itemizedlist>
-    Functions for refreshing materialized views:
-    <itemizedlist>
-      <listitem>
-	<link linkend="func_refresh_accessor_privs">refresh_accessor_privs()</link>;
-      </listitem> 
-      <listitem>
-	<link
-	    linkend="func_refresh_superior_scopes">refresh_superior_scopes()</link>;
-      </listitem> 
-      <listitem>
-	<link
-	    linkend="func_refresh_role_privileges">refresh_role_privileges()</link>.
-      </listitem>
-    </itemizedlist>
+  </para>
+
+  <para>
+      Functions for refreshing materialized views:
+
+      <itemizedlist>
+        <listitem>
+	  <link
+	      linkend="func_refresh_superior_scopes">refresh_superior_scopes()</link>;
+	</listitem>
+      </itemizedlist>
+  </para>
+
+  <para>
     Functions for checking the status of your <literal>Veil2</literal>
     secured database implementation:
     <itemizedlist>
@@ -180,6 +210,41 @@
       </listitem> 
     </itemizedlist>
   </para>
+  <para>
+    And these triggers exist:
+    <itemizedlist>
+      <listitem> 
+	<link linkend="trig_context_role__context_fk">context_role__context_fk</link>;
+      </listitem> 
+      <listitem> 
+	<link linkend="trig_role_role__context_fk">role_role__context_fk</link>;
+      </listitem> 
+      <listitem> 
+	<link linkend="trig_accessor_role__context_fk">accessor_role__context_fk</link>;
+      </listitem> 
+      <listitem> 
+	<link linkend="trig_scopes__aiudt">scopes__aiudt</link>;
+      </listitem> 
+      <listitem> 
+	<link linkend="trig_deferred_install_trg">deferred_install_trg</link>;
+      </listitem> 
+      <listitem> 
+	<link linkend="trig_system_parameters_biu">system_parameters_biu</link>;
+      </listitem> 
+      <listitem> 
+	<link linkend="trig_authentication_types_biu">authentication_types_biu</link>.
+      </listitem> 
+    </itemizedlist>
+    
+  </para>
+
+  <sect2 id="ri_functions">
+    <title>Functions for managing Referential Integrity </title>
+    <sect3 id="func_context_exists_chk">
+      <title><literal>context_exists_chk()</literal></title>
+      <?sql-definition function veil2.context_exists_chk sql/veil2--&version_number;.sql ?>
+    </sect3>
+  </sect2>
 
   <sect2 id="base_functions">
     <title>Functions for Management of User-Provided Database Objects</title>
@@ -228,6 +293,7 @@
       <?sql-definition function veil2.deferred_install_fn sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
+  
   <sect2 id="authentication_functions">
     <title>Authentication Functions</title>
     <sect3 id="func_authenticate_false">
@@ -247,11 +313,24 @@
       <?sql-definition function veil2.authenticate sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
+
   <sect2 id="session_functions">
     <title>Session Functions</title>
+    <sect3 id="func_ok">
+      <title><literal>ok()</literal></title>
+      <?sql-definition function veil2.ok sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_ok here?>.
+      </para>
+    </sect3>
     <sect3 id="func_reset_session">
       <title><literal>reset_session()</literal></title>
       <?sql-definition function veil2.reset_session sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_reset_session here?>.
+      </para>
     </sect3>
     <sect3 id="func_get_accessor">
       <title><literal>get_accessor()</literal></title>
@@ -318,25 +397,43 @@
       <?sql-definition function veil2.become_user sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
+  
   <sect2 id="privilege_functions">
     <title>Privilege Testing Functions</title>
     <sect3 id="i_have_global_priv">
       <title><literal>i_have_global_priv()</literal></title>
       <?sql-definition function veil2.i_have_global_priv sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3 id="i_have_priv_in_scope">
-      <title><literal>i_have_priv_in_scope()</literal></title>
-      <?sql-definition function veil2.i_have_priv_in_scope sql/veil2--&version_number;.sql ?>
-    </sect3>
-    <sect3 id="i_have_priv_in_superior_scope">
-      <title><literal>i_have_priv_in_superior_scope()</literal></title>
-      <?sql-definition function veil2.i_have_priv_in_superior_scope sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_i_have_global_priv here?>.
+      </para>
     </sect3>
     <sect3 id="i_have_personal_priv">
       <title><literal>i_have_personal_priv()</literal></title>
       <?sql-definition function veil2.i_have_personal_priv sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_i_have_personal_priv here?>.
+      </para>
+    </sect3>
+    <sect3 id="i_have_priv_in_scope">
+      <title><literal>i_have_priv_in_scope()</literal></title>
+      <?sql-definition function veil2.i_have_priv_in_scope sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_i_have_priv_in_scope here?>.
+      </para>
+    </sect3>
+    <sect3 id="i_have_priv_in_superior_scope">
+      <title><literal>i_have_priv_in_superior_scope()</literal></title>
+      <?sql-definition function veil2.i_have_priv_in_superior_scope sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_i_have_priv_in_superior_scope here?>.
+      </para>
     </sect3>
   </sect2>
+
   <sect2 id="utility_admin_functions">
     <title>Utility and Administration Functions</title>
     <sect3 id="delete_expired_sessions">
@@ -348,6 +445,7 @@
       <?sql-definition function veil2.bcrypt sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>  
+
   <sect2 id="utility_admin_functions">
     <title>Materialized View Functions</title>
     <sect3 id="func_refresh_accessor_privs">
@@ -421,6 +519,37 @@
     <sect3 id="func_implementation_status">
       <title><literal>implementation_status()</literal></title>
       <?sql-definition function veil2.implementation_status sql/veil2--&version_number;.sql ?>
+    </sect3>
+  </sect2>
+  <sect2 id="triggers">
+    <title>Built-in Triggers</title>
+    <sect3 id="trig_context_role__context_fk">
+      <title><literal>context_role__context_fk</literal></title>
+      <?sql-definition trigger context_role__context_fk sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="trig_role_role__context_fk">
+      <title><literal>role_role__context_fk</literal></title>
+      <?sql-definition trigger role_role__context_fk sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="trig_accessor_role__context_fk">
+      <title><literal>accessor_role__context_fk</literal></title>
+      <?sql-definition trigger accessor_role__context_fk sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="trig_scopes__aiudt">
+      <title><literal>scopes__aiudt</literal></title>
+      <?sql-definition trigger scopes__aiudt sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="trig_deferred_install_trg">
+      <title><literal>deferred_install_trg</literal></title>
+      <?sql-definition trigger deferred_install_trg sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="trig_system_parameters_biu">
+      <title><literal>system_parameters_biu</literal></title>
+      <?sql-definition trigger system_parameters_biu sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="trig_authentication_types_biu">
+      <title><literal>authentication_types_biu</literal></title>
+      <?sql-definition trigger authentication_types_biu sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
 </sect1>

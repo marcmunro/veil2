@@ -805,8 +805,7 @@ create type veil2.session_context_t as (
   login_context_type_id		integer,
   login_context_id		integer,
   mapping_context_type_id	integer,
-  mapping_context_id		integer,
-  is_open			boolean
+  mapping_context_id		integer
 );
 
 
@@ -2174,8 +2173,7 @@ begin
     into veil2_session_context
         (accessor_id, session_id,
 	 login_context_type_id, login_context_id,
-	 mapping_context_type_id, mapping_context_id,
-	 is_open)
+	 mapping_context_type_id, mapping_context_id)
   select create_accessor_session.accessor_id,
          nextval('veil2.session_id_seq'),
 	 create_accessor_session.context_type_id,
@@ -2185,8 +2183,7 @@ begin
 	               create_accessor_session.context_type_id) end,
          case when sp.parameter_value = '1' then 0
          else coalesce(asp.superior_scope_id,
-	               create_accessor_session.context_id) end,
-	 false
+	               create_accessor_session.context_id) end
     from veil2.system_parameters sp
     left outer join veil2.all_superior_scopes asp
       on asp.scope_type_id = create_accessor_session.context_type_id
@@ -2531,12 +2528,10 @@ begin
     into veil2_session_context
         (accessor_id, session_id,
          login_context_type_id, login_context_id,
-	 mapping_context_type_id, mapping_context_id,
-	 is_open)
+	 mapping_context_type_id, mapping_context_id)
   select _accessor_id, load_session_privs.session_id,
          login_context_type_id, login_context_id,
-         mapping_context_type_id, mapping_context_id,
-	 true
+         mapping_context_type_id, mapping_context_id
     from veil2.sessions s
    where s.session_id = load_session_privs.session_id;
 
@@ -2751,10 +2746,7 @@ declare
   can_connect bool;
 begin
   success := false;
-  update veil2_session_context  -- If anything goes wrong from here on, 
-  	 		        -- the session will be have no access
-			        -- rights.
-     set is_open = false;
+  truncate table veil2_session_privileges;
   select s.accessor_id, s.expires < now(),
          s.nonces, s.authent_type,
 	 ac.context_type_id,
@@ -2899,8 +2891,7 @@ function veil2.close_connection() returns boolean as
 $$
 begin
   perform veil2.reset_session();
-  update veil2_session_context
-     set is_open = false;
+  truncate table veil2_session_privileges;
   return true;
 end;
 $$

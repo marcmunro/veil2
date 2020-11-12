@@ -798,8 +798,8 @@ This type is used for the generation of a veil2_session_privileges
 temporary table which is populated by Veil2''s session management
 functions.';
  
-\echo ......session_params_t(type)...
-create type veil2.session_params_t as (
+\echo ......session_context_t(type)...
+create type veil2.session_context_t as (
   accessor_id			integer,
   session_id                    integer,
   login_context_type_id		integer,
@@ -1438,15 +1438,15 @@ function veil2.session_context(
   returns record as
 $$
 begin
-  select sp.accessor_id, sp.session_id,
-         sp.login_context_type_id, sp.login_context_id,
-         sp.mapping_context_type_id, sp.mapping_context_id
+  select sc.accessor_id, sc.session_id,
+         sc.login_context_type_id, sc.login_context_id,
+         sc.mapping_context_type_id, sc.mapping_context_id
     into session_context.accessor_id, session_context.session_id,
          session_context.login_context_type_id,
 	   session_context.login_context_id,
          session_context.mapping_context_type_id,
 	   session_context.mapping_context_id
-    from veil2_session_parameters sp;
+    from veil2_session_context sc;
 exception
   when sqlstate '42P01' then
     return;
@@ -1459,7 +1459,7 @@ language 'plpgsql' security definer volatile;
 comment on function veil2.session_context() is
 'Safe function to return the context of the current session.  If no
 session exists, returns nulls.  We use a function in this context
-because we cannot create a view on the veil2_session_parameters table as it
+because we cannot create a view on the veil2_session_context table as it
 is a temporary table and does not always exist.';
 
 
@@ -1507,7 +1507,7 @@ grant select on veil2.session_assignment_contexts to veil_user;
 
 /*
 TODO: Replace the view below with this, which is more correct and has
-a good optimisation for global logins
+a good optimisation for global logins.
 
 select -- All roles without filtering if we are logged-in in global
        -- context.
@@ -2168,10 +2168,10 @@ begin
   execute veil2.reset_session();
 
   -- Regardless of validity of accessor_id, we create a
-  -- veil2_session_parameters record.  This is to prevent fishing for
+  -- veil2_session_context record.  This is to prevent fishing for
   -- valid accessor_ids.
   insert
-    into veil2_session_parameters
+    into veil2_session_context
         (accessor_id, session_id,
 	 login_context_type_id, login_context_id,
 	 mapping_context_type_id, mapping_context_id,
@@ -2194,9 +2194,9 @@ begin
      and asp.superior_scope_type_id = sp.parameter_value::integer
      and asp.is_type_promotion
    where sp.parameter_name = 'mapping context target scope type'
-  returning veil2_session_parameters.session_id,
-            veil2_session_parameters.mapping_context_type_id,
-            veil2_session_parameters.mapping_context_id
+  returning veil2_session_context.session_id,
+            veil2_session_context.mapping_context_type_id,
+            veil2_session_context.mapping_context_id
        into create_accessor_session.session_id,
             _mapping_context_type_id,
 	    _mapping_context_id;
@@ -2498,7 +2498,7 @@ comment on function veil2.session_privileges() is
 'Safe function to return a user-readable version of the privileges for
 the current session.  If no session exists, returns nulls.  We use a
 function in this context because we cannot create a view on the
-veil2_session_parameters table as it is a temporary table and does not
+veil2_session_privileges table as it is a temporary table and does not
 always exist.';
 
 
@@ -2528,7 +2528,7 @@ declare
 begin
   execute veil2.reset_session();
   insert
-    into veil2_session_parameters
+    into veil2_session_context
         (accessor_id, session_id,
          login_context_type_id, login_context_id,
 	 mapping_context_type_id, mapping_context_id,
@@ -2751,9 +2751,9 @@ declare
   can_connect bool;
 begin
   success := false;
-  update veil2_session_parameters  -- If anything goes wrong from here on, 
-  	 		     -- the session will be have no access
-			     -- rights.
+  update veil2_session_context  -- If anything goes wrong from here on, 
+  	 		        -- the session will be have no access
+			        -- rights.
      set is_open = false;
   select s.accessor_id, s.expires < now(),
          s.nonces, s.authent_type,
@@ -2835,7 +2835,7 @@ begin
       -- Cannot truncate these as they are in use by the current
       -- transaction. 
       delete from veil2_session_privileges;
-      delete from veil2_session_parameters;
+      delete from veil2_session_context;
     end if;
     -- Regardless of the success of the preceding checks we record the
     -- use of the latest nonce.  If all validations succeeded, we
@@ -2899,7 +2899,7 @@ function veil2.close_connection() returns boolean as
 $$
 begin
   perform veil2.reset_session();
-  update veil2_session_parameters
+  update veil2_session_context
      set is_open = false;
   return true;
 end;
@@ -2984,9 +2984,9 @@ declare
   orig_session_id integer;
   _result boolean;
 begin
-  select sp.session_id
+  select sc.session_id
     into orig_session_id
-    from veil2_session_parameters sp;
+    from veil2_session_context sc;
     
   if veil2.i_have_global_priv(1) or
      veil2.i_have_priv_in_scope(1, context_type_id, context_id) or
@@ -3092,7 +3092,7 @@ username rather than accessor_id.';
 
 
 \echo ...creating veil2 privilege testing functions...
--- Ensure the veil2_session_parameters and session _privileges temp tables
+-- Ensure the veil2_session_context and session _privileges temp tables
 -- exist as they are needed in order to compile the following functions.
 select veil2.reset_session();
 

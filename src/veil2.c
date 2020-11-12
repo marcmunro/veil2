@@ -80,7 +80,7 @@ fetch_2ints(HeapTuple tuple, TupleDesc tupdesc, void *p_result)
 
 /** 
  * Create the temporary tables used for recording session privileges
- * and parameters.
+ * and context.
  */
 static void
 create_temp_tables()
@@ -98,15 +98,15 @@ create_temp_tables()
 		false, NULL,
 		NULL, NULL);
 	(void) veil2_query(
-		"create temporary table veil2_session_parameters"
-		"    of veil2.session_params_t",
+		"create temporary table veil2_session_context"
+		"    of veil2.session_context_t",
 		0, NULL, NULL,
 		false, NULL,
 		NULL, NULL);
 }
 
 /** 
- * Truncate the veil2_session_privileges and veil2_session_parameters
+ * Truncate the veil2_session_privileges and veil2_session_context
  * temporary tables.
  */
 static void
@@ -118,7 +118,7 @@ truncate_temp_tables()
 		false, 	NULL,
 		NULL, NULL);
 	(void) veil2_query(
-		"truncate table veil2_session_parameters",
+		"truncate table veil2_session_context",
 		0, NULL, NULL,
 		false, 	NULL,
 		NULL, NULL);
@@ -173,7 +173,7 @@ veil2_reset_session(PG_FUNCTION_ARGS)
 		"       sum(case when c.relacl is null then 1 else 0 end)"
 		"  from pg_catalog.pg_class c"
 		" where c.relname in ('veil2_session_privileges',"
-		"                     'veil2_session_parameters',"
+		"                     'veil2_session_context',"
 		"                     'veil2_orig_privileges')"
 		"   and c.relkind = 'r'"
 		"   and c.relpersistence = 't'",

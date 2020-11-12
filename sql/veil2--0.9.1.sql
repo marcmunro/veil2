@@ -693,6 +693,8 @@ create unlogged table veil2.sessions (
   accessor_id			integer not null,
   login_context_type_id		integer not null,
   login_context_id		integer not null,
+  session_context_type_id	integer not null,
+  session_context_id		integer not null,
   mapping_context_type_id	integer not null,
   mapping_context_id		integer not null,
   authent_type			text not null,
@@ -801,13 +803,46 @@ functions.';
 \echo ......session_context_t(type)...
 create type veil2.session_context_t as (
   accessor_id			integer,
+  effective_accessor_id		integer,
   session_id                    integer,
   login_context_type_id		integer,
   login_context_id		integer,
+  session_context_type_id       integer,
+  session_context_id		integer,
   mapping_context_type_id	integer,
   mapping_context_id		integer
 );
 
+comment on type veil2.session_context_t is
+'Records context for the current session.';
+
+comment on column veil2.session_context_t.accessor_id is
+'The id of the accessor whose session this is.';
+
+comment on column veil2.session_context_t.accessor_id is
+'The id of the accessor whose access rights (mostly) are being used by
+this session.  If this is not the same as the accessor_id, then the
+session_user has assumed the access rights of this accessor using the
+become_user() function.';
+
+comment on column veil2.session_context_t.login_context_type_id is
+'This is the context_type_id for the context within which our accessor
+has authenticated.  This will have been the context_type_id provided
+to the create_session() or hello() function that began this session.';
+
+comment on column veil2.session_context_t.login_context_id is
+'This is the context_id for the context within which our accessor
+has authenticated.  This will have been the context_id provided
+to the create_session() or hello() function that began this session.';
+
+comment on column veil2.session_context_t.session_context_type_id is
+'This is the context_type_id to be used for limiting our session''s
+assigned roles and from which is determined our
+mapping_context_type_id.  Ordinarily, this will be the same as our
+login_context_type_id, but if create_session() has been provided with
+session_context parameters, this will be different.  Note that for an
+accessor to create such a session they must have connect privilege in
+both their login context and their requested session context.'; 
 
 -- Create the VEIL2 schema views, including matviews
 -- 
@@ -2152,6 +2187,8 @@ function veil2.create_accessor_session(
     authent_type in text,
     context_type_id in integer default 1,
     context_id in integer default 0,
+    session_context_type_id in integer default null,
+    session_context_id in integer default null,
     session_id out integer,
     session_token out text,
     session_supplemental out text)
@@ -2173,11 +2210,16 @@ begin
     into veil2_session_context
         (accessor_id, session_id,
 	 login_context_type_id, login_context_id,
+	 session_context_type_id, session_context_id,
 	 mapping_context_type_id, mapping_context_id)
   select create_accessor_session.accessor_id,
          nextval('veil2.session_id_seq'),
 	 create_accessor_session.context_type_id,
 	 create_accessor_session.context_id,
+	 coalesce(create_accessor_session.session_context_type_id,
+		  create_accessor_session.context_type_id),
+	 coalesce(create_accessor_session.session_context_id,
+		  create_accessor_session.context_id),
          case when sp.parameter_value = '1' then 1
          else coalesce(asp.superior_scope_type_id,
 	               create_accessor_session.context_type_id) end,
@@ -2231,6 +2273,7 @@ begin
       into veil2.sessions
           (accessor_id, session_id,
 	   login_context_type_id, login_context_id,
+	   session_context_type_id, session_context_id,
 	   mapping_context_type_id, mapping_context_id,
 	   authent_type, has_authenticated,
 	   session_supplemental, expires,
@@ -2239,6 +2282,10 @@ begin
     	   create_accessor_session.session_id, 
     	   create_accessor_session.context_type_id,
 	   create_accessor_session.context_id,
+	   coalesce(create_accessor_session.session_context_type_id,
+		    create_accessor_session.context_type_id),
+	   coalesce(create_accessor_session.session_context_id,
+		    create_accessor_session.context_id),
     	   _mapping_context_type_id,
 	   _mapping_context_id,
 	   authent_type, false,
@@ -2253,7 +2300,7 @@ language 'plpgsql' security definer volatile
 set client_min_messages = 'error';
 
 comment on function veil2.create_accessor_session(
-integer, text, integer, integer) is
+    integer, text, integer, integer, integer, integer) is
 'Create a new session based on an accessor_id rather than username.
 This is an internal function to veil2.  It does the hard work for
 create_session().';
@@ -2266,6 +2313,8 @@ function veil2.create_session(
     authent_type in text,
     context_type_id in integer default 1,
     context_id in integer default 0,
+    session_context_type_id in integer default null,
+    session_context_id in integer default null,
     session_id out integer,
     session_token out text,
     session_supplemental out text)
@@ -2290,7 +2339,8 @@ $$
 language 'plpgsql' security definer volatile
 set client_min_messages = 'error';
 
-comment on function veil2.create_session(text, text, integer, integer) is
+comment on function
+    veil2.create_session(text, text, integer, integer, integer, integer) is
 'Get session credentials for a new session.  
 
 Returns session_id, authent_token and session_supplemental.
@@ -2528,9 +2578,11 @@ begin
     into veil2_session_context
         (accessor_id, session_id,
          login_context_type_id, login_context_id,
+         session_context_type_id, session_context_id,
 	 mapping_context_type_id, mapping_context_id)
   select _accessor_id, load_session_privs.session_id,
          login_context_type_id, login_context_id,
+         session_context_type_id, session_context_id,
          mapping_context_type_id, mapping_context_id
     from veil2.sessions s
    where s.session_id = load_session_privs.session_id;

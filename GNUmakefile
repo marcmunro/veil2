@@ -94,7 +94,9 @@ INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
 # Hmmmm.  This appears necessary.  It wasn't needed before I added
 # the deps handling stuff so this is a bit baffling.  Does no harm
 # tho'.
-all: $(BITCODES)
+all: $(BITCODES) $(VEIL2_LIB)
+
+$(VEIL2_LIB): $(OBJS)
 
 # Build per-source dependency files for inclusion
 # This ignores header files and any other non-local files (such as
@@ -136,8 +138,12 @@ VERSION_FILE = docs/version.sgml
 VERSION_NUMBER := $(shell cut -d" " -f1 VERSION)
 HTMLDIR = html
 ANCHORS_DIR = docs/anchors
-TARGET_FILES += $(HTMLDIR)/* doxy.tag $(ANCHORS_DIR)/*
-TARGET_DIRS += $(HTMLDIR)/doxygen $(HTMLDIR) $(ANCHORS_DIR)
+TARGET_FILES += $(HTMLDIR)/* doxy.tag $(ANCHORS_DIR)/* \
+		$(HTMLDIR)/doxygen/html/search/* \
+		$(HTMLDIR)/doxygen/html/* $(HTMLDIR)/doxygen/*
+
+TARGET_DIRS += $(HTMLDIR)/doxygen/html/search $(HTMLDIR)/doxygen/html \
+	       $(HTMLDIR)/doxygen $(HTMLDIR) $(ANCHORS_DIR)
 
 INTERMEDIATE_FILES += $(STYLESHEET_IMPORTER) $(VERSION_FILE)
 
@@ -332,14 +338,15 @@ unit: db
 # clean targets
 #
 
-SUBDIRS = src docs
+SUBDIRS = src docs/parts docs demo bin
 
 # Clean target that does not conflict with the same target from PGXS
 local_clean:
+	@rm -f $(garbage_files) 2>/dev/null || true
 	@echo $(SUBDIRS)
 	@for i in $(SUBDIRS); do \
 	   echo Cleaning $${i}...; \
-	   (cd $${i}; rm -f $(garbage_files)) 2>/dev/null; \
+	   (cd $${i}; rm -f $(garbage_files)); \
 	done || true
 	echo Cleaning intermediate and target files...
 	@rm -f $(INTERMEDIATE_FILES) $(TARGET_FILES) 2>/dev/null || true

@@ -448,17 +448,6 @@
 
   <sect2 id="utility_admin_functions">
     <title>Materialized View Functions</title>
-    <sect3 id="func_refresh_accessor_privs">
-      <title>Refresh Accessor Privs</title>
-      <sect4>
-	<title><literal>refresh_accessor_privs()</literal></title>
-	<?sql-definition function veil2.refresh_accessor_privs sql/veil2--&version_number;.sql ?>
-      </sect4>
-      <sect4>
-	<title><literal>accessor_roles__aiudt()</literal></title>
-	<?sql-definition trigger accessor_roles__aiudt sql/veil2--&version_number;.sql ?>
-      </sect4>
-    </sect3>
     <sect3 id="func_refresh_superior_scopes">
       <title>Refresh Scope Promotions</title>
       <sect4>
@@ -468,17 +457,6 @@
       <sect4>
 	<title><literal>scopes__aiudt</literal></title>
 	<?sql-definition trigger scopes__aiudt sql/veil2--&version_number;.sql ?>
-      </sect4>
-    </sect3>
-    <sect3 id="func_refresh_role_privileges">
-      <title>Refresh Role Privileges</title>
-      <sect4>
-	<title><literal>refresh_role_privileges()</literal></title>
-	<?sql-definition function veil2.refresh_role_privileges sql/veil2--&version_number;.sql ?>
-      </sect4>
-      <sect4>
-	<title><literal>role_privileges__aiudt</literal></title>
-	<?sql-definition trigger role_privileges__aiudt sql/veil2--&version_number;.sql ?>
       </sect4>
     </sect3>
   </sect2>

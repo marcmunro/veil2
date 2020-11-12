@@ -29,7 +29,7 @@ select plan(14);
 with login as
   (
     select *
-      from veil2.create_session('Alice', 'bcrypt', 4, 100) c
+      from veil2.create_session('Alice', 'bcrypt', 4, 1000) c
      cross join veil2.open_connection(c.session_id, 1, 'passwd1')
   )
 select is(success, true,
@@ -60,7 +60,7 @@ select is(cnt, 25,
 with login as
   (
     select o2.success -- *
-      from veil2.create_session('Bob', 'plaintext', 4, 101) c
+      from veil2.create_session('Bob', 'plaintext', 4, 1010) c
      cross join veil2.open_connection(c.session_id, 1, 'passwd2') o1
      cross join veil2.open_connection(c.session_id, 2,
                  encode(digest(c.session_token || to_hex(2), 'sha1'),
@@ -94,7 +94,7 @@ select is(cnt, 13,
 with login as
   (
     select *
-      from veil2.create_session('Carol', 'plaintext', 4, 102) c
+      from veil2.create_session('Carol', 'plaintext', 4, 1020) c
      cross join veil2.open_connection(c.session_id, 1, 'passwd3') o1
   )
 select is(success, true,
@@ -125,7 +125,7 @@ select is(cnt, 9,
 with login as
   (
     select *
-      from veil2.create_session('Eve', 'plaintext', 4, 100) c
+      from veil2.create_session('Eve', 'plaintext', 4, 1000) c
      cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1
    )
 select is(success, true,
@@ -156,7 +156,7 @@ select is(cnt, 23,
 with login as
   (
     select *
-      from veil2.create_session('Sue', 'plaintext', 4, 105) c
+      from veil2.create_session('Sue', 'plaintext', 4, 1050) c
      cross join veil2.open_connection(c.session_id, 1, 'passwd5') o1
   )
 select is(success, true,
@@ -187,7 +187,7 @@ select is(cnt, 7,
 with login as
   (
     select *
-      from veil2.create_session('Simon', 'plaintext', 4, 105) c
+      from veil2.create_session('Simon', 'plaintext', 4, 1050) c
      cross join veil2.open_connection(c.session_id, 1, 'passwd7') o1
   )
 select is(success, true,
@@ -233,17 +233,4 @@ select * from finish();
 rollback;
 \pset tuples_only false
 \pset format aligned
-
-/*
-    select *
-      from veil2.create_session('Eve', 'plaintext', 4, 100) c
-     cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
-
-select * from demo.parties;
-select * from demo.projects;
-select * from demo.project_assignments;
-select * from veil2.session_privileges_info;
-
-
-*/
 

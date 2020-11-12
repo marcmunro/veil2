@@ -813,7 +813,6 @@ create type veil2.session_params_t as (
 -- Create the VEIL2 schema views, including matviews
 -- 
 
-
 \echo ......all_role_roles...
 create or replace
 view veil2.all_role_roles (
@@ -1424,6 +1423,152 @@ contexts, for the currently connected accessor.';
 
 revoke all on veil2.all_accessor_privs_info from public;
 grant select on veil2.all_accessor_privs_info to veil_user;
+
+
+\echo ......session_context()...
+create or replace
+function veil2.session_context(
+    accessor_id out integer,
+    session_id out integer,
+    login_context_type_id out integer,
+    login_context_id out integer,
+    mapping_context_type_id out integer,
+    mapping_context_id out integer
+    )
+  returns record as
+$$
+begin
+  select sp.accessor_id, sp.session_id,
+         sp.login_context_type_id, sp.login_context_id,
+         sp.mapping_context_type_id, sp.mapping_context_id
+    into session_context.accessor_id, session_context.session_id,
+         session_context.login_context_type_id,
+	   session_context.login_context_id,
+         session_context.mapping_context_type_id,
+	   session_context.mapping_context_id
+    from veil2_session_parameters sp;
+exception
+  when sqlstate '42P01' then
+    return;
+  when others then
+    raise;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+comment on function veil2.session_context() is
+'Safe function to return the context of the current session.  If no
+session exists, returns nulls.  We use a function in this context
+because we cannot create a view on the veil2_session_parameters table as it
+is a temporary table and does not always exist.';
+
+
+\echo ......session_assignment_contexts...
+
+create or replace
+view veil2.session_assignment_contexts as
+select login_context_type_id as context_type_id,
+       login_context_id as context_id
+  from veil2.session_context() sc
+ union all
+select ass.superior_scope_type_id,
+       ass.superior_scope_id
+  from veil2.session_context() sc
+ inner join veil2.all_superior_scopes ass
+    on ass.scope_type_id = sc.login_context_type_id
+   and ass.scope_id = sc.login_context_id
+ union all
+select ass.scope_type_id,
+       ass.scope_id
+  from veil2.session_context() sc
+ inner join veil2.all_superior_scopes ass
+    on ass.superior_scope_type_id = sc.login_context_type_id
+   and ass.superior_scope_id = sc.login_context_id
+ union all
+select 1, 0
+ union all
+select 2, accessor_id
+  from veil2.session_context();
+
+comment on view veil2.session_assignment_contexts is
+'Provides the set of security contexts which are valid for this role
+assignments within the current session.  The purpose of this is to
+filter out any role assignments which should not apply to the current
+session, as these roles may contain privileges which will be promoted
+to global_scope.
+
+The situation this prevents is for users that are allowed to login in
+different contexts with different roles in those contexts.  We do not
+want the roles provided in one context to provide privileges that
+have not been assigned when we are logged-in in a different context.';
+
+revoke all on veil2.session_assignment_contexts from public;
+grant select on veil2.session_assignment_contexts to veil_user;
+
+/*
+TODO: Replace the view below with this, which is more correct and has
+a good optimisation for global logins
+
+select -- All roles without filtering if we are logged-in in global
+       -- context.
+       aar.accessor_id, aar.role_id,
+       aar.context_type_id, aar.context_id
+  from veil2.session_context() sc
+ inner join veil2.all_accessor_roles aar
+    on aar.accessor_id = sc.accessor_id
+ where sc.login_context_type_id = 1
+ union
+select -- Globally assigned roles, if we are logged in in non-global
+       -- context.
+       aar.accessor_id, aar.role_id,
+       aar.context_type_id, aar.context_id
+  from veil2.session_context() sc
+ inner join veil2.all_accessor_roles aar
+    on aar.accessor_id = sc.accessor_id
+ inner join veil2.session_assignment_contexts sac
+     on -- Matching login context and assignment context
+        aar.context_type_id = 1
+     or (    sac.context_type_id = aar.context_type_id
+         and sac.context_id = aar.context_id
+	 and aar.context_type_id != 1)
+ where sc.login_context_type_id != 1
+ union
+select sc.accessor_id, 2,   -- Personal context role
+       2, sc.accessor_id    -- Personal scope for accessor
+  from veil2.session_context() sc;
+*/
+
+\echo ......all_session_roles...
+create or replace
+view veil2.all_session_roles as
+select aar.accessor_id, aar.role_id,
+       aar.context_type_id, aar.context_id
+  from veil2.session_context() sc
+ inner join veil2.all_accessor_roles aar
+    on aar.accessor_id = sc.accessor_id
+ inner join veil2.session_assignment_contexts sac
+       -- This should really be a semi-join but it can only return 1
+       -- row so all is well.
+     on -- Matching login context and assignment context
+        (    sac.context_type_id = aar.context_type_id
+         and sac.context_id = aar.context_id)
+     or -- login context is is global, so all assignments apply
+        (    sc.login_context_type_id = 1
+	 and sc.login_context_id = 0)
+     or -- role is superuser, so we get it anyway
+        (    aar.role_id = 1
+         and sac.context_type_id = 1)
+ union all
+select sc.accessor_id, 2,   -- Personal context role
+       2, sc.accessor_id    -- Personal scope for accessor
+  from veil2.session_context() sc;
+
+comment on view veil2.all_session_roles is
+'Return all roles assigned to the currently authenticated accessor
+that apply given the accessor''s session_context.';
+
+revoke all on veil2.all_role_roles from public;
+grant select on veil2.all_role_roles to veil_user;
 
 
 \echo ...creating materialized view refresh functions...
@@ -2314,107 +2459,6 @@ language 'plpgsql' security definer volatile;
 comment on function veil2.save_privs_as_orig() is
 'Save the current contents of the veil2_session_privileges table to
 veil2_orig_privileges.  This is part of the become user process.';
-
-
-\echo ......session_context()...
-create or replace
-function veil2.session_context(
-    accessor_id out integer,
-    session_id out integer,
-    login_context_type_id out integer,
-    login_context_id out integer,
-    mapping_context_type_id out integer,
-    mapping_context_id out integer
-    )
-  returns record as
-$$
-begin
-  select sp.accessor_id, sp.session_id,
-         sp.login_context_type_id, sp.login_context_id,
-         sp.mapping_context_type_id, sp.mapping_context_id
-    into session_context.accessor_id, session_context.session_id,
-         session_context.login_context_type_id,
-	   session_context.login_context_id,
-         session_context.mapping_context_type_id,
-	   session_context.mapping_context_id
-    from veil2_session_parameters sp;
-exception
-  when sqlstate '42P01' then
-    return;
-  when others then
-    raise;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-comment on function veil2.session_context() is
-'Safe function to return the context of the current session.  If no
-session exists, returns nulls.  We use a function in this context
-because we cannot create a view on the veil2_session_parameters table as it
-is a temporary table and does not always exist.';
-
-
-\echo ......(view) all_session_roles...
-create or replace
-view veil2.all_session_roles as
-with session_context as
-  (
-    select *
-      from veil2.session_context() sc
-  ),
-assignment_contexts_for_session as
-  (
-    select login_context_type_id as context_type_id,
-    	     login_context_id as context_id
-      from session_context sc
-     union all
-    select ass.superior_scope_type_id,
-    	     ass.superior_scope_id
-      from session_context sc
-     inner join veil2.all_superior_scopes ass
-        on ass.scope_type_id = sc.login_context_type_id
-	 and ass.scope_id = sc.login_context_id
-     union all
-    select ass.scope_type_id,
-    	     ass.scope_id
-      from session_context sc
-     inner join veil2.all_superior_scopes ass
-        on ass.superior_scope_type_id = sc.login_context_type_id
-	 and ass.superior_scope_id = sc.login_context_id
-     union all
-    select 1, 0
-     union all
-    select 2, accessor_id
-      from session_context
-  )
-select aar.accessor_id, aar.role_id,
-       aar.context_type_id, aar.context_id
-  from session_context sc
- inner join veil2.all_accessor_roles aar
-    on aar.accessor_id = sc.accessor_id
- inner join assignment_contexts_for_session acfs 
-       -- This should really be a semi-join but it can only return 1
-       -- row so all is well.
-     on -- Matching login context and assignment context
-        (    acfs.context_type_id = aar.context_type_id
-         and acfs.context_id = aar.context_id)
-     or -- login context is is global, so all assignments apply
-        (    sc.login_context_type_id = 1
-	 and sc.login_context_id = 0)
-     or -- role is superuser, so we get it anyway
-        (    aar.role_id = 1
-         and acfs.context_type_id = 1)
- union all
-select sc.accessor_id, 2,   -- Personal context role
-       2, sc.accessor_id    -- Personal scope for accessor
-  from session_context sc;
-
-comment on view veil2.all_session_roles is
-'Return all roles assigned to the currently authenticated accessor
-that apply given the accessor''s session_context.';
-
-revoke all on veil2.all_role_roles from public;
-grant select on veil2.all_role_roles to veil_user;
 
 
 \echo ......session_privileges()...

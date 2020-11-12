@@ -67,31 +67,31 @@ its place.  This view simply hides the password field.';
 insert into demo.parties_tbl
        (party_id, party_type_id, corp_id, 
         org_id, party_name, password)
-values (100, 2, 100, 100, 'Veil Corp', null),
-       (101, 2, 101, 101, 'Secured Corp', null),
-       (102, 2, 102, 102, 'Protected Corp', null),
-       (103, 2, 101, 101, 'Secured Top Div', null),
-       (104, 2, 101, 101, 'Secured 2nd Div', null),
-       (105, 2, 101, 103, 'Department S', null),
-       (106, 2, 101, 103, 'Department S2', null),
-       (107, 2, 101, 104, 'Department s (lower)', null),
-       (108, 1, 100, 100, 'Alice', 'passwd1'),   -- superuser
-       (109, 1, 101, 101, 'Bob', 'passwd2'),     -- superuser for Secured Corp
-       (110, 1, 102, 102, 'Carol', 'passwd3'),   -- superuser for Protected Corp
-       (111, 1, 100, 100, 'Eve', 'passwd4'),     -- superuser for both corps
-       (112, 1, 101, 105, 'Sue', 'passwd5'),     -- superuser for dept s
-       (113, 1, 101, 105, 'Sharon', 'passwd6'),  -- vp for dept s
-       (114, 1, 101, 105, 'Simon', 'passwd7'),   -- pm for project S.1
-       (115, 1, 101, 105, 'Sara', 'passwd8'),    -- pm for project S2.1
-       (116, 1, 101, 105, 'Stef', 'passwd9'),    -- team member of S.1
-       (117, 1, 101, 105, 'Steve', 'passwd10'),  -- team member of both projects
-       (118, 2, 102, 102, 'Department P', null),
-       (119, 2, 102, 102, 'Department P2', null),       
-       (120, 1, 102, 102, 'Paul', 'passwd11'),
-       (121, 1, 102, 102, 'Pippa', 'passwd12'),
-       (122, 1, 102, 102, 'Phil', 'passwd13'),
-       (123, 1, 102, 102, 'Pete', 'passwd14'),
-       (124, 1, 102, 102, 'Pam', 'passwd15');
+values (1000, 2, 1000, 1000, 'Veil Corp', null),
+       (1010, 2, 1010, 1010, 'Secured Corp', null),
+       (1020, 2, 1020, 1020, 'Protected Corp', null),
+       (1030, 2, 1010, 1010, 'Secured Top Div', null),
+       (1040, 2, 1010, 1010, 'Secured 2nd Div', null),
+       (1050, 2, 1010, 1030, 'Department S', null),
+       (1060, 2, 1010, 1030, 'Department S2', null),
+       (1070, 2, 1010, 1040, 'Department s (lower)', null),
+       (1080, 1, 1000, 1000, 'Alice', 'passwd1'),   -- superuser
+       (1090, 1, 1010, 1010, 'Bob', 'passwd2'),     -- superuser for Secured Corp
+       (1100, 1, 1020, 1020, 'Carol', 'passwd3'),   -- superuser for Protected Corp
+       (1110, 1, 1000, 1000, 'Eve', 'passwd4'),     -- superuser for both corps
+       (1120, 1, 1010, 1050, 'Sue', 'passwd5'),     -- superuser for dept s
+       (1130, 1, 1010, 1050, 'Sharon', 'passwd6'),  -- vp for dept s
+       (1140, 1, 1010, 1050, 'Simon', 'passwd7'),   -- pm for project S.1
+       (1150, 1, 1010, 1050, 'Sara', 'passwd8'),    -- pm for project S2.1
+       (1160, 1, 1010, 1050, 'Stef', 'passwd9'),    -- team member of S.1
+       (1170, 1, 1010, 1050, 'Steve', 'passwd10'),  -- team member of both projects
+       (1180, 2, 1020, 1020, 'Department P', null),
+       (1190, 2, 1020, 1020, 'Department P2', null),       
+       (1200, 1, 1020, 1020, 'Paul', 'passwd11'),
+       (1210, 1, 1020, 1020, 'Pippa', 'passwd12'),
+       (1220, 1, 1020, 1020, 'Phil', 'passwd13'),
+       (1230, 1, 1020, 1020, 'Pete', 'passwd14'),
+       (1240, 1, 1020, 1020, 'Pam', 'passwd15');
 
 grant all on demo.parties_tbl to demouser;
 
@@ -144,8 +144,8 @@ grant all on table demo.projects to demouser;
 insert
   into demo.projects
        (project_id, corp_id, org_id, project_name)
-values (1, 101, 105, 'S.1'),
-       (2, 101, 106, 'S2.1');
+values (1, 1010, 1050, 'S.1'),
+       (2, 1010, 1060, 'S2.1');
 
 
 \echo ...project_assignments...
@@ -293,7 +293,7 @@ begin
   insert
     into veil2.accessor_party_map
         (accessor_id)
-  select new.party_id, new.party_name
+  select new.party_id
    where new.party_type_id = 1;
 
   -- All authentication is currently done using plaintext.  This is
@@ -629,26 +629,26 @@ values (7, 5, 1, 0),  -- In global context
        (7, 11, 1, 0),
        (10, 11, 1, 0),
        (10, 12, 1, 0),
-       (7, 5, 3, 101),   -- The same in context of Secured Corp
-       (8, 5, 3, 101),
-       (8, 6, 3, 101),
-       (9, 5, 3, 101),
-       (9, 6, 3, 101),
-       (7, 11, 3, 101),
-       (10, 11, 3, 101),
-       (10, 12, 3, 101),
-       (7, 5, 3, 102),-- Ditto in context of Protected Corp
-       (8, 5, 3, 102),
-       (8, 6, 3, 102),
-       (9, 5, 3, 102),
-       (9, 6, 3, 102),
-       (7, 11, 3, 102),
-       (10, 11, 3, 102),
-       (10, 12, 3, 102),
-       (16, 13, 3, 101),  -- user role 1 gets fn roles 1 & 2 in Secured Corp
-       (16, 14, 3, 101),
-       (16, 14, 3, 102),  -- user role 1 gets fn roles 2 & 3 in Protected Corp
-       (16, 15, 3, 102);
+       (7, 5, 3, 1010),   -- The same in context of Secured Corp
+       (8, 5, 3, 1010),
+       (8, 6, 3, 1010),
+       (9, 5, 3, 1010),
+       (9, 6, 3, 1010),
+       (7, 11, 3, 1010),
+       (10, 11, 3, 1010),
+       (10, 12, 3, 1010),
+       (7, 5, 3, 1020),-- Ditto in context of Protected Corp
+       (8, 5, 3, 1020),
+       (8, 6, 3, 1020),
+       (9, 5, 3, 1020),
+       (9, 6, 3, 1020),
+       (7, 11, 3, 1020),
+       (10, 11, 3, 1020),
+       (10, 12, 3, 1020),
+       (16, 13, 3, 1010),  -- user role 1 gets fn roles 1 & 2 in Secured Corp
+       (16, 14, 3, 1010),
+       (16, 14, 3, 1020),  -- user role 1 gets fn roles 2 & 3 in Protected Corp
+       (16, 15, 3, 1020);
 
 
 -- STEP 9:
@@ -869,26 +869,26 @@ select party_id, 0, 1, 0
 insert
   into veil2.accessor_roles
        (accessor_id, role_id, context_type_id, context_id)
-values (108, 1, 1, 0),     -- Alice is global superuser
-       (109, 1, 3, 101),   -- Bob is superuser for Secured Corp
-       (110, 1, 3, 102),   -- Carol is superuser for Protected Corp
-       (111, 1, 3, 101),   -- Eve is superuser for Secured Corp
-       (111, 1, 3, 102),   --  and for Protected Corp
-       (111, 16, 3, 101),  --  and has dummy user role 1
-       (111, 16, 3, 102),  --   for each corp.
-       (114, 16, 3, 101),  -- Simon has dummy user role 1
-       (114, 16, 3, 102),  --   for each corp.
-       (112, 1, 4, 105);   -- Sue is superuser for dept S.
+values (1080, 1, 1, 0),     -- Alice is global superuser
+       (1090, 1, 3, 1010),   -- Bob is superuser for Secured Corp
+       (1100, 1, 3, 1020),   -- Carol is superuser for Protected Corp
+       (1110, 1, 3, 1010),   -- Eve is superuser for Secured Corp
+       (1110, 1, 3, 1020),   --  and for Protected Corp
+       (1110, 16, 3, 1010),  --  and has dummy user role 1
+       (1110, 16, 3, 1020),  --   for each corp.
+       (1140, 16, 3, 1010),  -- Simon has dummy user role 1
+       (1140, 16, 3, 1020),  --   for each corp.
+       (1120, 1, 4, 1050);   -- Sue is superuser for dept S.
 
 -- Assign project roles
 insert
   into demo.project_assignments
        (project_id, party_id, role_id)
-values (1, 114, 10),  -- S.1 Simon, pm
-       (2, 115, 10),  -- S2.1 Sara, pm
-       (1, 116, 7),   -- S.1 Stef, member (employee)
-       (1, 117, 7),   -- S.1 Steve, member (employee)
-       (2, 117, 7);   -- S2.1 Steve, member (employee)
+values (1, 1140, 10),  -- S.1 Simon, pm
+       (2, 1150, 10),  -- S2.1 Sara, pm
+       (1, 1160, 7),   -- S.1 Stef, member (employee)
+       (1, 1170, 7),   -- S.1 Steve, member (employee)
+       (2, 1170, 7);   -- S2.1 Steve, member (employee)
 
 select * from veil2.implementation_status();
 
@@ -907,7 +907,7 @@ select * from demo.parties;
 update veil2.authentication_details
    set authent_token = veil2.bcrypt(authent_token),
        authentication_type = 'bcrypt'
- where accessor_id = 108;
+ where accessor_id = 1080;
 
 select veil2.init();
 

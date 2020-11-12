@@ -190,6 +190,13 @@ fetch_one_bool(HeapTuple tuple, TupleDesc tupdesc, void *p_result)
  * Executes a query that returns a single bool value.
  * 
  * @param qry The text of the query to be performed.
+ * @param nargs The number of input parameters ($1, $2, etc) to the query
+ * @param argtypes Pointer to an array containing the OIDs of the data
+ * @param args Actual parameters
+ * @param saved_plan Adress of void pointer into which the query plan
+ * will be saved.  Passing the same void pointer on a subsequent call
+ * will cause the saved query plan to be re-used.  This may be NULL,
+ * in which case the query plan will not be saved.
  * @param result Variable into which the result of the query will be placed.
  * 
  * @return true if the query returned a record, false otherwise.

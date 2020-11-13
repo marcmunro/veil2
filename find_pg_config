@@ -1,7 +1,18 @@
 #! /bin/sh
-# Figure out where to find pg_config.  This is primarily build for
-# debian and debian like systems where multiple versions of postgres may
-# be installed.
+#
+# 	Figure out where to find pg_config.
+#       Copyright (c) 2020 Marc Munro
+#       Author:  Marc Munro
+#	License: GPL V3
+#
+# This is primarily built for debian and debian-like systems where
+# multiple versions of postgres may be installed.
+#
+# Usage ./find_pg_config
+#
+
+
+
 # Return a simplified (2-part) version string.
 #
 strip_version()

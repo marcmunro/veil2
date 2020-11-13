@@ -7,10 +7,9 @@
  * 
  * \endcode
  * @brief  
- * Root header file for veil2.
+ * Main header file for veil2.
  * 
  */
-
 
 
 /**

@@ -1,3 +1,15 @@
+/* ----------
+ * teardown.sql
+ *
+ *      Remove the unit test data for running unit tests.
+ *
+ *      Copyright (c) 2020 Marc Munro
+ *      Author:  Marc Munro
+ *	License: GPL V3
+ *
+ * ----------
+ */
+
 \echo ...removing test objects and data...
 
 -- Reset veil2 views to original definitions

@@ -1,3 +1,14 @@
+/* ----------
+ * setup.sql
+ *
+ *      Set up the unit test data for running unit tests.
+ *
+ *      Copyright (c) 2020 Marc Munro
+ *      Author:  Marc Munro
+ *	License: GPL V3
+ *
+ * ----------
+ */
 
 create role db_accessor;
 create user veil2_alice password 'xyzzy';

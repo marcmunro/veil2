@@ -79,7 +79,6 @@ INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
 #
 
 EXTENSION = veil2
-MODULES = $(SOURCES:%.c=%)
 MODULE_big = veil2
 MODULEDIR = extension
 VEIL2_LIB = $(addsuffix $(DLSUFFIX), veil2)
@@ -96,7 +95,7 @@ include $(PGXS)
 # Hmmmm.  This appears necessary.  It wasn't needed before I added
 # the deps handling stuff so this is a bit baffling.  Does no harm
 # tho'.
-all: $(BITCODES) $(VEIL2_LIB)
+all: $(VEIL2_LIB)
 
 $(VEIL2_LIB): $(OBJS)
 
@@ -351,6 +350,8 @@ local_clean:
 	   echo Cleaning $${i}...; \
 	   (cd $${i}; rm -f $(garbage_files)); \
 	done || true
+	echo Cleaning intermediate and target files...
+	@rm -f $(INTERMEDIATE_FILES) $(TARGET_FILES) 2>/dev/null || true
 	@rmdir $(TARGET_DIRS) 2>/dev/null || true
 
 # Make PGXS clean target use our cleanup target.

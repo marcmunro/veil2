@@ -871,6 +871,7 @@ with recursive assigned_roles (
        and rr.context_type_id = ar.context_type_id
        and rr.context_id = ar.context_id
        and not ar.roles_encountered ? rr.assigned_role_id
+       and rr.primary_role_id != 1 -- Superuser role is handled below
   ),
   superuser_roles (primary_role_id, assigned_role_id) as
   (
@@ -1463,21 +1464,28 @@ grant select on veil2.all_accessor_privs_info to veil_user;
 create or replace
 function veil2.session_context(
     accessor_id out integer,
+    effective_accessor_id out integer,
     session_id out integer,
     login_context_type_id out integer,
     login_context_id out integer,
+    session_context_type_id out integer,
+    session_context_id out integer,
     mapping_context_type_id out integer,
     mapping_context_id out integer
     )
   returns record as
 $$
 begin
-  select sc.accessor_id, sc.session_id,
+  select sc.accessor_id, sc.effective_accessor_id, sc.session_id,
          sc.login_context_type_id, sc.login_context_id,
+         sc.session_context_type_id, sc.session_context_id,
          sc.mapping_context_type_id, sc.mapping_context_id
-    into session_context.accessor_id, session_context.session_id,
+    into session_context.accessor_id, session_context.effective_accessor_id,
+    	   session_context.session_id,
          session_context.login_context_type_id,
 	   session_context.login_context_id,
+         session_context.session_context_type_id,
+	   session_context.session_context_id,
          session_context.mapping_context_type_id,
 	   session_context.mapping_context_id
     from veil2_session_context sc;
@@ -1504,23 +1512,31 @@ view veil2.session_assignment_contexts as
 select login_context_type_id as context_type_id,
        login_context_id as context_id
   from veil2.session_context() sc
- union all
+ union
+select session_context_type_id as context_type_id,
+       session_context_id as context_id
+  from veil2.session_context() sc
+ union
 select ass.superior_scope_type_id,
        ass.superior_scope_id
   from veil2.session_context() sc
  inner join veil2.all_superior_scopes ass
-    on ass.scope_type_id = sc.login_context_type_id
-   and ass.scope_id = sc.login_context_id
- union all
+    on (    ass.scope_type_id = sc.login_context_type_id
+        and ass.scope_id = sc.login_context_id)
+    or (    ass.scope_type_id = sc.session_context_type_id
+        and ass.scope_id = sc.session_context_id)
+ union
 select ass.scope_type_id,
        ass.scope_id
   from veil2.session_context() sc
  inner join veil2.all_superior_scopes ass
-    on ass.superior_scope_type_id = sc.login_context_type_id
-   and ass.superior_scope_id = sc.login_context_id
- union all
+    on (    ass.superior_scope_type_id = sc.login_context_type_id
+        and ass.superior_scope_id = sc.login_context_id)
+    or (    ass.superior_scope_type_id = sc.session_context_type_id
+        and ass.superior_scope_id = sc.session_context_id)
+ union
 select 1, 0
- union all
+ union
 select 2, accessor_id
   from veil2.session_context();
 
@@ -1561,6 +1577,7 @@ select -- Globally assigned roles, if we are logged in in non-global
     on aar.accessor_id = sc.accessor_id
  inner join veil2.session_assignment_contexts sac
      on -- Matching login context and assignment context
+        -- Also session_context and assignment context
         aar.context_type_id = 1
      or (    sac.context_type_id = aar.context_type_id
          and sac.context_id = aar.context_id
@@ -1581,17 +1598,15 @@ select aar.accessor_id, aar.role_id,
  inner join veil2.all_accessor_roles aar
     on aar.accessor_id = sc.accessor_id
  inner join veil2.session_assignment_contexts sac
-       -- This should really be a semi-join but it can only return 1
-       -- row so all is well.
-     on -- Matching login context and assignment context
-        (    sac.context_type_id = aar.context_type_id
-         and sac.context_id = aar.context_id)
-     or -- login context is is global, so all assignments apply
-        (    sc.login_context_type_id = 1
-	 and sc.login_context_id = 0)
-     or -- role is superuser, so we get it anyway
-        (    aar.role_id = 1
-         and sac.context_type_id = 1)
+    on -- Matching login context and assignment context
+       (    sac.context_type_id = aar.context_type_id
+        and sac.context_id = aar.context_id)
+    or -- login context is is global, so all assignments apply
+       (    sc.login_context_type_id = 1
+        and sc.login_context_id = 0)
+    or -- role is superuser, so we get it anyway
+       (    aar.role_id = 1
+        and sac.context_type_id = 1)
  union all
 select sc.accessor_id, 2,   -- Personal context role
        2, sc.accessor_id    -- Personal scope for accessor
@@ -2693,27 +2708,56 @@ begin
        group by accessor_id,
                 scope_type_id, scope_id
     ),
+  have_global_connect as
+    (
+      select exists (
+          select null
+            from grouped_role_privs
+           where scope_type_id = 1
+             and scope_id = 0
+             and privileges ? 0) as have_global_connect
+    ),
+  have_session_connect as
+    (
+      select exists (
+    	  select null
+    	    from session_context sc
+    	   cross join grouped_role_privs grp
+    	   where (    grp.scope_type_id = sc.session_context_type_id
+    	          and grp.scope_id = sc.session_context_id)
+    	      or (grp.scope_type_id, grp.scope_id) in (
+    	      select ass.superior_scope_type_id, ass.superior_scope_id
+    		from veil2.all_superior_scopes ass
+    	       where ass.scope_type_id = sc.session_context_type_id
+    	         and ass.scope_id = sc.session_context_id))
+             as have_session_connect
+    ),
+  have_login_connect as
+    (
+      select exists (
+    	  select null
+    	    from session_context sc
+    	   cross join grouped_role_privs grp
+    	   where (    grp.scope_type_id = sc.login_context_type_id
+    	          and grp.scope_id = sc.login_context_id)
+    	      or (grp.scope_type_id, grp.scope_id) in (
+    	      select ass.superior_scope_type_id, ass.superior_scope_id
+    		from veil2.all_superior_scopes ass
+    	       where ass.scope_type_id = sc.login_context_type_id
+    	         and ass.scope_id = sc.login_context_id))
+             as have_login_connect
+    ),
   have_connect as
     (
       select true as have_connect
-        from session_context sc
-       cross join grouped_role_privs grp
-       where grp.privileges ? 0  -- Have connect priv
-         and (   -- have priv in global scope
-	         (    grp.scope_type_id = 1
-	         and grp.scope_id = 0)
-	      or -- have priv in login context
-	         (    grp.scope_type_id = sc.login_context_type_id
-	          and grp.scope_id = sc.login_context_id)
-	      or -- have priv in superior scope to login context
-	         exists (
-	          select null
-		    from veil2.all_superior_scopes ass
-		   where ass.scope_type_id = sc.login_context_type_id
-		     and ass.scope_id = sc.login_context_id
-		     and ass.superior_scope_type_id = grp.scope_type_id
-		     and ass.superior_scope_id = grp.scope_id))
-       limit 1
+        from have_global_connect
+       where have_global_connect
+       union
+      select have_login_connect and have_session_connect
+        from have_global_connect
+       cross join have_login_connect
+       cross join have_session_connect
+       where not have_global_connect
     )
   insert
     into veil2_session_privileges

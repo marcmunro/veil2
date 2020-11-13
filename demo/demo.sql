@@ -857,13 +857,14 @@ select ar.accessor_id, r.role_name,
 -- Step 12
 -- Assigning roles.
 
--- Give all persons the connect role
+-- Give all persons except Eve the connect role globally
 insert
   into veil2.accessor_roles
       (accessor_id, role_id, context_type_id, context_id)
 select party_id, 0, 1, 0 
   from demo.parties_tbl
- where party_type_id = 1;
+ where party_type_id = 1
+   and party_id != 1110;
 
 -- Give Specific roles to users
 insert
@@ -874,6 +875,8 @@ values (1080, 1, 1, 0),     -- Alice is global superuser
        (1100, 1, 3, 1020),   -- Carol is superuser for Protected Corp
        (1110, 1, 3, 1010),   -- Eve is superuser for Secured Corp
        (1110, 1, 3, 1020),   --  and for Protected Corp
+       (1110, 0, 3, 1000),   -- Eve has connect for Veil Corp
+       (1110, 0, 3, 1010),   -- Eve has connect for Secured Corp
        (1110, 16, 3, 1010),  --  and has dummy user role 1
        (1110, 16, 3, 1020),  --   for each corp.
        (1140, 16, 3, 1010),  -- Simon has dummy user role 1

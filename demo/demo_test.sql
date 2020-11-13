@@ -5,6 +5,18 @@
 \pset tuples_only true
 \pset pager off
 
+-- This is needed for a test below.
+create function demo.insert_connect() returns void as
+$$
+insert
+  into veil2.accessor_roles
+       (accessor_id, role_id, context_type_id, context_id)
+values (1110, 0, 4, 1020);
+$$
+language sql security definer;
+
+grant execute on function demo.insert_connect() to demouser;
+
 \c vpd demouser
 
 begin;
@@ -22,7 +34,7 @@ begin
 end;
 $$;
 
-select plan(14);
+select plan(19);
 
 -- Log Alice in.
 \timing on
@@ -120,7 +132,7 @@ select is(cnt, 9,
 \endif
 
 
--- Log Eve in.
+-- Log Eve in to Veil Corp
 \timing on
 with login as
   (
@@ -129,12 +141,12 @@ with login as
      cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1
    )
 select is(success, true,
-          'Eve successfully logs in as a superuser for both Corps')
+          'Eve successfully logs in to Veil Corp')
   from login;
 \timing off
 
-select is(cnt, 23,
-          'Eve sees all parties for both Corps')
+select is(cnt, 1,
+          'Eve sees no parties except herself')
   from (select count(*)::integer as cnt from demo.parties) x;
 
 
@@ -150,6 +162,76 @@ select is(cnt, 23,
     \pset format unaligned
     \pset tuples_only true
 \endif
+
+-- Log Eve in to Veil Secured Corp
+with login as
+  (
+    select *
+      from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1010) c
+     cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1
+   )
+select is(success, true,
+          'Eve successfully logs in as a superuser for Secured Corp')
+  from login;
+
+select is(cnt, 14,
+          'Eve sees all Secured Corp parties')
+  from (select count(*)::integer as cnt from demo.parties) x;
+
+\if :show_rows
+    \pset tuples_only false
+    \pset format aligned
+    select session_id, scope_type_id, scope_id,
+           to_array(roles) as roles, to_array(privs) as privs
+      from session_privileges ;
+
+    select 'Eve sees: ', * from demo.parties;
+
+    \pset format unaligned
+    \pset tuples_only true
+\endif
+
+-- Log Eve in to Veil Protected Corp
+with login as
+  (
+    select *
+      from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1020) c
+     cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1
+   )
+select is(success, false,
+          'Eve fails to logs in as a superuser for Protected Corp')
+  from login;
+
+-- Give Eve connect access to Protected Corp
+select demo.insert_connect();
+
+with login as
+  (
+    select *
+      from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1020) c
+     cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1
+   )
+select is(success, true,
+          'Eve successfully logs in as a superuser for Protected Corp')
+  from login;
+
+select is(cnt, 10,
+          'Eve sees all Protected Corp parties')
+  from (select count(*)::integer as cnt from demo.parties) x;
+
+\if :show_rows
+    \pset tuples_only false
+    \pset format aligned
+    select session_id, scope_type_id, scope_id,
+           to_array(roles) as roles, to_array(privs) as privs
+      from session_privileges ;
+
+    select 'Eve sees: ', * from demo.parties;
+
+    \pset format unaligned
+    \pset tuples_only true
+\endif
+
 
 -- Log Sue in.
 \timing on

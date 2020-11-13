@@ -1559,6 +1559,11 @@ grant select on veil2.session_assignment_contexts to veil_user;
 TODO: Replace the view below with this, which is more correct and has
 a good optimisation for global logins.
 
+*/
+
+\echo ......all_session_roles...
+create or replace
+view veil2.all_session_roles as
 select -- All roles without filtering if we are logged-in in global
        -- context.
        aar.accessor_id, aar.role_id,
@@ -1587,11 +1592,7 @@ select -- Globally assigned roles, if we are logged in in non-global
 select sc.accessor_id, 2,   -- Personal context role
        2, sc.accessor_id    -- Personal scope for accessor
   from veil2.session_context() sc;
-*/
-
-\echo ......all_session_roles...
-create or replace
-view veil2.all_session_roles as
+/*
 select aar.accessor_id, aar.role_id,
        aar.context_type_id, aar.context_id
   from veil2.session_context() sc
@@ -1611,7 +1612,7 @@ select aar.accessor_id, aar.role_id,
 select sc.accessor_id, 2,   -- Personal context role
        2, sc.accessor_id    -- Personal scope for accessor
   from veil2.session_context() sc;
-
+*/
 comment on view veil2.all_session_roles is
 'Return all roles assigned to the currently authenticated accessor
 that apply given the accessor''s session_context.';
@@ -2200,10 +2201,10 @@ create or replace
 function veil2.create_accessor_session(
     accessor_id in integer,
     authent_type in text,
-    context_type_id in integer default 1,
-    context_id in integer default 0,
-    session_context_type_id in integer default null,
-    session_context_id in integer default null,
+    context_type_id in integer,
+    context_id in integer,
+    session_context_type_id in integer,
+    session_context_id in integer,
     session_id out integer,
     session_token out text,
     session_supplemental out text)
@@ -2231,20 +2232,18 @@ begin
          nextval('veil2.session_id_seq'),
 	 create_accessor_session.context_type_id,
 	 create_accessor_session.context_id,
-	 coalesce(create_accessor_session.session_context_type_id,
-		  create_accessor_session.context_type_id),
-	 coalesce(create_accessor_session.session_context_id,
-		  create_accessor_session.context_id),
+	 create_accessor_session.session_context_type_id,
+	 create_accessor_session.session_context_id,
          case when sp.parameter_value = '1' then 1
          else coalesce(asp.superior_scope_type_id,
-	               create_accessor_session.context_type_id) end,
+	               create_accessor_session.session_context_type_id) end,
          case when sp.parameter_value = '1' then 0
          else coalesce(asp.superior_scope_id,
-	               create_accessor_session.context_id) end
+	               create_accessor_session.session_context_id) end
     from veil2.system_parameters sp
     left outer join veil2.all_superior_scopes asp
-      on asp.scope_type_id = create_accessor_session.context_type_id
-     and asp.scope_id = create_accessor_session.context_id
+      on asp.scope_type_id = create_accessor_session.session_context_type_id
+     and asp.scope_id = create_accessor_session.session_context_id
      and asp.superior_scope_type_id = sp.parameter_value::integer
      and asp.is_type_promotion
    where sp.parameter_name = 'mapping context target scope type'
@@ -2297,10 +2296,8 @@ begin
     	   create_accessor_session.session_id, 
     	   create_accessor_session.context_type_id,
 	   create_accessor_session.context_id,
-	   coalesce(create_accessor_session.session_context_type_id,
-		    create_accessor_session.context_type_id),
-	   coalesce(create_accessor_session.session_context_id,
-		    create_accessor_session.context_id),
+	   create_accessor_session.session_context_type_id,
+	   create_accessor_session.session_context_id,
     	   _mapping_context_type_id,
 	   _mapping_context_id,
 	   authent_type, false,
@@ -2348,7 +2345,9 @@ begin
          create_session.session_supplemental
     from veil2.create_accessor_session(
              _accessor_id, authent_type,
-	     context_type_id, context_id) cas;
+	     context_type_id, context_id,
+	     coalesce(session_context_type_id, context_type_id),
+	     coalesce(session_context_id, context_id)) cas;
 end;
 $$
 language 'plpgsql' security definer volatile
@@ -2723,13 +2722,14 @@ begin
     	  select null
     	    from session_context sc
     	   cross join grouped_role_privs grp
-    	   where (    grp.scope_type_id = sc.session_context_type_id
-    	          and grp.scope_id = sc.session_context_id)
-    	      or (grp.scope_type_id, grp.scope_id) in (
+    	   where grp.privileges ? 0
+	     and (   (    grp.scope_type_id = sc.session_context_type_id
+    	              and grp.scope_id = sc.session_context_id)
+    	          or (grp.scope_type_id, grp.scope_id) in (
     	      select ass.superior_scope_type_id, ass.superior_scope_id
     		from veil2.all_superior_scopes ass
     	       where ass.scope_type_id = sc.session_context_type_id
-    	         and ass.scope_id = sc.session_context_id))
+    	         and ass.scope_id = sc.session_context_id)))
              as have_session_connect
     ),
   have_login_connect as
@@ -2738,13 +2738,14 @@ begin
     	  select null
     	    from session_context sc
     	   cross join grouped_role_privs grp
-    	   where (    grp.scope_type_id = sc.login_context_type_id
-    	          and grp.scope_id = sc.login_context_id)
-    	      or (grp.scope_type_id, grp.scope_id) in (
+    	   where grp.privileges ? 0
+	     and (   (    grp.scope_type_id = sc.login_context_type_id
+    	              and grp.scope_id = sc.login_context_id)
+    	          or (grp.scope_type_id, grp.scope_id) in (
     	      select ass.superior_scope_type_id, ass.superior_scope_id
     		from veil2.all_superior_scopes ass
     	       where ass.scope_type_id = sc.login_context_type_id
-    	         and ass.scope_id = sc.login_context_id))
+    	         and ass.scope_id = sc.login_context_id)))
              as have_login_connect
     ),
   have_connect as
@@ -2778,7 +2779,6 @@ begin
     end if;
     return true;
   else
-    execute veil2.reset_session();
     return false;
   end if;
 end;
@@ -3029,6 +3029,7 @@ begin
       into _session_id
     from veil2.create_accessor_session(
              _accessor_id, 'dedicated',
+	     context_type_id, context_id,
 	     context_type_id, context_id) cas;
 
     success := veil2.load_session_privs(_session_id, _accessor_id);
@@ -3099,6 +3100,7 @@ begin
         into become_accessor.session_id, become_accessor.session_token
         from veil2.create_accessor_session(
              become_accessor.accessor_id, 'become',
+	     context_type_id, context_id,
 	     context_type_id, context_id) cas;
 
       -- Update sessions to show which was our original session.

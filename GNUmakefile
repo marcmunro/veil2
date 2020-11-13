@@ -64,23 +64,6 @@ AUTOCONF_TARGETS := Makefile.global ./configure autom4te.cache \
 
 
 ##
-# PGXS stuff
-#
-
-EXTENSION = veil2
-MODULE_big = veil2
-MODULEDIR = extension
-VEIL2_LIB = $(addsuffix $(DLSUFFIX), veil2)
-
-PG_CONFIG := $(shell ./find_pg_config)
-PGXS := $(shell $(PG_CONFIG) --pgxs)
-DATA = $(wildcard sql/veil2--*.sql)
-TARGET_FILES := PG_CONFIG PG_VERSION $(OBJS) $(VEIL2_LIB)
-
-include $(PGXS)
-
-
-##
 # C Language building stuff
 #
 SOURCES = $(wildcard src/*.c)
@@ -90,6 +73,25 @@ DEPS = $(SOURCES:%.c=%.d)
 BITCODES = $(SOURCES:%.c=%.bc)
 
 INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
+
+##
+# PGXS stuff
+#
+
+EXTENSION = veil2
+MODULES = $(SOURCES:%.c=%)
+MODULE_big = veil2
+MODULEDIR = extension
+VEIL2_LIB = $(addsuffix $(DLSUFFIX), veil2)
+
+PG_CONFIG := $(shell ./find_pg_config)
+PGXS := $(shell $(PG_CONFIG) --pgxs)
+DATA = $(wildcard sql/veil2--*.sql)
+
+TARGET_FILES := PG_CONFIG PG_VERSION $(OBJS) $(VEIL2_LIB)
+
+include $(PGXS)
+
 
 # Hmmmm.  This appears necessary.  It wasn't needed before I added
 # the deps handling stuff so this is a bit baffling.  Does no harm
@@ -124,11 +126,12 @@ include $(DEPS)
 ##
 # Documention targets
 #
-# The documentation is constructed using docbook xml.  Much of the
-# detailed documentation is extracted from the SQL source and
+# The primary documentation is constructed using docbook xml.  Much of
+# the detailed documentation is extracted from the SQL source and
 # converted into xml.  Also the dia ERD diagram is processed below so
 # that each entity in the diagram is linked to the documentation for
-# the table that implements it.
+# the table that implements it.  There is also Doxygen documentation
+# generated from the C sources.
 #
 DOC_SOURCES := $(wildcard docs/*.xml) $(wildcard docs/parts/*.xml) 
 BASE_STYLESHEET = $(DOCBOOK_STYLESHEETS)/html/chunkfast.xsl
@@ -348,8 +351,6 @@ local_clean:
 	   echo Cleaning $${i}...; \
 	   (cd $${i}; rm -f $(garbage_files)); \
 	done || true
-	echo Cleaning intermediate and target files...
-	@rm -f $(INTERMEDIATE_FILES) $(TARGET_FILES) 2>/dev/null || true
 	@rmdir $(TARGET_DIRS) 2>/dev/null || true
 
 # Make PGXS clean target use our cleanup target.

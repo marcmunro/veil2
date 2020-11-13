@@ -32,7 +32,7 @@ $$
 language plpgsql security definer;
 
 
-select plan(95);
+select plan(97);
 
 -- Perform a reset session without returning a row.  This ensures the
 -- temporary table is created.
@@ -575,6 +575,10 @@ with session as
 select is(success, true, 'Eve should be authenticated (global)')
   from session;
 
+select is(authent_accessor_id, -2, 'Eve''s authent_accessor_id is Eve')
+  from veil2_session_context;
+
+
 -- eve becomes bob
 -- Need to record the session_token for later use.
 create temporary table session_tt (
@@ -590,8 +594,12 @@ with session as
   )
 insert into session_tt select * from session;
 
+
 select is(success, true, 'Eve should now be Bob')
   from session_tt;
+
+select is(authent_accessor_id, -2, 'Bob''s authent_accessor_id is Eve')
+  from veil2_session_context;
 
 -- Check Eve-as-Bob's privs: should be mostly the same but without
 -- priv 20 which Eve did not have.

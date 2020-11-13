@@ -691,6 +691,7 @@ create unlogged table veil2.sessions (
   session_id			integer not null
   				  default nextval('veil2.session_id_seq'),
   accessor_id			integer not null,
+  authent_accessor_id		integer not null,
   login_context_type_id		integer not null,
   login_context_id		integer not null,
   session_context_type_id	integer not null,
@@ -803,7 +804,7 @@ functions.';
 \echo ......session_context_t(type)...
 create type veil2.session_context_t as (
   accessor_id			integer,
-  effective_accessor_id		integer,
+  authent_accessor_id		integer,
   session_id                    integer,
   login_context_type_id		integer,
   login_context_id		integer,
@@ -1464,7 +1465,7 @@ grant select on veil2.all_accessor_privs_info to veil_user;
 create or replace
 function veil2.session_context(
     accessor_id out integer,
-    effective_accessor_id out integer,
+    authent_accessor_id out integer,
     session_id out integer,
     login_context_type_id out integer,
     login_context_id out integer,
@@ -1476,11 +1477,11 @@ function veil2.session_context(
   returns record as
 $$
 begin
-  select sc.accessor_id, sc.effective_accessor_id, sc.session_id,
+  select sc.accessor_id, sc.authent_accessor_id, sc.session_id,
          sc.login_context_type_id, sc.login_context_id,
          sc.session_context_type_id, sc.session_context_id,
          sc.mapping_context_type_id, sc.mapping_context_id
-    into session_context.accessor_id, session_context.effective_accessor_id,
+    into session_context.accessor_id, session_context.authent_accessor_id,
     	   session_context.session_id,
          session_context.login_context_type_id,
 	   session_context.login_context_id,
@@ -2205,6 +2206,7 @@ function veil2.create_accessor_session(
     context_id in integer,
     session_context_type_id in integer,
     session_context_id in integer,
+    authent_accessor_id in integer default null,
     session_id out integer,
     session_token out text,
     session_supplemental out text)
@@ -2224,11 +2226,13 @@ begin
   -- valid accessor_ids.
   insert
     into veil2_session_context
-        (accessor_id, session_id,
+        (accessor_id, authent_accessor_id, session_id,
 	 login_context_type_id, login_context_id,
 	 session_context_type_id, session_context_id,
 	 mapping_context_type_id, mapping_context_id)
   select create_accessor_session.accessor_id,
+  	 coalesce(create_accessor_session.authent_accessor_id,
+	          create_accessor_session.accessor_id),
          nextval('veil2.session_id_seq'),
 	 create_accessor_session.context_type_id,
 	 create_accessor_session.context_id,
@@ -2285,7 +2289,7 @@ begin
   
     insert
       into veil2.sessions
-          (accessor_id, session_id,
+          (accessor_id, authent_accessor_id, session_id,
 	   login_context_type_id, login_context_id,
 	   session_context_type_id, session_context_id,
 	   mapping_context_type_id, mapping_context_id,
@@ -2293,7 +2297,9 @@ begin
 	   session_supplemental, expires,
 	   token)
     select create_accessor_session.accessor_id,
-    	   create_accessor_session.session_id, 
+    	   coalesce(create_accessor_session.authent_accessor_id,
+	   	    create_accessor_session.accessor_id),
+	   create_accessor_session.session_id, 
     	   create_accessor_session.context_type_id,
 	   create_accessor_session.context_id,
 	   create_accessor_session.session_context_type_id,
@@ -2312,7 +2318,7 @@ language 'plpgsql' security definer volatile
 set client_min_messages = 'error';
 
 comment on function veil2.create_accessor_session(
-    integer, text, integer, integer, integer, integer) is
+    integer, text, integer, integer, integer, integer, integer) is
 'Create a new session based on an accessor_id rather than username.
 This is an internal function to veil2.  It does the hard work for
 create_session().';
@@ -2590,11 +2596,11 @@ begin
   execute veil2.reset_session();
   insert
     into veil2_session_context
-        (accessor_id, session_id,
+        (accessor_id, authent_accessor_id, session_id,
          login_context_type_id, login_context_id,
          session_context_type_id, session_context_id,
 	 mapping_context_type_id, mapping_context_id)
-  select _accessor_id, load_session_privs.session_id,
+  select _accessor_id, s.authent_accessor_id, load_session_privs.session_id,
          login_context_type_id, login_context_id,
          session_context_type_id, session_context_id,
          mapping_context_type_id, mapping_context_id
@@ -2793,8 +2799,6 @@ security functions in order to determine what access rights the
 connected user has.  If the optional 3rd parameter is provided, use
 that as the session_id of an originating session - this is part of the
 become-user process (see become_user())';
-
-
 
 
 
@@ -3070,10 +3074,11 @@ function veil2.become_accessor(
 $$
 declare
   orig_session_id integer;
+  orig_accessor_id integer;
   _result boolean;
 begin
-  select sc.session_id
-    into orig_session_id
+  select sc.session_id, sc.accessor_id
+    into orig_session_id, orig_accessor_id
     from veil2_session_context sc;
     
   if veil2.i_have_global_priv(1) or
@@ -3101,7 +3106,8 @@ begin
         from veil2.create_accessor_session(
              become_accessor.accessor_id, 'become',
 	     context_type_id, context_id,
-	     context_type_id, context_id) cas;
+	     context_type_id, context_id,
+	     orig_accessor_id) cas;
 
       -- Update sessions to show which was our original session.
       update veil2.sessions s

@@ -845,6 +845,15 @@ session_context parameters, this will be different.  Note that for an
 accessor to create such a session they must have connect privilege in
 both their login context and their requested session context.'; 
 
+\echo ......session_privileges...
+create table veil2.session_privileges of veil2.session_privileges_t;
+
+create index session_privileges__session_idx
+  on veil2.session_privileges(session_id);
+
+revoke all on veil2.session_privileges from public;
+
+
 -- Create the VEIL2 schema views, including matviews
 -- 
 
@@ -1593,7 +1602,9 @@ select -- Globally assigned roles, if we are logged in in non-global
 select sc.accessor_id, 2,   -- Personal context role
        2, sc.accessor_id    -- Personal scope for accessor
   from veil2.session_context() sc;
+
 /*
+old version of the query, which is ~9% faster but harder to tweak
 select aar.accessor_id, aar.role_id,
        aar.context_type_id, aar.context_id
   from veil2.session_context() sc
@@ -2783,6 +2794,7 @@ begin
       -- session did not have.
       execute veil2.filter_privs();
     end if;
+    perform veil2.save_session_privs();
     return true;
   else
     return false;
@@ -2838,6 +2850,7 @@ declare
   _accessor_id integer;
   _nonces bitmap;
   _has_authenticated boolean;
+  _privs_loaded boolean;
   _session_token text;
   _context_type_id integer;
   _prev_session_id integer;
@@ -2869,12 +2882,12 @@ begin
 
   if not found then
     raise warning 'SECURITY: Login attempt with no session: %',  session_id;
-    errmsg = 'AUTHFAIL';
+    errmsg := 'AUTHFAIL';
   elsif _context_type_id is null then
     raise warning 'SECURITY: Login attempt for invalid context';
-    errmsg = 'AUTHFAIL';
+    errmsg := 'AUTHFAIL';
   elsif expired then
-    errmsg = 'EXPIRED';
+    errmsg := 'EXPIRED';
   else
     -- We have an unexpired session.
     if veil2.check_nonce(nonce, _nonces) then
@@ -2884,7 +2897,7 @@ begin
       -- authentication token, we log this failure
       raise warning 'SECURITY: Nonce failure.  Nonce %, Nonces %',
                    nonce, to_array(_nonces);
-      errmsg = 'NONCEFAIL';
+      errmsg := 'NONCEFAIL';
       success := false;
     end if;
 
@@ -2900,26 +2913,33 @@ begin
 	       				authent_token) then
           raise warning 'SECURITY: incorrect continuation token for %, %',
                        _accessor_id, session_id;
-          errmsg = 'AUTHFAIL';
+          errmsg := 'AUTHFAIL';
 	  success := false;
 	end if;
       else 
         if not veil2.authenticate(_accessor_id, authent_type,
 				  authent_token) then
           raise warning 'SECURITY: incorrect % authentication token for %, %',
-                       authent_type, _accessor_id, session_id;
-          errmsg = 'AUTHFAIL';
+                        authent_type, _accessor_id, session_id;
+          errmsg := 'AUTHFAIL';
 	  success := false;
 	end if;
       end if;
     end if;
     
     if success then
-      if not veil2.load_session_privs(session_id, _accessor_id) then
-        raise warning 'SECURITY: Accessor % has no connect privilege.',
-                       _accessor_id;
-        errmsg = 'AUTHFAIL';
-	success := false;
+      if _has_authenticated then
+        _privs_loaded := veil2.reload_session_privs(session_id);
+      else
+        _privs_loaded := false;
+      end if;
+      if not _privs_loaded then
+        if not veil2.load_session_privs(session_id, _accessor_id) then
+          raise warning 'SECURITY: Accessor % has no connect privilege.',
+                        _accessor_id;
+          errmsg := 'AUTHFAIL';
+	  success := false;
+        end if;
       end if;
     end if;
     
@@ -3422,6 +3442,53 @@ values ('shared session timeout', '20 mins'),
 -- Create security for vpd tables.
 -- This consists of enabling row-level security and only allowing
 -- select access to users with the approrpiate veil privileges.
+
+
+\echo ......save_session_privs()...
+select veil2.reset_session();
+
+create or replace
+function veil2.save_session_privs()
+  returns void as
+$$
+delete
+  from veil2.session_privileges
+ where session_id = (select session_id from veil2_session_context);
+insert
+  into veil2.session_privileges
+select *
+  from veil2_session_privileges;
+$$
+language 'sql' security definer volatile;
+
+comment on function veil2.save_session_privs() is
+'Save the current contents of the veil2_session_privileges temporary
+table into veil2.session_privileges after ensuring that there is no
+existing data present for the session.  This saves our
+session_privileges data for future use in the session.';
+
+
+\echo ......reload_session_privs()...
+create or replace
+function veil2.reload_session_privs(session_id integer)
+  returns boolean as
+$$
+begin
+  insert
+    into veil2_session_privileges
+  select *
+    from veil2.session_privileges sp
+   where sp.session_id = reload_session_privs.session_id;
+  return found;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+comment on function veil2.reload_session_privs(integer) is
+'Reload cached session privileges into our current session.';
+
+
+
 
 \echo ......scope_types...
 alter table veil2.scope_types enable row level security;

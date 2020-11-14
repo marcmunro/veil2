@@ -223,10 +223,11 @@
       Perhaps more important is how easy it is to change a user's
       access rights.  If we decide that a certain class of user should
       no longer have access to certain data, this can usually be
-      implemented by simply changing role to role or role to
-      privilege mappings.  Normally no code ever has to be written or
-      modified as every single test for a user's access rights is
-      implemented the same way, based upon relationships between data.
+      implemented by simply changing role-to-role, or
+      role-to-privilege mappings.  Normally no code ever has to be
+      written or modified as every single test for a user's access
+      rights is implemented the same way, based upon relationships
+      between data.
     </para>
   </sect2>
   <sect2 id="Where-Implemented">
@@ -299,11 +300,10 @@
     <para>
       The application is not off the hook though.  The application
       should not allow the user to try to do things that will not be
-      allowed by the database.  allowed.  It should limit the records
-      it tries to retrieve for the user using well-crafted queries
-      with where-clauses that request only the data that the user
-      should be able to see.  But if it gets it wrong, little harm
-      will be done.
+      allowed by the database.  It should limit the records it tries
+      to retrieve for the user using well-crafted queries with
+      where-clauses that request only the data that the user should be
+      able to see.  But if it gets it wrong, little harm will be done.
     </para>
   </sect2>
   <sect2 id="How-Restricted">

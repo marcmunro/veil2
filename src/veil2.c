@@ -283,7 +283,7 @@ veil2_i_have_global_priv(PG_FUNCTION_ARGS)
 	}
 	ereport(ERROR,
 			(errcode(ERRCODE_INTERNAL_ERROR),
-			 errmsg("Attempt to check privileges before call to  "
+			 errmsg("Attempt to check privileges before call to "
 					"veil2_reset_session.")));
 	return false;
 }

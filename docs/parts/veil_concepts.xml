@@ -257,10 +257,10 @@
       context of a specific project that contains the <literal>select
       lookups</literal> privilege.  This privilege allows the accessor
       select-access to lookup data which is not project-specific.
-      This privilege *needs* to operate in a different scope from the
+      This privilege must operate in a different scope from the
       context of its assignment, and so its operating scope will need
-      to be promoted (see <link linkend="privilege-promotion">privilege
-      promotion</link> below).
+      to be promoted (see <link
+      linkend="privilege-promotion">privilege promotion</link> below).
     </para>
     <para>
       It is largely because privileges may apply in different scopes
@@ -274,7 +274,7 @@
     <para>
       The key to a good relational security implementation is an
       understanding of your relational security contexts.  In
-      particular, how you may need to perform some data
+      particular, understanding how you may need to perform some data
       <link linkend="denormalize">denormalizations</link> in order to
       get good performance.
     </para>
@@ -350,28 +350,23 @@
         <literal>...</literal>
       </listitem>
       <listitem>
-        <literal>select lookups</literal>;
-      </listitem>
-      <listitem>
-        <literal>connect</literal>.
+        <literal>select lookups</literal>.
       </listitem>
     </itemizedlist>
     <para>
       If we assume that <literal>select lookups</literal> gives the
-      user the ability to view all lookup data, and
-      <literal>connect</literal> gives them the ability to actually
-      connect to the system and authenticate, we can see that they
-      don’t really apply to the <literal>customer
-      context</literal>.  They are not related to customer-specific
-      data.  In fact they should apply the same regardless of who we
-      might be a <literal>CSR</literal> for.  These privileges should
-      be applied in the global scope, but they have been assigned in
+      user the ability to view all lookup data, we can see that it
+      doesn’t really apply to the <literal>customer
+      context</literal>.  It is not related to customer-specific
+      data.  In fact it should apply the same regardless of who we
+      might be a <literal>CSR</literal> for.  This privilege should
+      be applied in the global scope, but it has been assigned in
       the <literal>customer context</literal> for <literal>customer
       Z</literal>.
     </para>
     <para>
-      The context for the role assignment makes no sense for these
-      privileges, so they must be promoted to a higher-level scope.
+      The context for the role assignment makes no sense for this
+      privilege, so it must be promoted to a higher-level scope.
       In this case, the scope would be that of the <literal>global
       context</literal>.
     </para>

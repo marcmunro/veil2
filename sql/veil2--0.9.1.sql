@@ -845,13 +845,6 @@ session_context parameters, this will be different.  Note that for an
 accessor to create such a session they must have connect privilege in
 both their login context and their requested session context.'; 
 
-\echo ......session_privileges...
-create table veil2.session_privileges of veil2.session_privileges_t;
-
-create index session_privileges__session_idx
-  on veil2.session_privileges(session_id);
-
-revoke all on veil2.session_privileges from public;
 
 \echo ......accessor_privileges_cache
 create table veil2.accessor_privileges_cache (
@@ -3128,11 +3121,8 @@ begin
     end if;
     
     if success then
-      if _has_authenticated then
-        _privs_loaded := veil2.reload_session_privs(session_id);
-      else
-        _privs_loaded := false;
-      end if;
+      _privs_loaded := veil2.reload_session_privs(session_id);
+      
       if not _privs_loaded then
         if not veil2.load_session_privs(session_id, _accessor_id) then
           raise warning 'SECURITY: Accessor % has no connect privilege.',
@@ -3677,21 +3667,6 @@ select sc.accessor_id, sc.login_context_type_id,
 $$
 language 'sql' security definer volatile;
 
-
-create or replace
-function veil2.save_session_privs()
-  returns void as
-$$
-delete
-  from veil2.session_privileges
- where session_id = (select session_id from veil2_session_context);
-insert
-  into veil2.session_privileges
-select *
-  from veil2_session_privileges;
-$$
-language 'sql' security definer volatile;
-
 comment on function veil2.save_session_privs() is
 'Save the current contents of the veil2_session_privileges temporary
 table into veil2.session_privileges after ensuring that there is no
@@ -3722,21 +3697,6 @@ begin
      and apc.session_context_id = sc.session_context_id
      and apc.mapping_context_type_id = sc.mapping_context_type_id
      and apc.mapping_context_id = sc.mapping_context_id;
-  return found;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-create or replace
-function veil2.reload_session_privs(session_id integer)
-  returns boolean as
-$$
-begin
-  insert
-    into veil2_session_privileges
-  select *
-    from veil2.session_privileges sp
-   where sp.session_id = reload_session_privs.session_id;
   return found;
 end;
 $$

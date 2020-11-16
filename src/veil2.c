@@ -21,6 +21,7 @@
 
 
 
+
 PG_MODULE_MAGIC;
 
 /* These definitions are up here rather than immediately preceding the
@@ -33,6 +34,8 @@ PG_FUNCTION_INFO_V1(veil2_i_have_global_priv);
 PG_FUNCTION_INFO_V1(veil2_i_have_personal_priv);
 PG_FUNCTION_INFO_V1(veil2_i_have_priv_in_scope);
 PG_FUNCTION_INFO_V1(veil2_i_have_priv_in_superior_scope);
+PG_FUNCTION_INFO_V1(veil2_docpath);
+PG_FUNCTION_INFO_V1(veil2_datapath);
 
 
 /**
@@ -463,4 +466,31 @@ Datum veil2_i_have_priv_in_superior_scope(PG_FUNCTION_ARGS)
 			 errmsg("Attempt to check privileges before call to  "
 					"veil2_reset_session.")));
 	return false;
+}
+
+/** 
+ * Create a dynamically allocated text value as a copy of a C string.
+ * 
+ * @param in String to be copied
+ * @return Dynamically allocated (by palloc()) copy of in.
+ */
+static text *
+textfromstr(char *in)
+{
+    int   len = strlen(in);
+    text *out = palloc(len + VARHDRSZ);
+    memcpy(VARDATA(out), in, len);
+	SET_VARSIZE(out, (len + VARHDRSZ));
+
+    return out;
+}
+
+Datum veil2_docpath(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_TEXT_P(textfromstr(DOCS_PATH));
+}
+
+Datum veil2_datapath(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_TEXT_P(textfromstr(DATA_PATH));
 }

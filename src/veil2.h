@@ -61,4 +61,15 @@ Datum veil2_i_have_global_priv(PG_FUNCTION_ARGS);
 Datum veil2_i_have_personal_priv(PG_FUNCTION_ARGS);
 Datum veil2_i_have_priv_in_scope(PG_FUNCTION_ARGS);
 Datum veil2_i_have_priv_in_superior_scope(PG_FUNCTION_ARGS);
+Datum veil2_docpath(PG_FUNCTION_ARGS);
+Datum veil2_datapath(PG_FUNCTION_ARGS);
+
+
+#ifndef DOCS_PATH
+#define DOCS_PATH "<path to postgres extension docs>"
+#endif
+
+#ifndef DATA_PATH
+#define DATA_PATH "<path to postgres extension data files>"
+#endif
 

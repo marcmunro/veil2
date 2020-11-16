@@ -7,7 +7,7 @@
 #      License: GPL V3
 #
 
-directory       = 'extension'
+directory       = 'veil2'
 default_version = '0.9.1'
 requires        = 'pgbitmap,pgcrypto'
 superuser       = true

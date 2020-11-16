@@ -1,4 +1,4 @@
-<sect1 id="veil_demo">
+<chapter id="veil_demo">
   <title>Exploring The <literal>Veil2</literal> Demo</title>
   <para>
     The <literal>Veil2</literal> demo exists to demonstrate a
@@ -13,7 +13,7 @@
     There is much that has not been implemented.  Feel free to
     implement the missing parts.
   </para>
-  <sect2>
+  <sect1>
     <title>The Security Contexts</title>
     <para>
       The demo provides 3 relational contexts:
@@ -23,20 +23,21 @@
 	<listitem>project context</listitem>
       </itemizedlist>
     </para>
-    <sect3>
+    <sect2>
       <title>Corp Context</title>
       <para>
 	The demo uses the <literal>parties</literal> table to identfiy
 	organizations and persons.  There is a tree structured
-	organizational hierarchy of organizations.  The top-level of
+	organizational hierarchy of organizations.  The top-leve
+	l of
 	the each organizational tree is called a corp, or corporation.
 	The corp context applies to all data owned by the corp, and by
 	all organizations within it.  Many tables contain a
 	<literal>corp_id</literal> field as a data denormalization to
 	make privilege testing in corp context easier and faster.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Org Context</title>
       <para>
 	Within each corp there is a tree of organisational parts, or
@@ -46,17 +47,17 @@
 	but corp context provides faster privilege checks in this
 	implementation.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Project Context</title>
       <para>
 	Projects have their own contexts.  Assignment to a project
 	uses a different mechanism from the more explicit role
 	assignments made in the other contexts.
       </para>
-    </sect3>
-  </sect2>
-  <sect2>
+    </sect2>
+  </sect1>
+  <sect1>
     <title>The Organizational Hierarchy</title>
     <para>
       See the above descriptions of corp and org contexts for an
@@ -66,8 +67,8 @@
       <literal>demo/demo.sql</literal> file that should help it all
       make sense.  Take a look at them.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Exploring It</title>
     <para>
       You can install the demo to a database that already had
@@ -87,7 +88,7 @@ $ make db; psql -d vpd -f demo/demo.sql
       should use to explore the demo.  Using a privileged account will
       bypass the security which would be pointless and uninteresting.
     </para>
-    <sect3>
+    <sect2>
       <title>Users</title>
       <para>
 	This section describes a number of the users defined for the
@@ -111,7 +112,7 @@ $ make db; psql -d vpd -f demo/demo.sql
 	linkend="authent_protocols">authentication protocols</link>
 	appendix.
       </para>
-      <sect4>
+      <sect3>
 	<title>Alice</title>
 	<para>
 	  Alice is a global superuser.  She works for Veil Corp (corp
@@ -136,8 +137,8 @@ select *
  where accessor_id = 108;
 	</programlisting>
 	</para>
-      </sect4>
-      <sect4>
+      </sect3>
+      <sect3>
 	<title>Bob</title>
 	<para>
 	  Bob is a superuser in corp context for Secured Corp.  He
@@ -160,8 +161,8 @@ select *
 	  has, but assigned in different contexts.  This is why Bob
 	  sees fewer records than Alice.
 	</para>
-      </sect4>
-      <sect4>
+      </sect3>
+      <sect3>
 	<title>Carol</title>
 	<para>
 	  Carol is a superuser in corp context for Protected Corp.
@@ -177,10 +178,11 @@ select *
 	  Unlike Bob, Carol can see no projects.  This is because
 	  Protected Corp has no projects.
 	</para>
-      </sect4>
-      <sect4>
+      </sect3>
+      <sect3>
 	<title>Eve</title>
 	<para>
+	  TODO: CHECK AND REWRITE STUFF FOR EVE
 	  Eve is a superuser in corp context for both Secure Corp and
 	  Protected Corp.  She works for Veil Corp (corp 100).  She
 	  authenticates using plaintext.  You can connect as Eve using
@@ -196,8 +198,8 @@ select *
 	  than Bob and Carol, but fewer than Alice.  She sees all
 	  projects and project assignments.
 	</para>
-      </sect4>
-      <sect4>
+      </sect3>
+      <sect3>
 	<title>Sue</title>
 	<para>
 	  Sue is a superuser in org context for Department S.  She
@@ -221,8 +223,8 @@ select veil2.i_have_priv_in_scope(21, 5, 1);
 select veil2.i_have_priv_in_superior_scope(21, 5, 1);
 	  </programlisting>
 	</para>
-      </sect4>
-      <sect4>
+      </sect3>
+      <sect3>
 	<title>Simon</title>
 	<para>
 	  Simon is a project manager for project S.1.  He works for
@@ -446,7 +448,7 @@ vpd->  where accessor_id = 114 and privilege_id in (17, 23);
 	  they can provide invaluable information to help you debug
 	  and understand your security model.
 	</para>
-      </sect4>
-    </sect3>
-  </sect2>
-</sect1>
+      </sect3>
+    </sect2>
+  </sect1>
+</chapter>

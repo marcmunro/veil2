@@ -1,4 +1,4 @@
-<sect1 id="setup_scope_types">
+<chapter id="setup_scope_types">
   <title>Identify and Define Your Scope Types (STEP 2)</title>
   <para>
     You need to identify the types of scopes that your privileges will
@@ -44,7 +44,7 @@
     defines role to role mappings within corp contexts.  TODO: rewrite
     this bit.
   </para>
-  <sect2>
+  <sect1>
     <title>In Summary</title>
     <para>
       <itemizedlist>
@@ -64,5 +64,5 @@
 	</listitem>
       </itemizedlist>
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

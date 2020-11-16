@@ -1,4 +1,4 @@
-<sect1 id="Implementation">
+<chapter id="Implementation">
   <title>The Veil2 Implementation: What You Need To Know</title>
   <para>
     Although <literal>Veil2</literal> is built to be customized and
@@ -20,7 +20,7 @@
     <literal>Veil2</literal> implementation, intended to help you with
     your customization needs.
   </para>
-  <sect2 id="privileges_implementation">
+  <sect1 id="privileges_implementation">
     <title>Privileges</title>
     <para>
       <literal>Veil2</literal> is supplied with a base set of <link
@@ -34,7 +34,7 @@
       privileges in future releases, you should start numbering your
       own privileges from 20.
     </para>
-    <sect3 id="connect_privilege">
+    <sect2 id="connect_privilege">
       <title>Connect Privilege</title>
       <para>
 	<literal>Connect</literal> is a special built-in privilege
@@ -63,8 +63,8 @@
 	user's roles in order to disable their access.  This is
 	intended to make user and role management easier.
       </para>
-    </sect3>
-    <sect3 id="become_user_privilege">
+    </sect2>
+    <sect2 id="become_user_privilege">
       <title>Become User Privilege</title>
       <para>
 	This privilege allows an already authenticated user to
@@ -94,9 +94,9 @@
 	that they have and you do not (this is the mathematical
 	intersection of the sets of your privileges and theirs).
       </para>
-    </sect3>
-  </sect2>
-  <sect2 id="roles_implementation">
+    </sect2>
+  </sect1>
+  <sect1 id="roles_implementation">
     <title>Roles</title>
     <para>
       Talk about implicit and immutable.  Also the 3 provided roles.
@@ -106,7 +106,7 @@
     </para>
     <para>
     </para>
-    <sect3 id="connect_role">
+    <sect2 id="connect_role">
       <title>The Connect Role</title>
       <para>
 	The <literal>connect</literal> role is provided by
@@ -120,8 +120,8 @@
 	This role has no other privileges, by default and should
 	not be assigned any.
       </para>
-    </sect3>
-    <sect3 id="superuser_role">
+    </sect2>
+    <sect2 id="superuser_role">
       <title>The Superuser Role</title>
       <para>
 	The <literal>superuser</literal> role is system-provided, and
@@ -130,17 +130,17 @@
       </para>
       <para>
       </para>
-    </sect3>
-    <sect3 id="personal_context_role">
+    </sect2>
+    <sect2 id="personal_context_role">
       <title>The Personal Context Role</title>
       <para>
 	TODO: wise words about this.
       </para>
       <para>
       </para>
-    </sect3>
-  </sect2>
-  <sect2>
+    </sect2>
+  </sect1>
+  <sect1>
     <title id="physical_authentication_context">Authentication
     Contexts</title>
     <para>
@@ -211,7 +211,7 @@ select * from veil2.create_session(&lt;username&gt;, 4, 44);
 	</listitem>
       </itemizedlist>
     </para>
-    <sect3>
+    <sect2>
       <title>Associating Accessors With Their Authentication Context</title>
       <para>
 	The association between an accessor and their authentication
@@ -254,16 +254,16 @@ language plpgsql security definer stable leakproof;
 	  
 	</programlisting>
       </para>
-    </sect3>
-  </sect2>
-  <sect2>
+    </sect2>
+  </sect1>
+  <sect1>
     <title>Assignment Contexts</title>
     <para>
       Each role assignment in <literal>Veil2</literal> happens within
       a specific assignment context.
     </para>
-  </sect2>
-  <sect2 id="physical_role_mapping">
+  </sect1>
+  <sect1 id="physical_role_mapping">
     <title>Role Mappings and Mapping Contexts</title>
     <para>
       As described in <link linkend="role_mapping">the concepts
@@ -343,14 +343,14 @@ language plpgsql security definer stable leakproof;
 	</listitem>
       </itemizedlist>
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Built-In Security Contexts</title>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Login Contexts</title>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Built-In Roles</title>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

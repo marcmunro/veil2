@@ -1,4 +1,4 @@
-<sect1 id="how-difficult-is-this">
+<chapter id="how-difficult-is-this">
   <title>How Difficult Is This?</title>
   <para>
     You could be forgiven for thinking, given
@@ -19,7 +19,7 @@
     responses.  This is in place of a FAQ since, at the time of
     writing, no-one has asked any questions.
   </para>
-  <sect2 id="frequently-imagined-criticisms-fic">
+  <sect1 id="frequently-imagined-criticisms-fic">
     <title>Frequently Imagined Criticisms (FIC)</title>
     <para>
       It’s easy to criticize relational security systems and
@@ -151,5 +151,5 @@
         </para>
       </listitem>
     </itemizedlist>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

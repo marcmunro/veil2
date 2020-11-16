@@ -1,5 +1,5 @@
-<sect1 id="starting">
-  <title>Getting Started With <literal>Veil2</literal></title>
+<chapter id="starting">
+  <title>Getting Started With <literal>Veil2</literal> (STEP 1)</title>
   <para>
     This section aims to help you get <literal>Veil2</literal>
     installed on your database server.  Once this is done,
@@ -21,7 +21,7 @@ dbname# create extension veil2 cascade;
     release your own, improved, fork, or contribute fixes and
     improvements back to the author.
   </para>
-  <sect2 id="compatibility">
+  <sect1 id="compatibility">
     <title>Compatible PostgreSQL versions</title>
     <para>
       Veil2 is compatibale with all currently-supported version of
@@ -36,9 +36,9 @@ dbname# create extension veil2 cascade;
       url="https://www.postgresql.org/docs/current/extend-pgxs.html">PGXS</ulink>
       extension building infrastructure in place.
     </para>
-  </sect2>
-  <sect2 id="installation">
-    <title>Installing <literal>Veil2</literal> (STEP1)</title>
+  </sect1>
+  <sect1 id="installation">
+    <title>Installing <literal>Veil2</literal></title>
     <para>
       Since version 0.9.1 of <literal>Veil2</literal>, it can and
       should be installed as a PostgreSQL extension.  It is available
@@ -46,7 +46,7 @@ dbname# create extension veil2 cascade;
       Extension Network.  Alternatively it can be downloaded from
       <ulink url="https://github.com/">github</ulink>.
     </para>
-    <sect3 id="pgxn_install_with_client">
+    <sect2 id="pgxn_install_with_client">
       <title>Installing from PGXN using the pgxn client</title>
       <para>
 	If you have the pgxn client available you can simply do this:
@@ -54,8 +54,8 @@ dbname# create extension veil2 cascade;
 $ pgxn install veil2
 	</programlisting>
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Downloading from PGXN</title>
       <para>
 	You can download <literal>Veil2</literal> from PGXN from <ulink
@@ -66,11 +66,11 @@ $ unzip Veil2-n.n.zip
 	</programlisting>
       </para>
       <para>
-	You will then need to install the extension as desecribed in
+	You will then need to install the extension as described in
 	the installation section below.
       </para>
-    </sect3>
-    <sect3 id="download from github">
+    </sect2>
+    <sect2 id="download_from_github">
       <title>Download from github</title>
       <para>
 	You can find the <literal>Veil2</literal> source code <ulink
@@ -80,8 +80,8 @@ $ unzip Veil2-n.n.zip
 	Follow the instructions on the page linked above to clone the
 	repository and then you will be able to install.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Installation</title>
       <para>
 	Assuming that you have the PGXS extension building
@@ -91,7 +91,7 @@ $ sudo make install
 	</programlisting>
 	and the extension will be installed for you.
       </para>
-      <sect4>
+      <sect3>
 	<title>Dependencies</title>
 	<para>
 	  <literal>Veil2</literal> depends on 2 other extensions:
@@ -104,9 +104,9 @@ $ sudo make install
 	  If you are not using the pgxn client, you will have to
 	  ensure that these have also been installed.
 	</para>
-      </sect4>
-    </sect3>
-    <sect3>
+      </sect3>
+    </sect2>
+    <sect2>
       <title>For Developers</title>
       <para>
 	If you want to hack on <literal>Veil2</literal>, please do.
@@ -114,12 +114,6 @@ $ sudo make install
 	the <literal>Veil2</literal> root directory a good place to
 	start looking into its components and how it all fits
 	together.
-      </para>
-      <para>
-	Since <literal>Veil2</literal> is entirely implemented in
-	<literal>SQL</literal> and <literal>PL/pgSQL</literal> there
-	is no real build process to speak of, except for the
-	building of documentation.
       </para>
       <para>
 	As far as possible the makefile is self-documenting.  You
@@ -139,7 +133,7 @@ $ make help
 	  <listitem><literal>dia;</literal></listitem>
 	  <listitem><literal>gawk;</literal></listitem>
 	  <listitem><literal>make;</literal></listitem>
-	  <listitem><literal>docbook</literal> V4.5 stylesheets.</listitem>
+	  <listitem><literal>docbook</literal> stylesheets.</listitem>
 	</itemizedlist>
       </para>
       <para>
@@ -174,7 +168,7 @@ $ cd html
 	your local changes, be sure to switch back to the
 	<literal>master</literal> branch before you start coding.
       </para>
-      <sect4 id="test">
+      <sect3 id="test">
 	<title>Testing</title>
 	<para>
 	  If you'd like to test the <literal>Veil2</literal>
@@ -196,17 +190,17 @@ VPD database created successfully
 
 . . .
 
-ok 92 - Eve should have role 7
-ok 93 - Eve should have role 9
+ok 96 - Eve should have role 7
+ok 97 - Eve should have role 9
 Cleaning up...
 ...removing test objects and data...
 
 
 
 Results by test suite:
-  Veil2 views                   : 44/44   
+  Veil2 views                   : 13/13   
   authentication functions      : 8/8   
-  veil2 session handling        : 93/93   
+  veil2 session handling        : 97/97
 
 all tests passed.
 	</programlisting>
@@ -218,7 +212,7 @@ all tests passed.
 	linkend="reporting_bugs">reporting bugs</link>.
       </para>
       <para>
-	When you wish to remove the databse you can do:
+	When you wish to remove the database you can do:
 	<programlisting>
 $ make drop TESTDB=whateverdbnameyoulike
 	</programlisting>
@@ -233,10 +227,10 @@ $ make drop TESTDB=whateverdbnameyoulike
 	targets.  You will see <literal>psql</literal> commands
 	there.  You can run these directly.
       </para>
-      </sect4>
-    </sect3>
-  </sect2>
-  <sect2 id="demo-install">
+      </sect3>
+    </sect2>
+  </sect1>
+  <sect1 id="demo-install">
     <title>Installing The Demo</title>
     <para>
       You will need to have downloaded the source from PGXN or github
@@ -266,7 +260,7 @@ $ psql -d whateverdbnameyoulike -f demo/demo.sql
       examples of most of the steps you will need to follow to
       implement your own solution.
     </para>
-    <sect3 id="demouser-access">
+    <sect2 id="demouser-access">
       <title>Allowing Access For The Demo User</title>
       <para>
 	It is assumed that the demo database will be accessed by the
@@ -302,6 +296,6 @@ local   whateverdbnameyoulike demouser                          trust
 	<literal>local</literal> definition for <literal>all</literal>
 	databases or <literal>all</literal> users.
       </para>
-    </sect3>
-  </sect2>
-</sect1>
+    </sect2>
+  </sect1>
+</chapter>

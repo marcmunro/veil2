@@ -1,4 +1,4 @@
-<sect1 id="oddities">
+<chapter id="oddities">
   <title>Deal With Oddities And Corner Cases (STEP 9)</title>
   <para>
     For many <literal>Veil2</literal>-protected database, there will
@@ -23,4 +23,4 @@
     any changes or bugfixes that may be appropriate if and when the
     extension is upgraded.
   </para>
-</sect1>
+</chapter>

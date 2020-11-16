@@ -8,17 +8,15 @@
 #
 # For a list of targets use make help.
 #
-# TODO: Improve/rewrite comments in here.
-#       Update help target for new stuff
 # Most of this makefile is concerned with building the html
 # documentation.  The basic process is simple, but is complicated by
 # Marc's wish to automatically create html maps from dia ERD diagrams
-# so that the diagrams can be used to navigate to entity descriptions.
-# Oh, and also to create automated documentation from the sql
-# scripts.  The GNUmakefiles in subdirectories are just there to 
-# automatically invoke this makefile ins such a way that emacs'
-# compile and next-error handling still works if you are not in the
-# root directory.
+# so that the diagrams can be used to navigate to entity descriptions,
+# and also to create automated documentation from the sql scripts.
+# The GNUmakefiles in subdirectories are just there to automatically
+# invoke this makefile in such a way that make can be onvoked from
+# those subdirectories, and emacs' compile and next-error handling
+# will still work if you are not in the root directory.
 
 #
 # At some point we should add some targets for dealing with releases
@@ -51,7 +49,7 @@ all:
 include Makefile.global
 include extracts.d
 
-Makefile.global: ./configure
+Makefile.global: ./configure Makefile.global.in
 	./configure
 
 ./configure:
@@ -64,40 +62,65 @@ AUTOCONF_TARGETS := Makefile.global ./configure autom4te.cache \
 
 
 ##
-# C Language building stuff
-#
-SOURCES = $(wildcard src/*.c)
-HEADERS = $(wildcard src/*.h)
-OBJS = $(SOURCES:%.c=%.o)
-DEPS = $(SOURCES:%.c=%.d)
-BITCODES = $(SOURCES:%.c=%.bc)
-
-INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
-
-##
 # PGXS stuff
 #
 
 EXTENSION = veil2
 MODULE_big = veil2
-MODULEDIR = extension
+MODULEDIR = veil2
+SOURCES = $(wildcard src/*.c)
+OBJS = $(SOURCES:%.c=%.o)
 VEIL2_LIB = $(addsuffix $(DLSUFFIX), veil2)
 
 PG_CONFIG := $(shell ./find_pg_config)
 PGXS := $(shell $(PG_CONFIG) --pgxs)
-DATA = $(wildcard sql/veil2--*.sql)
+DATA = $(wildcard sql/veil2--*.sql) $(wildcard demo/*.sql) 
+# This is for installing documentation.  We cannot just use DOCS as
+# install will flatten the directory hierarchy and result in the
+# installed documentation being useless.  See the install-doc-tree
+# target below.
+HTMLDIR = html
+DOCS_TREE = $(HTMLDIR)
 
 TARGET_FILES := PG_CONFIG PG_VERSION $(OBJS) $(VEIL2_LIB)
 
 include $(PGXS)
 
 
-# Hmmmm.  This appears necessary.  It wasn't needed before I added
-# the deps handling stuff so this is a bit baffling.  Does no harm
-# tho'.
-all: $(VEIL2_LIB)
+# Hack to add the install-data-tree target to the standard install
+# target.  This is for installing documentation as an html
+# documentation tree.
+install: install-doc-tree
 
-$(VEIL2_LIB): $(OBJS)
+# Install the contents of DOCS_TREE into the appropriate docs
+# directory.  It unfortunately relies on knowledge of the contents of
+# the pgxs makefile to do it but this should be relatively stable so I
+# think it's acceptable.
+install-doc-tree: 
+	@echo INSTALLING LOCAL DOCS
+	@if [ -d $(HTMLDIR) ]; then \
+	    find $(DOCS_TREE) -type f -exec \
+	        install -vDm 755 {} $(DESTDIR)$(docdir)/$(docmoduledir)/{} \; \
+	; fi
+
+##
+# C Language building stuff
+#
+HEADERS = $(wildcard src/*.h)
+DEPS = $(SOURCES:%.c=%.d)
+# These files may be automatically created by compilation.  If they
+# are, we need to be able to clean them up, hence the defiinition
+# here.  We do not need the definition for any other purpose.
+BITCODES = $(SOURCES:%.c=%.bc)
+
+INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
+
+# This definition is needed in order to publish the docs and data
+# dirs from veil2 functions.
+PG_CFLAGS = -D DATA_PATH=\"$(DESTDIR)$(datadir)/$(datamoduledir)\" \
+	    -D DOCS_PATH=\"$(DESTDIR)$(docdir)/$(docmoduledir)\" 
+
+
 
 # Build per-source dependency files for inclusion
 # This ignores header files and any other non-local files (such as
@@ -138,7 +161,6 @@ VEIL2_STYLESHEET = docs/html_stylesheet.xsl
 STYLESHEET_IMPORTER = docs/system-stylesheet.xsl
 VERSION_FILE = docs/version.sgml
 VERSION_NUMBER := $(shell cut -d" " -f1 VERSION)
-HTMLDIR = html
 ANCHORS_DIR = docs/anchors
 TARGET_FILES += $(HTMLDIR)/* doxy.tag $(ANCHORS_DIR)/* \
 		$(HTMLDIR)/doxygen/html/search/* \
@@ -163,8 +185,7 @@ $(ANCHORS_DIR): doxy.tag $(DOC_SOURCES)
 	@bin/get_doxygen_anchors.sh doxy.tag docs $(ANCHORS_DIR)
 
 doxygen: doxy.tag $(ANCHORS_DIR)
-	@>/dev/null # Prevent the 'Nothing to be done for...' msg
-
+	@cp LICENSE $(HTMLDIR)/doxygen
 
 
 # Build the version entity for the docbook documentation.  This is
@@ -240,10 +261,12 @@ INTERMEDIATE_FILES += $(DIAGRAM_INTERMEDIATES)
 
 TARGET_IMAGES := $(patsubst $(DIAGRAMS_DIR)%, $(HTMLDIR)%, $(DIAGRAM_IMAGES))
 
+$(HTMLDIR):
+	@[ -d $(HTMLDIR) ] || mkdir $(HTMLDIR) # Create the directory if needed.
+
 # Copy new images to html dir
 #
-$(HTMLDIR)/%: $(DIAGRAMS_DIR)/% 
-	@[ -d html ] || mkdir html # Create the directory, if needed.
+$(HTMLDIR)/%: $(DIAGRAMS_DIR)/% $(HTMLDIR)
 	cp $< $@
 
 # Intermediate file used for creating maps from our diagrams.
@@ -289,8 +312,7 @@ images: $(DIAGRAM_IMAGES)
 #
 $(HTMLDIR)/index.html: $(DOC_SOURCES) $(VERSION_FILE) $(VEIL2_STYLESHEET) \
 		 $(STYLESHEET_IMPORTER) $(TARGET_IMAGES) $(EXTRACTS) \
-		 $(ANCHORS_DIR)
-	@[ -d html ] || mkdir html # Create the directory, if needed.
+		 $(ANCHORS_DIR) $(HTMLDIR)
 	@echo XSLTPROC "<docbook sources>.xml -->" $@
 	$(XSLTPROC) $(XSLTPROCFLAGS) --output html/ \
 		$(VEIL2_STYLESHEET) docs/veil2.xml

@@ -1,4 +1,4 @@
-<sect1 id="setup_accessors">
+<chapter id="setup_accessors">
   <title>Link Your Users To <literal>Veil2</literal>'s Accessors (STEP
   4)</title>
   <para>
@@ -33,7 +33,7 @@
   <para>
     Look for STEP 4 in the file <literal>demo/demo.sql</literal>.
   </para>
-  <sect2>
+  <sect1>
     <title>Create Foreign-Key Links to Your Users</title>
     <para>
       You will need to create a link between each of your user tables
@@ -52,8 +52,8 @@
       Take a look at the code for the demo (in
       <literal>demo/demo.sql</literal>) for details.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Create Insert Trigger</title>
     <para>
       When new users are created in your users table, we need
@@ -61,15 +61,15 @@
       Insert triggers on your users tables will achieve this.  A fine
       example can be found in the demo.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Copy Existing User Records</title>
     <para>
       Create copies of the existing user records in
       <literal>veil2.accessors</literal>.  See the demo.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Copy Existing Authentication Details</title>
     <para>
       <literal>Veil2</literal> accessors may have multiple sets of
@@ -83,8 +83,8 @@
       See the demo for an example but note that the demo uses
       plaintext authentication which should not be used.
     </para>
-    </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Ensure Authentication Changes Are Propagated</title>
     <para>
       Ideally, on an ongoing basis, all authentication details will be
@@ -101,12 +101,12 @@
       be made to <literal>veil2.authentication_details</literal>.
       Again, examples can be found in the demo code.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>In Summary</title>
     <para>
       What the list <link linkend="setup_accessors">at the top of the
       page</link> says.  
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

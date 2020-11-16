@@ -1,4 +1,4 @@
-<sect1 id="housekeeping">
+<chapter id="housekeeping">
   <title>Setup Housekeeping Tasks</title>
   <para>
     The only essential housekeeping task beyond normal database
@@ -7,4 +7,4 @@
     linkend="delete_expired_sessions">delete_expired_sessions()</link></literal>
     function.
   </para>
-</sect1>
+</chapter>

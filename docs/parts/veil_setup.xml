@@ -1,4 +1,4 @@
-<sect1 id="setup">
+<chapter id="setup">
   <title>Setting Up A <literal>Veil2</literal> Virtual Private
   Database - Overview</title>
   <para>
@@ -42,7 +42,7 @@
     Installation is covered in <link linkend="installation">this
     previous section</link>.  The rest follows.
   </para>
-  <sect2 id="customization">
+  <sect1 id="customization">
     <title>Notes on Customising the <literal>Veil2</literal>
     Extension</title>
     <para>
@@ -76,7 +76,7 @@
       limit the ways in which customizations to
       <literal>Veil2</literal> are made:
     </para>
-    <sect3 id="custom_data">
+    <sect2 id="custom_data">
       <title>Customized Data</title>
       <para>
 	PostgreSQL allows tables in extensions to contain user-data.
@@ -92,8 +92,8 @@
 	do is extend those tables in other ways such as by adding
 	extra columns or constraints.
       </para>
-    </sect3>
-    <sect3 id="custom-functions">
+    </sect2>
+    <sect2 id="custom-functions">
       <title>Customized Functions</title>
       <para>
 	Although most <literal>Veil2</literal> functions are not
@@ -158,8 +158,8 @@ language plpgsql security definer stable leakproof;
 	url="https://www.postgresql.org/docs/current/plpgsql-implementation.html">this
 	link</ulink> for more details).
       </para>
-    </sect3>
-    <sect3 id="custom-views">
+    </sect2>
+    <sect2 id="custom-views">
       <title>Customized Views</title>
       <para>
 	Much of the heavy-lifting of managing users' privileges is
@@ -237,8 +237,8 @@ select 5, s.scope_id,   -- Project to org promotions
     on s.project_id = p.project_id;
 	</programlisting>
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Managing User-Provided Functionality</title>
       <para>
 	To make user-provided functions and views take effect, they
@@ -326,9 +326,9 @@ select 5, s.scope_id,   -- Project to org promotions
 	initiall call, and will have been replaced by the
 	user-provided version on subsequent calls.
       </para>
-    </sect3>
-  </sect2>
-  <sect2>
+    </sect2>
+  </sect1>
+  <sect1>
     <title>Checking The State of Your Implementation</title>
     <para>
       There are a significant number of steps needed to complete your
@@ -358,5 +358,5 @@ select 5, s.scope_id,   -- Project to org promotions
 
       </programlisting>
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

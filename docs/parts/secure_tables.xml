@@ -1,4 +1,4 @@
-<sect1 id="secure_tables">
+<chapter id="secure_tables">
   <title>Secure Your Tables (STEP 10)</title>
   <para>
     At last we get to secure something.
@@ -10,7 +10,7 @@
     implementation and it shows that the relation has not simply been
     forgotten.  The overhead of doing this is small.
   </para>
-  <sect2>
+  <sect1>
     <title>Doing It</title>
     <para>
       Securing a table is pretty simple.  First you enable row
@@ -50,8 +50,8 @@ create policy parties_tbl__select
     <para>
       Note that the demo only implements the select policy.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>The <literal>Veil2</literal> tables</title>
     <para>
       Each <literal>Veil2</literal> table is protected with a select
@@ -66,11 +66,11 @@ create policy parties_tbl__select
       <literal>VEIL2</literal> TABLE WITHOUT FIRST ADDING SUITABLE
       PRIVILEGES AND SECURITY POLICIES.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>In Summary</title>
     <para>
       Create and enable security policies for each user-facing table.
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

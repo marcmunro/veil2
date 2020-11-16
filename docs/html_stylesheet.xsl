@@ -20,7 +20,8 @@ Custom docbook stylesheet for html for Veil2 docs.
   <!-- Auto-generation of tables of contents -->
   <xsl:param name="generate.toc">
     set         toc
-    article     toc
+    book     toc,title
+    part     toc,title
   </xsl:param>
   <xsl:param name="toc.max.depth">2</xsl:param>
   <xsl:param name="toc.section.depth">2</xsl:param>
@@ -35,7 +36,7 @@ Custom docbook stylesheet for html for Veil2 docs.
   <xsl:param name="section.autolabel" select="1"/>
   <xsl:param name="section.autolabel.max.depth" select="3"/>
   <xsl:param name="section.label.includes.component.label">1</xsl:param>
-  <xsl:param name="chunk.section.depth" select="1"/>
+  <xsl:param name="chunk.section.depth" select="0"/>
 
   <!-- Easier to read html -->
   <xsl:param name="chunker.output.indent" select="'yes'"/>

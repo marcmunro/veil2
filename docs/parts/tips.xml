@@ -1,10 +1,10 @@
-<sect1 id="tips">
+<chapter id="tips">
   <title>Tips and Guidelines</title>
   <para>
     This section provides whatever tips and guidelines have occurred
     to the author.  We can hope that the section expands over time.
   </para>
-  <sect2>
+  <sect1>
     <title>Write Queries That Work Without <literal>Veil2</literal></title>
     <para>
       Generally, with a well-behaved application and well-implemented
@@ -51,8 +51,8 @@ where party_name like '%Bob%';
       this case the security policy has only had to check records that
       the user was allowed to see anyway.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1 id="report_breaches">
     <title>Consider Reporting Blocked Accesses</title>
     <para>
       For most applications, any time that a security policy blocks
@@ -61,10 +61,14 @@ where party_name like '%Bob%';
       be done, this is an indication of one of two things:
       <itemizedlist>
 	<listitem>
-	  the application has not been properly implemented;
+	  <para>
+	    the application has not been properly implemented;
+	  </para>
 	</listitem>
 	<listitem>
-	  your security policy is over-restrictive.
+	  <para>
+	    your security policy is over-restrictive.
+	  </para>
 	</listitem>
       </itemizedlist>
     </para>
@@ -73,8 +77,8 @@ where party_name like '%Bob%';
       investigate.  Note that in a reporting environment where ad-hoc
       reports can be run, this may prove less useful.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Consider Testing With and Without Security</title>
     <para>
       If you have automated tests, you should run them against both
@@ -83,8 +87,8 @@ where party_name like '%Bob%';
       are in harmony, and you should be very pleased with yourselves.
       Encourage your employer to provide handsome bonuses.
     </para>
-  </sect2>
-  <sect2 id="denormalize">
+  </sect1>
+  <sect1 id="denormalize">
     <title>Denormalize Around Your Scopes</title>
     <para>
       If you find that your security policies require joins to other
@@ -94,8 +98,8 @@ where party_name like '%Bob%';
       tests.  You might also consider doing this just to simplify
       those tests.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Use Secured Views To Implement Complex Queries</title>
     <para>
       You may find that multi-table queries encounter performance
@@ -111,8 +115,8 @@ where party_name like '%Bob%';
       intermediate rows that are discarded by subsequent joins in the
       original query.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Avoid Drop...Cascade</title>
     <para>
       While you are integrating <literal>Veil2</literal> with your
@@ -139,6 +143,6 @@ where party_name like '%Bob%';
       dependent object.  By making each drop explicit you can ensure
       that your have a matching re-build of those objects.
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>
 

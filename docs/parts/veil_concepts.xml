@@ -1,4 +1,4 @@
-<sect1 id="veil2-concepts">
+<chapter id="veil2-concepts">
   <title><literal>Veil2</literal> Concepts</title>
   <para>
     The following concepts are crucial to a full understanding of
@@ -22,13 +22,10 @@
     linkend="privileges">privileges</link> and <link
     linkend="scopes">scopes</link>, the rest can be dealt with as the
     need arises.  Few applications will need all of the features
-    provided by <literal>Veil2</literal>.
+    provided by <literal>Veil2</literal>, and you can probably ignore
+    the stuff you don't think you need.
   </para>
-  <para>
-    If you don't need it, you can probably ignore it.  At least to
-    start with.
-  </para>
-  <sect2 id="privileges">
+  <sect1 id="privileges">
     <title>Privileges</title>
     <para>
       Privileges are the atomic units of access control, limiting
@@ -66,8 +63,8 @@
       A <literal>Veil2</literal>-based security system is likely to
       have tens or hundreds of distinct privileges.
     </para>
-  </sect2>
-  <sect2 id="scopes">
+  </sect1>
+  <sect1 id="scopes">
     <title>Scopes</title>
     <para>
       A scope describes the applicability of a <link
@@ -99,11 +96,11 @@
       scope, they will be able to see their own
       <literal>users</literal> record.  Whether they can see other
       <literal>users</literal> records will depend on whether they
-      have been assigned <literal>select users</literal> in any other
+      have the <literal>select users</literal> privilege in any other
       scopes.
     </para>
-  </sect2>
-  <sect2 id="roles">
+  </sect1>
+  <sect1 id="roles">
     <title>Roles</title>
     <para>
       Roles exist to manage collections of <link
@@ -153,7 +150,7 @@
       equivalent - which is hardly useful.  You may want to implement
       some policies around this for your own system.
     </para>
-    <sect3 id="role_mapping">
+    <sect2 id="role_mapping">
       <title>Contextual Role Mapping</title>
       <para>
 	One of the possible use-cases for <literal>Veil2</literal>, is
@@ -193,9 +190,9 @@
 	More on this can be found <link
 	linkend="physical_role_mapping">here</link>.
       </para>
-    </sect3>
-  </sect2>
-  <sect2 id="assignments">
+    </sect2>
+  </sect1>
+  <sect1 id="assignments">
     <title>Role Assignments</title>
     <para>
       Users are assigned <link linkend="roles">roles</link> in a
@@ -234,8 +231,8 @@
       would create a <literal>team member</literal> role, and assume
       that team members have this role.
     </para>
-  </sect2>
-  <sect2 id="security-contexts">
+  </sect1>
+  <sect1 id="security-contexts">
     <title>Security Contexts</title>
     <para>
       A security context (or just <literal>context</literal>) applies
@@ -282,7 +279,7 @@
       <literal>Veil2</literal> provides 2 built-in security 
       contexts:
     </para>
-    <sect3 id="global-context">
+    <sect2 id="global-context">
       <title>Global Context</title>
       <para>
 	This is a non-relational context.  Privileges assigned in
@@ -299,8 +296,8 @@
         linkend="Traditional">traditional</link> security systems and
         it should be used with great care.
       </para>
-    </sect3>
-    <sect3 id="personal-context">
+    </sect2>
+    <sect2 id="personal-context">
       <title>Personal Context</title>
       <para>
 	Personal context is an implied context.  Each user has an
@@ -315,9 +312,9 @@
         personal context is to give you access to your data, and no-one
         else’s.
       </para>
-    </sect3>
-  </sect2>
-  <sect2 id="privilege-promotion">
+    </sect2>
+  </sect1>
+  <sect1 id="privilege-promotion">
     <title>Privilege Promotion</title>
     <para>
       <link linkend="privileges">Privileges</link> may give access to
@@ -340,18 +337,10 @@
       privileges for this role are:
     </para>
     <itemizedlist spacing="compact">
-      <listitem>
-        <literal>select customer</literal>;
-      </listitem>
-      <listitem>
-        <literal>update customer</literal>;
-      </listitem>
-      <listitem>
-        <literal>...</literal>
-      </listitem>
-      <listitem>
-        <literal>select lookups</literal>.
-      </listitem>
+      <listitem><literal>select customer</literal>;</listitem>
+      <listitem><literal>update customer</literal>; </listitem>
+      <listitem><literal>...</literal>;</listitem>
+      <listitem><literal>select lookups</literal>.</listitem>
     </itemizedlist>
     <para>
       If we assume that <literal>select lookups</literal> gives the
@@ -392,8 +381,8 @@
       automatically be performed when the user's privileges are first
       loaded.
     </para>
-  </sect2>
-  <sect2 id="authentication_context">
+  </sect1>
+  <sect1 id="authentication_context">
     <title>Authentication Contexts</title>
     <para>
       Each accessor (database user) is associated with a specific
@@ -420,6 +409,6 @@
       More information on this, with examples, can be found <link
       linkend="physical_authentication_context">here</link>.
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>
 

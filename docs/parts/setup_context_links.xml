@@ -1,4 +1,4 @@
-<sect1 id="link_scopes">
+<chapter id="link_scopes">
   <title>Link Your Scopes and Security Contexts (STEP 5)</title>
   <para>
     The <literal>Veil2 <link
@@ -17,7 +17,7 @@
   <para>
     Look for STEP 5 in the file <literal>demo/demo.sql</literal>.
   </para>
-  <sect2>
+  <sect1>
     <title>Create Foreign Key Links</title>
     <para>
       You will start by creating a table that inherits from
@@ -62,8 +62,8 @@ alter table veil2.scope_links
       Where, we assume, a <literal>scope_type_id</literal> of
       <literal>6</literal> means project scope.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Create Insertion Triggers</title>
     <para>
       Next, we want to ensure that new <literal>projects</literal>
@@ -71,8 +71,8 @@ alter table veil2.scope_links
       <literal>scopes</literal> table.  You will add an on insert
       trigger to do this, the details of which are left to the reader.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Link Existing Records</title>
     <para>
       The final step is to populate scope records for your existing
@@ -98,8 +98,8 @@ select 6, nextval('veil2.scope_id_seq'), project_id
       including as it means that you will be able to safely re-run
       this insert at any time if your tables get out of step.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Update the <literal>all_accessor_roles</literal> View</title>
     <para>
       If you have role assignments that are not managed solely through
@@ -121,8 +121,8 @@ select 6, nextval('veil2.scope_id_seq'), project_id
       <literal>veil2.accessor_roles</literal> and the
       <literal>demo.project_assignments</literal> tables.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>In Summary</title>
     <para>
       You will extend the <literal>veil2.scopes</literal> table using
@@ -133,5 +133,5 @@ select 6, nextval('veil2.scope_id_seq'), project_id
       create a custom view:
       <literal>veil2.my_all_accessor_roles</literal>.
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

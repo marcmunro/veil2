@@ -36,6 +36,8 @@
 <!ENTITY housekeeping           SYSTEM "parts/housekeeping.xml">
 <!ENTITY contact                SYSTEM "parts/contact.xml">
 <!ENTITY tips                   SYSTEM "parts/tips.xml">
+<!ENTITY performance            SYSTEM "parts/performance.xml">
+<!ENTITY security               SYSTEM "parts/security.xml">
 <!ENTITY veil_dbtables          SYSTEM "parts/veil_dbtables.xml">
 <!ENTITY veil_dbviews           SYSTEM "parts/veil_dbviews.xml">
 <!ENTITY veil_dbfuncs           SYSTEM "parts/veil_dbfuncs.xml">
@@ -45,10 +47,10 @@
          
 ]>
 
-<article id="Veil2">
+<book id="Veil2">
   <title>Veil2 &version; Documentation</title>
-  <sect1 id="introduction">
-    <title>Introduction</title>
+  <preface id="introduction">
+    <title>Introduction to Veil2</title>
     <para>
       <literal>Veil2</literal> is a Postgres <ulink
       url="https://pgxn.org/dist/veil2/">extension</ulink> for
@@ -100,32 +102,43 @@
       aims to make the security of your system better, faster, more
       complete and easier to understand.
     </para>
-  </sect1>
+  </preface>
 
-  &whatisrelsec;
-  &relsecdiff;
-  &whyuse_veil;
-  &veil_concepts;
-  &whatis_veil;
-  &built_in;
-  &how_difficult;
-  &get_started;
-  &veil_demo;
-  &veil_setup;
-  &setup_contexts;
-  &setup_authent;
-  &setup_accessors;
-  &setup_context_links;
-  &setup_scope_promotions;
-  &setup_privs;
-  &setup_roles;
-  &setup_oddities;
-  &secure_tables;
-  &secure_views;
-  &assign_roles;
-  &housekeeping;
-  &contact;
-  &tips;
+  <part>
+    <title>Understanding Veil2 And Relational Security</title>
+    &whatisrelsec;
+    &relsecdiff;
+    &whyuse_veil;
+    &veil_concepts;
+    &whatis_veil;
+    &built_in;
+    &how_difficult;
+  </part>
+  <part>
+    <title>Creating Your Veil2-based VPD</title>
+    &veil_setup;
+    &get_started;
+    &setup_contexts;
+    &setup_authent;
+    &setup_accessors;
+    &setup_context_links;
+    &setup_scope_promotions;
+    &setup_privs;
+    &setup_roles;
+    &setup_oddities;
+    &secure_tables;
+    &secure_views;
+    &assign_roles;
+    &housekeeping;
+  </part>
+  <part>
+    <title>More</title>
+    &veil_demo;
+    &contact;
+    &tips;
+    &performance;
+    &security;
+  </part>
   <appendix>
     <title><literal>Veil2</literal> ERD and Database Objects</title>
     <mediaobject>
@@ -158,4 +171,4 @@
   </appendix>
   &authent_protocols;
   &change_history;
-</article>
+</book>

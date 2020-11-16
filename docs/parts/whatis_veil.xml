@@ -1,4 +1,4 @@
-<sect1 id="whatis">
+<chapter id="whatis">
   <title>What is <literal>Veil2</literal> And What Does It Provide?</title>
   <para>
     <literal>Veil2</literal> is a collection of database objects,
@@ -48,7 +48,7 @@
     the <link linkend="veil_demo">demo</link> before starting out on
     your implementation.
   </para>
-  <sect2>
+  <sect1>
     <title>How It Works - An Overview</title>
     <para>
       <literal>Veil2</literal> works by:
@@ -79,7 +79,7 @@
       The following sections provide more detail on each of the above
       list items.
     </para>
-    <sect3>
+    <sect2>
       <title>Knowing The User</title>
       <para>
 	<literal>Veil2</literal> provides session management functions
@@ -107,8 +107,8 @@
 	privilege.  Tests for the presence of a privilege in a bitmap
 	are very fast.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Contextual Privileges Per User</title>
       <para>
 	At the start of each session, the user's privileges are
@@ -127,8 +127,8 @@
 	manipulated, and some will allow large, small or smaller
 	subsets of data to be seen.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Fast Privilege Testing</title>
       <para>
 	As stated above, the set of privileges in each scope is stored
@@ -215,8 +215,8 @@ create policy projects__select
 	  </listitem>
 	</orderedlist>
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Individually Securing Each Relation</title>
       <para>
 	Every table and view is given its own individual security
@@ -232,9 +232,9 @@ create policy projects__select
 	that the tests do not have to be executed for every row used
 	by the view's query.
       </para>
-    </sect3>
-  </sect2>
-  <sect2>
+    </sect2>
+  </sect1>
+  <sect1>
     <title>Refactoring Your Systems To Use <literal>Veil2</literal></title>
     <para>
       Integrating your systems with <literal>Veil2</literal> is not a
@@ -252,7 +252,7 @@ create policy projects__select
       required.  The process is covered in much more detail <link
       linkend="setup">later</link>.
     </para>
-    <sect3>
+    <sect2>
       <title>Web Session Management</title>
       <para>
 	The <literal>Veil2</literal>-protected database needs to know
@@ -263,8 +263,8 @@ create policy projects__select
 	as triggers or hooks into the database connection pool
 	management.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Integration of Role Handling</title>
       <para>
 	<literal>Veil2</literal> has its own view of what roles should
@@ -311,8 +311,8 @@ create policy projects__select
 	  </listitem>
 	</itemizedlist>
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Integration of Security Contexts</title>
       <para>
 	For every type of security context that you wish to provide,
@@ -321,8 +321,8 @@ create policy projects__select
 	triggers and FK-constraints.  There are examples of how this
 	may be done in the demo.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Integration of Users</title>
       <para>
 	All of your users must be associated with
@@ -331,8 +331,8 @@ create policy projects__select
 	Again this can be handled by triggers and FK-constraints, and
 	the demo provides examples.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Performance Denormalizations</title>
       <para>
 	You will be applying access controls to each relation in your
@@ -344,8 +344,8 @@ create policy projects__select
 	queries for each row returned, performance is likely to
 	suffer.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Authentication</title>
       <para>
 	You may need to implement a new authentication system for
@@ -353,8 +353,8 @@ create policy projects__select
 	url="https://en.wikipedia.org/wiki/Bcrypt">bcrypt</ulink>
 	implementation may be enough. 
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Development/Tightening of Access Controls</title>
       <para>
 	Once you have everything integrated, you will be able to use
@@ -373,6 +373,6 @@ create policy projects__select
 	well, remove those privileges from your super-role and ensure
 	that everyone can still do their jobs.  Rinse and repeat.
       </para>
-    </sect3>
-  </sect2>
-</sect1>
+    </sect2>
+  </sect1>
+</chapter>

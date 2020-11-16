@@ -1,4 +1,4 @@
-<sect1 id="superior_scopes">
+<chapter id="superior_scopes">
   <title>Define Your Scope Hierarchy (STEP 6)</title>
   <para>
     In your database, you are likely to have a hierarchy of <link
@@ -25,7 +25,7 @@
     require a recursive query to identify grandparent scopes etc.
     These are handled elsewhere.
   </para>
-  <sect2>
+  <sect1>
     <title>Customizing The <literal>superior_scopes</literal>View</title>
     <para>
       You will need to create a custom version of the <literal><link
@@ -86,8 +86,8 @@ select 5, s.scope_id,   -- Project to org promotions
       update the base definition and refresh the materialized views
       that depend on it.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>In Summary</title>
     <para>
       <itemizedlist>
@@ -106,5 +106,5 @@ select 5, s.scope_id,   -- Project to org promotions
 	</listitem>
       </itemizedlist>
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

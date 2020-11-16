@@ -1,4 +1,4 @@
-<sect1 id="secure_views">
+<chapter id="secure_views">
   <title>Secure Your Views (STEP 11)</title>
   <para>
     Just as with tables, user-facing views should be secured.  You can
@@ -9,7 +9,7 @@
     which owns the tables as views are processed with the access
     rights of their owners.
   </para>
-  <sect2>
+  <sect1>
     <title>Doing It</title>
     <para>
       This is best explained by example.  Here is an example from the
@@ -56,12 +56,12 @@ select ar.accessor_id, r.role_name,
       to use the privilege testing functions on specific columns to
       make access controls even more fine-grained.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>In Summary</title>
     <para>
       Add privilege testing functions to each user-facing view
       definition.
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

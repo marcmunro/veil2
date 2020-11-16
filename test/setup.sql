@@ -107,13 +107,13 @@ create trigger org_hierarchy__aiudt
   after insert or update or delete or truncate
   on org_hierarchy
   for each statement
-  execute procedure veil2.refresh_superior_scopes();
+  execute procedure veil2.refresh_scopes_matviews();
 
 create trigger projects__aiudt
   after insert or update or delete or truncate
   on projects
   for each statement
-  execute procedure veil2.refresh_superior_scopes();
+  execute procedure veil2.refresh_scopes_matviews();
 
 --\echo ...creating test parties...
 insert into veil2.accessors

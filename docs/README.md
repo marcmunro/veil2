@@ -3,7 +3,7 @@
 
 Veil2 provides a framwork for the implementation of
 [relational security
-systems](https://marcmunro.github.io/veil2/html/ar01s02.html).
+systems](https://marcmunro.github.io/veil2/html/ch01.html).
 
 The primary aims of a relational security system are to make the
 management of access to data a seamless, and necessary, component of
@@ -16,20 +16,17 @@ permissions, permission checks, and user authentication so that you
 can start building a secure database in a matter of hours.
 
 Documentation is [provided
-here](https://marcmunro.github.io/veil2/html/index.html).
+here on github](https://marcmunro.github.io/veil2/html/index.html).
 
 ## Getting Started
 
 The concept of a Relational Security System is relatively new and
 little-known.  [This
-section](https://marcmunro.github.io/veil2/html/ar01s02.html) describes
+section](https://marcmunro.github.io/veil2/html/ch01.html) describes
 what a relational security system is.
-[This](https://marcmunro.github.io/veil2/html/ar01s03.html) describes
+[This](https://marcmunro.github.io/veil2/html/ch02.html) describes
 what is different about relational security, and the fundamental
-concepts behind Veil2 are [described here](https://marcmunro.github.io/veil2/html/ar01s05.html).
-
-Or, if you just want to launch in and try it, start reading from
-[here](https://marcmunro.github.io/veil2/html/ar01s10.html).
+concepts behind Veil2 are [described here](https://marcmunro.github.io/veil2/html/ch04.html).
 
 ## Contacts
 

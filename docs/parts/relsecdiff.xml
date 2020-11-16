@@ -1,4 +1,4 @@
-<sect1 id="how-is-relational-security-different">
+<chapter id="how-is-relational-security-different">
   <title>How Is Relational Security Different?</title>
   <para>
     A relational security implementation differs from the typical access
@@ -35,7 +35,7 @@
       </para>
     </listitem>
   </itemizedlist>
-  <sect2 id="Traditional">
+  <sect1 id="Traditional">
     <title>The <emphasis>Traditional</emphasis> Approach</title>
     <subtitle>(What Is Relational Security Different From?)</subtitle>
     <para>
@@ -136,8 +136,8 @@
         </para>
       </listitem>
     </itemizedlist>
-  </sect2>
-  <sect2 id="How-Assign">
+  </sect1>
+  <sect1 id="How-Assign">
     <title>The Relational Security Approach</title>
     <para>
       In our
@@ -229,8 +229,8 @@
       rights is implemented the same way, based upon relationships
       between data.
     </para>
-  </sect2>
-  <sect2 id="Where-Implemented">
+  </sect1>
+  <sect1 id="Where-Implemented">
     <title>Where Are Access Controls Implemented In A Relational
     Security System?</title>
     <para id="external_factors">
@@ -305,8 +305,8 @@
       where-clauses that request only the data that the user should be
       able to see.  But if it gets it wrong, little harm will be done.
     </para>
-  </sect2>
-  <sect2 id="How-Restricted">
+  </sect1>
+  <sect1 id="How-Restricted">
     <title>How Is Access Restricted In A Relational Security
     System?</title>
     <para>
@@ -338,8 +338,8 @@
       access control mechanisms are based on the highly flexible
       mechanism of privileges with scope.
     </para>
-  </sect2>
-  <sect2 id="ease_of_reasoning">
+  </sect1>
+  <sect1 id="ease_of_reasoning">
     <title>Ease of Reasoning</title>
     <para>
       Traditional access control systems are often built piecemeal, or
@@ -359,8 +359,8 @@
       implementation, by virtue of its consistency, is much more
       likely to match what your designer intended.
     </para>
-  </sect2>
-  <sect2 id="comprehensiveness">
+  </sect1>
+  <sect1 id="comprehensiveness">
     <title>Comprehensiveness</title>
     <para>
       Earlier we stated that <link linkend="implicit_rights">implicit
@@ -385,5 +385,5 @@
       that the same security model applies to all applications
       including reports.
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

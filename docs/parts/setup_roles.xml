@@ -1,4 +1,4 @@
-<sect1 id="setup_roles">
+<chapter id="setup_roles">
   <title>Integrate And/Or Create Roles (STEP 8)</title>
   <para>
     The demo chooses to use only <literal>Veil2</literal>'s role
@@ -7,7 +7,7 @@
     but there are some things you will have to do for yourselves.
     Look for  STEP 8 in the file <literal>demo/demo.sql</literal>.
   </para>
-  <sect2>
+  <sect1>
     <title>Integrating Existing Roles</title>
     <para>
       If your existing system has roles of some sort that you wish to
@@ -17,7 +17,7 @@
     <para>
       There are essentially three options:
     </para>
-    <sect3>
+    <sect2>
       <title>Link <literal>Veil2</literal> To Your Existing Data</title> 
       <para>
 	This is likely to be a reasonably complex process.  You are
@@ -59,8 +59,8 @@
 	<literal>Veil2</literal>'s role semantics, this may work.  You
 	will have to do some careful thinking about this.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Make <literal>Veil2</literal>'s Roles Provide Your Role
       Data</title>
       <para>
@@ -79,8 +79,8 @@
 	the previous option.  Roles and privileges are complex enough
 	without adding an extra level of redirection.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Update Your Application To Use <literal>Veil2</literal>'s Roles</title>
       <para>
 	This is conceptually the simplest approach but the amount of
@@ -98,9 +98,9 @@
 	If you are building a new system from scratch, this should be
 	your prefered approach.
       </para>
-    </sect3>
-  </sect2>
-  <sect2>
+    </sect2>
+  </sect1>
+  <sect1>
     <title>Create New Roles and Mappings</title>
     <para>
       If your application has user-level roles (roles that are
@@ -134,8 +134,8 @@
       names may also need to be customized for those contexts.  This
       is shown in the demo; look for the text STEP 8.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>In Summary</title>
     <itemizedlist>
       <listitem>integrate with any existing roles;</listitem>
@@ -151,5 +151,5 @@
       <literal>
 	<link linkend="entity_role_role">veil2.role_roles</link></literal>).</listitem> 
     </itemizedlist>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

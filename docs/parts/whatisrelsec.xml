@@ -1,24 +1,32 @@
-<sect1 id="what-is-relational-security">
+<chapter id="what-is-relational-security">
   <title>What Is A Relational Security System?</title>
   <para>
-    A Relational Security System is one in which each assigned
-    privilege has a scope, which limits the extent to which the
-    privilege applies.
+    A Relational Security System is one in which access to each piece
+    of data and functionality is limited according to the user's
+    relationships to that data or functionality.  Access is managed by
+    privileges that users aquire by various means and in various
+    contexts, and which provide each aquired privilege with a scope,
+    which limits the extent to which that privilege applies.
   </para>
   <para>
-    The scope of an assigned privilege is related to a specific subset
-    of data, so that each privilege assignment will give access to
-    that specific data subset.  The scope may be all-encompassing or
-    very specific.  It may give access to thousands of records; to
-    just a few; or even to none.  And privileges may be assigned
-    multiple times, in different scopes.
+    Users aquire their privileges in various ways.  There may be a
+    basic set of privileges that all users get; some users may be
+    members of teams or departments and their roles in those things
+    may give them implied privilege assignments; and users may be
+    granted specific roles explictly.  Even with explicit role
+    assignments, those assignments may occur in different contexts
+    giving the user access to greater or smaller subsets of data: you
+    might be a manager for a project, within a department or division,
+    or company-wide.  The same privileges would apply in each case,
+    but their scope would apply to larger or smaller sets of data.
   </para>
   <para>
     For example, you may be given the <literal>select user
     data</literal> privilege in a scope that grants you access to
-    only your user data: <emphasis>personal scope</emphasis>; or to
-    only user data for users employed in your department:
-    <emphasis>departmental scope</emphasis>. 
+    only your user data (<emphasis>personal scope</emphasis>); or to
+    only user data for users employed in your department
+    (<emphasis>departmental scope</emphasis>).  You may even have the
+    same privilege assigned in multiple distinct scopes.
   </para>
   <para>
     Scopes may be created from almost any definable subset of your
@@ -42,4 +50,4 @@
     privileges can effectively contain their conditionality through
     their scope. 
   </para>
-</sect1>
+</chapter>

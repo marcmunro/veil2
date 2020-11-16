@@ -1,4 +1,4 @@
-<sect1 id="setup_authent">
+<chapter id="setup_authent">
   <title>Setting Up Authentication and Session Management (STEP 3)</title>
   <para>
     <literal>Veil2</literal> provides built-in mechanisms for
@@ -16,7 +16,7 @@
     find some useful hints there.  Look for "STEP 3" in the file
     <literal>demo/demo.sql</literal>.
   </para>
-  <sect2 id="authentication">
+  <sect1 id="authentication">
     <title>Authentication</title>
     <para>
       Authenticating users is hard.  There are many different ways to
@@ -64,8 +64,8 @@
       authentication functions and new records in <link
       linkend="entity_authentication_type"><literal>veil2.authentication_types</literal></link>.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Associate Your Users With Their Authentication
     Contexts</title>
     <para>
@@ -86,8 +86,8 @@
 vpd=$ select veil2.init();
       </programlisting>
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Define Your <literal>my_get_accessor()</literal> Function</title>
     <para>
       For user authentication purposes <literal>Veil2</literal> needs
@@ -109,8 +109,8 @@ vpd=$ select veil2.init();
       you make it current by calling <literal><link
       linkend="func_init">veil2.init()</link></literal>.
     </para>
-  </sect2>
-  <sect2 id="session_management">
+  </sect1>
+  <sect1 id="session_management">
     <title>Session Management</title>
     <para>
       There are 2 distinct types of sessions provided:
@@ -150,7 +150,7 @@ vpd=$ select veil2.init();
 	</listitem>
       </itemizedlist>
     </para>
-    <sect3>
+    <sect2>
       <title>Shared-Connection Sessions</title>
       <para>
 	Within a shared connection environment, such as provided by
@@ -187,8 +187,8 @@ vpd=$ select veil2.init();
       <para>
 	
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Dedicated Sessions</title>
       <para>
 	If you have users that connect directly to your database,
@@ -233,9 +233,9 @@ select * from session where result = 0;
 	  session user (as well as a shared session user).
 	</para>
       </para>
-    </sect3>
-  </sect2>
-  <sect2 id="authent_what">
+    </sect2>
+  </sect1>
+  <sect1 id="authent_what">
     <title>In Summary</title>
     <itemizedlist>
       <listitem>
@@ -282,7 +282,7 @@ select * from session where result = 0;
 	</para>
       </listitem>
     </itemizedlist>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>
 
 

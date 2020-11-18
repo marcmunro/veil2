@@ -38,9 +38,10 @@
 <!ENTITY tips                   SYSTEM "parts/tips.xml">
 <!ENTITY performance            SYSTEM "parts/performance.xml">
 <!ENTITY security               SYSTEM "parts/security.xml">
+<!ENTITY for_developers         SYSTEM "parts/for_developers.xml">
+<!ENTITY original_veil          SYSTEM "parts/original_veil.xml">
 <!ENTITY veil_dbtables          SYSTEM "parts/veil_dbtables.xml">
 <!ENTITY veil_dbviews           SYSTEM "parts/veil_dbviews.xml">
-<!ENTITY veil_dbfuncs           SYSTEM "parts/veil_dbfuncs.xml">
 <!ENTITY veil_dbfuncs           SYSTEM "parts/veil_dbfuncs.xml">
 <!ENTITY authent_protocols      SYSTEM "parts/authent_protocols.xml">
 <!ENTITY change_history         SYSTEM "parts/change_history.xml">
@@ -102,6 +103,11 @@
       aims to make the security of your system better, faster, more
       complete and easier to understand.
     </para>
+    <para>
+      If you would like to see what <literal>Veil2</literal> can do,
+      you can install and explore the <link
+      linkend="veil_demo"><literal>Veil2</literal> demo</link>. 
+    </para>
   </preface>
 
   <part>
@@ -134,10 +140,12 @@
   <part>
     <title>More</title>
     &veil_demo;
-    &contact;
+    &for_developers;
+    &original_veil;
     &tips;
     &performance;
     &security;
+    &contact;
   </part>
   <appendix>
     <title><literal>Veil2</literal> ERD and Database Objects</title>

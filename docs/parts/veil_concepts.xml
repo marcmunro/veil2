@@ -12,9 +12,7 @@
     <listitem><link linkend="security-contexts">security
     contexts</link>;</listitem> 
     <listitem><link linkend="privilege-promotion">privilege
-    promotion</link>;</listitem> 
-    <listitem><link linkend="authentication_context">authentication
-    contexts</link>.</listitem>
+    promotion</link>.</listitem> 
   </itemizedlist>
   <para>
     This looks like a lot to understand, but you don't need to grasp
@@ -185,6 +183,11 @@
 	<literal>system_parameter</literal> named
 	<quote><literal>mapping context target scope
 	type</literal></quote>.
+      </para>
+      <para>
+	Note that in order to determine the role-mapping context for a
+	session, the role-mapping context type must be equal to or
+	superior to the authentication context type.
       </para>
       <para>
 	More on this can be found <link

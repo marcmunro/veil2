@@ -1,68 +1,74 @@
 <chapter id="setup_scope_types">
   <title>Identify and Define Your Scope Types (STEP 2)</title>
   <para>
-    You need to identify the types of scopes that your privileges will
-    have.  It may be easier to think in terms of relational contexts
-    rather than scopes.  The two things are very similar but contexts
-    are more user-facing and scopes more implementation-facing.  Ask
-    yourself, in what contexts do I need to provide different access
-    rights based on users' relationships?
+    You need to identify the types of <link
+    linkend="scopes">scopes</link> that your privileges will have.
+    You may find it easier easier to think in terms of <link
+    linkend="security-contexts">security contexts</link> rather than
+    scopes (use whichever concept works better for you).  The two
+    things are very similar but contexts are more user-facing and
+    scopes more implementation-facing.  Ask yourself, in what contexts
+    do I need to provide different access rights based on users'
+    relationships?
   </para>
   <para>
     You are not, at this stage, going to be creating the scopes
     themselves, just identifying and creating their types.  This is a
-    necessary precursor to creating privileges.
-  </para>
-  <para>
-    Anywhere that you need context-based access controls, you should
-    be able to find a scope.
+    necessary precursor to creating <link
+    linkend="privileges">privileges</link>.
   </para>
   <para>
     Note that <literal>Veil2</literal> provides 2 default scope types:
     for global and personal scopes.
   </para>
   <para id="role_mapping_context">
-    Consider also your <link
-    linkend="authentication_context">authentication contexts</link>
-    and <link linkend="role_mapping">role mapping</link> contexts.
-    You need to work out whether all of your users will be logging in
-    to the system as if they were all using the same system within the
-    same company, or whether they exist in mutually independent
-    spaces.  Similarly you need to consider whether some of those
-    independent spaces will need to separately manage their own
-    role->role mappings or whether a single set of mappings that apply
-    equally to all users is enough.  If you need multiple role->role
-    mapping contexts, you need to define <quote><literal>mapping context
-    target scope type</literal></quote> in the <literal><link
-    linkend="entity_system_parameter">system_parameters</link></literal>
-    table.
+    You will also need to consider whether your role mappings will
+    apply globally, or whether different subsets of users are going to
+    see different <link
+    linkend="role_mapping">contextually-dependendent
+    role-mappings</link>.  If your users have different <link
+    linkend="authentication_context">authentication contexts</link>,
+    that is they log in using different web forms for different
+    organizations or departments, etc, then you may need different
+    role mappings for those different authentication contexts.
   </para>
   <para>
-    The demo sets up 3 relational scopes.  Look for "STEP 2" in the
-    file <literal>demo/demo.sql</literal>.  It uses distinct
-    authentication contexts (based on org and corp contexts) and
-    defines role to role mappings within corp contexts.  TODO: rewrite
-    this bit.
+    Look for "STEP 2" in the file
+    <literal>veil2_demo--&lt;version&gt;.sql</literal>.
   </para>
   <sect1>
-    <title>In Summary</title>
+    <title>Create Scope Type Records</title>
     <para>
-      <itemizedlist>
-	<listitem>
-	  <para>
-	    Create records in <literal><link
-	    linkend="entity_scope_type">veil2.scope_types</link></literal>.
-	  </para>
-	</listitem>
-	<listitem>
-	  <para>
-	    Define how your role mapping context is promoted from
-	    authentication contexts in the system parameter:
-	    <quote><literal>mapping context target scope
-	    type</literal></quote>.
-	  </para>
-	</listitem>
-      </itemizedlist>
+      You will need to insert records into
+      <link
+	  linkend="entity_scope_type"><literal>veil2.scope_types</literal></link>.
+    </para>
+    <para>
+      The <literal>Veil2</literal> demo creates 3 relational scopes:
+      corp, org and project where: corp represents a corporation; org
+      represents an organization within the organizational hierarchy
+      of a corporation; and project represents a project.
+    </para>
+  </sect1>    
+  <sect1>
+    <title>Update Your Role Mapping Context (maybe)</title>
+    <para>
+      If you need multiple role->role mapping contexts, you need to
+      define <quote><literal>mapping context target scope
+      type</literal></quote> in the <literal><link
+      linkend="entity_system_parameter">system_parameters</link></literal>
+      table.
+    </para>
+    <para>
+      The demo sets role to role mapping to happen at the
+      <quote>corp</quote> level.  This means that the
+      <literal>Customer Service Rep</literal> role might provide us
+      with different function-level roles if we log in to <quote>Veil
+      Corp</quote> than if we log in to <quote>Protected Corp</quote>.
+    </para>
+    <para>
+      <literal>Veil2</literal> defaults to role-mapping being global.
+      If this is what you want for your system, you can skip this step.
     </para>
   </sect1>
 </chapter>

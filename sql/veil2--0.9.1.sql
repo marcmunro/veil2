@@ -787,7 +787,6 @@ grant select on veil2.deferred_install to veil_user;
 
 \echo ......session_privileges_t...
 create type veil2.session_privileges_t as (
-  session_id			integer,
   scope_type_id			integer,
   scope_id			integer,
   roles                         bitmap,
@@ -2398,7 +2397,7 @@ comment on function veil2.get_accessor(text, integer, integer) is
 version of this, named my_get_accessor() should be created
 specifically for your application.  It will be automatically installed
 when it is first needed.  If you modify your version, you can update
-the system version by calling veil2.install_user_functions().'; 
+the system version by calling veil2.init().'; 
 
 
 \echo ......create_accessor_session()...
@@ -2691,7 +2690,7 @@ begin
     ),
   final_privs as
     (
-      select sp.session_id, sp.scope_type_id, sp.scope_id,
+      select sp.scope_type_id, sp.scope_id,
              sp.roles * ap.roles as roles,
              sp.privs * ap.privs as privs
         from veil2_session_privileges sp
@@ -2735,7 +2734,6 @@ veil2_orig_privileges.  This is part of the become user process.';
 \echo ......session_privileges()...
 create or replace
 function veil2.session_privileges(
-    session_id out integer,
     scope_type_id out integer,
     scope_id out integer,
     roles out integer[],
@@ -2744,14 +2742,12 @@ function veil2.session_privileges(
   returns setof record as
 $$
 begin
-  for session_privileges.session_id,
-      session_privileges.scope_type_id,
+  for session_privileges.scope_type_id,
       session_privileges.scope_id,
       session_privileges.roles,
       session_privileges.privs
-  in select sp.session_id,  sp.scope_type_id,
-            sp.scope_id, to_array(sp.roles),
-  	    to_array(sp.privs)
+  in select sp.scope_type_id, sp.scope_id,
+     	    to_array(sp.roles), to_array(sp.privs)
        from veil2_session_privileges sp
   loop
     return next;
@@ -2972,9 +2968,9 @@ begin
     )
   insert
     into veil2_session_privileges
-        (session_id, scope_type_id, scope_id,
+        (scope_type_id, scope_id,
   	 roles, privs)
-  select load_session_privs.session_id, scope_type_id, scope_id,
+  select scope_type_id, scope_id,
          roles, privileges
     from grouped_role_privs
    where exists (select null from have_connect where have_connect);
@@ -3682,12 +3678,10 @@ $$
 begin
   insert
     into veil2_session_privileges
-        (session_id,  scope_type_id,
-	 scope_id, roles,
-	 privs)
-  select sc.session_id, apc.scope_type_id,
-  	 apc.scope_id, apc.roles,
-	 apc.privs
+        (scope_type_id,	 scope_id,
+	 roles, privs)
+  select apc.scope_type_id, apc.scope_id,
+  	 apc.roles, apc.privs
     from veil2_session_context sc
    inner join veil2.accessor_privileges_cache apc
       on apc.accessor_id = sc.accessor_id
@@ -4299,3 +4293,24 @@ Call this using select * from veil2.implementation_status();
 and it will return a list of things to implement or consider implementing.';
 
 
+create view veil2.docs(file, purpose) as
+values (veil2.docpath() || '/html/index.html',
+        'Complete html documentation for Veil2');
+ 
+create or replace
+view veil2.sql_files(file, purpose) as
+values (veil2.datapath() || '/demo.sql',
+       'Install demo and run test'),
+       (veil2.datapath() || '/demo_test.sql',
+       'Run simple tests against demo'),
+       (veil2.datapath() || '/demo_bulk_data.sql',
+       'Install some bulk role and priv data'),
+       (veil2.datapath() || '/perf.sql',
+       'Run session management performance check'),
+       (veil2.datapath() || '/veil2_demo--0.9.1.sql',
+       'Veil2 demo creation script'),
+       (veil2.datapath() || '/veil2_minimal_demo.sql',
+       'Veil2 minimal-demo creation script'),
+       (veil2.datapath() || '/veil2_template.sql',
+       'Veil2 implementation template.');
+ 

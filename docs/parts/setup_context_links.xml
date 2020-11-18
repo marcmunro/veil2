@@ -7,46 +7,61 @@
     that it is protecting.  It provides the semantic link between
     <link linkend="scopes">scopes</link> as understood by the security
     model, and the <link linkend="security-contexts">security
-    contexts</link> provided or implied by the data model.
+    contexts</link> provided or implied by the data model: it maps
+    logical scopes in the protected database, to
+    <literal>Veil2</literal>'s physical scopes, keyed by
+    <literal>scope_type_id</literal> and <literal>scope_id</literal>.
   </para>
   <para>
-    As described below, the recommended way to implement these links
-    is by extending the scopes table using inheritence and adding
-    foreign-key columns and relationships to the new table.
-  </para>
-  <para>
-    Look for STEP 5 in the file <literal>demo/demo.sql</literal>.
+    Look for STEP 5 in the file
+    <literal>veil2_demo--&lt;version&gt;.sql</literal>.
   </para>
   <sect1>
     <title>Create Foreign Key Links</title>
     <para>
       You will start by creating a table that inherits from
-      <literal>veil2.scopes</literal>.  To this you will add columns
-      that reference your tables.  For instance if you have a project
-      context based on a user's membership of projects, and your
-      <literal>project</literal> table has an integer
-      <literal>project_id</literal> field as its primary key, you
-      would do the following:
+      <literal><link
+      linkend="entity_scope">veil2.scopes</link></literal>.  To this
+      you will add columns that reference your tables.
+    </para>
+    <para>
+      For instance if you have a project context based on a user's
+      membership of projects, and your <literal>project</literal>
+      table has an integer <literal>project_id</literal> field as its
+      primary key, you would do the following:
       <programlisting>
 create table veil2.scope_links (
-  project_id integer
+  party_id 	integer,
+  project_id	integer
 ) inherits (veil2.scopes);
 
--- You will need to create PK and FK constraints to match those in the 
--- parent veil2.scopes table.
+-- Set PK and FKs to match those in the parent scopes table
+
+alter table veil2.scope_links add constraint scope_link__pk
+  primary key(scope_type_id, scope_id);
+
+alter table veil2.scope_links add constraint scope_link__type_fk
+  foreign key(scope_type_id)
+  references veil2.scope_types;
+
+alter table veil2.scope_links
+  add constraint scope_link__party_fk
+  foreign key (party_id)
+  references demo.parties_tbl(party_id)
+  on delete cascade;
 
 alter table veil2.scope_links
   add constraint scope_link__project_fk
   foreign key (project_id)
-  references projects(project_id)
-  on update cascade on delete cascade;
+  references demo.projects(project_id)
+  on on delete cascade;
       </programlisting>
     </para>
     <para>
-      Using the cascade options ensures that deletions and updates of
-      the primary keys in the <literal>projects</literal> table are
-      propagated to <literal>scopes</literal>.  This saves us from
-      having to implement our own triggers for updates and deletions.
+      Using the cascade options ensures that deletions of record in
+      the <literal>projects</literal> table are propagated to
+      <literal>scopes</literal>.  This saves us from having to
+      implement our own triggers for deletions.
     </para>
     <para>
       It is wise to also ensure that project_id fields are only used
@@ -54,49 +69,90 @@ alter table veil2.scope_links
       following should be used:
       <programlisting>
 alter table veil2.scope_links
-  add constraint scope__check_project_fk_type
-  check (case when scope_type_id = 6 then
-              project_id is not null
-	 else project_id is null end);
+  add constraint scope_link__check_fk_type
+  check (case
+         when scope_type_id in (3, 4) then
+              party_id is not null
+	 when scope_type_id = 5 then
+	      project_id is not null
+	 else true end);
       </programlisting>
       Where, we assume, a <literal>scope_type_id</literal> of
-      <literal>6</literal> means project scope.
+      <literal>5</literal> means project scope, <literal>4</literal>
+      means org scope and <literal>3</literal> means corp scope.
+    </para>
+    <sect2>
+      <title>A Note on Keys</title>
+      <para>
+	If the linked scope in your protected database uses a simple
+	integer primary key, this can safely be used as the
+	<literal>scope_id</literal> in the links table as the primary
+	key of a scope is the combination of
+	<literal>scope_type_id</literal> and
+	<literal>scope_id</literal>.
+      </para>
+      <para>
+	If your source table's primary key is of some other form you
+	could simply allocate a <literal>scope_id</literal> for the
+	link table from a sequence, however each call to <link
+	linkend="i_have_priv_in_scope">i_have_priv_in_scope()</link>
+	will now need to map to the <literal>Veil2</literal> scope key
+	through our links table.  This is likely to badly affect
+	performance.
+      </para>
+      <para>
+	In such a case, we recommend refactoring your source table to
+	include a new unique integer key which can be used in the link
+	table as both the foreign key to the source scope, and as part
+	of the primary key to <literal>Veil2</literal>'s scope.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Create Insert Triggers</title>
+    <para>
+      We need to ensure that new scopes (in the demo these are
+      projects, orgs and corps) created in the underlying tables are
+      automatically propagated to the scopes tables.  Triggers on
+      insert to those tables should be created do do this.
+    </para>
+    <para>
+      There should be no need for update or delete triggers as we have
+      defined our foreign key constraint to cascade updates and
+      deletes.
     </para>
   </sect1>
   <sect1>
-    <title>Create Insertion Triggers</title>
+    <title>Create Update Triggers</title>
     <para>
-      Next, we want to ensure that new <literal>projects</literal>
-      records are automatically recorded in the
-      <literal>scopes</literal> table.  You will add an on insert
-      trigger to do this, the details of which are left to the reader.
+      Next, we want to ensure that the keys used by scopes do not
+      change, or that if they do, we handle it.
+    </para>
+    <para>
+      Ideally our on-update trigger function will ensure that the
+      scope's key fields do not change and cause an error if an
+      attempt is made to do so.
+    </para>
+    <para>
+      If, for some reason, key changes must be allowed, then we must
+      propagate such changes into our scope_links table, and we must
+      clear all caches and refresh all materialized views that may be
+      affected.
     </para>
   </sect1>
   <sect1>
-    <title>Link Existing Records</title>
+    <title>Copy Existing Scopes Into The Links Table</title>
     <para>
-      The final step is to populate scope records for your existing
-      projects.  Something like this:
+      Now we need to copy our existing scope records into our new
+      <literal>scope_links</literal> table.
+      projects.  Something like this (for projects):
       <programlisting>
-insert 
+insert
   into veil2.scope_links
       (scope_type_id, scope_id, project_id)
-select 6, nextval('veil2.scope_id_seq'), project_id
-  from projects p
- where not exists (
-    select null
-      from veil2.scope_links s
-     where s.project_id = p.project_id);
+select 5, project_id, project_id
+  from demo.projects;
       </programlisting>
-      Note that you would have to create the sequence used above as
-      this is not provided for you by default.
-    </para>
-    <para>
-      Although the not-exists clause in the above insert is not
-      strictly necessary as there will be no existing records in
-      <literal>scope_links</literal> when you start, it is worth
-      including as it means that you will be able to safely re-run
-      this insert at any time if your tables get out of step.
     </para>
   </sect1>
   <sect1>
@@ -104,9 +160,11 @@ select 6, nextval('veil2.scope_id_seq'), project_id
     <para>
       If you have role assignments that are not managed solely through
       the <literal>veil2.accessor_roles</literal> table, you will need
-      to modify the <literal>all_accessor_roles</literal> view.  For
-      example, in the demo, roles are assigned in project context
-      using the <literal>demo.project_assignments</literal> table.
+      to modify the <literal><link
+      linkend="view_all_accessor_roles">all_accessor_roles</link></literal>
+      view.  For example, in the demo, roles are assigned in project
+      context using the <literal>demo.project_assignments</literal>
+      table.
     </para>
     <para>
       To enable the creation of custom security contexts,
@@ -123,15 +181,37 @@ select 6, nextval('veil2.scope_id_seq'), project_id
     </para>
   </sect1>
   <sect1>
-    <title>In Summary</title>
+    <title>On Caches</title>
     <para>
-      You will extend the <literal>veil2.scopes</literal> table using
-      inheritence and then for each relational context you will add
-      foreign key columns, create foreign key and check constraints,
-      create an insert trigger and populate the
-      <literal>scopes</literal> table records.  You may also need to
-      create a custom view:
-      <literal>veil2.my_all_accessor_roles</literal>.
+      [TODO: Link to the caches documentation section]
+      For performance reasons <literal>Veil2</literal> caches a lot of
+      scope-related privilege data.  Some steps in your
+      <literal>Veil2</literal> VPD implementation will require the
+      explicit clearing or refreshing of some or all of those caches.
+      This step does not, unless updates are allowed to the key fields
+      or the originating scopes tables.
+    </para>
+    <para>
+      In the event of a new scope being created, there can exist no
+      records relating to that scope (assuming that you cannot create
+      descendent records of your scopes before creating the scope
+      itself - ie we assume proper referential integrity is being
+      maintained in the source database), particularly records
+      relating to role assignments, so there can be no new privileges
+      or roles assigned to any users and therefore no need to update
+      the caches.
+    </para>
+    <para>
+      In the event of scope deletion, there will be no records
+      remaining in that scope to which access must be controlled, so
+      temporarily retaining redundant privileges for dead scopes can
+      have no security implications.
+    </para>
+    <para>
+      Updates to the scope keys are the only situation where we may
+      need to clear caches and refresh materialized views, and we
+      strongly recommend that triggers are put in place to prevent
+      such updates.
     </para>
   </sect1>
 </chapter>

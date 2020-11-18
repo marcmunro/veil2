@@ -60,16 +60,57 @@ garbage_files := \\\#*  .\\\#*  *~
 AUTOCONF_TARGETS := Makefile.global ./configure autom4te.cache \
 		    config.log config.status
 
+##
+# C Language building stuff
+#
+HEADERS = $(wildcard src/*.h)
+SOURCES = $(wildcard src/*.c)
+OBJS = $(SOURCES:%.c=%.o)
+DEPS = $(SOURCES:%.c=%.d)
+
+# These files may be automatically created by compilation.  If they
+# are, we need to be able to clean them up, hence the defiinition
+# here.  We do not need the definition for any other purpose.
+BITCODES = $(SOURCES:%.c=%.bc)
+
+INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
+
+# This definition is needed in order to publish the docs and data
+# dirs from veil2 functions.
+PG_CFLAGS = -D DATA_PATH=\"$(DESTDIR)$(datadir)/$(datamoduledir)\" \
+	    -D DOCS_PATH=\"$(DESTDIR)$(docdir)/$(docmoduledir)\" 
+
+
+# Build per-source dependency files for inclusion
+# This ignores header files and any other non-local files (such as
+# postgres include files).  
+%.d: %.c
+	@echo Recreating $@
+	@$(SHELL) -ec "$(CC) -MM -MT $*.o $(CPPFLAGS) $< | \
+		xargs -n 1 | grep '^[^/]' | \
+		sed -e '1,$$ s/$$/ \\\\/' -e '$$ s/ \\\\$$//' \
+		    -e '2,$$ s/^/  /' | \
+		sed 's!$*.o!& $@!g'" > $@
+
+# Target used by recursive call from deps target below.  
+make_deps: $(DEPS)
+	@>/dev/null # Prevent the 'Nothing to be done for...' msg
+
+# Target that rebuilds all dep files unconditionally.  
+deps: 
+	rm -f $(DEPS)
+	$(MAKE) MAKEFLAGS="$(MAKEFLAGS)" make_deps
+
+include $(DEPS)
+
 
 ##
 # PGXS stuff
 #
 
-EXTENSION = veil2
+EXTENSION = veil2 veil2_demo
 MODULE_big = veil2
 MODULEDIR = veil2
-SOURCES = $(wildcard src/*.c)
-OBJS = $(SOURCES:%.c=%.o)
 VEIL2_LIB = $(addsuffix $(DLSUFFIX), veil2)
 
 PG_CONFIG := $(shell ./find_pg_config)
@@ -102,48 +143,6 @@ install-doc-tree:
 	    find $(DOCS_TREE) -type f -exec \
 	        install -vDm 755 {} $(DESTDIR)$(docdir)/$(docmoduledir)/{} \; \
 	; fi
-
-##
-# C Language building stuff
-#
-HEADERS = $(wildcard src/*.h)
-DEPS = $(SOURCES:%.c=%.d)
-# These files may be automatically created by compilation.  If they
-# are, we need to be able to clean them up, hence the defiinition
-# here.  We do not need the definition for any other purpose.
-BITCODES = $(SOURCES:%.c=%.bc)
-
-INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
-
-# This definition is needed in order to publish the docs and data
-# dirs from veil2 functions.
-PG_CFLAGS = -D DATA_PATH=\"$(DESTDIR)$(datadir)/$(datamoduledir)\" \
-	    -D DOCS_PATH=\"$(DESTDIR)$(docdir)/$(docmoduledir)\" 
-
-
-
-# Build per-source dependency files for inclusion
-# This ignores header files and any other non-local files (such as
-# postgres include files).  
-%.d: %.c
-	@echo Recreating $@
-	@$(SHELL) -ec "$(CC) -MM -MT $*.o $(CPPFLAGS) $< | \
-		xargs -n 1 | grep '^[^/]' | \
-		sed -e '1,$$ s/$$/ \\\\/' -e '$$ s/ \\\\$$//' \
-		    -e '2,$$ s/^/  /' | \
-		sed 's!$*.o!& $@!g'" > $@
-
-# Target used by recursive call from deps target below.  
-make_deps: $(DEPS)
-	@>/dev/null # Prevent the 'Nothing to be done for...' msg
-
-# Target that rebuilds all dep files unconditionally.  
-deps: 
-	rm -f $(DEPS)
-	$(MAKE) MAKEFLAGS="$(MAKEFLAGS)" make_deps
-
-include $(DEPS)
-
 
 ##
 # Documention targets
@@ -362,7 +361,7 @@ unit: db
 # clean targets
 #
 
-SUBDIRS = src docs/parts docs demo bin
+SUBDIRS = src docs/parts docs demo bin sql
 
 # Clean target that does not conflict with the same target from PGXS
 local_clean:

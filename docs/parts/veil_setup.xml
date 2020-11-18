@@ -60,14 +60,14 @@
       As a PostgreSQL extension, allowing customization of
       <literal>Veil2</literal> is something of a challenge.  The issue
       is that <literal>Veil2</literal>'s own database objects are
-      expected by PostgreSQL to not be user-modifiable.  This is
-      primarily so that extensions can be upgraded in place using
-      standard extension mechanisms; and also so that backups taken
-      using <literal>pg_dump</literal> can allow a database to be
-      restored by simply re-installing the extension.  What this means
-      is that any modifications you make to database objects that are
-      part of the <literal>Veil2</literal> extension will be lost if
-      you restore from a <literal>pg_dump</literal> backup, or if you
+      expected by PostgreSQL to not be user-modifiable.  This is so
+      that extensions can be upgraded in place using standard
+      extension mechanisms; and so that backups taken using
+      <literal>pg_dump</literal> can allow a database to be restored
+      by simply re-installing the extension.  What this means is that
+      any modifications you make to database objects that are part of
+      the <literal>Veil2</literal> extension will be lost if you
+      restore from a <literal>pg_dump</literal> backup, or if you
       upgrade the <literal>Veil2</literal> extension.
     </para>
     <para>
@@ -243,7 +243,7 @@ select 5, s.scope_id,   -- Project to org promotions
       <para>
 	To make user-provided functions and views take effect, they
 	must be installed to replace the original system-provided
-	version.  <literal>Veil2</literal> provides 4 functions for
+	version.  <literal>Veil2</literal> provides 5 functions for
 	low-level management of user-provided functions and views:
 	<itemizedlist>
 	  <listitem>
@@ -315,7 +315,7 @@ select 5, s.scope_id,   -- Project to org promotions
 	In addition to the manual mechanisms described above, all
 	user-defined functions and views will be automatically 
 	installed by <literal>Veil2</literal> when the system-provided
-	<literal>veil2,get_accessor()</literal> function is first run.
+	<literal>veil2.get_accessor()</literal> function is first run.
       </para>
       <para>
 	This is provided primarily for the case when we restore from a

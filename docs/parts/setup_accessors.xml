@@ -2,86 +2,96 @@
   <title>Link Your Users To <literal>Veil2</literal>'s Accessors (STEP
   4)</title>
   <para>
-    Unlike the situation with roles, <literal>Veil2</literal>'s
-    accessors are probably not going to be usable in place of your
-    system's users or parties tables.  Your system is likely to have a
-    lot of built-in semantics around the notion of user or party, and
-    keeping the <literal>Veil2</literal> accessor separate from this
-    is likely to be the simplest thing you can do.  This is the way
-    that the demo handles accessors and is our recommended practice.
-  </para>
-  <para id="accessors_steps">
-    The steps for this are:
-    <itemizedlist>
-      <listitem>
-	create foreign-key links to your users;
-      </listitem>
-      <listitem>
-	create insert triggers;
-      </listitem>
-      <listitem>
-	copy existing user records;
-      </listitem>
-      <listitem>
-	copy existing user authentication details;
-      </listitem>
-      <listitem>
-	ensure authentication changes are propagated.
-      </listitem>
-    </itemizedlist>
+    It is likely that your application is going to have tables that
+    represent users.  The next stage of your implementation is going
+    to be to link your users with <literal>Veil2</literal>'s
+    accessors.
   </para>
   <para>
-    Look for STEP 4 in the file <literal>demo/demo.sql</literal>.
+    Look for STEP 4 in the file
+    <literal>veil2_demo--&lt;version&gt;.sql</literal>.
+  </para>
+  <para>
+    You will need to create links between each of your user tables
+    and the <literal><link
+    linkend="entity_accessor">veil2.accessors</link></literal>
+    table.
+  </para>
+  <para>
+    You will create foreign-key constraints back to those tables,
+    and create triggers to keep the mapping and
+    <literal>accessors</literal> tables in step with changes in your
+    users tables.
   </para>
   <sect1>
-    <title>Create Foreign-Key Links to Your Users</title>
+    <title>Create A Mapping Table With Foreign-Key Links to Your Users</title>
     <para>
-      You will need to create a link between each of your user tables
-      and the <literal>veil2.accessors</literal> table.  Typically you
-      will create one or more mapping tables, with triggers to ensure
-      that changes in your user tables are propagated to
-      <literal>veil2.accessors</literal> and
-      <literal>veil2.authentication_details</literal>.
+      You will create a mapping table, ideally in the
+      <literal>veil2</literal> schema, that will consist of foreign key
+      references to both the <literal>veil2.accessors</literal> table
+      and whatever tables from your database that need you need to link
+      to.  You will also create indexes for performance, and
+      foreign-key references back to your users tables.
     </para>
     <para>
-      You may be able to use the same id for
-      <literal>accessors</literal> as you currently use for for your
-      users table.  Do so if you can.  The demo does this.
-    </para>
-    <para>
-      Take a look at the code for the demo (in
-      <literal>demo/demo.sql</literal>) for details.
-    </para>
-  </sect1>
-  <sect1>
-    <title>Create Insert Trigger</title>
-    <para>
-      When new users are created in your users table, we need
-      <literal>veil2.accessors</literal> records to also be created.
-      Insert triggers on your users tables will achieve this.  A fine
-      example can be found in the demo.
+      Note that as a simplification, the demo chooses to use the
+      <literal>accessor_id</literal> from the
+      <literal>accessors</literal> table as the primary key for its
+      <literal>parties</literal> table.
     </para>
   </sect1>
   <sect1>
     <title>Copy Existing User Records</title>
     <para>
       Create copies of the existing user records in
-      <literal>veil2.accessors</literal>.  See the demo.
+      <literal>veil2.accessors</literal>.  Note that you will need to
+      create records in both the
+      <literal>veil2.accessors</literal> and the new mapping table for
+      each users record.  See the demo.
     </para>
   </sect1>
   <sect1>
     <title>Copy Existing Authentication Details</title>
     <para>
-      <literal>Veil2</literal> accessors may have multiple sets of
-      authentication details, 1 for each active authentication type
-      (eg bcrypt).  Existing authentication details will need to be
-      copied from your current users tables, possibly modified (eg
-      bcrypted), and stored in
-      <literal>veil2.authentication_details</literal>.
+      What we need to do is populate the 
+      <literal><link
+		   linkend="entity_authentication_detail">veil2.authentication_details</link></literal>
+      table from the authentication details (passwords) in your source
+      database.  Depending on how secure your existing system is, this
+      may prove to be difficult.  For instance if you use a simple
+      salted hash to store your passwords, you will be unable to
+      generate a bcrypt password from it.  In this case you have
+      2 basic choices:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    implement your current password management scheme in
+	    <literal>Veil2</literal>;
+	  </para>
+	  <para>
+	    In this case you will be able to simply copy the current
+	    hashed passwords.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    implement a password migration scheme.
+	  </para>
+	  <para>
+	    You will create bcrypt tokens from the users' passwords,
+	    as they enter them into your system. 
+	  </para>
+	</listitem>
+      </itemizedlist>
     </para>
+  </sect1>
+  <sect1>
+    <title>Create Referential Integrity Triggers</title>
     <para>
-      See the demo for an example but note that the demo uses
-      plaintext authentication which should not be used.
+      When new users are created, updated or deleted in your users
+      table, we need the <literal>veil2.accessors</literal> records to
+      reflect this.  Triggers on your users tables must be created to
+      achieve this.  
     </para>
   </sect1>
   <sect1>
@@ -100,13 +110,6 @@
       source tables which will cause the appropriate modifications to
       be made to <literal>veil2.authentication_details</literal>.
       Again, examples can be found in the demo code.
-    </para>
-  </sect1>
-  <sect1>
-    <title>In Summary</title>
-    <para>
-      What the list <link linkend="setup_accessors">at the top of the
-      page</link> says.  
     </para>
   </sect1>
 </chapter>

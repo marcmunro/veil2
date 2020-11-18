@@ -1629,28 +1629,6 @@ select sc.accessor_id, 2,   -- Personal context role
        2, sc.accessor_id    -- Personal scope for accessor
   from veil2.session_context() sc;
 
-/*
-old version of the query, which is ~9% faster but harder to tweak
-select aar.accessor_id, aar.role_id,
-       aar.context_type_id, aar.context_id
-  from veil2.session_context() sc
- inner join veil2.all_accessor_roles aar
-    on aar.accessor_id = sc.accessor_id
- inner join veil2.session_assignment_contexts sac
-    on -- Matching login context and assignment context
-       (    sac.context_type_id = aar.context_type_id
-        and sac.context_id = aar.context_id)
-    or -- login context is is global, so all assignments apply
-       (    sc.login_context_type_id = 1
-        and sc.login_context_id = 0)
-    or -- role is superuser, so we get it anyway
-       (    aar.role_id = 1
-        and sac.context_type_id = 1)
- union all
-select sc.accessor_id, 2,   -- Personal context role
-       2, sc.accessor_id    -- Personal scope for accessor
-  from veil2.session_context() sc;
-*/
 comment on view veil2.all_session_roles is
 'Return all roles assigned to the currently authenticated accessor
 that apply given the accessor''s session_context.';

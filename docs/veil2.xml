@@ -59,10 +59,9 @@
     </para>
     <para>
       A <link linkend="what-is-relational-security">relational
-      security system</link> Is one in which access to data is
-      determined, at least partly, by a user’s relationships to that
-      data.  Many access controls may therefore be implicit rather
-      than explicit.
+      security system</link> Is one in which access rights are
+      determined by the user’s relationships to the objects being
+      accessed.
     </para>
     <para>
       The primary aims of a relational security system are to make the

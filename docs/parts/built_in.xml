@@ -2,9 +2,9 @@
   <title>The Veil2 Implementation: What You Need To Know</title>
   <para>
     Although <literal>Veil2</literal> is built to be customized and
-    modified by you, it comes with a number of built-in assumptions,
-    rules and limitations.  These exist to provide a sane starting
-    point for your implementation.
+    modified by you, it comes with a number of built-in features,
+    functionality and assumptions.  These exist to provide a sane
+    starting point for your implementation.
   </para>
   <para>
     For most database implementations only a relatively small number
@@ -92,19 +92,41 @@
 	that you do not already have: your session's privileges will
 	become those of the user that you become, minus any privileges
 	that they have and you do not (this is the mathematical
-	intersection of the sets of your privileges and theirs).
+	intersection of the sets of your privileges and theirs). 
       </para>
     </sect2>
   </sect1>
   <sect1 id="roles_implementation">
     <title>Roles</title>
     <para>
-      Talk about implicit and immutable.  Also the 3 provided roles.
-      Start allocating user roles from role_id 5.
+      <literal>Veil2</literal> is supplied with a small set of
+      built-in <link linkend="roles">roles</link>.  To allow for
+      expansion of <literal>Veil2</literal>'s built-in roles in future
+      releases, you should start numbering your own roles from 5.
     </para>
     <para>
-    </para>
-    <para>
+      Roles have 2 attributes that require some explanation:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    <literal>implicit</literal>;
+	  </para>
+	  <para>
+	    Roles marked as implicit are intended to not be assigned
+	    to accessors and do not appear in the set of roles
+	    implicitly mapped to the <literal>superuser</literal> role.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    <literal>immutable</literal>;
+	  </para>
+	  <para>
+	    Immutable roles are intended to be function-level roles
+	    only.  They should not have other roles assigned to them.
+	  </para>
+	</listitem>
+      </itemizedlist>
     </para>
     <sect2 id="connect_role">
       <title>The Connect Role</title>
@@ -113,11 +135,12 @@
 	<literal>Veil2</literal> and is intended to be the only role
 	that provides the <link
 	linkend="connect_privilege"><literal>connect</literal></link>
-	privilege.  Only users who have been assigned this role will
-	be able to authenticate within a session.
+	privilege.  Users need this role in both their authentication
+	and session contexts (or a superior one such as global
+	context) in order to establish a session.
       </para>
       <para>
-	This role has no other privileges, by default and should
+	This role has no other privileges, as supplied, and should
 	not be assigned any.
       </para>
     </sect2>
@@ -125,24 +148,31 @@
       <title>The Superuser Role</title>
       <para>
 	The <literal>superuser</literal> role is system-provided, and
-	essentially unmodifiable.  It provides every role
-	TODO: wise words about this.
-      </para>
-      <para>
+	unmodifiable.  It provides every non-implicit role and every
+	privilege except <literal>connect</literal>.  These roles and
+	privileges are built in to the implementation (in
+	<literal><link
+	linkend="view_all_role_roles">veil2.all_role_roles</link></literal>)
+	and are not modifiable through <literal><link
+	linkend="entity_role_privilege">veil2.role_privileges</link></literal>
+	and <literal><link
+	linkend="entity_role_role">veil2.role_roles</link></literal>.
       </para>
     </sect2>
     <sect2 id="personal_context_role">
       <title>The Personal Context Role</title>
       <para>
-	TODO: wise words about this.
-      </para>
-      <para>
+	This role is implicitly assigned to each accessor (via
+	<literal><link
+		     linkend="view_all_accessor_roles_plus">veil2.all_accessor_roles_plus</link></literal>)
+	when their session is established.  As supplied it has no
+	privileges.
       </para>
     </sect2>
   </sect1>
   <sect1>
     <title id="physical_authentication_context">Authentication
-    Contexts</title>
+    and Session Contexts</title>
     <para>
       The <link linkend="veil2-concepts">concepts section</link>
       describes <link linkend="authentication_context">authentication
@@ -346,11 +376,5 @@ language plpgsql security definer stable leakproof;
   </sect1>
   <sect1>
     <title>Built-In Security Contexts</title>
-  </sect1>
-  <sect1>
-    <title>Login Contexts</title>
-  </sect1>
-  <sect1>
-    <title>Built-In Roles</title>
   </sect1>
 </chapter>

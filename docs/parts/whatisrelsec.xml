@@ -4,44 +4,37 @@
     A Relational Security System is one in which access to each piece
     of data and functionality is limited according to the user's
     relationships to that data or functionality.  Access is managed by
-    privileges that users aquire by various means and in various
-    contexts, and which provide each aquired privilege with a scope,
-    which limits the extent to which that privilege applies.
+    privileges assigned in contexts which limit the extent to
+    which that privilege applies.
   </para>
   <para>
-    Users aquire their privileges in various ways.  There may be a
-    basic set of privileges that all users get; some users may be
-    members of teams or departments and their roles in those things
-    may give them implied privilege assignments; and users may be
-    granted specific roles explictly.  Even with explicit role
-    assignments, those assignments may occur in different contexts
-    giving the user access to greater or smaller subsets of data: you
-    might be a manager for a project, within a department or division,
-    or company-wide.  The same privileges would apply in each case,
-    but their scope would apply to larger or smaller sets of data.
-  </para>
-  <para>
-    For example, you may be given the <literal>select user
-    data</literal> privilege in a scope that grants you access to
-    only your user data (<emphasis>personal scope</emphasis>); or to
-    only user data for users employed in your department
-    (<emphasis>departmental scope</emphasis>).  You may even have the
-    same privilege assigned in multiple distinct scopes.
+    Users aquire their privileges in various ways: all users may get a
+    basic set of privileges; some users may be members of teams or
+    departments and their roles in those things may give them implied
+    privilege assignments; and some users may be granted specific
+    roles explictly.  Even with explicit role assignments, those
+    assignments may occur in different contexts giving the user access
+    to greater or smaller subsets of data: you might be a given the
+    manager role for a project, or for a department, or for a
+    division, or company-wide.  The same privileges would apply in
+    each case, but their scope would apply to larger or smaller sets
+    of data.
   </para>
   <para>
     Scopes may be created from almost any definable subset of your
     data.  Mostly they are based on the relationships of your users
     with their data, though they need not be.  Typically, scopes are
-    defined in terms of parties and their relationships either to
-    other parties, or to specific artifacts described by your
-    database.  For example, a person's relationship to the company
-    they work for, or their membership of a department or project team.
+    defined in terms of users and their relationships to specific
+    artifacts described by your database.  For example, a person's
+    relationship to the company they work for, or their membership of
+    a department or project team.
   </para>
   <para>
-    Having scopes associated with privileges means that the
-    granularity of access controls can be as coarse or as fine as the
-    data demands, and it means that there is rarely the need for more
-    complex access checks than "do I have privilege X in scope Y?".
+    Having scopes associated with each assigned privilege means that
+    the granularity of access controls can be as coarse or as fine as
+    the data demands, and it means that there is rarely the need for
+    more complex access checks than "do I have privilege X in scope
+    Y?".
   </para>
   <para>
     Instead of having privileges which imply conditional rule checks,

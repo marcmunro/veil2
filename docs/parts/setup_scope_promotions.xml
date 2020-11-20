@@ -8,7 +8,7 @@
     the project.  This hierarchy is used in 2 ways:
     <itemizedlist>
       <listitem>
-	for <link linkend="privilege-promotion">privilege
+	for <link linkend="scope-promotion">scope
 	promotions</link>;
       </listitem>
       <listitem>

@@ -200,17 +200,16 @@
       </listitem>
       <listitem>
         <para>
-          contextually inherited role assignments;
+          inherited role assignments;
         </para>
         <para>
-          This comprises both of the last two mechanisms. An explicit
-          role assignment within a given context, can imply that same
-          assignment in subordinate or otherwise related contexts. For
-          example, if you have been assigned the
-          <literal>Administrator</literal> role in the context of a
-          division within your company, that role may be inherited to
-          apply at the department level of all departments within the
-          division.
+	  If a hierarchy of scopes can be defined, roles assigned in a
+	  given context can also apply in inferior contexts.  For
+	  example, if you have been assigned the
+	  <literal>Administrator</literal> role in the context of a
+	  division within your company, that role may be inherited to
+	  apply at the department level of all departments within the
+	  division.
         </para>
       </listitem>
     </itemizedlist>
@@ -218,16 +217,6 @@
       These mechanisms can be as sophisticated/complex as you need them
       to be, but from the user’s perspective they will be unsurprising
       and they should therefore be simple to administer.
-    </para>
-    <para>
-      Perhaps more important is how easy it is to change a user's
-      access rights.  If we decide that a certain class of user should
-      no longer have access to certain data, this can usually be
-      implemented by simply changing role-to-role, or
-      role-to-privilege mappings.  Normally no code ever has to be
-      written or modified as every single test for a user's access
-      rights is implemented the same way, based upon relationships
-      between data.
     </para>
   </sect1>
   <sect1 id="Where-Implemented">
@@ -246,11 +235,12 @@
     <para>
       With a relational security mechanism <emphasis>all</emphasis> of
       the decision making is made within the database.  There will be
-      no <emphasis>external factors</emphasis>.  There are two
-      distinct types of access controls that we implement:
+      no <emphasis>external factors</emphasis> such as hard-coded
+      access-control rules.  There are two distinct types of access
+      controls that we implement:
       <itemizedlist spacing="compact">
 	<listitem>
-          on relations;
+          on relations (tables and views);
 	</listitem>
 	<listitem>
           on functions.
@@ -261,12 +251,17 @@
       Access controls on functions are similar to the access controls
       of the traditional system.  The difference is that the database
       directly provides a decision to the application, rather than
-      providing (some of) the base data for the application to make
-      that decision.  The application, when determining which menu
-      entries should be greyed-out for a user in the <literal>Project
-      Management</literal> menu of <literal>Project X</literal>, would
-      execute a query something like:
-      <programlisting language="sql">
+      providing some of the base data for the application to make that
+      decision based on whatever rules were implemented for the
+      specific case in the specific application.
+    </para>
+    <para>
+      An application using a relational security system could
+      determine which menu entries should be greyed-out for a 
+      user in the <literal>Project Management</literal> menu of
+      <literal>Project X</literal>, by executing a query something
+      like:
+      <programlisting>
 	select i_have_priv_in_scope('exec pm-menu-item1', 'Project X'),
 	       i_have_priv_in_scope('exec pm-menu-item2', 'Project X'),
 	       i_have_priv_in_scope('exec pm-menu-item3', 'Project X'),
@@ -294,8 +289,9 @@
       access to a record, then no matter how you try you will not be
       able to see or manipulate it.  The fact that different users
       may see different data from the same query is why this is
-      sometimes called a Virtual Private Database (VPD)
-      implementation.
+      sometimes called a <ulink
+      url="https://en.wikipedia.org/wiki/Virtual_private_database">Virtual
+      Private Database</ulink> (VPD) implementation. 
     </para>
     <para>
       The application is not off the hook though.  The application
@@ -348,8 +344,7 @@
       require special treatment.  This means that the security
       mechanisms of traditional applications are often difficult to
       completely describe.  Furthermore since privileges in the
-      traditional system often imply <link
-      linkend="conditionality">conditionality</link>, a simple
+      traditional system often imply conditionality, a simple
       understanding of privileges is not enough.
     </para>
     <para>
@@ -357,7 +352,8 @@
       relational security model, it becomes much easier to describe
       and reason about your security implementation.  And your
       implementation, by virtue of its consistency, is much more
-      likely to match what your designer intended.
+      likely to match what your designer intended and your customer
+      wanted.
     </para>
   </sect1>
   <sect1 id="comprehensiveness">

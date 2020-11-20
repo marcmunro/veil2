@@ -32,7 +32,7 @@ $$
 language plpgsql security definer;
 
 
-select plan(97);
+select plan(102);
 
 -- Perform a reset session without returning a row.  This ensures the
 -- temporary table is created.
@@ -374,7 +374,13 @@ select is(errmsg is null, true,
 
 -- ...while we are here, let's ensure that we have some privileges.
 select is(veil2.i_have_global_priv(0), true,
-       	  'Session should have connect privilege');
+       	  'Session should have connect privilege(1)');
+
+select is(veil2.i_have_priv_in_scope_or_global(0, 9, 9), true,
+       	  'Session should have connect privilege(2)');
+
+select is(veil2.i_have_priv_in_scope_or_superior_or_global(0, 9, 9), true,
+       	  'Session should have connect privilege(3)');
 
 -- Last time - should be forgetting those early nonces by now
 with session as
@@ -552,8 +558,11 @@ select is(success, true, 'Bob should be authenticated (global login)')
 select is(veil2.i_have_priv_in_scope(20, -5, -51), true,
           'Bob should have priv 20 in context -5,-51')
 union all
-select is(veil2.i_have_priv_in_scope(21, -5, -51), true,
-         'Bob should have priv 21 in context -5,-51')
+select is(veil2.i_have_priv_in_scope_or_global(21, -5, -51), true,
+         'Bob should have priv 21 in context -5,-51 (2)')
+union all
+select is(veil2.i_have_priv_in_scope_or_superior_or_global(21, -5, -51), true,
+         'Bob should have priv 21 in context -5,-51 (3)')
 union all
 select is(veil2.i_have_priv_in_scope(23, -5, -51), true,
          'Bob should have priv 23 in context -5,-51')
@@ -714,10 +723,16 @@ with session as
 select is(s.success, true, 'Eve should be authenticated (login -3, -31)')
   from session s;
 
-select is(true, veil2.i_have_priv_in_superior_scope(4, -6, -62),
+select is(veil2.i_have_priv_in_superior_scope(4, -6, -62), true,
           'Eve should have priv 4 in a scope superior to -6, -62');
 
-select is(false, veil2.i_have_priv_in_superior_scope(4, -6, -61),
+select is(veil2.i_have_priv_in_scope_or_superior(4, -6, -62), true,
+          'Eve should have priv 4 in a scope superior to -6, -62 (1)');
+
+select is(veil2.i_have_priv_in_scope_or_superior_or_global(4,-6, -62), true,
+          'Eve should have priv 4 in a scope superior to -6, -62 (2)');
+
+select is(veil2.i_have_priv_in_superior_scope(4, -6, -61), false,
           'Eve should not have priv 4 in a scope superior to -6, -61');
 
 with sess as

@@ -1637,6 +1637,158 @@ revoke all on veil2.all_role_roles from public;
 grant select on veil2.all_role_roles to veil_user;
 
 
+create or replace
+view veil2.session_privileges_v as
+  with session_context as
+    (
+      select *
+        from veil2.session_context() sc
+    ),
+  base_accessor_privs as
+    (
+      select aar.accessor_id, aar.role_id, 
+             aar.context_type_id as assignment_context_type_id,
+             aar.context_id as assignment_context_id,
+             arp.mapping_context_type_id,
+             arp.mapping_context_id,
+             arp.roles,
+             arp.privileges
+        from session_context sc
+       inner join veil2.all_session_roles aar
+          on aar.accessor_id = sc.accessor_id
+       inner join veil2.all_role_privileges_cache arp
+          on arp.role_id = aar.role_id
+         and (   (    arp.mapping_context_type_id = sc.mapping_context_type_id
+                  and arp.mapping_context_id = sc.mapping_context_id)
+	      or (    arp.mapping_context_type_id = 1
+                  and arp.mapping_context_id = 0)
+	      or (    arp.mapping_context_type_id is null
+                  and arp.mapping_context_id is null))
+    ),
+  promoted_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, ss.superior_scope_id as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id != 1
+       inner join veil2.all_superior_scopes ss
+          on ss.scope_type_id = bap.assignment_context_type_id
+         and ss.scope_id = bap.assignment_context_id
+         and ss.superior_scope_type_id = pp.scope_type_id
+	 and ss.is_type_promotion
+    ),
+  global_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, 0 as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id = 1
+    ),  
+  all_role_privs as
+    (
+      select accessor_id, 
+      	     mapping_context_type_id, mapping_context_id,
+  	     assignment_context_type_id as scope_type_id,
+             assignment_context_id as scope_id,
+             roles + role_id as roles,  privileges
+        from base_accessor_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from promoted_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from global_privs
+    ),
+  grouped_role_privs as
+    (
+      select accessor_id,
+             scope_type_id, scope_id,
+             union_of(roles) as roles, union_of(privileges) as privileges
+        from all_role_privs
+       group by accessor_id,
+                scope_type_id, scope_id
+    ),
+  have_global_connect as
+    (
+      select exists (
+          select null
+            from grouped_role_privs
+           where scope_type_id = 1
+             and scope_id = 0
+             and privileges ? 0) as have_global_connect
+    ),
+  have_session_connect as
+    (
+      select exists (
+    	  select null
+    	    from session_context sc
+    	   cross join grouped_role_privs grp
+    	   where grp.privileges ? 0
+	     and (   (    grp.scope_type_id = sc.session_context_type_id
+    	              and grp.scope_id = sc.session_context_id)
+    	          or (grp.scope_type_id, grp.scope_id) in (
+    	      select ass.superior_scope_type_id, ass.superior_scope_id
+    		from veil2.all_superior_scopes ass
+    	       where ass.scope_type_id = sc.session_context_type_id
+    	         and ass.scope_id = sc.session_context_id)))
+             as have_session_connect
+    ),
+  have_login_connect as
+    (
+      select exists (
+    	  select null
+    	    from session_context sc
+    	   cross join grouped_role_privs grp
+    	   where grp.privileges ? 0
+	     and (   (    grp.scope_type_id = sc.login_context_type_id
+    	              and grp.scope_id = sc.login_context_id)
+    	          or (grp.scope_type_id, grp.scope_id) in (
+    	      select ass.superior_scope_type_id, ass.superior_scope_id
+    		from veil2.all_superior_scopes ass
+    	       where ass.scope_type_id = sc.login_context_type_id
+    	         and ass.scope_id = sc.login_context_id)))
+             as have_login_connect
+    ),
+  have_connect as
+    (
+      select true as have_connect
+        from have_global_connect
+       where have_global_connect
+       union
+      select have_login_connect and have_session_connect
+        from have_global_connect
+       cross join have_login_connect
+       cross join have_session_connect
+       where not have_global_connect
+    )
+  select scope_type_id, scope_id,
+         roles, privileges
+    from grouped_role_privs
+   where exists (select null from have_connect where have_connect);
+
+comment on view veil2.session_privileges_v is
+'View used to dynamically figure out the roles and privileges in all
+contexts for the current session.  If the accessor for the session
+does not have connect privilege in both the authentication and login
+contexts, then no rows are returned.';
+
+revoke all on veil2.session_privileges_v from public;
+
+
 \echo ...creating materialized view refresh functions...
 \echo ......refresh_scopes_matviews()...
 create or replace
@@ -2808,150 +2960,13 @@ begin
     end if;
   end if;
 
-  with session_context as
-    (
-      select *
-        from veil2.session_context() sc
-    ),
-  base_accessor_privs as
-    (
-      select aar.accessor_id, aar.role_id, 
-             aar.context_type_id as assignment_context_type_id,
-             aar.context_id as assignment_context_id,
-             arp.mapping_context_type_id,
-             arp.mapping_context_id,
-             arp.roles,
-             arp.privileges
-        from session_context sc
-       inner join veil2.all_session_roles aar
-          on aar.accessor_id = sc.accessor_id
-       inner join veil2.all_role_privileges_cache arp
-          on arp.role_id = aar.role_id
-         and (   (    arp.mapping_context_type_id = sc.mapping_context_type_id
-                  and arp.mapping_context_id = sc.mapping_context_id)
-	      or (    arp.mapping_context_type_id = 1
-                  and arp.mapping_context_id = 0)
-	      or (    arp.mapping_context_type_id is null
-                  and arp.mapping_context_id is null))
-    ),
-  promoted_privs as
-    (
-      select bap.accessor_id, bap.role_id,
-      	     bap.mapping_context_type_id, bap.mapping_context_id,
-	     pp.scope_type_id, ss.superior_scope_id as scope_id,
-  	     bap.privileges * pp.privilege_ids as privileges
-        from base_accessor_privs bap
-       inner join veil2.promotable_privileges pp
-          on not is_empty(bap.privileges * pp.privilege_ids)
-         and pp.scope_type_id != 1
-       inner join veil2.all_superior_scopes ss
-          on ss.scope_type_id = bap.assignment_context_type_id
-         and ss.scope_id = bap.assignment_context_id
-         and ss.superior_scope_type_id = pp.scope_type_id
-	 and ss.is_type_promotion
-    ),
-  global_privs as
-    (
-      select bap.accessor_id, bap.role_id,
-      	     bap.mapping_context_type_id, bap.mapping_context_id,
-	     pp.scope_type_id, 0 as scope_id,
-  	     bap.privileges * pp.privilege_ids as privileges
-        from base_accessor_privs bap
-       inner join veil2.promotable_privileges pp
-          on not is_empty(bap.privileges * pp.privilege_ids)
-         and pp.scope_type_id = 1
-    ),  
-  all_role_privs as
-    (
-      select accessor_id, 
-      	     mapping_context_type_id, mapping_context_id,
-  	     assignment_context_type_id as scope_type_id,
-             assignment_context_id as scope_id,
-             roles + role_id as roles,  privileges
-        from base_accessor_privs
-       union all
-      select accessor_id, 
-             mapping_context_type_id, mapping_context_id,
-  	     scope_type_id, scope_id,
-             bitmap() as roles, privileges
-        from promoted_privs
-       union all
-      select accessor_id, 
-             mapping_context_type_id, mapping_context_id,
-  	     scope_type_id, scope_id,
-             bitmap() as roles, privileges
-        from global_privs
-    ),
-  grouped_role_privs as
-    (
-      select accessor_id,
-             scope_type_id, scope_id,
-             union_of(roles) as roles, union_of(privileges) as privileges
-        from all_role_privs
-       group by accessor_id,
-                scope_type_id, scope_id
-    ),
-  have_global_connect as
-    (
-      select exists (
-          select null
-            from grouped_role_privs
-           where scope_type_id = 1
-             and scope_id = 0
-             and privileges ? 0) as have_global_connect
-    ),
-  have_session_connect as
-    (
-      select exists (
-    	  select null
-    	    from session_context sc
-    	   cross join grouped_role_privs grp
-    	   where grp.privileges ? 0
-	     and (   (    grp.scope_type_id = sc.session_context_type_id
-    	              and grp.scope_id = sc.session_context_id)
-    	          or (grp.scope_type_id, grp.scope_id) in (
-    	      select ass.superior_scope_type_id, ass.superior_scope_id
-    		from veil2.all_superior_scopes ass
-    	       where ass.scope_type_id = sc.session_context_type_id
-    	         and ass.scope_id = sc.session_context_id)))
-             as have_session_connect
-    ),
-  have_login_connect as
-    (
-      select exists (
-    	  select null
-    	    from session_context sc
-    	   cross join grouped_role_privs grp
-    	   where grp.privileges ? 0
-	     and (   (    grp.scope_type_id = sc.login_context_type_id
-    	              and grp.scope_id = sc.login_context_id)
-    	          or (grp.scope_type_id, grp.scope_id) in (
-    	      select ass.superior_scope_type_id, ass.superior_scope_id
-    		from veil2.all_superior_scopes ass
-    	       where ass.scope_type_id = sc.login_context_type_id
-    	         and ass.scope_id = sc.login_context_id)))
-             as have_login_connect
-    ),
-  have_connect as
-    (
-      select true as have_connect
-        from have_global_connect
-       where have_global_connect
-       union
-      select have_login_connect and have_session_connect
-        from have_global_connect
-       cross join have_login_connect
-       cross join have_session_connect
-       where not have_global_connect
-    )
   insert
     into veil2_session_privileges
         (scope_type_id, scope_id,
   	 roles, privs)
   select scope_type_id, scope_id,
          roles, privileges
-    from grouped_role_privs
-   where exists (select null from have_connect where have_connect);
+    from veil2.session_privileges_v;
 
   if found then
     if _need_filter then
@@ -3264,7 +3279,8 @@ begin
   select sc.session_id, sc.accessor_id
     into orig_session_id, orig_accessor_id
     from veil2_session_context sc;
-    
+
+  -- TODO: Replace this with a single call
   if veil2.i_have_global_priv(1) or
      veil2.i_have_priv_in_scope(1, context_type_id, context_id) or
      veil2.i_have_priv_in_superior_scope(1, context_type_id, context_id)
@@ -3375,6 +3391,17 @@ username rather than accessor_id.';
 -- exist as they are needed in order to compile the following functions.
 select veil2.reset_session();
 
+\echo ......true()...
+create or replace
+function veil2.true(integer) returns boolean
+     as '$libdir/veil2', 'veil2_true'
+     language C security definer stable leakproof;
+
+comment on function veil2.true(integer) is
+'Performance testing function - always returns true.  Used to
+establish the mimumu overhead of security policies for tables.';
+
+
 \echo ......i_have_global_priv()...
 create or replace
 function veil2.i_have_global_priv(integer) returns boolean
@@ -3397,7 +3424,6 @@ comment on function veil2.i_have_personal_priv(integer, integer) is
 privilege in the personal scope.';
 
 
-
 \echo ......i_have_priv_in_scope()...
 create or replace
 function veil2.i_have_priv_in_scope(integer, integer, integer) returns boolean
@@ -3407,6 +3433,18 @@ function veil2.i_have_priv_in_scope(integer, integer, integer) returns boolean
 comment on function veil2.i_have_priv_in_scope(integer, integer, integer) is
 'Predicate to determine whether the connected user has the given
 privilege in the given scope.';
+
+
+\echo ......i_have_priv_in_scope_or_global()...
+create or replace
+function veil2.i_have_priv_in_scope_or_global(
+	     integer, integer, integer) returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_scope_or_global'
+     language C security definer stable leakproof;
+
+comment on function veil2.i_have_priv_in_scope(integer, integer, integer) is
+'Predicate to determine whether the connected user has the given
+privilege in the given scope, or in global scope.';
 
 
 \echo ......i_have_priv_in_superior_scope()...
@@ -3425,6 +3463,53 @@ test will have already been performed.  Note that due to the join on
 all_superior_scopes this function may incur some small measurable
 overhead.';
 
+\echo ......i_have_priv_in_scope_or_superior()...
+create or replace
+function veil2.i_have_priv_in_scope_or_superior(integer, integer, integer) 
+     returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_scope_or_superior'
+     language C security definer stable leakproof;
+
+comment on function veil2.i_have_priv_in_scope_or_superior(
+	   	         integer, integer, integer) is
+'Predicate to determine whether the connected user has the given
+privilege in a scope that is, or is superior to the given scope.  This
+does not check for the privilege in a global scope as it is assumed
+that such a test will have already been performed.  Note that due to
+the join on all_superior_scopes this function may incur some small
+measurable overhead.';
+
+
+\echo ......i_have_priv_in_scope_or_superior_or_global()...
+create or replace
+function veil2.i_have_priv_in_scope_or_superior_or_global(
+	     integer, integer, integer) 
+     returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_scope_or_superior_or_global'
+     language C security definer stable leakproof;
+
+comment on function veil2.i_have_priv_in_scope_or_superior_or_global(
+	   	         integer, integer, integer) is
+'Predicate to determine whether the connected user has the given
+privilege in a scope that is, or is superior to the given scope, or in
+the global scope.  This does not check for the privilege in a global
+scope as it is assumed that such a test will have already been
+performed.  Note that due to the join on all_superior_scopes this
+function may incur some small measurable overhead.';
+
+
+\echo ......result_counts()...
+create or replace
+function veil2.result_counts(false_count out integer, true_count out integer)
+     returns record
+     as '$libdir/veil2', 'veil2_result_counts'
+     language C security definer stable leakproof;
+
+comment on function veil2.result_counts() is
+'Return record of how many false and how many true results have been
+returned by the i_have_privi_xxx() functions in this session';
+
+revoke all on function veil2.result_counts() from public;
 
 
 \echo ...creating veil2 admin and helper functions...
@@ -3600,7 +3685,8 @@ values (4, 2),
 insert into veil2.system_parameters
        (parameter_name, parameter_value)
 values ('shared session timeout', '20 mins'),
-       ('mapping context target scope type', '1');
+       ('mapping context target scope type', '1'),
+       ('error on uninitialized session', true);
 
 
 -- Create security for vpd tables.

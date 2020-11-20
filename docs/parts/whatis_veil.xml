@@ -113,12 +113,10 @@
       <para>
 	At the start of each session, the user's privileges are
 	determined based upon the roles that have been assigned to
-	them, and the contexts of those role assignments.  This is a
-	highly optimized process, using pre-built bitmaps and
-	materialized views.  These materialized views are
-	automatically updated whenever role->role and role->privilege
-	assignments are modified which should be relatively
-	infrequently.
+	them and the contexts of those role assignments.  This is a
+	highly optimized process, using pre-built, cached, bitmaps and
+	materialized views.  These caches and materialized views are
+	automatically updated as needed.
       </para>
       <para>
 	Each privilege assigned to a user acts within a scope that
@@ -141,16 +139,16 @@ alter table demo.projects enable row level security;
 create policy projects__select
     on demo.projects
    for select
- using (   veil2.i_have_global_priv(21)
-        or veil2.i_have_priv_in_scope(21, 3, corp_id)
-        or veil2.i_have_priv_in_scope(21, 4, org_id)
-        or veil2.i_have_priv_in_scope(21, 5, project_id));
+ using (   veil2.i_have_global_priv(25)
+        or veil2.i_have_priv_in_scope(25, 3, corp_id)
+        or veil2.i_have_priv_in_scope(25, 4, org_id)
+        or veil2.i_have_priv_in_scope(25, 5, project_id));
 	</programlisting>
       </para>
       <para>
 	Each of the test functions is checking whether the user has
 	the privilege, <literal>select projects</literal> (privilege
-	21), to view the current record.  Tests are made in global
+	25), to view the current record.  Tests are made in global
 	scope, then corp scope (scope type 3) of the owning corp, then
 	org scope (scope type 4) of the owning org, and finally in
 	project scope (scope type 5) of the project itself.  Each of
@@ -271,7 +269,7 @@ create policy projects__select
 	do and what they should look like.  If your own system uses
 	roles for its existing access control purposes, you will have
 	to somehow integrate your system's role requirements with
-	those of <literal>Veil2</literal>.  You essentially have three
+	those of <literal>Veil2</literal>.  You essentially have two
 	choices:
 	<itemizedlist>
 	  <listitem>
@@ -283,18 +281,6 @@ create policy projects__select
 	      roles.  Use triggers and Foreign Key (FK) constraints to
 	      make and maintain copies of your roles within
 	      <literal>Veil2</literal>.
-	    </para>
-	  </listitem>
-	  <listitem>
-	    <para>
-	      Make <literal>Veil2</literal> the source of your
-	      system's roles.
-	    </para>
-	    <para>
-	      Update <literal>Veil2</literal>'s roles to handle whatever
-	      extra data your system needs, and replace your existing
-	      role objects with views onto the
-	      <literal>Veil2</literal> roles.
 	    </para>
 	  </listitem>
 	  <listitem>
@@ -315,7 +301,7 @@ create policy projects__select
     <sect2>
       <title>Integration of Security Contexts</title>
       <para>
-	For every type of security context that you wish to provide,
+	For every type of security context/scope that you wish to provide,
 	you will need to provide a link from your existing tables back
 	to <literal>Veil2</literal>.  This will be handled with
 	triggers and FK-constraints.  There are examples of how this
@@ -352,26 +338,6 @@ create policy projects__select
 	users.  Or the built-in <ulink
 	url="https://en.wikipedia.org/wiki/Bcrypt">bcrypt</ulink>
 	implementation may be enough. 
-      </para>
-    </sect2>
-    <sect2>
-      <title>Development/Tightening of Access Controls</title>
-      <para>
-	Once you have everything integrated, you will be able to use
-	your system.  Create a super-role that allows all access and
-	assign it to all of your users in the global context: your
-	system will work exactly as it did before.  Now you can begin
-	tightening your access controls.
-      </para>
-      <para>
-	Create appropriate roles one function at a time and ensure
-	that they have sufficient access to get the job done.  Assign
-	these in the most restrictive security contexts possible and
-	ensure that they work.  Check that they also work in
-	higher-level contexts.  Remove any existing code that
-	implements access controls for that functionality.  If all is
-	well, remove those privileges from your super-role and ensure
-	that everyone can still do their jobs.  Rinse and repeat.
       </para>
     </sect2>
   </sect1>

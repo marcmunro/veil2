@@ -40,7 +40,7 @@
       You will define this view as the union of a number of selects.
       Each select will represent a single type of superior scope.  The
       following example is from the demo.  See STEP 6 in the file
-      <literal>demo/demo.sql</literal>.
+      <literal>demo/veil2_demo--&version;.sql</literal>.
       <programlisting>
 create or replace
 view veil2.my_superior_scopes (
@@ -85,26 +85,6 @@ select 5, s.scope_id,   -- Project to org promotions
       linkend="func_init">veil2.init()</link></literal> to
       update the base definition and refresh the materialized views
       that depend on it.
-    </para>
-  </sect1>
-  <sect1>
-    <title>In Summary</title>
-    <para>
-      <itemizedlist>
-	<listitem>
-	  <para>
-	    Define your custom <literal>my_superior_scopes</literal>
-	    view.
-	  </para>
-	</listitem>
-	<listitem>
-	  <para>
-	    Install the view and refresh matrialized views by calling
-	    <literal><link
-			 linkend="func_init">veil2.init()</link></literal>.
-	  </para>
-	</listitem>
-      </itemizedlist>
     </para>
   </sect1>
 </chapter>

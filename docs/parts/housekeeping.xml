@@ -4,7 +4,7 @@
     The only essential housekeeping task beyond normal database
     maintenance is to add a periodic job to delete expired sessions.
     This can be done by simply calling the <literal><link
-    linkend="delete_expired_sessions">delete_expired_sessions()</link></literal>
+    linkend="func_delete_expired_sessions">delete_expired_sessions()</link></literal>
     function.
   </para>
 </chapter>

@@ -23,8 +23,8 @@
     <title>Frequently Imagined Criticisms (FIC)</title>
     <para>
       It’s easy to criticize relational security systems and
-      implementations as they are not widely used and can be difficult
-      to grasp. Here are a few criticisms that have been directed at
+      implementations as they are not widely used and are worryingly
+      novel.  Here are a few criticisms that have been directed at
       <literal>Veil2</literal>-like implementations.
     </para>
     <itemizedlist>

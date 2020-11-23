@@ -5,7 +5,8 @@
     tables for its roles implementation.  This makes things very
     simple, but may be unhelpful as an example.  The author apologises
     but there are some things you will have to do for yourselves.
-    Look for  STEP 8 in the file <literal>demo/demo.sql</literal>.
+    Look for  STEP 8 in the file
+    <literal>demo/veil2_demo--&version;.sql</literal>.
   </para>
   <sect1>
     <title>Integrating Existing Roles</title>
@@ -127,29 +128,14 @@
       contiguously and re-use ids for records that get deleted.
     </para>
     <para>
-      Note that if you have defined that role to role mappings are done
+      Note that if you have decided to use 
+
+      defined that role to role mappings are done
       in anything other than the global context (as described <link
       linkend="role_mapping_context">here</link>) your role to role
       mappings may need to be repeated for each context.  Your role
       names may also need to be customized for those contexts.  This
       is shown in the demo; look for the text STEP 8.
     </para>
-  </sect1>
-  <sect1>
-    <title>In Summary</title>
-    <itemizedlist>
-      <listitem>integrate with any existing roles;</listitem>
-      <listitem>create function-level roles in
-      <literal>
-	<link linkend="entity_role">veil2.roles</link></literal>;</listitem>  
-      <listitem>assign privileges to function-level roles (in
-      <literal>
-	<link linkend="entity_role_privilege">veil2.role_privileges</link></literal>);</listitem> 
-      <listitem>create user-level roles (in
-      <literal>veil2.roles</literal>);</listitem> 
-      <listitem>assign function-level roles to user-level roles (in
-      <literal>
-	<link linkend="entity_role_role">veil2.role_roles</link></literal>).</listitem> 
-    </itemizedlist>
   </sect1>
 </chapter>

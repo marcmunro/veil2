@@ -1,4 +1,4 @@
-<sect1>
+<appendix>
   <title>Veil2 Functions and Triggers</title>
 
   <para>
@@ -126,10 +126,10 @@
 	<link linkend="func_hello">hello()</link>;
       </listitem>
       <listitem>
-	<link linkend="become_accessor">become_accessor()</link>;
+	<link linkend="func_become_accessor">become_accessor()</link>;
       </listitem>
       <listitem>
-	<link linkend="become_user">become_user()</link>.
+	<link linkend="func_become_user">become_user()</link>.
       </listitem>
     </itemizedlist>
   </para>
@@ -138,18 +138,29 @@
     These functions are for testing session privileges:
     <itemizedlist>
       <listitem>
-	<link linkend="i_have_global_priv">i_have_global_priv()</link>;
+	<link linkend="func_i_have_global_priv">i_have_global_priv()</link>;
       </listitem> 
       <listitem>
-	<link linkend="i_have_personal_priv">i_have_personal_priv()</link>;
+	<link linkend="func_i_have_personal_priv">i_have_personal_priv()</link>;
       </listitem> 
       <listitem>
-	<link linkend="i_have_priv_in_scope">i_have_priv_in_scope()</link>;
+	<link linkend="func_i_have_priv_in_scope">i_have_priv_in_scope()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_i_have_priv_in_scope_or_global">i_have_priv_in_scope_or_global()</link>;
       </listitem> 
       <listitem>
 	<link
-	    linkend="i_have_priv_in_superior_scope">i_have_priv_in_superior_scope()</link>.
-      </listitem> 
+	    linkend="func_i_have_priv_in_superior_scope">i_have_priv_in_superior_scope()</link>;
+      </listitem>
+      <listitem>
+	<link
+	    linkend="func_i_have_priv_in_scope_or_superior">i_have_priv_in_scope_or_superior()</link>;
+      </listitem>
+      <listitem>
+	<link
+	    linkend="func_i_have_priv_in_scope_or_superior_or_global">i_have_priv_in_scope_orsuperior_or_global()</link>.
+      </listitem>
     </itemizedlist>
   </para>
 
@@ -158,10 +169,10 @@
 
     <itemizedlist>
       <listitem>
-	<link linkend="delete_expired_sessions">delete_expired_sessions()</link>;
+	<link linkend="func_delete_expired_sessions">delete_expired_sessions()</link>;
       </listitem> 
       <listitem>
-	<link linkend="bcrypt">bcrypt()</link>.
+	<link linkend="func_bcrypt">bcrypt()</link>.
       </listitem> 
     </itemizedlist>
   </para>
@@ -388,11 +399,11 @@
       <title><literal>hello()</literal></title>
       <?sql-definition function veil2.hello sql/veil2--&version_number;.sql ?>
     </sect3>
-    <sect3 id="become_accessor">
+    <sect3 id="func_become_accessor">
       <title><literal>become_accessor()</literal></title>
       <?sql-definition function veil2.become_accessor sql/veil2--&version_number;.sql ?>
     </sect3>
-    <sect3 id="become_user">
+    <sect3 id="func_become_user">
       <title><literal>become_user()</literal></title>
       <?sql-definition function veil2.become_user sql/veil2--&version_number;.sql ?>
     </sect3>
@@ -400,7 +411,7 @@
   
   <sect2 id="privilege_functions">
     <title>Privilege Testing Functions</title>
-    <sect3 id="i_have_global_priv">
+    <sect3 id="func_i_have_global_priv">
       <title><literal>i_have_global_priv()</literal></title>
       <?sql-definition function veil2.i_have_global_priv sql/veil2--&version_number;.sql ?>
       <para>
@@ -408,7 +419,7 @@
 	<?doxygen-ulink function veil2_i_have_global_priv here?>.
       </para>
     </sect3>
-    <sect3 id="i_have_personal_priv">
+    <sect3 id="func_i_have_personal_priv">
       <title><literal>i_have_personal_priv()</literal></title>
       <?sql-definition function veil2.i_have_personal_priv sql/veil2--&version_number;.sql ?>
       <para>
@@ -416,7 +427,7 @@
 	<?doxygen-ulink function veil2_i_have_personal_priv here?>.
       </para>
     </sect3>
-    <sect3 id="i_have_priv_in_scope">
+    <sect3 id="func_i_have_priv_in_scope">
       <title><literal>i_have_priv_in_scope()</literal></title>
       <?sql-definition function veil2.i_have_priv_in_scope sql/veil2--&version_number;.sql ?>
       <para>
@@ -424,7 +435,15 @@
 	<?doxygen-ulink function veil2_i_have_priv_in_scope here?>.
       </para>
     </sect3>
-    <sect3 id="i_have_priv_in_superior_scope">
+    <sect3 id="func_i_have_priv_in_scope_or_global">
+      <title><literal>i_have_priv_in_scope_or_global()</literal></title>
+      <?sql-definition function veil2.i_have_priv_in_scope_or_global sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_i_have_priv_in_scope_or_global here?>.
+      </para>
+    </sect3>
+    <sect3 id="func_i_have_priv_in_superior_scope">
       <title><literal>i_have_priv_in_superior_scope()</literal></title>
       <?sql-definition function veil2.i_have_priv_in_superior_scope sql/veil2--&version_number;.sql ?>
       <para>
@@ -432,16 +451,32 @@
 	<?doxygen-ulink function veil2_i_have_priv_in_superior_scope here?>.
       </para>
     </sect3>
+    <sect3 id="func_i_have_priv_in_scope_or_superior">
+      <title><literal>i_have_priv_in_scope_or_superior()</literal></title>
+      <?sql-definition function veil2.i_have_priv_in_scope_or_superior sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_i_have_priv_in_scope_or_superior here?>.
+      </para>
+    </sect3>
+    <sect3 id="func_i_have_priv_in_scope_or_superior_or_global">
+      <title><literal>i_have_priv_in_scope_or_superior_or_global()</literal></title>
+      <?sql-definition function veil2.i_have_priv_in_scope_or_superior_or_global sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_i_have_priv_in_scope_or_superior_or_global here?>.
+      </para>
+    </sect3>
   </sect2>
 
   <sect2 id="utility_admin_functions">
     <title>Utility and Administration Functions</title>
-    <sect3 id="delete_expired_sessions">
+    <sect3 id="func_delete_expired_sessions">
       <title><literal>delete_expired_sessions()</literal></title>
       <?sql-definition function veil2.delete_expired_sessions sql/veil2--&version_number;.sql ?>
     </sect3>
-    <sect3 id="bcrypt">
-      <title><literal>bcrypt()</literal></title>
+    <sect3 id="func_bcrypt">
+      <title><literal>func_bcrypt()</literal></title>
       <?sql-definition function veil2.bcrypt sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>  
@@ -463,7 +498,7 @@
   <sect2 id="implementation_check_functions">
     <title>Functions For Checking Your Implementation</title>
     <sect3 id="func_have_user_scope_types">
-      <title><literal>have_user_scope_types()</literal></title>
+      <title><literal>func_have_user_scope_types()</literal></title>
       <?sql-definition function veil2.have_user_scope_types sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3 id="func_have_user_privileges">
@@ -530,4 +565,4 @@
       <?sql-definition trigger authentication_types_biu sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
-</sect1>
+</appendix>

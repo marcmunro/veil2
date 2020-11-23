@@ -36,13 +36,6 @@
   </para>
   <para>
     The demo sets a (very) minimal set of privileges.  Look for STEP 7
-    in the file <literal>demo/demo.sql</literal>.
+    in the file <literal>demo/veil2_demo--&version;.sql</literal>.
   </para>
-  <sect1>
-    <title>In Summary</title>
-    <para>
-      Create records in <link
-      linkend="entity_privilege"><literal>veil2.privileges</literal></link>.
-    </para>
-  </sect1>
 </chapter>

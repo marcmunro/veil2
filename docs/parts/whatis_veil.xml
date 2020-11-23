@@ -243,12 +243,11 @@ create policy projects__select
       Virtual Private Database - Overview</link> section. 
     </para>
     <para>
-      This section describes the major areas that you will need to
-      address in order to protect an existing system with
+      The following sections describe the major areas that you will
+      need to address in order to protect an existing system with
       <literal>Veil2</literal>.  This is intended as an introduction
       to the process solely in order to give you a feel for what is
-      required.  The process is covered in much more detail <link
-      linkend="setup">later</link>.
+      required.
     </para>
     <sect2>
       <title>Web Session Management</title>

@@ -95,7 +95,7 @@ alter table veil2.scope_links
 	If your source table's primary key is of some other form you
 	could simply allocate a <literal>scope_id</literal> for the
 	link table from a sequence, however each call to <link
-	linkend="i_have_priv_in_scope">i_have_priv_in_scope()</link>
+	linkend="func_i_have_priv_in_scope">i_have_priv_in_scope()</link>
 	will now need to map to the <literal>Veil2</literal> scope key
 	through our links table.  This is likely to badly affect
 	performance.
@@ -189,7 +189,11 @@ select 5, project_id, project_id
       <literal>Veil2</literal> VPD implementation will require the
       explicit clearing or refreshing of some or all of those caches.
       This step does not, unless updates are allowed to the key fields
-      or the originating scopes tables.
+      or the originating scopes tables.  
+    </para>
+    <para>
+      The rationale for not needing to refresh or clear caches is as
+      follows:
     </para>
     <para>
       In the event of a new scope being created, there can exist no

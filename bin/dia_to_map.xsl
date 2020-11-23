@@ -71,7 +71,7 @@ out our scaling factor and thereby define polygons for a map.
 
   <!-- Match and process string elements. -->
   <xsl:template match="dia:object[@type='Standard - Text']">
-    <entity>
+    <refobject>
       <xsl:copy-of select="@id"/>
       <xsl:attribute name="value">
 	<xsl:value-of select="substring-before(
@@ -133,7 +133,7 @@ out our scaling factor and thereby define polygons for a map.
 	  </xsl:if>
 	</xsl:for-each>
       </xsl:for-each>
-    </entity>
+    </refobject>
   </xsl:template>
 
  

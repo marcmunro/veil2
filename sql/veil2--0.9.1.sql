@@ -814,7 +814,9 @@ create type veil2.session_context_t as (
 );
 
 comment on type veil2.session_context_t is
-'Records context for the current session.';
+'Records context for the current session.  This type is used for the
+generation of a veil2_session_context temporary table which is
+populated by Veil2''s session management functions.';
 
 comment on column veil2.session_context_t.accessor_id is
 'The id of the accessor whose session this is.';
@@ -1191,11 +1193,10 @@ grant select on veil2.scope_tree to veil_user;
 create view veil2.promotable_privileges (
   scope_type_id, privilege_ids)
 as
-select st.scope_type_id, bitmap_of(p.privilege_id)
-  from veil2.scope_types st
- inner join veil2.privileges p
-    on p.promotion_scope_type_id = st.scope_type_id
-group by st.scope_type_id;
+select p.promotion_scope_type_id, bitmap_of(p.privilege_id)
+  from veil2.privileges p
+ where p.promotion_scope_type_id is not null
+group by p.promotion_scope_type_id;
 
 comment on view veil2.promotable_privileges is
 'Provide bitmaps of those privileges that may be promoted, mapped to the
@@ -1398,104 +1399,6 @@ revoke all on veil2.privilege_assignments from public;
 grant select on veil2.privilege_assignments to veil_user;
 
 
-\echo ......all_accessor_privs...
-create or replace
-view veil2.all_accessor_privs as
-with base_accessor_privs as
-  (
-    select aar.accessor_id,
-           aar.context_type_id as assignment_context_type_id,
-           aar.context_id as assignment_context_id,
-           arp.mapping_context_type_id,
-           arp.mapping_context_id,
-           arp.roles,
-           arp.privileges
-      from veil2.all_accessor_roles aar
-     inner join veil2.all_role_privileges arp
-        on arp.role_id = aar.role_id
-  ),
-promoted_privs as
-  (
-    select bap.accessor_id, bap.mapping_context_type_id,
-    	   bap.mapping_context_id, pp.scope_type_id,
-	   ss.superior_scope_id as scope_id,
-	   bap.privileges * pp.privilege_ids as privileges
-      from base_accessor_privs bap
-     inner join veil2.promotable_privileges pp
-        on not is_empty(bap.privileges * pp.privilege_ids)
-       and pp.scope_type_id != 1
-     inner join veil2.superior_scopes ss
-        on ss.scope_type_id = bap.assignment_context_type_id
-       and ss.scope_id = bap.assignment_context_id
-       and ss.superior_scope_type_id = pp.scope_type_id
-  ),
-global_privs as
-  (
-    select bap.accessor_id, bap.mapping_context_type_id,
-    	   bap.mapping_context_id, pp.scope_type_id,
-	   0 as scope_id,
-	   bap.privileges * pp.privilege_ids as privileges
-      from base_accessor_privs bap
-     inner join veil2.promotable_privileges pp
-        on not is_empty(bap.privileges * pp.privilege_ids)
-       and pp.scope_type_id = 1
-  ),  
-all_role_privs as
-  (
-    select accessor_id,
-    	   mapping_context_type_id, mapping_context_id,
-	   assignment_context_type_id as scope_type_id,
-           assignment_context_id as scope_id,
-       	   roles,  privileges
-      from base_accessor_privs
-     union all
-    select accessor_id, 
-           mapping_context_type_id, mapping_context_id,
-	   scope_type_id, scope_id,
-       	   null::bitmap as roles, privileges
-      from promoted_privs
-     union all
-    select accessor_id, 
-           mapping_context_type_id, mapping_context_id,
-	   scope_type_id, scope_id,
-       	   null::bitmap as roles, privileges
-      from global_privs
-  )
-select accessor_id,
-       mapping_context_type_id, mapping_context_id,
-       scope_type_id, scope_id,
-       union_of(roles) as roles, union_of(privileges) as privileges
-  from all_role_privs
- where accessor_id = 114
- group by accessor_id,
-          mapping_context_type_id, mapping_context_id,
-          scope_type_id, scope_id;
-  
-comment on view veil2.all_accessor_privs is
-'Shows all roles and privileges, in all possible contexts, for the
-currently connected accessor.';
-
-revoke all on veil2.all_accessor_privs from public;
-grant select on veil2.all_accessor_privs to veil_user;
-
-
-\echo ......all_accessor_privs_info...
-create or replace
-view veil2.all_accessor_privs_info as
-select accessor_id,
-       mapping_context_type_id, mapping_context_id,
-       to_array(roles) as roles,
-       to_array(privileges) as privileges
-  from veil2.all_accessor_privs;
-
-comment on view veil2.all_accessor_privs_info is
-'Developer view that shows all roles and privileges, in all possible
-contexts, for the currently connected accessor.';
-
-revoke all on veil2.all_accessor_privs_info from public;
-grant select on veil2.all_accessor_privs_info to veil_user;
-
-
 \echo ......session_context()...
 create or replace
 function veil2.session_context(
@@ -1542,7 +1445,6 @@ is a temporary table and does not always exist.';
 
 
 \echo ......session_assignment_contexts...
-
 create or replace
 view veil2.session_assignment_contexts as
 select login_context_type_id as context_type_id,
@@ -1591,11 +1493,6 @@ have not been assigned when we are logged-in in a different context.';
 revoke all on veil2.session_assignment_contexts from public;
 grant select on veil2.session_assignment_contexts to veil_user;
 
-/*
-TODO: Replace the view below with this, which is more correct and has
-a good optimisation for global logins.
-
-*/
 
 \echo ......all_session_roles...
 create or replace
@@ -1614,7 +1511,7 @@ select -- Globally assigned roles, if we are logged in in non-global
        aar.accessor_id, aar.role_id,
        aar.context_type_id, aar.context_id
   from veil2.session_context() sc
- inner join veil2.all_accessor_roles aar
+ inner join veil2.all_accessor_roles_plus aar
     on aar.accessor_id = sc.accessor_id
  inner join veil2.session_assignment_contexts sac
      on -- Matching login context and assignment context

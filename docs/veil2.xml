@@ -116,11 +116,10 @@
     &whyuse_veil;
     &veil_concepts;
     &whatis_veil;
-    &built_in;
     &how_difficult;
   </part>
   <part>
-    <title>Creating Your Veil2-based VPD</title>
+    <title>Creating Your Veil2-based VPD Step By Step</title>
     &veil_setup;
     &get_started;
     &setup_contexts;
@@ -137,29 +136,18 @@
     &housekeeping;
   </part>
   <part>
-    <title>More</title>
+    <title>Implementation Details</title>
     &veil_demo;
-    &for_developers;
+    &built_in;
     &original_veil;
     &tips;
     &performance;
     &security;
     &contact;
   </part>
-  <appendix>
-    <title><literal>Veil2</literal> ERD and Database Objects</title>
-    <mediaobject>
-      <imageobject>
-	<imagedata
-	    id="veil2_erd_div"
-	    fileref="veil2_erd.png"
-	    format="PNG"/>
-      </imageobject>
-    </mediaobject>
-    &veil_dbtables;
-    &veil_dbviews;
-    &veil_dbfuncs;
-  </appendix>
+  &veil_dbtables;
+  &veil_dbviews;
+  &veil_dbfuncs;
   <appendix>
     <title><literal>Veil2</literal> C Implementation</title>
     <para>

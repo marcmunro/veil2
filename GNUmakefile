@@ -286,15 +286,21 @@ $(HTMLDIR)/%: $(DIAGRAMS_DIR)/% $(HTMLDIR)
 # map file - an intermediate for mapping diagrams
 #
 %.map: %.coords %.png $(HTMLDIR)/index.html
-	@echo Creating HTML map file $<...
+	@echo Creating HTML map file $@...
 	bin/erd2map $* $(HTMLDIR) >$*.map
+
+diagrams/veil2_views.map: diagrams/veil2_views.coords \
+			  diagrams/veil2_views.png $(HTMLDIR)/index.html
+	@echo Creating HTML map file $@...
+	bin/erd2map diagrams/veil2_views $(HTMLDIR) view >$@
+
 
 # Phony target for building image files.
 #
 images: $(DIAGRAM_IMAGES)
 
 
-# This builds a png files from .dia files.
+# This builds .png files from .dia files.
 #
 %.png: %.dia
 	@echo "Rebuilding $@ from $<..."

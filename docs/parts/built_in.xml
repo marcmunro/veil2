@@ -20,6 +20,326 @@
     <literal>Veil2</literal> implementation, intended to help you with
     your customization needs.
   </para>
+  <sect1 id="user_customizations">
+    <title>User Customizations</title>
+    <para>
+       As a PostgreSQL extension, allowing customization of
+       <literal>Veil2</literal> is something of a challenge.  The
+       issue is that <literal>Veil2</literal>'s own database objects
+       are expected by PostgreSQL to not be user-modifiable.  This is
+       so that extensions can be upgraded in place using standard
+       extension mechanisms; and so that backups taken using pg_dump
+       can allow a database to be restored by simply re-installing the
+       extension.  What this means is that any modifications you make
+       to database objects that are part of the
+       <literal>Veil2</literal> extension will be lost if you restore
+       from a pg_dump backup, or if you upgrade the
+       <literal>Veil2</literal> extension. 
+    </para>
+    <para>
+      It is therefore vital that any user modifications are to objects
+      that are not owned by the extension. To deal with this, we limit
+      the ways in which customizations to <literal>Veil2</literal> are
+      made: 
+    </para>
+    <sect2 id="custom_data">
+      <title>Customized Data</title>
+      <para>
+	PostgreSQL allows tables in extensions to contain user-data.
+	Such tables must be registered with the extension mechanism
+	using
+	<literal>pg_catalog.pg_extension_config_dump()</literal>.
+	This allows a <literal>where clause</literal> to be defined
+	which specifies how to identify user-provided entries.
+      </para>
+      <para>
+	All <literal>Veil2</literal> tables are managed in this way,
+	so you can safely add your own data to them.  What you cannot
+	do is extend those tables in other ways such as by adding
+	extra columns or constraints.
+      </para>
+    </sect2>
+    <sect2 id="custom-functions">
+      <title>Customized Functions</title>
+      <para>
+	Although most <literal>Veil2</literal> functions are not
+	expected to be modified by the user, a small number must
+	provide functionality that is specific to your database
+	schema.  This means that some functionality must be
+	user-provided.
+      </para>
+      <para>
+	The mechanism provided by <literal>Veil2</literal> to allow
+	for user-provided functionaity is to allow users to define
+	their own replacements for built-in <literal>Veil2</literal>
+	functions.  These replacement functions are owned by you
+	and are <emphasis role="bold">not</emphasis> part of the
+	<literal>Veil2</literal> extension.
+      </para>
+      <para>
+	To define your own version of a <literal>Veil2</literal>
+	function, you simply create a new function, with the same
+	function signature, in the <literal>veil2</literal> schema,
+	with the function name prepended with
+	<literal>my_</literal>.
+      </para>
+      <para>
+	The following example is from the <literal>Veil2</literal>
+	demo and redefines the <literal>veil2.get_accessor()</literal>
+	function:
+	<programlisting>
+create or replace
+function veil2.my_get_accessor(
+    username in text,
+    context_type_id in integer,
+    context_id in integer)
+  returns integer as
+$$
+declare
+  _result integer;
+begin
+  select party_id
+    into _result
+    from demo.parties_tbl p
+   where p.party_name = username
+     and p.org_id = context_id
+     and context_type_id = 4;  -- Logins are in org context
+   return _result;
+end;
+$$
+language plpgsql security definer stable leakproof;
+	</programlisting>
+	This provides an <literal>accessor_id</literal> for a user
+	based on their username and the	<link
+	linkend="authentication_context">authentication context</link>
+	for which they are logging-in.
+      </para>
+      <para>
+	Note that in use, your user-provided function will replace the
+	<literal>Veil2</literal> system-provided function.  This means
+	that the name of the function when it is executed will not
+	include the <literal>my_</literal> prefix.  You should not
+	therefore use the function name as a prefix to a parameter
+	name in order to disambiguate a reference (see <ulink
+	url="https://www.postgresql.org/docs/current/plpgsql-implementation.html">this
+	link</ulink> for more details).
+      </para>
+    </sect2>
+    <sect2 id="custom-views">
+      <title>Customized Views</title>
+      <para>
+	Much of the heavy-lifting of managing users' privileges is
+	done through views and materialized views.  By redefining
+	views, we can alter functionality and expand the range of data
+	upon which we operate.
+      </para>
+      <para>
+	For instance, the <literal>veil2.superior_scopes</literal>
+	view identifies the hierarchy of scopes for which privilege
+	promotions are available.  If we have a database which
+	provides scopes for projects and for organizations, the scope
+	promotion for a project might be to the organization which
+	owns the project.  A role assigned in a project context might
+	contain the privilege to view basic organization data, and
+	this privilege would need to be promoted to apply at the
+	organization level.  In order to perform this promotion,
+	<literal>Veil2</literal> needs to know which projects belong
+	to which organizations.  This is what the
+	<literal>superior_scopes</literal> view is intended to
+	provide, but can only do so if user-defined.
+      </para>
+      <para>
+	Just as with functions, views owned by the
+	<literal>Veil2</literal> extension cannot be safely
+	redefined, but again, as with functions, we can create
+	alternative views and have <literal>Veil2</literal> manage them.
+      </para>
+      <para>
+	To override the built-in version of a <literal>Veil2</literal>
+	view, you simply need to define a new view, in the
+	<literal>veil2</literal> schema, with the prefix
+	<literal>my_</literal>.  So, to define new functionality for
+	the view <literal>veil2.superior_scopes</literal>, you would
+	create a new view
+	<literal>veil2.my_superior_scopes</literal>.
+      </para>
+      <para>
+	As an example, here is the definition for
+	<literal>veil2.my_superior_scopes</literal> from the demo:
+	<programlisting>
+create or replace
+view veil2.my_superior_scopes (
+  scope_type_id, scope_id,
+  superior_scope_type_id, superior_scope_id
+) as
+select 4, party_id,  -- Promote org to corp scope
+       3, corp_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+union all
+select 4, party_id,  -- Promote root orgs within corps to corp scope
+       3, party_id
+  from demo.parties_tbl
+ where party_type_id = 2
+   and org_id = 100
+   and party_id != 100
+union all
+select 4, party_id,  -- Promotion of org to higher org
+       4, org_id
+  from demo.parties_tbl
+ where party_type_id = 2
+   and party_id != org_id
+union all
+select 5, s.scope_id,   -- Project to corp promotions
+       3, p.corp_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id
+union all
+select 5, s.scope_id,   -- Project to org promotions
+       4, p.org_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id;
+	</programlisting>
+      </para>
+    </sect2>
+    <sect2>
+      <title>Managing User-Provided Functionality</title>
+      <para>
+	To make user-provided functions and views take effect, they
+	must be installed to replace the original system-provided
+	version.  <literal>Veil2</literal> provides 5 functions for
+	low-level management of user-provided functions and views:
+	<itemizedlist>
+	  <listitem>
+	    <link linkend="func_install_user_functions"><literal>veil2.install_user_functions()</literal></link>
+	    <para>
+	      This function copies all user-provided functions over
+	      their corresponding system-provided couterparts.  Before
+	      doing this, it ensures that a backup copy of the original
+	      system-provided function exists.  Any function defined
+	      in the <literal>veil2</literal> schema with a name
+	      beginning with <literal>my_</literal> that matches a
+	      function without that prefix will be copied.
+	    </para>
+	    <para>
+	      This function should be called after any modification of
+	      your user-provided functions.  It is safe to call this
+	      function any number oftimes.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <link linkend="func_restore_system_functions"><literal>veil2.restore_system_functions()</literal></link>
+	    <para>
+	      Should you need to restore original functions from their
+	      backup copies you should call this function.  This
+	      function exists primarily for use when upgrading the
+	      <literal>Veil2</literal> extension, but if you have
+	      mistakenly overwritten system-provided functionality
+	      with a buggy <literal>my_xxxx()</literal> function you
+	      should use this to restore the original functionality
+	      before dropping or fixing your version.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <link linkend="func_install_user_views"><literal>veil2.install_user_views()</literal></link>
+	    <para>
+	      This installs user-provided views in the same way that
+	      <literal>veil2.install_user_functions()</literal>
+	      installs user-provided functions.
+	    </para>
+	    <para>
+	      This function should be called after any modification of
+	      your user-provided views.  It is safe to call this
+	      function any number oftimes.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <link linkend="func_restore_system_views"><literal>veil2.restore_system_views()</literal></link>
+	    <para>
+	      Restores the original system-provided views from backups
+	      made by <literal>veil2.install_user_views()</literal>.
+	    </para>
+	  </listitem>
+	  <listitem id="use_func_init">
+	    <link linkend="func_init"><literal>veil2.init()</literal></link>
+	    <para>
+	      This installs all user-provided views and functions and
+	      also refreshes all materialized views.  Call this
+	      function any time that you modify one of your
+	      user-provided views or functions.  This will install
+	      your latest versions and ensure that everything is ready
+	      to go.  This function can safely be called any time that
+	      you may doubt whether you have the latest versions of
+	      your views and functions in use.
+	    </para>
+	  </listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	In addition to the manual mechanisms described above, all
+	user-defined functions and views will be automatically 
+	installed by <literal>Veil2</literal> when the system-provided
+	<link
+	    linkend="func_get_accessor"><literal>veil2.get_accessor()</literal></link>
+	function is first run.
+      </para>
+      <para>
+	This is provided primarily for the case when we restore from a
+	<literal>pg_dump</literal>-based backup.  In such a case, the
+	first attempt by a user to log in will call the
+	system-provided version of this function.  The system-provided
+	version of the function will only be in place during this
+	initiall call, and will have been replaced by the
+	user-provided version on subsequent calls.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="authentication">
+    <title>Authentication</title>
+    <para>
+      <literal>Veil2</literal> provides barely adequate password-based
+      authentication using <literal>bcrypt</literal>, and the means to
+      create your own better authentication methods.
+    </para>
+    <para>
+      Authentication is performed by the <link
+      linkend="func_authenticate"><literal>veil2.authenticate()</literal></link>
+      function which is called from <link
+      linkend="func_open_connection"><literal>veil2.open_connection()</literal></link>,
+      one of the functions used in <link
+      linkend="shared_session_management">Shared Session
+      Authentication</link>.
+    </para>
+    <para>
+      <literal>Veil2</literal> allows for new authentication methods
+      to be defined by creating authentication functions that match
+      the call signature of <link
+      linkend="func_authenticate_bcrypt"><literal>veil2.authenticate_bcrypt()</literal></link>
+      and recording them in <link
+      linkend="entity_authentication_type"><literal>veil2.authentication_types</literal></link>.
+    </para>
+    <para>
+      If your custom authentication mechanism requires 2 round-trips,
+      you can send supplemental data to the client from <link
+      linkend="func_create_session"><literal>veil2.create_session()</literal></link>
+      by recording a value for <literal>supplemental_fn</literal> in
+      the <literal>veil2.authentication_types</literal> entry.  This
+      will be the name of a function which takes an
+      <literal>accessor_id</literal> and
+      <literal>session_token</literal> as parameters and returns
+      another token which will be returned as the
+      <literal>session_supplemental</literal> value from
+      <literal>veil2.create_session()</literal>.
+    </para>
+    <para>
+      It should be possible to implement most authentication methods
+      using these 2 functions.  If you need anything more complex than
+      this, you will have to create your own versions of the session
+      management functions.
+    </para>
+  </sect1>
   <sect1 id="privileges_implementation">
     <title>Privileges</title>
     <para>
@@ -80,11 +400,11 @@
 	session or, worse, their authentication credentials.
       </para>
       <para>
-	To become a different user you use the function
-	<literal>veil2.become_user()</literal>, which will only
-	succeed if you have the <literal>become user</literal>
-	privilege in the scope of, or a superior scope to, their
-	authentication context.
+	To become a different user you use the function <link
+	linkend="func_become_user"><literal>veil2.become_user()</literal></link>,
+	which will only succeed if you have the <literal>become
+	user</literal> privilege in the scope of, or a superior scope
+	to, their authentication context.
       </para>
       <para>
 	Note that you cannot use
@@ -149,9 +469,8 @@
       <para>
 	The <literal>superuser</literal> role is system-provided, and
 	unmodifiable.  It provides every non-implicit role and every
-	privilege except <literal>connect</literal>.  These roles and
-	privileges are built in to the implementation (in
-	<literal><link
+	privilege except <literal>connect</literal>.  This is built in
+	to the implementation (in <literal><link
 	linkend="view_all_role_roles">veil2.all_role_roles</link></literal>)
 	and are not modifiable through <literal><link
 	linkend="entity_role_privilege">veil2.role_privileges</link></literal>
@@ -171,19 +490,43 @@
     </sect2>
   </sect1>
   <sect1>
-    <title id="physical_authentication_context">Authentication
-    and Session Contexts</title>
+    <title id="physical_authentication_context">Authentication Contexts</title>
     <para>
-      The <link linkend="veil2-concepts">concepts section</link>
-      describes <link linkend="authentication_context">authentication
-      contexts</link> as a means to associate different users with
-      different organizations.
+      As described in the concepts section, having distinct <link
+      linkend="authentication_context">authentication contexts</link>
+      means that you can have distinct sets of usernames for different
+      groupings of users.  Typically this would be for different
+      organizations based on some sort of organization context type.
     </para>
     <para>
-      If you don't need this functionality you can skip to the <link
-      linkend="simplest_get_accessor">end</link> of this section,
+      If you don't need this functionality you can skip this section
       and create the simplest possible
-      <literal>my_get_accessor()</literal> function.
+      <literal><link
+		   linkend="func_get_accessor">my_get_accessor()</link></literal>
+      function, something like this:
+      <programlisting>
+create or replace
+function veil2.my_get_accessor(
+    username in text,
+    context_type_id in integer,
+    context_id in integer)
+  returns integer as
+$$
+declare
+  _result integer;
+begin
+  select user_id
+    into _result
+    from my_users
+   where user_name = username;
+   -- We could choose to ensure that context_type_id = 1 and
+   -- context_id = 0, but instead we just ignore those parameters.
+  return _result;
+end;
+$$
+language plpgsql security definer stable leakproof;
+	  
+      </programlisting>
     </para>
     <para>
       If your application serves a number of distinct customers, each
@@ -251,47 +594,130 @@ select * from veil2.create_session(&lt;username&gt;, 4, 44);
 	username and authentication context.  For an example of this,
 	you should look at the <literal>Veil2</literal> demo
 	(following the text <quote><literal>STEP 3</literal></quote>
-	in the file <literal>demo/demo.sql</literal>).
-      </para>
-      <para id="simplest_get_accessor">
-	Note that many <literal>Veil2</literal> implementations will
-	not need to use seperate authentication contexts.  In such a
-	case your <literal>veil2.my_get_accessor()</literal> function
-	should simply insist on the context being global
-	(<literal>context_type_id = 1</literal> and
-	<literal>context_id = 0</literal>).  Something like this:
-	<programlisting>
-create or replace
-function veil2.my_get_accessor(
-    username in text,
-    context_type_id in integer,
-    context_id in integer)
-  returns integer as
-$$
-declare
-  _result integer;
-begin
-  select user_id
-    into _result
-    from my_users
-   where user_name = username;
-   -- We could choose to ensure that context_type_id = 1 and
-   -- context_id = 0, but instead we just ignore those parameters.
-  return _result;
-end;
-$$
-language plpgsql security definer stable leakproof;
-	  
-	</programlisting>
+	in the file <literal>veil2_demo--&lt;version&gt;.sql</literal>.
       </para>
     </sect2>
   </sect1>
   <sect1>
-    <title>Assignment Contexts</title>
+    <title>Role Assignment and Contexts</title>
     <para>
       Each role assignment in <literal>Veil2</literal> happens within
-      a specific assignment context.
+      a specific assignment context.  The assignment may be explicit,
+      as it is when roles are assigned to accessors in <link
+      linkend="entity_accessor_role"><literal>veil2.accessor_roles</literal></link>
+      or implicit as is the case for the <link
+      linkend="personal_context_role"><literal>personal
+      context</literal></link> role.
     </para>
+    <sect2 id="new_role_assignment_types">
+      <title>Creating New Role Assignment Mechanisms</title>
+      <para>
+	One of the coolest things about <literal>Veil2</literal> is
+	that you can create your own role assignment mechanisms.  You
+	do this by redefining <link
+	linkend="view_all_accessor_roles"><literal>veil2.all_accessor_roles</literal></link>.
+	This view returns all role assignments in all contexts other
+	than personal context which is handled by <literal><link
+	linkend="view_all_accessor_roles_plus">veil2.all_accessor_roles_plus</link></literal>).
+	You add new mechanisms by adding extra unions to the base
+	query against the <literal>veil2.accessor_roles</literal>
+	table.
+      </para>
+      <para>
+	For instance, to add an implicit global context role
+	assignment of role <literal>67</literal> to all accessors
+	whose username begins with <literal>M</literal> (for reasons
+	that make no sense whatsoever, but nicely illustrate the
+	flexibility this provides) you would define your version of
+	the view like this:
+	<programlisting>
+create or replace
+view veil2.my_all_accessor_roles (
+  accessor_id, role_id, context_type_id, context_id
+) as
+select accessor_id, role_id,
+       context_type_id, context_id
+  from veil2.accessor_roles
+ union all
+select accessor_id, role_id, 1, 0
+  from veil2.accessors
+ where lower(username) like 'm%';
+	</programlisting>
+      </para>
+      <para>
+	As a more realistic example let's add, additionally, the
+	<literal>project member</literal> role (which we'll give
+	role_id 68) in the project context to all accessors who are
+	recorded as team members in the
+	<literal>project_members</literal> table:
+	<programlisting>
+create or replace
+view veil2.my_all_accessor_roles (
+  accessor_id, role_id, context_type_id, context_id
+) as
+select accessor_id, role_id,
+       context_type_id, context_id
+  from veil2.accessor_roles
+ union all
+select accessor_id, 67, 1, 0
+  from veil2.accessors
+ where lower(username) like 'm%'
+ union all
+select accessor_id, 68, 5, project_id -- project context type is 5
+  from project_members; 
+	</programlisting>
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="physical_session_context">
+    <title>Session Contexts</title>
+    <para>
+      As described in <link linkend="session_context">session
+      contexts</link> in the concepts section, a user's session
+      context need not be the same as their authentication context.
+      The user-provided function <literal><link
+      linkend="func_get_accessor">my_get_accessor()</link></literal>
+      is used to determine the accessor_id for a user based on a
+      username and a context.  This context, ordinarily - see
+      Separating Login and Session Contexts below), will be the
+      session context.  Your <literal>my_get_accessor()</literal>
+      function may use the context parameters as it sees fit: if you
+      require a global authentication context, the parameters can be
+      ignored; or it can require the supplied context to be the
+      authentication context; or it can require that the supplied
+      context is related to the authentication context (eg a child
+      context of the authentication context.  What it chooses to do is
+      entirely up to your implementation.
+    </para>
+    <para>
+      Note that in order to successfully authenticate, the user must
+      have <literal><link
+      linkend="connect_privilege">connect</link></literal> privilege in
+      a scope equal or superior to the session context.
+    </para>
+    <sect2 id="login_context">
+      <title>Separating Login and Session Contexts</title>
+      <para>
+	In order to let privileged users work in session contexts that
+	are unrelated to their authentication contexts,
+	<literal>Veil2</literal> optionally allows the session context
+	for a session to be provided explicitly to the <literal><link
+	linkend="func_create_session">veil2.create_session()</link></literal>
+	and <literal><link
+	linkend="func_create_session">veil2.hello()</link></literal>
+	functions.
+      </para>
+      <para>
+	The user must have <literal>connect</literal> privilege in the
+	scope of both the accessor's authentication context and the
+	chosen session context.
+      </para>
+      <para>
+	This is described in more detail in the <link
+	linkend="authent_protocols">Authentication Protocols</link>
+	appendix.
+      </para>
+    </sect2>
   </sect1>
   <sect1 id="physical_role_mapping">
     <title>Role Mappings and Mapping Contexts</title>
@@ -360,21 +786,13 @@ language plpgsql security definer stable leakproof;
 	  </para>
 	</listitem>
 	<listitem>
-	  TODO: DISTINGUISH BETWEEN AUTHENTICATION AND LOGIN CONTEXTS 
 	  <para>
 	    the user's <link
-	    linkend="physical_authentication_context">authentication
+	    linkend="physical_session_context">session
 	    context</link>.
-	  </para>
-	  <para>
-	    A user's authentication context determines which role
-	    assignments are considered valid.
 	  </para>
 	</listitem>
       </itemizedlist>
     </para>
-  </sect1>
-  <sect1>
-    <title>Built-In Security Contexts</title>
   </sect1>
 </chapter>

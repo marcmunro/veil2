@@ -1,0 +1,121 @@
+<chapter id="security">
+  <title>Security</title>
+  <subtitle>(So, How Secure Is This?)</subtitle>
+  <para>
+    Although a well-implemented <literal>Veil2</literal>-based VPD
+    will give you a more secure system than one without
+    <literal>Veil2</literal>, there are some fundamental limits to how
+    secure your database can ever be.
+  </para>
+  <sect1>
+    <title>Fundamental Security Weaknesses</title>
+    <subtitle>(Game-Over Scenarios)</subtitle>
+    <para>
+      There are many security threats that <literal>Veil2</literal>
+      can do nothing for.  <literal>Veil2</literal> can only limit
+      access to data for users that are, or appear to be legitimate.
+      Here are some things <literal>Veil2</literal> can't protect
+      against:
+      <itemizedlist>
+	<listitem>
+	  an attacker with credentials for the owner of the database
+	  objects;
+	</listitem>
+	<listitem>
+	  an attacker with credentials for the postgres account;
+	</listitem>
+	<listitem>
+	  an attacker with credentials for root;
+	</listitem>
+	<listitem>
+	  an attacker who can become root through a local privilege
+	  escalation attack;
+	</listitem>
+	<listitem>
+	  an attacker with access to the database filesystem;
+	</listitem>
+	<listitem>
+	  an attacker with access to database backups;
+	</listitem>
+	<listitem>
+	  an attacker with access to a replica/failover/reporting
+	  database.
+	</listitem>
+      </itemizedlist>
+    </para>
+  </sect1>
+  <sect1>
+    <title>So, What Is It Good For?</title>
+    <para>
+      <literal>Veil2</literal> is designed primarily to protect
+      sensitive data from legitimate users.  It is not intended to
+      keep attackers out of your systems.  It cannot hope to keep your
+      data secure against attacks from state actors, or highly skilled
+      black-hat hackers.  
+    </para>
+    <para>
+      But it can protect sensitive data from inquisitive users, and in
+      doing so it can protect users from themselves.  And it can
+      greatly limit the damage that can arise from a compromised
+      application server.
+    </para>
+  </sect1>
+  <sect1>
+    <title>Why It Is Still Worth Doing</title>
+    <para>
+      If your database is being accessed from a web-based system, it
+      is in hostile territory.  Typically, your web server will be
+      running in a walled-off part of your network which is considered
+      <quote>untrusted</quote>.  This is often referred to a a
+      <ulink
+	  url="https://en.wikipedia.org/wiki/DMZ_%28computing%29"><literal>DMZ</literal></ulink>.
+    </para>
+    <para>
+      This is done because of the poor history of web application
+      security.  Your System Administrators assume that the web-server
+      will eventually be compromised, and try to limit the damage that
+      an attacker can do from that server by placing it into a sandbox
+      with limited access to the rest of your network.
+    </para>
+    <para>
+      That's the theory anyway.  Where it breaks down is that your web
+      server has to have access to your database.  It may go through
+      another level of indirection to an application server, which may
+      be in yet another walled-off segment of the network, but
+      ultimately the problem is the same.  If the application server
+      is compromised, even though it is in a segregated, untrusted,
+      part of your network, it still has access to your database.
+    </para>
+    <para>
+      What this means is that any breach of your application server
+      will mean that an attacker has the same rights to your database
+      that your application server has, and the chances are that your
+      application server needs access to almost every relation in your
+      database.  This is very bad.
+    </para>
+    <para>
+      It is also entirely baffling.  We put the web/application server
+      in a special untrusted segment of the network because we don't
+      trust it, and then we give the application almost unlimited
+      access to our database.  We say that the database has to be in
+      the secure part of our network and then do almost nothing to
+      limit access from the untrusted part.  This is just asking for
+      trouble.
+    </para>
+    <para>
+      So, what can <literal>Veil2</literal> do to help?  Well, it
+      limits the data that an attacker can see, to the set of data for
+      which they can steal credentials.  If they can steal Bob's login
+      credentials, then they can see all of the data that Bob can see.
+      But no more than that.  And <ulink
+      url="https://explainxkcd.com/wiki/index.php/538:_Security">they
+      could probably steal</ulink> Bob's credentials without going to
+      the trouble of breaking in to the application server.
+      Furthermore, if you implement the <link
+      linkend="report_breaches">reporting of blocked accesses</link>
+      as suggested in the <link linkend="tips">tips chapter</link>,
+      you will probably be alerted as soon as any intruder attempts to
+      access the database.
+    </para>
+  </sect1>
+</chapter>

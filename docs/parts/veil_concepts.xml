@@ -489,10 +489,18 @@
     <title>Session Contexts</title>
     <para>
       When a user authenticates, they begin a session, and this session
-      has a context.  The session context will often by the same as
-      the session's <link
-      linkend="authentication_context">authentication context</link>
-      but it need not be.
+      has a context.  The session context determines what data the
+      user can see, as though the user is logged in to that context.
+      Often the session context will be the same as the authentication
+      context, but <literal>Veil2</literal> does not require this.
+    </para>
+    <para>
+      For example, consider that our authentication context is at the
+      level of a corporation (so usernames must be unique withi nthe
+      entire corporation), but that we log in to the web-site for a
+      subdivision.  Our authentication context would be the
+      corporation context, and the session context would be the
+      subdivision context.
     </para>
     <para>
       The context of a user's session will determine the access rights

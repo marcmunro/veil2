@@ -39,115 +39,155 @@
     <para>
       The (clickable) diagram above shows the relationship of views
       with each other and with <literal>Veil2</literal>, and other,
-      tables. 
+      tables and functions.
     </para>
     <para>
+      The bottom-most view in the diagram, <link
+      linkend="view_session_privileges_v"><literal>session_privileges_v</literal></link>
+      provides the data that determines an accessors privileges.  This
+      view is used directly by the function <link
+      linkend="func_load_session_privs"><literal>load_session_privs</literal></link>
+      to load the set of applicable roles and privileges, in all
+      applicable contexts for an accessor's session.  The performance
+      of this view is critical, and has been carefully developed and
+      optimised.  Even so, <literal>Veil2</literal>'s session
+      management functions will usually load this data from the <link
+      linkend="view_accessor_privileges_cache"><literal>accessor_privileges_cache</literal></link>
+      table.
     </para>
     <para>
+      A few of the views shown do not contribute to
+      <literal>session_privileges_v</literal>.  These are developer
+      views, aimed at providing data for development and debugging.
     </para>
-    <sect2 id="view_all_role_roles">
-    <title>All Role Roles View</title>
-    <sect3>
-      <title><literal>all_role_roles</literal></title>
-      <?sql-definition view veil2.all_role_roles sql/veil2--&version_number;.sql ?>
-    </sect3>
-    </sect2>
-    <sect2 id="view_all_role_privileges">
-      <title>All Role Privileges Views</title>
-      <sect3>
-        <title><literal>all_role_privileges</literal></title>
-        <?sql-definition view veil2.all_role_privileges sql/veil2--&version_number;.sql ?>
-      </sect3>
-      <sect3>
-        <title><literal>all_role_privileges_info</literal></title>
-        <?sql-definition view veil2.all_role_privileges_info sql/veil2--&version_number;.sql ?>
-      </sect3>
-    </sect2>
-    <sect2 id="view_accessor_contexts">
-      <title>Accessor Contexts View</title>
-      <sect3>
-        <title><literal>accessor_contexts</literal></title>
+    <sect2>
+      <title>User-Supplied Views</title>
+      <para>
+	Although all of <literal>Veil2</literal>'s views may be
+	replaced by user-supplied versions, the following views are
+	expected to be.  These views are expected to directly query
+	user-provided tables which will be part of the set of data
+	being protected by <literal>Veil2</literal>.
+      </para>
+      <sect3 id="view_accessor_contexts">
+	<title>Accessor Contexts View</title>
         <?sql-definition view veil2.accessor_contexts sql/veil2--&version_number;.sql ?>
       </sect3>
-    </sect2>
-    <sect2 id="view_superior_scopes">
-      <title>Superior Scopes View</title>
-      <sect3>
-        <title><literal>superior_scopes</literal></title>
+      <sect3 id="view_superior_scopes">
+	<title>Superior Scopes View</title>
         <?sql-definition view veil2.superior_scopes sql/veil2--&version_number;.sql ?>
       </sect3>
-    </sect2>
-    <sect2 id="view_all_superior_scopes">
-      <title>All Superior Scopes Views</title>
-      <sect3>
-        <title><literal>all_superior_scopes_v</literal></title>
-        <?sql-definition view veil2.all_superior_scopes_v sql/veil2--&version_number;.sql ?>
-      </sect3>
-      <sect3>
-        <title><literal>all_superior_scopes</literal></title>
-        <?sql-definition view veil2.all_superior_scopes sql/veil2--&version_number;.sql ?>
-      </sect3>
-    </sect2>
-    <sect2 id="view_scope_tree">
-      <title>Scope Tree View</title>
-      <sect3>
-        <title><literal>scope_tree</literal></title>
-        <?sql-definition view veil2.scope_tree sql/veil2--&version_number;.sql ?>
-      </sect3>
-    </sect2>
-    <sect2 id="view_promotable_privileges">
-      <title>Promotable Privileges Views</title>
-      <sect3>
-        <title><literal>promotable_privileges</literal></title>
-        <?sql-definition view veil2.promotable_privileges sql/veil2--&version_number;.sql ?>
-      </sect3>
-      <sect3>
-        <title><literal>promotable_privileges_info</literal></title>
-        <?sql-definition view veil2.promotable_privileges_info sql/veil2--&version_number;.sql ?>
-      </sect3>
-    </sect2>
-    <sect2 id="view_all_accessor_roles">
-      <title>All Accessor Roles Views</title>
-      <sect3>
-        <title><literal>all_accessor_roles</literal></title>
+      <sect3 id="view_all_accessor_roles">
+	<title>All Accessor Roles View</title>
         <?sql-definition view veil2.all_accessor_roles sql/veil2--&version_number;.sql ?>
       </sect3>
-      <sect3 id="view_all_accessor_roles_plus">
-        <title><literal>all_accessor_roles_plus</literal></title>
-        <?sql-definition view veil2.all_accessor_roles_plus sql/veil2--&version_number;.sql ?>
-      </sect3>
     </sect2>
-    <sect2 id="view_role_chains">
-      <title>Role Chains View</title>
-      <sect3>
-        <title><literal>role_chains</literal></title>
+    <sect2>
+      <title>Developer Views</title>
+      <para>
+	These views do not directly contribute to
+	<literal>Veil2</literal> functionality.  They exist to help
+	developers in visuallizing and debugging data.
+      </para>
+      <sect3 id="view_privilege_assignments">
+	<title>Privilege Assignments View</title>
+        <?sql-definition view veil2.privilege_assignments sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_all_role_privileges_info">
+        <title>All Role Privileges Info View</title>
+        <?sql-definition view veil2.all_role_privileges_info sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_scope_tree">
+	<title>Scope Tree View</title>
+        <?sql-definition view veil2.scope_tree sql/veil2--&version_number;.sql ?>      </sect3>
+      <sect3 id="view_promotable_privileges_info">
+        <title>Promotable Privileges Info View</title>
+        <?sql-definition view veil2.promotable_privileges_info sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_session_privileges_info">
+        <title>Session Privileges Info View</title>
+        <?sql-definition view veil2.session_privileges_info sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_role_chains">
+	<title>Role Chains View</title>
         <?sql-definition view veil2.role_chains sql/veil2--&version_number;.sql ?>
       </sect3>
     </sect2>
-    <sect2 id="view_privilege_assignments">
-      <title>Privilege Assignments View</title>
-      <sect3>
-        <title><literal>privilege_assignments</literal></title>
-        <?sql-definition view veil2.privilege_assignments sql/veil2--&version_number;.sql ?>
+    <sect2>
+      <title><literal>Veil2</literal> Core Views</title>
+      <para>
+	These views are fundamental to the proper operation of
+	<literal>Veil2</literal>.  You may provide your own versions
+	of these views if needed, but you should be aware that future
+	versions of <literal>Veil2</literal> may redefine and
+	redevelop these views.  Although your user-supplied views will
+	take precedence, you run the risk of missing important
+	improvements to performance and functionality, and more
+	importantly, if the view semantics change, you risk
+	breaking assumptions made by the <literal>Veil2</literal>
+	developers, which could have unforeseen consequences.
+      </para>
+      <para>
+	That said, if you need to create a user-supplied version of
+	one of these views, you are free to do so.  If so, you should
+	carefully review any revisions to <literal>Veil2</literal>
+	before applying the extension upgrade.  You are also advised
+	to discuss your needs with the <literal>Veil2</literal>
+	developers.  Contact links can be found <link
+	linkend="contact">here</link>.
+      </para>
+      <sect3 id="view_all_role_roles">
+	<title>All Role Roles View</title>
+	<?sql-definition view veil2.all_role_roles sql/veil2--&version_number;.sql ?>
       </sect3>
-    </sect2>
-    <sect2 id="view_session_assignment_contexts">
-      <title><literal>session_assignment_contexts</literal></title>
-      <?sql-definition view veil2.session_assignment_contexts sql/veil2--&version_number;.sql ?>
-    </sect2>
-    <sect2 id="view_all_session_roles">
-      <title>All Session Roles View</title>
-      <?sql-definition view veil2.all_session_roles sql/veil2--&version_number;.sql ?>
-    </sect2>
-    <sect2 id="view_session_privileges">
-      <title>Session Privileges Views</title>
-      <sect3>
-        <title><literal>session_privileges_v</literal></title>
+      <sect3 id="view_all_superior_scopes_v">
+	<title>All Superior Scopes View</title>
+        <?sql-definition view veil2.all_superior_scopes_v sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_all_accessor_roles_plus">
+        <title>All Accessor Roles Plus View</title>
+        <?sql-definition view veil2.all_accessor_roles_plus sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_all_role_privileges">
+	<title>All Role Privileges View</title>
+        <?sql-definition view veil2.all_role_privileges sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_session_assignment_contexts">
+	<title>Session Assignment Contexts View</title>
+	<?sql-definition view veil2.session_assignment_contexts sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_all_session_roles">
+	<title>All Session Roles View</title>
+	<?sql-definition view veil2.all_session_roles sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_promotable_privileges">
+	<title>Promotable Privileges View</title>
+        <?sql-definition view veil2.promotable_privileges sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_session_privileges_v">
+	<title>Session Privileges V View</title>
         <?sql-definition view veil2.session_privileges_v sql/veil2--&version_number;.sql ?>
       </sect3>
-      <sect3 id="view_session_privileges_info">
-        <title><literal>session_privileges_info</literal></title>
-        <?sql-definition view veil2.session_privileges_info sql/veil2--&version_number;.sql ?>
+    </sect2>
+    <sect2>
+      <title>Materialized Views and Caches</title>
+      <para>
+	Materized views and caches are used to improve query
+	performance.  The trade-off for improved performance is that
+	they need to be managed: whenever the data on which they
+	depend is modified, they must be refreshed.
+      </para>
+      <sect3 id="view_all_superior_scopes">
+        <title>All Superior Scopes Materialized View</title>
+        <?sql-definition view veil2.all_superior_scopes sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_all_role_privileges_cache">
+        <title>All Role Privileges Cache Table</title>
+        <?sql-definition table veil2.all_role_privileges_cache sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_accessor_privileges_cache">
+        <title>Accessor Privileges Cache Table</title>
+        <?sql-definition table veil2.accessor_privileges_cache sql/veil2--&version_number;.sql ?>
       </sect3>
     </sect2>
   </sect1>

@@ -862,6 +862,9 @@ create table veil2.accessor_privileges_cache (
   privs				bitmap not null
 );
 
+comment on table veil2.accessor_privileges_cache is
+'Cache table';
+
 create index accessor_privileges_cache__accessor_idx
   on veil2.accessor_privileges_cache(accessor_id);
 
@@ -922,15 +925,16 @@ select primary_role_id, assigned_role_id,
   from superuser_roles;
 
 comment on view veil2.all_role_roles is
-'Show all role->role mappings in all contexts.  If the context is
-null, the mapping applies in all contexts.
-
-Note that the superuser role is implicitly assigned all non-implicit
-roles except connect.
+'Show all role to role mappings in all contexts.  If the context is
+null, the mapping applies in all contexts, taking into account
+role mappings that occur indirectly through other role mappings.
 
 Indirect mappings occur through other mappings (ie mappings are
 transitive).  Eg if a is assigned to b and b to c, then by transitivity
-a is assigned (indirectly) to c.'; 
+a is assigned (indirectly) to c.
+
+Note that the superuser role is implicitly assigned all non-implicit
+roles except connect.';
 
 revoke all on veil2.all_role_roles from public;
 grant select on veil2.all_role_roles to veil_user;
@@ -967,9 +971,14 @@ select r.role_id as role_id,
        rr.context_id;
 
 comment on view veil2.all_role_privileges is
-'Shows all role->role mappings, with their resulting privileges in all
-mapping contexts.  If the mapping context is null, the mapping applies
-in all mapping contexts.';
+'Provides all role to role mappings, with their resulting privileges
+in all mapping contexts.  If the mapping context is null, the mapping
+applies in all mapping contexts.
+
+For performance reasons a cache table,
+veil2.all_role_privileges_cache, has been created.  This cache must be
+refreshed, either fully or partly (per accessor) whenever data
+underlying this view is updated.';
 
 create or replace
 view veil2.all_role_privileges_info as
@@ -1003,15 +1012,15 @@ select accessor_id, 1, 0
 
 comment on view veil2.accessor_contexts is
 'This view lists the allowed session contexts for accessors.  The
-system-provided version of this view should be overridden by the user
-by providing an equivalent view called veil2.my_accessor_contexts.
+system-provided version of this view may be overridden by providing
+an equivalent view called veil2.my_accessor_contexts.
 
 When an accessor opens a session, they choose a session context.  This
-session context determines which set of role->role mappings are in
+session context determines which set of role to role mappings are in
 play.  Typically, there will only be one such set, as provided by the
 default implementation of this view.  If however, your application
-requires separate contexts to have different role->role mappings, you
-should modify this view to map your accessors with that context.
+requires separate contexts to have different role to role mappings,
+you should modify this view to map your accessors with that context.
 
 Typically this will be used in a situation where your application
 serves a number of different clients, each of which have their own
@@ -1019,15 +1028,19 @@ role definitions.  Each accessor will belong to one of those clients
 and this view should be modified to make that mapping apparent.
 
 A typical view definition might be:
-  select party_id, 3, client_id
-    from app_schema.parties
-   union all 
-  select party_id, 1, 0
-    from mycorp_schema.superusers;
+    select party_id, 3, client_id
+      from app_schema.parties
+     union all 
+    select party_id, 1, 0
+      from mycorp_schema.superusers;
 
 which would allow those defined in the superusers table to connect in
 the global scope, and those defined in the parties table to connect
-in the context of the client that they work for.';
+in the context of the client that they work for.
+
+Note that any change to the underlying data of this view (ie one that
+changes what the view will show) *must* cause a full refresh of all
+Veil2 materialized views and caches.';
 
 
 \echo ......superior_scopes...
@@ -1041,35 +1054,40 @@ select null::integer, null::integer,
 where false;
 
 comment on view veil2.superior_scopes is
-'This view identified superior scopes for determining the scope
+'This view identifies superior scopes for determining the scope
 hierarchy.  This is used for determing how to promote privileges when
 privilege promotion is needed, which happens when a role that is
 assigned in a restricted security context has privileges that must be
 applied in a less restricted scope.  Note that promotion to global
 scope is always possible and is not managed through this view.
 
-VPD Implementation Notes: If you have restricted scopes which are
-sub-scopes of less restricted ones, and you need privilege promotion
-for privileges assigned in the restricted context to the less
-restricted one, you must override this view to show which scopes may
-be promoted to which other scopes.  For example if you have a corp
-scope type and a dept scope type which is a sub-scope of it, and your
-departments table identifies the corp_id for each department, you would
-define your over-riding view something like this:
+If you have restricted scopes which are descendant scopes of less
+restricted ones, and you need privileges assigned in the restricted
+context to be promoted to the less restricted one, you must override
+this view to show which scopes may be promoted to which other scopes.
+For example if you have a corp scope type and a dept scope type which
+is a sub-scope of it, and your departments table identifies the
+corp_id for each department, you would define your over-riding view
+something like this:
 
     create or replace
     view veil2.my_superior_scopes (
       scope_type_id, scope_id,
       superior_scope_type_id, superior_scope_id
     ) as
-    select 96, -- dept scope type id
+    select 96,   -- dept scope type id
            department_id,
-           95, -- corp scope type id 
+           95,   -- corp scope type id 
            corp_id
       from departments;
 
-Note that any multi-level context promotions will be handled by
-veil2.all_superior_scopes which you should have no need to modify.';
+Multi-level context promotions (eg to grandparent or great-grandparent
+scopes) will be handled by veil2.all_superior_scopes which you should
+have no need to modify.
+
+Note that any change to the underlying data of this view (ie one that
+changes what the view will show) *must* cause a full refresh of all
+Veil2 materialized views and caches.';
 
 revoke all on veil2.superior_scopes from public;
 grant select on veil2.superior_scopes to veil_user;
@@ -1109,7 +1127,12 @@ contains scope c, then this view will return rows for scope c
 promoting to both scope b and scope a.
 
 You should not need to modify this view when creating your custom VPD
-implementation.';
+implementation.
+
+Note that for performance reasons a materialized version of this view,
+veil2.all_superior_scopes, has been created.  Any change to the data
+underlying this view must result in the materialized view being
+refreshed.';
 
 create 
 materialized view veil2.all_superior_scopes
@@ -1230,18 +1253,16 @@ select accessor_id, role_id,
 
 comment on view veil2.all_accessor_roles is
 'Provides all of an accessor''s explicit role assignments, ie it does
-not provide the personal_scope role.  This view is used by the veil2
-access control functions, and when adding new security context types,
-this view is all that should usually need to be modified.
+not provide the personal_scope role.
 
-VPD Implementation Notes: If you have any explicitly assigned roles
-that are not granted through the veil2.accessor_role table, you will
-need to redefine this view.  For example if you have a project context
-that is dependent on an accessor being assigned to a project you might
-redefine the view as follows:
+If you have any explicitly assigned roles that are not granted through
+the veil2.accessor_role table, you must provide your own definition of
+this view (called veil2.my_all_accessor_roles).  For example if you
+have a project context that is dependent on an accessor being assigned
+to a project you might redefine the view as follows:
 
     create or replace
-    view veil2.all_accessor_roles (
+    view veil2.my_all_accessor_roles (
       accessor_id, role_id, context_type_id, context_id
     ) as
     select accessor_id, role_id,
@@ -1251,7 +1272,11 @@ redefine the view as follows:
     select party_id, role_id,
            99,  -- id for project context_type
            project_id
-      from project_parties;';
+      from project_parties;
+
+Note that any change to the underlying data of this view (ie one that
+changes what the view will show) *must* cause a full or partial
+refresh of all Veil2 materialized views and caches.';
 
 revoke all on veil2.all_accessor_roles from public;
 grant select on veil2.all_accessor_roles to veil_user;
@@ -1268,8 +1293,8 @@ select accessor_id, 2, 1, accessor_id
   from veil2.accessors;
 
 comment on view veil2.all_accessor_roles_plus is
-'As all_accessor_roles but also showing personal_scope role for each
-accessor.';
+'As all_accessor_roles but also providing the implicitly assigned
+personal_scope role for each accessor. ';
 
 revoke all on veil2.all_accessor_roles_plus from public;
 grant select on veil2.all_accessor_roles_plus to veil_user;
@@ -1479,11 +1504,11 @@ select 2, accessor_id
   from veil2.session_context();
 
 comment on view veil2.session_assignment_contexts is
-'Provides the set of security contexts which are valid for this role
+'Provides the set of security contexts which are valid for role
 assignments within the current session.  The purpose of this is to
 filter out any role assignments which should not apply to the current
-session, as these roles may contain privileges which will be promoted
-to global_scope.
+session, as those roles could contain privileges which could be
+promoted to global_scope.
 
 The situation this prevents is for users that are allowed to login in
 different contexts with different roles in those contexts.  We do not
@@ -1530,8 +1555,8 @@ comment on view veil2.all_session_roles is
 'Return all roles assigned to the currently authenticated accessor
 that apply given the accessor''s session_context.';
 
-revoke all on veil2.all_role_roles from public;
-grant select on veil2.all_role_roles to veil_user;
+revoke all on veil2.all_session_roles from public;
+grant select on veil2.all_session_roles to veil_user;
 
 
 create or replace
@@ -2803,7 +2828,8 @@ select *
   from veil2.session_privileges();
 
 comment on view veil2.session_privileges_info is
-'Provides a user-readable view of session_privileges.';
+'Provides a user-readable view of the veil2.session_privileges
+temporary table.';
 
 grant select on veil2.session_privileges_info to veil_user;
 

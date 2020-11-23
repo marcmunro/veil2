@@ -241,6 +241,8 @@ docs/extracts: $(DATA)
 	@bin/extract_sql.sh docs docs/extracts
 	@touch $@
 
+$(EXTRACTS): docs/extracts
+
 TARGET_FILES += $(EXTRACTS) docs/extracts/*xml
 TARGET_DIRS += docs/extracts
 
@@ -265,7 +267,8 @@ $(HTMLDIR):
 
 # Copy new images to html dir
 #
-$(HTMLDIR)/%: $(DIAGRAMS_DIR)/% $(HTMLDIR)
+$(TARGET_IMAGES): $(DIAGRAM_IMAGES)
+	@mkdir -p $(HTMLDIR) 2>/dev/null
 	cp $< $@
 
 # Intermediate file used for creating maps from our diagrams.
@@ -285,7 +288,7 @@ $(HTMLDIR)/%: $(DIAGRAMS_DIR)/% $(HTMLDIR)
 
 # map file - an intermediate for mapping diagrams
 #
-%.map: %.coords %.png $(HTMLDIR)/index.html
+%.map: %.coords %.png $(HTMLDIR)
 	@echo Creating HTML map file $@...
 	bin/erd2map $* $(HTMLDIR) >$*.map
 
@@ -317,7 +320,8 @@ images: $(DIAGRAM_IMAGES)
 #
 $(HTMLDIR)/index.html: $(DOC_SOURCES) $(VERSION_FILE) $(VEIL2_STYLESHEET) \
 		 $(STYLESHEET_IMPORTER) $(TARGET_IMAGES) $(EXTRACTS) \
-		 $(ANCHORS_DIR) $(HTMLDIR)
+		 $(ANCHORS_DIR)
+	@echo $(TARGET_IMAGES)
 	@echo XSLTPROC "<docbook sources>.xml -->" $@
 	$(XSLTPROC) $(XSLTPROCFLAGS) --output html/ \
 		$(VEIL2_STYLESHEET) docs/veil2.xml

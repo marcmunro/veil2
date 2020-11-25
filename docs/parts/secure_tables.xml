@@ -1,5 +1,5 @@
 <chapter id="secure_tables">
-  <title>Secure Your Tables (STEP 10)</title>
+  <title>Secure Your Tables (STEP 9)</title>
   <para>
     At last we get to secure something.
   </para>
@@ -17,7 +17,8 @@
       level security for that table, and then you define policies on
       the table for select, insert, update and delete.  The following
       is the definition for the select policy on projects from the
-      demo.  See STEP 10 in file <literal>demo/demo.sql</literal>.
+      demo.  See STEP 9 in file
+      <literal>demo/veil2_demo--&version;.sql</literal>.
       <programlisting>
 alter table demo.projects enable row level security;
 
@@ -65,12 +66,6 @@ create policy parties_tbl__select
       DO NOT GRANT ANY ACCESS OTHER THAN SELECT TO A
       <literal>VEIL2</literal> TABLE WITHOUT FIRST ADDING SUITABLE
       PRIVILEGES AND SECURITY POLICIES.
-    </para>
-  </sect1>
-  <sect1>
-    <title>In Summary</title>
-    <para>
-      Create and enable security policies for each user-facing table.
     </para>
   </sect1>
 </chapter>

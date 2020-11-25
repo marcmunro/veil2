@@ -55,8 +55,7 @@ update veil2.system_parameters
 -- STEP 3:
 -- Authentication stuff.
 
--- Create new authentication types, if you need them.  Note that you
--- can easily do this later. 
+-- Create new authentication types if you need them.
 
 -- 3.1 Create new authentication methods.
 /*
@@ -190,7 +189,7 @@ $$
 language plpgsql;
  */
 
--- 4.4 Copy existing authentication records
+-- 4.3 Copy existing authentication records
 -- This is going to be tricky as it is unlikely that the
 -- authentication tokens in your database are going to match those
 -- exepected by Veil2.  See the Veil2 documentation for Step 4 for
@@ -206,7 +205,7 @@ select a.accessor_id, 'bcrypt', u.<token>
     on a.<user id> = u.<user id>;
 */
 
--- 4.5 Create Referential Integrity Triggers
+-- 4.4 Create Referential Integrity Triggers
 -- On insert and on delete triggers are needed as a minimum.  If
 -- updates are allowed to change the user id fields, then we will also
 -- need to deal with updates.  Far better though to simply have an
@@ -283,7 +282,7 @@ create trigger <user_table>_bd_trg
 -- Also do something for updates.  See comments above
 */
 
--- 4.6 Authentication Token Handling Triggers
+-- 4.5 Authentication Token Handling Triggers
 -- Ideally, we will stop recording authentication tokens in the old
 -- database tables and instead record them in
 -- veil2.authentication_details.
@@ -465,10 +464,29 @@ select party_id, role_id,
   from <foreign scope table>;
 */
 
+-- 5.6 Create triggers on updates to accessor roles
+-- There is no need to do this on the veil2.accessor_roles table as
+-- this is already done.
+
+/*
+-- For each table providing data to my_all_accessor_roles...
+
+create trigger <tablename>_biud_trg
+  before insert or update or delete on <role assignment table>
+  for each row
+  execute procedure veil2.clear_accessor_privs_cache_entry();
+
+-- You should probably ensure that truncation of the above table does
+-- not happen.  If, for some reason you need to allow it, create a
+-- trigger for truncation that calls veil2.clear_accessor_privs_cache();
+
+*/
+
 
 -- STEP 6: Define Scope Hierarchy
 
 /*
+-- 6.1
 -- Define the my_superior_scopes view
 
 create or replace
@@ -488,6 +506,20 @@ select <scope_type_id>, <scope_id>
 union all
  . . .';
 
+-- 6.2 
+-- Refresh matviews if scope hierarchy changes
+-- Create triggers on modification of the scope hierarchy
+
+create trigger privileges__aiud
+  after insert or update or delete or truncate
+  on <source table>
+  for each statement
+  execute procedure veil2.refresh_scopes_matviews();
+
+-- Alternatively, if you need your trigger function to determine
+-- whether a change is significant enough to warrant clearing the
+-- matviews, you can call the function veil2.refresh_all_matviews()
+-- from your custom trigger function.
  */
 
 
@@ -509,7 +541,82 @@ values (20, <privname>
 */
 
 -- STEP 8:
--- 
+-- Define/integrate roles
+
+-- 8.1 Integrate veil2 roles with your system's equivalent, if it has
+-- one.
+
+/* 
+-- We will assume that your existing objects are going to use veil2's
+-- roles.  If not, you will have to figure all of this out for
+-- yourself.
+
+-- For each protected table that needs to reference veil2.roles:
+alter table <protected table>
+  add constraint <protected_tablename>__role_fk
+  foreign key (role_id) references veil2.roles(role_id);
+*/
+
+-- 8.2 Create new roles and mappings
+--
+/*
+insert
+  into veil2.roles
+       (role_id, role_type_id, role_name,
+        implicit, immutable, description)
+values (,,,,,),
+       (,,,,,),
+       ...;
+
+insert into veil2.role_privileges
+       (role_id, privilege_id)
+values (,)
+       (,), 
+       ...;
+
+insert into veil2.role_roles
+       (primary_role_id, assigned_role_id,
+        context_type_id, context_id)
+values (,,,),
+       (,,,),
+       ...;
+*/
+
+-- STEP 9:
+-- Secure Tables
+
+/*
+-- For each table
+
+alter table <table name> enable row level security;
+
+-- For each operation (insert, update, select, delete) that you need
+-- to secure:
+create policy <table name>_select
+    on <table name>
+   for select
+ using veil2.i_have_xxxx(<priv>,??);
+
+revoke all on <table name> from public;
+greant <appropriate operations> on table_name to <your access role>;
+
+*/
+
+-- STEP 10:
+-- Secure Views
+
+/*
+-- For each view
+
+create or replace
+view view_name as
+select ....
+ where veil2.i_have_xxxx(<priv>,??);
+
+-- Create appropriate instead-of triggers if the view is to be
+-- updatable.
+
+*/
 
 -- Check how we are doing.
 select * from veil2.implementation_status();
@@ -518,3 +625,11 @@ create trigger <authent>_bi_trg
   before insert on <authent table name>
   for each row
   execute procedure <authent_insert_trigger_fn_name>();
+
+
+-- Step 11:
+-- Assign roles to accessors
+
+-- ...
+
+

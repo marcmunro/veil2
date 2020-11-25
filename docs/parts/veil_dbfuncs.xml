@@ -183,8 +183,29 @@
       <itemizedlist>
         <listitem>
 	  <link
-	      linkend="func_refresh_superior_scopes">refresh_superior_scopes()</link>;
+	      linkend="func_refresh_all_matviews">refresh_all_matviews()</link>;
 	</listitem>
+        <listitem>
+	  <link
+	      linkend="func_refresh_scopes_matviews">refresh_scopes_matviews()</link>;
+	</listitem>
+        <listitem>
+	  <link
+	      linkend="func_refresh_privs_matviews">refresh_privs_matviews()</link>;
+	</listitem>
+        <listitem>
+	  <link
+	      linkend="func_refresh_roles_matviews">refresh_roles_matviews()</link>;
+	</listitem>
+        <listitem>
+	  <link
+	      linkend="func_clear_accessor_privs_cache">clear_accessor_privs_cache()</link>;
+	</listitem>
+        <listitem>
+	  <link
+	      linkend="func_clear_accessor_privs_cache_entry">clear_accessor_privs_cache_entry()</link>;
+	</listitem>
+
       </itemizedlist>
   </para>
 
@@ -481,18 +502,31 @@
     </sect3>
   </sect2>  
 
-  <sect2 id="utility_admin_functions">
+  <sect2 id="matview_functions">
     <title>Materialized View Functions</title>
-    <sect3 id="func_refresh_superior_scopes">
-      <title>Refresh Scope Promotions</title>
-      <sect4>
-	<title><literal>refresh_superior_scopes()</literal></title>
-	<?sql-definition function veil2.refresh_superior_scopes sql/veil2--&version_number;.sql ?>
-      </sect4>
-      <sect4>
-	<title><literal>scopes__aiudt</literal></title>
-	<?sql-definition trigger scopes__aiudt sql/veil2--&version_number;.sql ?>
-      </sect4>
+    <sect3 id="func_refresh_all_matviews">
+      <title>Refresh All Matviews Function</title>
+      <?sql-definition function veil2.refresh_all_matviews sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_refresh_scopes_matviews">
+      <title>Refresh Scopes Matviews Function</title>
+      <?sql-definition function veil2.refresh_scopes_matviews sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_refresh_roles_matviews">
+      <title>Refresh Roles Matviews Function</title>
+      <?sql-definition function veil2.refresh_roles_matviews sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_refresh_privs_matviews">
+      <title>Refresh Privs Matviews Function</title>
+      <?sql-definition function veil2.refresh_privs_matviews sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_clear_accessor_privs_cache">
+      <title>Clear Accessor Privs Cache Function</title>
+      <?sql-definition function veil2.clear_accessor_privs_cache sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_clear_accessor_privs_cache_entry">
+      <title>Clear Accessor Privs Cache Entry Function</title>
+      <?sql-definition function veil2.clear_accessor_privs_cache_entry sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
   <sect2 id="implementation_check_functions">

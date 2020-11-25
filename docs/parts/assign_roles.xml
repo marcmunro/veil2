@@ -1,8 +1,8 @@
 <chapter id="assign_roles">
-  <title>Assign Initial Roles (STEP 12)</title>
+  <title>Assign Initial Roles (STEP 11)</title>
   <para>
-    Finally, we assign some initial roles to users.  See STEP 12 in
-    file <literal>demo/demo.sql</literal>.
+    Finally, we assign some initial roles to users.  See STEP 11 in
+    file <literal>demo/veil2_demo--&version;.sql</literal>.
   </para>
   <sect1>
     <title>Roles</title>

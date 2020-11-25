@@ -117,7 +117,7 @@
       <literal>veil2.role_privileges</literal>.
     </para>
     <para>
-      You will then need to create role->role mappings, making your
+      You will then need to create role to role mappings, making your
       function-level roles available to your user-level roles.  You
       will do this by creating records in
       <literal>veil2.role_roles</literal>.
@@ -136,6 +136,19 @@
       mappings may need to be repeated for each context.  Your role
       names may also need to be customized for those contexts.  This
       is shown in the demo; look for the text STEP 8.
+    </para>
+  </sect1>
+  <sect1>
+    <title>Refreshing Materialized Views - Do Nothing</title>
+    <para>
+      Any time that role to role or role to privilege mappings are
+      updated, all <link linkend="cache">materialized views and
+      caches</link> must be updated. 
+    </para>
+    <para>
+      Since these mappings are managed exclusively from
+      <literal>Veil2</literal> tables, all the necessary triggers to
+      refresh our materialized views are already in place.
     </para>
   </sect1>
 </chapter>

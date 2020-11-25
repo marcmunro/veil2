@@ -29,7 +29,6 @@
 <!ENTITY setup_privs           	SYSTEM "parts/setup_privs.xml">
 <!ENTITY setup_roles           	SYSTEM "parts/setup_roles.xml">
 <!ENTITY setup_scope_promotions SYSTEM "parts/setup_scope_promotions.xml">
-<!ENTITY setup_oddities         SYSTEM "parts/setup_oddities.xml">
 <!ENTITY secure_tables          SYSTEM "parts/secure_tables.xml">
 <!ENTITY secure_views           SYSTEM "parts/secure_views.xml">
 <!ENTITY assign_roles           SYSTEM "parts/assign_roles.xml">
@@ -129,7 +128,6 @@
     &setup_scope_promotions;
     &setup_privs;
     &setup_roles;
-    &setup_oddities;
     &secure_tables;
     &secure_views;
     &assign_roles;
@@ -139,6 +137,7 @@
     <title>Implementation Details</title>
     &veil_demo;
     &built_in;
+    &for_developers;
     &original_veil;
     &tips;
     &performance;

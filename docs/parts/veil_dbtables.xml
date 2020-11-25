@@ -14,114 +14,66 @@
     <sect2 id="entity_scope_type">
       <title>Scope Types Table</title>
       <?sql-definition table veil2.scope_types sql/veil2--&version_number;.sql ?>
-      <para>
-	<link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_system_parameter">
       <title>System Parameters Table</title>
       <?sql-definition table veil2.system_parameters sql/veil2--&version_number;.sql ?>
-      <para>
-	<link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_role_type">
       <title>Role Types Table</title>
       <?sql-definition table veil2.role_types sql/veil2--&version_number;.sql ?>
-      <para>
-	<link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_privilege">
       <title>Privileges Table</title>
       <?sql-definition table veil2.privileges sql/veil2--&version_number;.sql ?>
-      <para>
-	<link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_scope">
       <title>Scopes Table</title>
       <?sql-definition table veil2.scopes sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_role">
       <title>Roles Table</title>
       <?sql-definition table veil2.roles sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_context_role">
       <title>Context Roles Table</title>
       <?sql-definition table veil2.context_roles sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_role_privilege">
       <title>Role Privileges Table</title>
       <?sql-definition table veil2.role_privileges sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_accessor">
       <title>Accessors Table</title>
       <?sql-definition table veil2.accessors sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_accessor_role">
       <title>Accessor Roles Table</title>
       <?sql-definition table veil2.accessor_roles sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_session">
       <title>Sessions Table</title>
       <?sql-definition table veil2.sessions sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_authentication_type">
       <title>Authentication Types Table</title>
       <?sql-definition table veil2.authentication_types sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_role_role">
       <title>Role Roles Table</title>
       <?sql-definition table veil2.role_roles sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_session_context">
       <title>Session Context Type and Table</title>
       <?sql-definition type session_context_t sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_session_privilege">
       <title>Session Privileges Type and Table</title>
       <?sql-definition type session_privileges_t sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="entity_authentication_detail">
       <title>Authentication Details Table</title>
       <?sql-definition table veil2.authentication_details sql/veil2--&version_number;.sql ?>
-      <para>
-        <link linkend="veil2_erd_div">back to ERD</link>.
-      </para>
     </sect2>
     <sect2 id="table_deferred_install">
       <title>Deferred Install Table</title>

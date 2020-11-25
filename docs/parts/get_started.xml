@@ -53,7 +53,7 @@ dbname# create extension veil2 cascade;
       demo files on your database server by executing the following
       query:
 	<programlisting>
-dbname# select * from veil2.helper_files;
+dbname# select * from veil2.sql_files;
 	</programlisting>
       This lists a number of files that you can take a look at.  There
       are 3 files that you should take copies of:

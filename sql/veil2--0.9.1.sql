@@ -863,7 +863,16 @@ create table veil2.accessor_privileges_cache (
 );
 
 comment on table veil2.accessor_privileges_cache is
-'Cache table';
+'Table used to cache accessor_privileges returned by
+veil2.session_privileges_v.
+
+This is automatically populated by the Veil2 session management
+functions for any combination of accessor and session context for
+which it contains no data.
+
+It should be truncated whenever any underlying role, privilege or
+context data is updated, and records for individual accessors should
+be deleted whenever their role assignments are updated.';
 
 create index accessor_privileges_cache__accessor_idx
   on veil2.accessor_privileges_cache(accessor_id);
@@ -942,7 +951,7 @@ grant select on veil2.all_role_roles to veil_user;
 
 \echo ......all_role_privileges...
 create or replace
-view veil2.all_role_privileges as
+view veil2.all_role_privileges_v as
 with superuser_privs as
   (
     -- Superuser role has implied assignments of all privileges except
@@ -970,34 +979,40 @@ select r.role_id as role_id,
  group by r.role_id, rr.context_type_id,
        rr.context_id;
 
-comment on view veil2.all_role_privileges is
+comment on view veil2.all_role_privileges_v is
 'Provides all role to role mappings, with their resulting privileges
 in all mapping contexts.  If the mapping context is null, the mapping
 applies in all mapping contexts.
 
-For performance reasons a cache table,
-veil2.all_role_privileges_cache, has been created.  This cache must be
-refreshed, either fully or partly (per accessor) whenever data
-underlying this view is updated.';
+For performance reasons a materialized view veil2.all_role_privileges,
+has been created.  This must be refreshed whenever data underlying
+this view is updated.';
 
 create or replace
 view veil2.all_role_privileges_info as
 select role_id, mapping_context_type_id,
        mapping_context_id, to_array(roles) as roles,
        to_array(privileges) as privileges
-  from veil2.all_role_privileges;
+  from veil2.all_role_privileges_v;
 
 comment on view veil2.all_role_privileges_info is
 'Developer view on all_role_privileges showing roles and privileges as
 arrays of integers for easier comprehension.';
 
-create materialized view veil2.all_role_privileges_cache as
-select * from veil2.all_role_privileges;
+create materialized view veil2.all_role_privileges as
+select * from veil2.all_role_privileges_v;
 
+comment on materialized view veil2.all_role_privileges is
+'Materialized view on veil2.all_role_privileges_v.  This exists to
+improve the performance of veil2.session_privileges_v.
+
+Any time that the data underlying all_role_privileges_v is modified,
+this materialized view should be refreshed.';
+
+revoke all on veil2.all_role_privileges_v from public;
+grant select on veil2.all_role_privileges_v to veil_user;
 revoke all on veil2.all_role_privileges from public;
 grant select on veil2.all_role_privileges to veil_user;
-revoke all on veil2.all_role_privileges_cache from public;
-grant select on veil2.all_role_privileges_cache to veil_user;
 revoke all on veil2.all_role_privileges_info from public;
 grant select on veil2.all_role_privileges_info to veil_user;
 
@@ -1139,15 +1154,12 @@ materialized view veil2.all_superior_scopes
 as select * from veil2.all_superior_scopes_v;
 
 comment on materialized view veil2.all_superior_scopes is
-'This takes the simple custom view veil2.superior_scopes and makes it
-recursive so that if context a contains context b and context b contains
-context c, then this view will return rows for context c promoting to
-both context b and context a.  
+'This is a materialized view on veil2.all_superior_scopes_v.  It
+exists in order to improve the performance of
+veil2.session_privileges_v.
 
-It is automatically refreshed when the veil2.scopes table is modified.
-
-You should not need to modify this view when creating your custom VPD
-implementation.'; 
+It must be fully refreshed whenever the underlying data for
+veil2.superior_scopes is updated.'; 
 
 revoke all on veil2.all_superior_scopes from public;
 grant select on veil2.all_superior_scopes to veil_user;
@@ -1578,7 +1590,7 @@ view veil2.session_privileges_v as
         from session_context sc
        inner join veil2.all_session_roles aar
           on aar.accessor_id = sc.accessor_id
-       inner join veil2.all_role_privileges_cache arp
+       inner join veil2.all_role_privileges arp
           on arp.role_id = aar.role_id
          and (   (    arp.mapping_context_type_id = sc.mapping_context_type_id
                   and arp.mapping_context_id = sc.mapping_context_id)
@@ -1706,12 +1718,36 @@ comment on view veil2.session_privileges_v is
 'View used to dynamically figure out the roles and privileges in all
 contexts for the current session.  If the accessor for the session
 does not have connect privilege in both the authentication and login
-contexts, then no rows are returned.';
+contexts, then no rows are returned.
+
+This view is used as the basis for loading session privileges into the
+veil2_session_privileges temporary table and into the
+veil2.accessor_privileges_cache table.  Note that the cache table is
+used in preference to querying from this view if it has records for
+the session''s accessor and session context.';
 
 revoke all on veil2.session_privileges_v from public;
 
 
 \echo ...creating materialized view refresh functions...
+
+\echo ......refresh_all_matviews()...
+create or replace
+function veil2.refresh_all_matviews()
+    returns void as
+$$
+  refresh materialized view veil2.all_superior_scopes;
+  refresh materialized view veil2.all_role_privileges;
+  truncate table veil2.accessor_privileges_cache;
+$$
+language 'sql' security definer volatile leakproof;
+
+comment on function veil2.refresh_all_matviews() is
+'Clear all matviews and caches unconditionally.';
+
+revoke all on function veil2.refresh_all_matviews() from public;
+
+
 \echo ......refresh_scopes_matviews()...
 create or replace
 function veil2.refresh_scopes_matviews()
@@ -1719,9 +1755,7 @@ function veil2.refresh_scopes_matviews()
 as
 $$
 begin
-  refresh materialized view veil2.all_superior_scopes;
-  refresh materialized view veil2.all_role_privileges_cache;
-  truncate table veil2.accessor_privileges_cache;
+  perform veil2.refresh_all_matviews();
   return new;
 end;
 $$
@@ -1739,7 +1773,7 @@ function veil2.refresh_privs_matviews()
 as
 $$
 begin
-  refresh materialized view veil2.all_role_privileges_cache;
+  refresh materialized view veil2.all_role_privileges;
   truncate table veil2.accessor_privileges_cache;
   return new;
 end;
@@ -1758,7 +1792,7 @@ function veil2.refresh_roles_matviews()
 as
 $$
 begin
-  refresh materialized view veil2.all_role_privileges_cache;
+  refresh materialized view veil2.all_role_privileges;
   truncate table veil2.accessor_privileges_cache;
   return new;
 end;
@@ -1796,16 +1830,18 @@ begin
     delete
       from veil2.accessor_privileges_cache
      where accessor_id = new.accessor_id;
-  end if;
-  if tg_op = 'UPDATE' or tg_op = 'DELETE' then
+    if (tg_op = 'UPDATE') and
+       (old.accessor_id != new.accessor_id) then
+      delete
+        from veil2.accessor_privileges_cache
+       where accessor_id = old.accessor_id;
+    end if;
+    return new;
+  elsif tg_op = 'DELETE' then
     delete
       from veil2.accessor_privileges_cache
      where accessor_id = old.accessor_id;
-  end if;
-  if tg_op = 'DELETE' then
     return old;
-  else
-    return new;
   end if;
 end;
 $$
@@ -1874,12 +1910,23 @@ comment on trigger role_roles__aiudt on veil2.role_roles is
 role_roles table.';
 
 
+\echo ......on role_privileges...
+create trigger role_privileges__aiudt
+  after insert or update or delete or truncate
+  on veil2.role_privileges
+  for each statement
+  execute procedure veil2.refresh_roles_matviews();
+
+comment on trigger role_privileges__aiudt on veil2.role_privileges is
+'Refresh materialized views that are constructed from the
+role_privileges table.';
+
 \echo ......on accessor_roles...
 create trigger accessor_roles__at
   after truncate 
   on veil2.accessor_roles
   for each statement
-  execute procedure veil2.clear_accessor_privs_cache();
+  execute procedure veil2.clear_accessor_privs_cache_entry();
 
 comment on trigger accessor_roles__at on veil2.accessor_roles is
 'Clear all cached accessor role and privilege data.';
@@ -2221,7 +2268,7 @@ begin
   perform veil2.install_user_functions();
   perform veil2.install_user_views();
   refresh materialized view veil2.all_superior_scopes;
-  refresh materialized view veil2.all_role_privileges_cache;
+  refresh materialized view veil2.all_role_privileges;
 end;
 $$
 language plpgsql security definer volatile;
@@ -2614,8 +2661,7 @@ $$
 language 'plpgsql' security definer volatile
 set client_min_messages = 'error';
 
-comment on function
-    veil2.create_session(text, text, integer, integer, integer, integer) is
+comment on function veil2.create_session(text, text, integer, integer, integer, integer) is
 'Get session credentials for a new session.  
 
 Returns session_id, authent_token and session_supplemental.
@@ -3333,7 +3379,7 @@ function veil2.i_have_global_priv(integer) returns boolean
 
 comment on function veil2.i_have_global_priv(integer) is
 'Predicate to determine whether the connected user has the given
-privilege in the global scope.  This always returns a record.';
+privilege in the global scope.';
 
 
 \echo ......i_have_personal_priv()...
@@ -3896,8 +3942,20 @@ comment on policy system_parameter__select on veil2.system_parameters is
 (assigned in global scope) in order to see the data in this table.'; 
 
 
-\echo ......deferred_install...
+\echo ......accessor_privileges_cache...
+alter table veil2.accessor_privileges_cache enable row level security;
 
+create policy accessor_privileges_cache__all
+    on veil2.accessor_privileges_cache;
+
+comment on policy accessor_privileges_cache__all
+  on veil2.accessor_privileges_cache is
+'No access to this table should be given to normal users.'; 
+
+revoke all on veil2.accessor_privileges_cache from public;
+
+
+\echo ......deferred_install...
 alter table veil2.deferred_install enable row level security;
 
 create policy deferred_install__all
@@ -4005,7 +4063,7 @@ select pg_catalog.pg_extension_config_dump(
 \echo ......privileges...
 select pg_catalog.pg_extension_config_dump(
            'veil2.privileges',
-	   'where privilege_id > 15
+	   'where privilege_id >= 20
                or privilege_id < 0');
 
 \echo ......roles...
@@ -4194,7 +4252,7 @@ begin
     return next '    - ' || tbl;
   end loop;
   if not header_returned then
-    return next 'All tables appear to have security policies:';
+    return next 'All tables appear to have security policies.';
   end if;  
 end;
 $$
@@ -4265,7 +4323,7 @@ begin
     return next line;
   end loop;
   if ok then
-    return next 'Have you secured your views?';
+    return next 'Have you secured your views (I have no way of knowing)?';
   end if;
 end;
 $$
@@ -4280,10 +4338,14 @@ Call this using select * from veil2.implementation_status();
 and it will return a list of things to implement or consider implementing.';
 
 
-create view veil2.docs(file, purpose) as
+create or replace
+view veil2.docs(file, purpose) as
 values (veil2.docpath() || '/html/index.html',
         'Complete html documentation for Veil2');
- 
+
+comment on view veil2.docs is
+'Show where local Veil2 documentation can be found.';
+
 create or replace
 view veil2.sql_files(file, purpose) as
 values (veil2.datapath() || '/demo.sql',
@@ -4299,5 +4361,10 @@ values (veil2.datapath() || '/demo.sql',
        (veil2.datapath() || '/veil2_minimal_demo.sql',
        'Veil2 minimal-demo creation script'),
        (veil2.datapath() || '/veil2_template.sql',
-       'Veil2 implementation template.');
+       'Veil2 implementation template.'),
+       (veil2.datapath() || '/veil2--0.9.1.sql',
+       'Veil2 extension creation script.');
  
+comment on view veil2.sql_files is
+'Show where copies of useful Veil2 sql files can be found.';
+

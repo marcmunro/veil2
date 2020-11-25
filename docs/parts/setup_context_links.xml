@@ -183,39 +183,59 @@ select 5, project_id, project_id
   <sect1>
     <title>On Caches</title>
     <para>
-      [TODO: Link to the caches documentation section]
-      For performance reasons <literal>Veil2</literal> caches a lot of
-      scope-related privilege data.  Some steps in your
-      <literal>Veil2</literal> VPD implementation will require the
-      explicit clearing or refreshing of some or all of those caches.
-      This step does not, unless updates are allowed to the key fields
-      or the originating scopes tables.  
+      For performance reasons <literal>Veil2</literal> <link
+      linkend="caches">caches a lot of scope-related privilege
+      data</link>.  Some steps in your <literal>Veil2</literal> VPD
+      implementation will require the explicit clearing or refreshing
+      of some or all of those caches.
     </para>
-    <para>
-      The rationale for not needing to refresh or clear caches is as
-      follows:
-    </para>
-    <para>
-      In the event of a new scope being created, there can exist no
-      records relating to that scope (assuming that you cannot create
-      descendent records of your scopes before creating the scope
-      itself - ie we assume proper referential integrity is being
-      maintained in the source database), particularly records
-      relating to role assignments, so there can be no new privileges
-      or roles assigned to any users and therefore no need to update
-      the caches.
-    </para>
-    <para>
-      In the event of scope deletion, there will be no records
-      remaining in that scope to which access must be controlled, so
-      temporarily retaining redundant privileges for dead scopes can
-      have no security implications.
-    </para>
-    <para>
-      Updates to the scope keys are the only situation where we may
-      need to clear caches and refresh materialized views, and we
-      strongly recommend that triggers are put in place to prevent
-      such updates.
-    </para>
+    <sect2>
+      <title>Changes To Scopes</title>
+      <para>
+	Changes to scopes do not require the refresh of materialized
+	views or the clearing of caches.  The rationale for this is as
+	follows: 
+      </para>
+      <para>
+	In the event of a new scope being created, there can exist no
+	records relating to that scope (assuming that you cannot
+	create descendent records of your scopes before creating the
+	scope itself - ie we assume proper referential integrity is
+	being maintained in the source database), particularly records
+	relating to role assignments, so there can be no new
+	privileges or roles assigned to any users and therefore no
+	need to update the caches.
+      </para>
+      <para>
+	In the event of scope deletion, there will be no records
+	remaining in that scope to which access must be controlled, so
+	temporarily retaining redundant privileges for dead scopes can
+	have no security implications.
+      </para>
+      <para>
+	Updates to the scope keys are the only situation where we may
+	need to clear caches and refresh materialized views, and we
+	strongly recommend that triggers are put in place to prevent
+	such updates.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Changes To Role Assignments</title>
+      <subtitle>(Triggers for Maintaining our Accessor Privileges Cache)</subtitle>
+      <para>
+	All changes to role assignments must result in <link
+	linkend="view_accessor_privileges_cache"><literal>accessor_privileges_cache</literal></link>
+	entries being cleared for the accessor in question.
+      </para>
+      <para>
+	This should be done by adding triggers to the tables
+	underlying your version of the
+	<literal>all_accessor_roles</literal> view.  These triggers
+	should call <link
+	linkend="func_clear_accessor_privs_cache_entry"><literal>veil2.clear_accessor_privs_cache_entry()</literal></link>
+	or <link
+	linkend="func_clear_accessor_privs_cache"><literal>veil2.clear_accessor_privs_cache()</literal></link>.
+      </para>
+    </sect2>
   </sect1>
 </chapter>

@@ -3,12 +3,20 @@
  *
  *      Create the veil2 demo database,
  *
+ *      Based on the template file veil_template.sql
+ *
  *      Copyright (c) 2020 Marc Munro
  *      Author:  Marc Munro
  *	License: GPL V3
  *
  * ----------
  */
+
+
+-- STEP 0
+-- Define your database objects.  These will intially be entirely
+-- independent of Veil2 unless you choose to use some of the Veil2
+-- tables, such as roles, directly.
 
 -- Create the veil2 demo database
 
@@ -189,10 +197,18 @@ grant all on table demo.project_assignments to demouser;
 -- STEP 1 is installing Veil2, then we create the extension in this
 -- database.  
 
--- This is commented out since the veil2 extension should have been
--- created as a dependency now that this demo is an extension.
--- create extension veil2 cascade;
+-- STEP 1: Install Veil2
 
+-- If you haven't installed the extension on your server, and have the
+-- pgxn client installed:
+-- $ pgxn install veil2
+--
+-- Install the Veil2 extension in your database.  We use cascade to
+-- ensure that dependencies are also installed.
+
+-- If you installed the veil_demo as an extension, the following
+-- statement does nothing.
+--create extension if not exists veil2 cascade;
 
 -- STEP 2:
 -- Define scopes
@@ -201,6 +217,8 @@ grant all on table demo.project_assignments to demouser;
 -- elements.  Projects are projects, owned by orgs.
 --
 
+-- 2.1 Create new scopes by inserting records into veil2.scope_types.
+-- 
 insert into veil2.scope_types
        (scope_type_id, scope_type_name,
         description)
@@ -211,14 +229,19 @@ values (3, 'corp scope',
        (5, 'project scope',
         'For access to data that is specific to to project members.');
 
--- Make role-_role mappings work at the corp context level.
+-- 2.2 Define your role_mapping context.  If you intend to map all
+-- roles in global_context then you don't need to do anything.  If you
+-- are not sure about this, just skip it.  If you need it, it will
+-- become obvious later
+
 update veil2.system_parameters
    set parameter_value = 3
  where parameter_name = 'mapping context target scope type';
 
 
--- STEP 3 is defining authentication data and functions (and session
--- management)
+-- STEP 3:
+-- Authentication stuff.
+
 -- For the purpose of this demo, we will be using only plaintext and
 -- bcrypt so no new authentication methods have to be defined and
 -- implemented. 
@@ -236,6 +259,16 @@ update veil2.authentication_types
    set enabled = true
  where shortname = 'plaintext';
 
+-- 3.1 Create new authentication methods.
+
+-- Nothing done here.
+
+-- 3.2 Associate accessors and authentication contexts
+-- This associates each accessor with an authentication context.
+-- Typically each authentication context allows their own set of
+-- usernames, so that Bob at ProtectedCorp is a different person from
+-- Bob at SecuredCorp.
+
 -- Set up accessor contexts.  All authentication will be in org context.
 create or replace
 view veil2.my_accessor_contexts (
@@ -243,6 +276,10 @@ view veil2.my_accessor_contexts (
 ) as
 select party_id, 4, org_id
   from demo.parties_tbl where party_type_id = 1;
+
+-- 3.3 get_accessor()
+-- Create a my_get_accessor() function that will take a username and
+-- context, and return an accessor_id
 
 -- Create get_accessor so that we can map from usernames in context to
 -- accessor_ids.  This is used by create_session().
@@ -267,8 +304,23 @@ end;
 $$
 language plpgsql security definer stable leakproof;
 
+-- 3.4 Session Management Customizations
+-- You may need to extend the set of Veil2 session management
+-- functions, or provide mechanisms to invoke them from SQL if your
+-- application is not flexible enough to use the built-in mechanisms
+-- as they stand.  What this will look like will depend on what you
+-- are trying to achieve.  It may be additional functions for managing
+-- extra round-trips between the user and the database for some
+-- imagined exotic authentication system, or it may be the tables and
+-- triggers so that authentication can be performed solely using
+-- simple insert and select statements.
+
+-- Nothing to do here.
+
 
 -- STEP 4:
+-- Link Veil2 accessors to your database's users.
+
 -- Create FK links for veil2.accessors to the demo database tables.
 -- These ensure that veil2.accessors and veil2.authentication_details
 -- are kept in step with the demo parties_tbl table.
@@ -281,6 +333,11 @@ language plpgsql security definer stable leakproof;
 -- use Veil's accessor_id, the mapping table would have to map from
 -- the Veil accessor_id to your user_id (ie it would contain 2
 -- columns) and each foreign key below would be on a different column.
+
+-- 4.1 Create a mapping table
+-- Note that you may have multiple users tables and so you may need 
+-- multiple FK fields back to your database.  If so, you may want to
+-- add a check constraint to ensure that only 1 of them is not null.
 
 create table veil2.accessor_party_map (
   accessor_id		integer not null
@@ -301,6 +358,50 @@ alter table veil2.accessor_party_map
   foreign key(accessor_id)
   references demo.parties_tbl (party_id);
   
+-- You should probably index the other FK columns
+-- No, need: there are no other FK columns.
+
+
+-- 4.2 Copy Existing User Records
+-- 
+
+-- Create initial accessor records from current parties_tbl records
+insert into veil2.accessors
+      (accessor_id, username)
+select party_id, party_name
+  from demo.parties_tbl p
+ where p.party_type_id = 1
+   and not exists (
+   select null
+     from veil2.accessors a
+    where a.accessor_id = p.party_id);
+
+
+-- 4.3 Copy existing authentication records
+-- This is going to be tricky as it is unlikely that the
+-- authentication tokens in your database are going to match those
+-- exepected by Veil2.  See the Veil2 documentation for Step 4 for
+-- more information.
+
+-- Create initial authentication_detail records from current parties_tbl records
+insert
+  into veil2.authentication_details
+      (accessor_id, authentication_type, authent_token)
+select party_id, 'plaintext', password
+  from demo.parties_tbl p
+ where p.party_type_id = 1
+   and not exists (
+   select null
+     from veil2.authentication_details a
+    where a.accessor_id = p.party_id);
+
+
+-- 4.4 Create Referential Integrity Triggers
+-- On insert and on delete triggers are needed as a minimum.  If
+-- updates are allowed to change the user id fields, then we will also
+-- need to deal with updates.  Far better though to simply have an
+-- on-update trigger that fails if such an attempt is made. 
+
 -- Create triggers on demo.parties_tbl to keep veil2.accessors in step.
 create or replace
 function demo.parties_tbl_ai () returns trigger as
@@ -344,28 +445,11 @@ comment on trigger parties_tbl_ait on demo.parties_tbl is
 -- WE SHOULD ALSO HANDLE UPDATES TO THE PARTY_ID AND DELETIONS.  THIS
 -- IS LEFT AS AN EXERCISE FOR THE READER.
 
--- Create initial accessor records from current parties_tbl records
-insert into veil2.accessors
-      (accessor_id, username)
-select party_id, party_name
-  from demo.parties_tbl p
- where p.party_type_id = 1
-   and not exists (
-   select null
-     from veil2.accessors a
-    where a.accessor_id = p.party_id);
 
--- Create initial authentication_detail records from current parties_tbl records
-insert
-  into veil2.authentication_details
-      (accessor_id, authentication_type, authent_token)
-select party_id, 'plaintext', password
-  from demo.parties_tbl p
- where p.party_type_id = 1
-   and not exists (
-   select null
-     from veil2.authentication_details a
-    where a.accessor_id = p.party_id);
+-- 4.5 Authentication Token Handling Triggers
+-- Ideally, we will stop recording authentication tokens in the old
+-- database tables and instead record them in
+-- veil2.authentication_details.
 
 -- Deal with changes to passwords
 create or replace
@@ -394,14 +478,21 @@ comment on trigger parties_tbl_aut on demo.parties_tbl is
 'Ensure password changes get propagated to veil2.authentication_details';
 
 
--- STEP 5:
--- Link scopes back to the database being secured.
 
+
+-- STEP 5: Link your scopes
+
+-- 5.1 Extend the veil2.scopes table to link to the tables that define
+-- your scopes.
+
+-- Extend veil2.scopes using inheritence
 create table veil2.scope_links (
   party_id 	integer,
   project_id	integer
 ) inherits (veil2.scopes);
 
+-- Define Keys for the extended table - these do not get created
+-- automatically.
 alter table veil2.scope_links add constraint scope_link__pk
   primary key(scope_type_id, scope_id);
 
@@ -409,12 +500,14 @@ alter table veil2.scope_links add constraint scope_link__type_fk
   foreign key(scope_type_id)
   references veil2.scope_types;
 
+-- Define FKs for each <newcolumns>
 alter table veil2.scope_links
   add constraint scope_link__party_fk
   foreign key (party_id)
   references demo.parties_tbl(party_id)
   on delete cascade;
 
+-- ditto
 alter table veil2.scope_links
   add constraint scope_link__project_fk
   foreign key (project_id)
@@ -426,6 +519,11 @@ comment on column veil2.scope_links.party_id is
 
 comment on column veil2.scope_links.project_id is
 'Foreign key column to projects for use in project context.';
+
+-- You may also want to define a check constraint to ensure that only
+-- one of the <newcolumn> columns is null.  We might also check that
+-- the scope_type_id (an inherited column) is apprpriate for the
+-- <newcolumn> that is not null.
 
 alter table veil2.scope_links
   add constraint scope_link__check_fk_type
@@ -440,6 +538,17 @@ comment on constraint scope_link__check_fk_type
   on veil2.scope_links is
 'Ensure that party or project-specific contexts have an appropriate FK.';
 
+-- 5.2 Create on-insert triggers to handle new scopes
+-- Add a trigger for *each* scope type.
+
+-- 5.3 Create on update triggers
+-- Add a trigger for *each* scope type.
+
+-- READER EXERCISE: create triggers on parties_tbl and projects for
+-- to automatically propagate inserts updates and deletes back to the
+-- scope_links tables.
+
+-- 5.4 Copy existing scope data into the links table.
 
 -- Create initial security contexts...
 -- ...for corps...
@@ -466,10 +575,8 @@ insert
 select 5, project_id, project_id
   from demo.projects;
 
--- READER EXERCISE: create triggers on parties_tbl and projects for
--- to automatically propagate inserts updates and deletes back to the
--- scope_links tables.
 
+-- 5.5 Update the all_accessor_roles view
 
 -- Now we modify all_accessor_roles to include project assignments.
 -- With this done, the veil2.load_session_privs() function will see
@@ -487,16 +594,21 @@ select accessor_id, role_id,
 select party_id, role_id, 5, project_id
   from demo.project_assignments ;
 
--- Ensure updates to project_assignments are reflected in the
--- all_accessor_privs materialized view.
+
+-- 5.6 Create triggers on updates to accessor roles
+-- There is no need to do this on the veil2.accessor_roles table as
+-- this is already done.
+
+-- ADDING THESE TRIGGERS IS ANOTHER READER EXERCISE.
 
 
+-- STEP 6: Define Scope Hierarchy
 
--- STEP 6:
--- Deal with scope promotions
+-- 6.1
+-- Define the my_superior_scopes view
+
 -- Note that the second part of the union below allows scope promotion
 -- within the organizational hierarchy.
-
 create or replace
 view veil2.my_superior_scopes (
   scope_type_id, scope_id,
@@ -525,9 +637,15 @@ select 5, s.scope_id,   -- Project to org promotions
  inner join veil2.scope_links s
     on s.project_id = p.project_id;
 
+-- 6.2 
+-- Refresh matviews if scope hierarchy changes
+-- Create triggers on modification of the scope hierarchy
+
+-- MORE READER EXERCISES HERE
+
 
 -- STEP 7:
--- Define privileges.  Note that priv_ids below 16 are used for veil2
+-- Define privileges.  Note that priv_ids below 20 are used for veil2
 -- objects.
 
 insert into veil2.privileges
@@ -556,17 +674,12 @@ values (20, 'select party_types',
 
 
 -- STEP 8:
+-- Define/integrate roles
+
 -- Create some new role_types.  These allow us to differentiate
 -- between user and function-level roles and could be used, for
 -- example, in views to differentiate between roles that can be
 -- renamed within a spcecific context, and those that cannot.
-
--- Link project_assignments to roles.  Your assignment to a project
--- comes with one or more roles that define what you can do on/with
--- the project.
-alter table demo.project_assignments
-  add constraint project_assignments__role_fk
-  foreign key (role_id) references veil2.roles(role_id);
 
 insert
   into veil2.role_types
@@ -576,7 +689,18 @@ values (3, 'Function-level role',
        (4, 'User-level role',
         'Demo App Role that will be assigned to accessors');
 
--- Create some initial roles
+-- 8.1 Integrate veil2 roles with your system's equivalent, if it has
+-- one.
+
+-- Link project_assignments to roles.  Your assignment to a project
+-- comes with one or more roles that define what you can do on/with
+-- the project.
+alter table demo.project_assignments
+  add constraint project_assignments__role_fk
+  foreign key (role_id) references veil2.roles(role_id);
+
+-- 8.2 Create new roles and mappings
+--
 insert
   into veil2.roles
        (role_id, role_type_id, role_name,
@@ -661,61 +785,7 @@ values (7, 5, 1, 0),  -- In global context
 
 
 -- STEP 9:
--- Deal with oddities and corner-cases
-
-/*
--- The Veil Corp party is treated as a special case.  If a user is
--- logged in to Veil Corp but has privileges assigned in the context
--- of other Corps, they will retain all of those privileges.  This is
--- because Veil-Corp is the owner of the demo-system and provides
--- management services to all of the subsidiary (customer) corps.  A
--- Veil-Corp employee should be able to perform database operations
--- for those Corps that they have been given access rights without
--- having to log in as a user for those corporations.
---
--- In the normal scheme of things, a user which has been assigned
--- roles in a context that is not directly related to their
--- authentication context, will appear to not have those roles.  This
--- normal behaviour is deliberate and aims to reduce opportunities for
--- privilege escalation.
-
--- Customize assignment_contexts: the final select in the union below
--- allows those users authenticating in the context of Veil Corp to
--- retain all roles and privileges assigned in other contexts.
-create or replace
-view veil2.my_permitted_assignment_contexts as
-   select asp.superior_scope_type_id, asp.superior_scope_id
-     from veil2.session_context() sc
-    inner join veil2.all_superior_scopes asp
-       on asp.scope_type_id = sc.login_context_type_id
-      and asp.scope_id = sc.login_context_id
-    union all
-    select asp.scope_type_id, asp.scope_id
-     from veil2.session_context() sc
-    inner join veil2.all_superior_scopes asp
-       on asp.superior_scope_type_id = sc.login_context_type_id
-      and asp.superior_scope_id = sc.login_context_id
-    union all
-   select sc.login_context_type_id, sc.login_context_id
-     from veil2.session_context() sc
-    union all
-   select -- Special case for when you log in to Veil-Corp: you get
-   	  -- all of the privileges you have been assigned for other
-	  -- corps
-	  3, party_id
-     from demo.parties_tbl 
-    where party_type_id = 2
-      and party_id = corp_id  -- Party is a corp
-      and party_id != 100     -- Party is not Veil Crop
-      and exists (
-       select null
-         from veil2.session_context() sc
-        where sc.login_context_type_id = 4
-          and sc.login_context_id = 100);
-*/
-
--- STEP 10:
--- Add row level security on our objects.
+-- Secure Tables
 
 alter table demo.party_types enable row level security;
 
@@ -772,7 +842,9 @@ create policy accessor_party_map__all
 
 alter table veil2.accessor_party_map enable row level security;
 
--- STEP 11:
+-- STEP 10:
+-- Secure Views
+
 -- Create secured views into user-facing parts of Veil2
 -- ??????????
 -- These are:
@@ -857,8 +929,15 @@ select ar.accessor_id, r.role_name,
     or veil2.i_have_priv_in_scope(24, 4, context_id);
 
 
--- Step 12
--- Assigning roles.
+-- Check how we are doing.
+-- WE CANNOT DO THIS IN THE EXTENSION AS IT CAUSES OUR USER-SUPPLIED
+-- VEIL FUNCTIONS TO ATTEMPT TO TAKE THE PLACE OF THE SYSTEM-PROVIDED
+-- ONES.  THAT MUST BE DONE OUTSIDE OF THE EXTENSION INSTALLATION.
+--select * from veil2.implementation_status();
+
+
+-- Step 11:
+-- Assign roles to accessors
 
 -- Give all persons except Eve the connect role globally
 insert
@@ -898,7 +977,7 @@ values (1, 1140, 10),  -- S.1 Simon, pm
 
 select veil2.reset_session();
 
--- Convert Alice to use bcrypt.
+-- Convert Alice to use bcrypt - this is mostly for test purposes.
 update veil2.authentication_details
    set authent_token = veil2.bcrypt(authent_token),
        authentication_type = 'bcrypt'

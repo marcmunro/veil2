@@ -148,9 +148,9 @@
         <title>All Accessor Roles Plus View</title>
         <?sql-definition view veil2.all_accessor_roles_plus sql/veil2--&version_number;.sql ?>
       </sect3>
-      <sect3 id="view_all_role_privileges">
+      <sect3 id="view_all_role_privileges_v">
 	<title>All Role Privileges View</title>
-        <?sql-definition view veil2.all_role_privileges sql/veil2--&version_number;.sql ?>
+        <?sql-definition view veil2.all_role_privileges_v sql/veil2--&version_number;.sql ?>
       </sect3>
       <sect3 id="view_session_assignment_contexts">
 	<title>Session Assignment Contexts View</title>
@@ -169,7 +169,7 @@
         <?sql-definition view veil2.session_privileges_v sql/veil2--&version_number;.sql ?>
       </sect3>
     </sect2>
-    <sect2>
+    <sect2 id="caches">
       <title>Materialized Views and Caches</title>
       <para>
 	Materized views and caches are used to improve query
@@ -181,13 +181,24 @@
         <title>All Superior Scopes Materialized View</title>
         <?sql-definition view veil2.all_superior_scopes sql/veil2--&version_number;.sql ?>
       </sect3>
-      <sect3 id="view_all_role_privileges_cache">
-        <title>All Role Privileges Cache Table</title>
-        <?sql-definition table veil2.all_role_privileges_cache sql/veil2--&version_number;.sql ?>
+      <sect3 id="view_all_role_privileges">
+        <title>All Role Privileges Materialized View</title>
+        <?sql-definition view veil2.all_role_privileges sql/veil2--&version_number;.sql ?>
       </sect3>
       <sect3 id="view_accessor_privileges_cache">
         <title>Accessor Privileges Cache Table</title>
         <?sql-definition table veil2.accessor_privileges_cache sql/veil2--&version_number;.sql ?>
+      </sect3>
+    </sect2>
+    <sect2 id="miscellaneous">
+      <title>Miscellaneous Helper Views</title>
+      <sect3 id="view_docs">
+        <title>Docs View</title>
+        <?sql-definition view veil2.docs sql/veil2--&version_number;.sql ?>
+      </sect3>
+      <sect3 id="view_sql_files">
+        <title>SQL Files View</title>
+        <?sql-definition view veil2.sql_files sql/veil2--&version_number;.sql ?>
       </sect3>
     </sect2>
   </sect1>

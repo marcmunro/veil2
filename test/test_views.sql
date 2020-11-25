@@ -14,6 +14,7 @@
 begin;
 select '...test Veil2 views...';
 select plan(13);
+refresh materialized view veil2.all_role_privileges;
 
 select is(array_length(to_array(privileges), 1), 1,
           'Expecting connect role to have only 1 privilege')

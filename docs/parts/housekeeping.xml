@@ -1,10 +1,13 @@
 <chapter id="housekeeping">
-  <title>Setup Housekeeping Tasks</title>
+  <title>Setup Housekeeping Tasks STEP 12</title>
   <para>
     The only essential housekeeping task beyond normal database
     maintenance is to add a periodic job to delete expired sessions.
     This can be done by simply calling the <literal><link
     linkend="func_delete_expired_sessions">delete_expired_sessions()</link></literal>
-    function.
+    function.  This needs to be called often enough that the <link
+    linkend="entity_session"><literal>veil2.sessions</literal></link>
+    table does not become bloated.  How often will depend on the
+    amount of traffic to your database.
   </para>
 </chapter>

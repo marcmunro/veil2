@@ -14,6 +14,69 @@
     implement the missing parts.
   </para>
   <sect1>
+    <title>Installation</title>
+    <para>
+      The demo can be most easily installed as a package from within
+      postgres:
+      <programlisting>
+vpd=# create extension veil2_demo cascade;
+CREATE EXTENSION
+vpd=# 
+      </programlisting>
+    </para>
+    <para>
+      As an alternative you can run the <literal>demo.sql</literal>
+      script which can be found as described <link
+      linkend="next_steps">here</link>, eg
+      <programlisting>
+marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo.sql
+      </programlisting>
+      This installs the veil2_demo and runs a simple set of tests on
+      it.  Note that in order to run the tests as supplied, the
+      postgres user <literal>demouser</literal> must be given access
+      as described below
+    </para>
+    <sect2 id="demouser-access">
+      <title>Allowing Access For The Demo User</title>
+      <para>
+        The <literal>Veil2</literal> test script
+        <literal>demo/demo_test.sql</literal> accesses the test
+        database using demo user <literal>demouser</literal>, which it
+	assumes is a trusted user (ie no password is needed).  Note
+        that this is not a good security practice and is done simply
+        for simplicity and expediency.
+      </para>
+      <para>
+	If this doesn't work you, you can create a modified version of
+	the test script to use a more secure authentication method
+	that conforms with your site's policies and requirements.
+	However if you want to simply try the demo in a test or
+	development environment where security is not a concern, you
+	can enable trust-based authentication solely for the
+	<literal>demouser</literal> role, solely for your demo
+	database.
+      </para>
+      <para>
+        To allow <literal>demouser</literal> to access the demo
+        database without needing to provide authentication you will
+        need to add a <quote>trust</quote> authentication definition
+        to your <literal>pg_hba.conf</literal> file.  This line should
+        look something like this:
+        <programlisting>
+local   whateverdbnameyoulike demouser                          trust
+        </programlisting>
+      </para>
+      <para>
+        This defines that local (ie non-networked) connections to the
+        <literal>whateverdbnameyoulike</literal> database by the
+        <literal>demouser</literal> user are to be trusted.  This line
+        must appear <emphasis role="bold">before</emphasis> any
+        <literal>local</literal> definition for <literal>all</literal>
+        databases or <literal>all</literal> users.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1>
     <title>The Security Contexts</title>
     <para>
       The demo provides 3 relational contexts:
@@ -28,9 +91,8 @@
       <para>
 	The demo uses the <literal>parties</literal> table to identfiy
 	organizations and persons.  There is a tree structured
-	organizational hierarchy of organizations.  The top-leve
-	l of
-	the each organizational tree is called a corp, or corporation.
+	organizational hierarchy of organizations.  The top-level of
+	each organizational tree is called a corp, or corporation.
 	The corp context applies to all data owned by the corp, and by
 	all organizations within it.  Many tables contain a
 	<literal>corp_id</literal> field as a data denormalization to
@@ -116,12 +178,12 @@ $ make db; psql -d vpd -f demo/demo.sql
 	<title>Alice</title>
 	<para>
 	  Alice is a global superuser.  She works for Veil Corp (corp
-	  100).  She authenticates using bcrypt.  You can connect as
+	  1000).  She authenticates using bcrypt.  You can connect as
 	  Alice using this query:
 	  <programlisting>
-select *
-  from veil2.create_session('Alice', 'bcrypt', 4, 100) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd1');
+vpd=# select *
+vpd-#  from veil2.create_session('Alice', 'bcrypt', 4, 1000) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd1');
 	  </programlisting>
 	</para>
 	<para>
@@ -132,9 +194,9 @@ select *
 	  To see which privileges she has, and how she has arrived at
 	  them, run the following query:
 	<programlisting>
-select *
-  from veil2.privilege_assignments
- where accessor_id = 108;
+vpd=# select *
+vpd-#  from veil2.privilege_assignments
+vpd-# where accessor_id = 1080;
 	</programlisting>
 	</para>
       </sect3>
@@ -142,12 +204,12 @@ select *
 	<title>Bob</title>
 	<para>
 	  Bob is a superuser in corp context for Secured Corp.  He
-	  works for Secured Corp (corp 101).  He authenticates using
+	  works for Secured Corp (corp 1010).  He authenticates using
 	  plaintext.  You can connect as Bob using this query:
 	  <programlisting>
-select *
-  from veil2.create_session('Bob', 'plaintext', 4, 101) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd2') o1;
+vpd=# select *
+vpd-#  from veil2.create_session('Bob', 'plaintext', 4, 1010) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd2') o1;
 	  </programlisting>
 	</para>
 	<para>
@@ -166,12 +228,12 @@ select *
 	<title>Carol</title>
 	<para>
 	  Carol is a superuser in corp context for Protected Corp.
-	  She works for Protected Corp (corp 102).  She authenticates
+	  She works for Protected Corp (corp 1020).  She authenticates
 	  using plaintext.  You can connect as Carol using this query:
 	  <programlisting>
-select *
-  from veil2.create_session('Carol', 'plaintext', 4, 102) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd3') o1;
+vpd=# select *
+vpd-#  from veil2.create_session('Carol', 'plaintext', 4, 1020) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd3') o1;
 	  </programlisting>
 	</para>
 	<para>
@@ -182,32 +244,111 @@ select *
       <sect3>
 	<title>Eve</title>
 	<para>
-	  TODO: CHECK AND REWRITE STUFF FOR EVE
 	  Eve is a superuser in corp context for both Secure Corp and
-	  Protected Corp.  She works for Veil Corp (corp 100).  She
-	  authenticates using plaintext.  You can connect as Eve using
-	  this query:
+	  Protected Corp.  She works for Veil Corp (corp 1000).  She
+	  authenticates using plaintext.  She has the
+	  <link
+	      linkend="connect_role"><literal>connect</literal></link>
+	  role for Veil Corp and Secured Corp.  This means she
+	  authenticates within Veil Corp but also has the right to
+	  connect to Secured Corp.
+	</para>
+	<para>
+	  You can connect as Eve in Veil Corp using this query:
 	  <programlisting>
-select *
-  from veil2.create_session('Eve', 'plaintext', 4, 100) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+vpd=# select *
+vpd-#  from veil2.create_session('Eve', 'plaintext', 4, 1000) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
 	  </programlisting>
 	</para>
 	<para>
-	  Eve sees all parties in corps 101 and 102, which is more
-	  than Bob and Carol, but fewer than Alice.  She sees all
-	  projects and project assignments.
+	  Connected to Veil Corp, Eve can only see her own party
+	  record.
+	</para>
+	<para>
+	  To connect Eve in the context of Secured Corp you cab do
+	  this: 
+	  <programlisting>
+vpd=# select *
+vpd-#  from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1010) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+	  </programlisting>
+	</para>
+	<para>
+	  Eve now sees all parties in corp 1010 (plus herself).  She
+	  sees all projects and project assignments within corp 1010.
+	</para>
+	<para>
+	  Eve cannot log in to Protected Corp, even though she has the
+	  <literal>superuser</literal> role because she has not been
+	  given the <literal>connect</literal> role in that context.
+	  If you wish, you can verify this using:
+	  <programlisting>
+vpd=# select *
+vpd-#  from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1020) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+	  </programlisting>
+	  If you give Eve the <literal>connect</literal> role for
+	  Protected Corp she will then be able to log in and see all
+	  parties for Protected Corp:
+	  <programlisting>
+vpd=# select *
+vpd-#  from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1020) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+ session_id |                session_token                 | session_supplemental | success |  errmsg  
+------------+----------------------------------------------+----------------------+---------+----------
+         28 | v3AvfSi6KQ0h4zhR0Yoha3XZ6JT8WHgVRUqGQAC+4R8= |                      | f       | AUTHFAIL
+(1 row)
+
+vpd=# select * from demo.parties;
+ party_id | party_type_id | corp_id | org_id | party_name | password 
+----------+---------------+---------+--------+------------+----------
+(0 rows)
+
+vpd=# insert
+vpd-#   into veil2.accessor_roles
+vpd-#        (accessor_id, role_id, context_type_id, context_id)
+vpd-# values (1110, 0, 4, 1020);
+INSERT 0 1
+vpd=# select *                   
+  from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1020) c
+ cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+ session_id |                session_token                 | session_supplemental | success | errmsg 
+------------+----------------------------------------------+----------------------+---------+--------
+         29 | fA3tsbnh0nhC9j6KTXSKOEQCgiZNU7//McP7IcxZPVU= |                      | t       | 
+(1 row)
+
+vpd=# select * from demo.parties;
+ party_id | party_type_id | corp_id | org_id |   party_name   |   password   
+----------+---------------+---------+--------+----------------+--------------
+     1020 |             2 |    1020 |   1020 | Protected Corp | 
+     1100 |             1 |    1020 |   1020 | Carol          | xxxxxxxxxxxx
+     1110 |             1 |    1000 |   1000 | Eve            | xxxxxxxxxxxx
+     1180 |             2 |    1020 |   1020 | Department P   | 
+     1190 |             2 |    1020 |   1020 | Department P2  | 
+     1200 |             1 |    1020 |   1020 | Paul           | xxxxxxxxxxxx
+     1210 |             1 |    1020 |   1020 | Pippa          | xxxxxxxxxxxx
+     1220 |             1 |    1020 |   1020 | Phil           | xxxxxxxxxxxx
+     1230 |             1 |    1020 |   1020 | Pete           | xxxxxxxxxxxx
+     1240 |             1 |    1020 |   1020 | Pam            | xxxxxxxxxxxx
+(10 rows)
+
+vpd=# 
+	  </programlisting>
+	  What this shows is that Eve can see all users in both corps,
+	  but only for one corp at a time, depending on how she has
+	  logged in.  Pretty cool, eh?
 	</para>
       </sect3>
       <sect3>
 	<title>Sue</title>
 	<para>
 	  Sue is a superuser in org context for Department S.  She
-	  works for Department S (org 105).  She authenticates using
+	  works for Department S (org 1050).  She authenticates using
 	  plaintext.  You can connect as Sue using this query:
 	  <programlisting>
-select *
-  from veil2.create_session('Sue', 'plaintext', 4, 105) c
+vpd=# select *
+  from veil2.create_session('Sue', 'plaintext', 4, 1050) c
  cross join veil2.open_connection(c.session_id, 1, 'passwd5') o1;
 	  </programlisting>
 	</para>
@@ -219,8 +360,8 @@ select *
 	  context of the project itself.  Try executing these 2
 	  queries:
 	  <programlisting>
-select veil2.i_have_priv_in_scope(21, 5, 1);
-select veil2.i_have_priv_in_superior_scope(21, 5, 1);
+vpd=# select veil2.i_have_priv_in_scope(21, 5, 1);
+vpd=# select veil2.i_have_priv_in_superior_scope(21, 5, 1);
 	  </programlisting>
 	</para>
       </sect3>
@@ -228,12 +369,12 @@ select veil2.i_have_priv_in_superior_scope(21, 5, 1);
 	<title>Simon</title>
 	<para>
 	  Simon is a project manager for project S.1.  He works for
-	  Department S (org 105).  He authenticates using plaintext.
+	  Department S (org 1050).  He authenticates using plaintext.
 	  You can connect as Simon using this query:
 	  <programlisting>
-select *
-  from veil2.create_session('Simon', 'plaintext', 4, 105) c
- cross join veil2.open_connection(c.session_id, 1, 'passwd7') o1;
+vpd=# select *
+vpd-#  from veil2.create_session('Simon', 'plaintext', 4, 1050) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd7') o1;
 	  </programlisting>
 	</para>
 	<para>
@@ -250,11 +391,11 @@ select *
 	  able to see the <literal>demo.parties</literal> record for
 	  the org that owns project 1:
 	  <programlisting>
-vpd=> select * from demo.parties;
+vpd=# select * from demo.parties;
  party_id | party_type_id | corp_id | org_id |  party_name  |   password   
 ----------+---------------+---------+--------+--------------+--------------
-      105 |             2 |     101 |    103 | Department S | 
-      114 |             1 |     101 |    105 | Simon        | xxxxxxxxxxxx
+     1050 |             2 |    1010 |   1030 | Department S | 
+     1140 |             1 |    1010 |   1050 | Simon        | xxxxxxxxxxxx
 (2 rows)
 vpd=> 
 	  </programlisting>
@@ -281,7 +422,7 @@ vpd=>
 	  <literal>psql \d</literal> command can be used to describe a
 	  relation:
 	  <programlisting>
-vpd=> \d demo.parties
+vpd=# \d demo.parties
                    View "demo.parties"
     Column     |  Type   | Collation | Nullable | Default 
 ---------------+---------+-----------+----------+---------
@@ -301,7 +442,7 @@ vpd=> \d demo.parties
 	  so let's take a look at the underlying table:
 	  <literal>demo.parties_tbl</literal>:
 	  <programlisting>
-vpd=> \d demo.parties_tbl
+vpd=# \d demo.parties_tbl
                  Table "demo.parties_tbl"
     Column     |  Type   | Collation | Nullable | Default 
 ---------------+---------+-----------+----------+---------
@@ -348,19 +489,19 @@ Triggers:
 	<para>
 	  So, does Simon have privileges 17 and/or 23?  Let's try
 	  running the privilege testing functions directly.  We can
-	  see <literal>party</literal> records 114 and 105.  It seems
-	  likely that we can see record 114 because its our record (we
+	  see <literal>party</literal> records 1140 and 1050.  It seems
+	  likely that we can see record 1140 because its our record (we
 	  are being Simon at this point).  And maybe we can see record
-	  105 because its the owner or project 1, for which we have
+	  1050 because its the owner or project 1, for which we have
 	  the <literal>project manager</literal> role.
 	  <programlisting>
-vpd=> select veil2.i_have_personal_priv(17, 114);
+vpd=# select veil2.i_have_personal_priv(17, 1140);
  i_have_personal_priv 
 ----------------------
  t
 (1 row)
 
-vpd=> select veil2.i_have_priv_in_scope(23, 4, 105);
+vpd=# select veil2.i_have_priv_in_scope(23, 4, 1050);
  i_have_priv_in_scope 
 ----------------------
  t
@@ -378,14 +519,14 @@ vpd=> select veil2.i_have_priv_in_scope(23, 4, 105);
 	  so it is better to use the helper view <literal><link
 	  linkend="view_session_privileges_info">session_privileges_info</link></literal>.
 	  <programlisting>
-vpd=> select * from veil2.session_privileges_info;
+vpd=# select * from veil2.session_privileges_info;
 pd=# select * from veil2.session_privileges_info;
  session_id | scope_type_id | scope_id |   roles    |     privs     
 ------------+---------------+----------+------------+---------------
          21 |             1 |        0 | {0}        | {0,16}
-         21 |             4 |      105 |            | {23}
+         21 |             4 |     1050 |            | {23}
          21 |             5 |        1 | {10,11,12} | {16,21,22,23}
-         21 |             2 |      114 | {2}        | {10,13,17,22}
+         21 |             2 |     1140 | {2}        | {10,13,17,22}
 (4 rows)
 	  </programlisting>
 	</para>
@@ -400,11 +541,11 @@ pd=# select * from veil2.session_privileges_info;
 	      role 0 and privileges 0 and 16 in global scope;
 	    </listitem>
 	    <listitem>
-	      privilege 23 in org scope for org 105;
+	      privilege 23 in org scope for org 1050;
 	    </listitem>
 	    <listitem>
 	      role 2 and privileges 10, 13, 17 and 22 in personal
-	      scope for accessor 114 (Simon).
+	      scope for accessor 1140 (Simon).
 	    </listitem>
 	  </itemizedlist>
 	</para>
@@ -421,17 +562,17 @@ pd=# select * from veil2.session_privileges_info;
 	  linkend="view_privilege_assignments">veil2.privilege_assignments</link></literal>
 	  view:
 	  <programlisting>
-vpd=> select privilege_id as priv_id, ass_cntxt_type_id as cntxt_type,
-vpd->        ass_cntxt_id as cntxt_id, scope_type_id as scope_type,
-vpd->        scope_id, ass_role_id as role_id,
-vpd->        priv_bearing_role_id as priv_role_id,
-vpd->        role_id_mapping
-vpd->   from veil2.privilege_assignments
-vpd->  where accessor_id = 114 and privilege_id in (17, 23);
+vpd=# select privilege_id as priv_id, ass_cntxt_type_id as cntxt_type,
+vpd-#        ass_cntxt_id as cntxt_id, scope_type_id as scope_type,
+vpd-#        scope_id, ass_role_id as role_id,
+vpd-#        priv_bearing_role_id as priv_role_id,
+vpd-#        role_id_mapping
+vpd-#   from veil2.privilege_assignments
+vpd-#  where accessor_id = 1140 and privilege_id in (17, 23);
  priv_id | cntxt_type | cntxt_id | scope_type | scope_id | role_id | priv_role_id | role_id_mapping 
 ---------+------------+----------+------------+----------+---------+--------------+-----------------
-      17 |          1 |      114 |          1 |      114 |       2 |            2 | 2
-      23 |          5 |        1 |          4 |      105 |      10 |           11 | 10->11
+      17 |          1 |     1140 |          1 |     1140 |       2 |            2 | 2
+      23 |          5 |        1 |          4 |     1050 |      10 |           11 | 10->11
 (2 rows)
 	  </programlisting>
 	</para>
@@ -439,7 +580,7 @@ vpd->  where accessor_id = 114 and privilege_id in (17, 23);
 	  This gives us pretty much the whole story.  We get privilege
 	  17 in personal scope from role 2 (<literal>personal
 	  context</literal> assigned in personal context.  And
-	  privilege 23 in org scope for org 105, from role 11, mapped
+	  privilege 23 in org scope for org 1050, from role 11, mapped
 	  from role 10 assigned to us in project scope of project 1.
 	</para>
 	<para>

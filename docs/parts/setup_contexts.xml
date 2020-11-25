@@ -53,7 +53,7 @@
   <sect1>
     <title>Update Your Role Mapping Context (maybe)</title>
     <para>
-      If you need multiple role->role mapping contexts, you need to
+      If you need multiple role to role mapping contexts, you need to
       define <quote><literal>mapping context target scope
       type</literal></quote> in the <literal><link
       linkend="entity_system_parameter">system_parameters</link></literal>

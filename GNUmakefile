@@ -182,6 +182,7 @@ $(ANCHORS_DIR): doxy.tag $(DOC_SOURCES)
 	@echo "Recreating doxygen anchor files..."
 	@mkdir -p $(ANCHORS_DIR)
 	@bin/get_doxygen_anchors.sh doxy.tag docs $(ANCHORS_DIR)
+	@touch $(ANCHORS_DIR)
 
 doxygen: doxy.tag $(ANCHORS_DIR)
 	@cp LICENSE $(HTMLDIR)/doxygen
@@ -262,14 +263,15 @@ INTERMEDIATE_FILES += $(DIAGRAM_INTERMEDIATES)
 
 TARGET_IMAGES := $(patsubst $(DIAGRAMS_DIR)%, $(HTMLDIR)%, $(DIAGRAM_IMAGES))
 
-$(HTMLDIR):
-	@[ -d $(HTMLDIR) ] || mkdir $(HTMLDIR) # Create the directory if needed.
 
 # Copy new images to html dir
 #
-$(TARGET_IMAGES): $(DIAGRAM_IMAGES)
-	@mkdir -p $(HTMLDIR) 2>/dev/null
+$(HTMLDIR)/%.png: diagrams/%.png
+	@-mkdir -p $(HTMLDIR) 2>/dev/null
 	cp $< $@
+
+$(HTMLDIR)/veil2_erd.png: diagrams/veil2_erd.png
+$(HTMLDIR)/veil2_views.png: diagrams/veil2_views.png
 
 # Intermediate file used for creating maps from our diagrams.
 #
@@ -288,12 +290,13 @@ $(TARGET_IMAGES): $(DIAGRAM_IMAGES)
 
 # map file - an intermediate for mapping diagrams
 #
-%.map: %.coords %.png $(HTMLDIR)
+%.map: %.coords %.png 
+	@mkdir -p $(HTMLDIR) 2>/dev/null
 	@echo Creating HTML map file $@...
 	bin/erd2map $* $(HTMLDIR) >$*.map
 
 diagrams/veil2_views.map: diagrams/veil2_views.coords \
-			  diagrams/veil2_views.png $(HTMLDIR)/index.html
+			  diagrams/veil2_views.png 
 	@echo Creating HTML map file $@...
 	bin/erd2map diagrams/veil2_views $(HTMLDIR) view >$@
 
@@ -320,7 +323,7 @@ images: $(DIAGRAM_IMAGES)
 #
 $(HTMLDIR)/index.html: $(DOC_SOURCES) $(VERSION_FILE) $(VEIL2_STYLESHEET) \
 		 $(STYLESHEET_IMPORTER) $(TARGET_IMAGES) $(EXTRACTS) \
-		 $(ANCHORS_DIR)
+		 $(ANCHORS_DIR) 
 	@echo $(TARGET_IMAGES)
 	@echo XSLTPROC "<docbook sources>.xml -->" $@
 	$(XSLTPROC) $(XSLTPROCFLAGS) --output html/ \
@@ -339,7 +342,6 @@ $(HTMLDIR)/mapped: $(HTMLDIR)/index.html $(DIAGRAM_MAPS)
 #
 docs: $(STYLESHEET_IMPORTER) $(VERSION_FILE) extracts \
 	$(HTMLDIR)/index.html $(HTMLDIR)/mapped doxygen 
-
 
 ##
 # test targets

@@ -349,11 +349,11 @@
   <sect2 id="session_functions">
     <title>Session Functions</title>
     <sect3 id="func_ok">
-      <title><literal>ok()</literal></title>
-      <?sql-definition function veil2.ok sql/veil2--&version_number;.sql ?>
+      <title><literal>session_ready()</literal></title>
+      <?sql-definition function veil2.session_ready sql/veil2--&version_number;.sql ?>
       <para>
 	The Doxygen documentation for this can be found
-	<?doxygen-ulink function veil2_ok here?>.
+	<?doxygen-ulink function veil2_session_ready here?>.
       </para>
     </sect3>
     <sect3 id="func_reset_session">

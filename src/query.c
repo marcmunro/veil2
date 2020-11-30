@@ -30,19 +30,27 @@
  * whether we have saved a presiously active SPI connection.  This
  * allows recursive queries, which is probably overkill for our needs,
  * but since the overhead is low...
+ * @param TODO: describe
  * @result integer giving an SPI error code or success.
  */
-int
-veil2_spi_connect(bool *p_pushed)
+void
+veil2_spi_connect(bool *p_pushed, const char *msg)
 {
 	int result = SPI_connect();
 	if (result == SPI_ERROR_CONNECT) {
 		SPI_push();
 		*p_pushed = true;
-		return SPI_connect();
+		result = SPI_connect();
 	}
-	*p_pushed = false;
-	return result;
+	else {
+		*p_pushed = false;
+	}
+	if (result != SPI_OK_CONNECT) {
+		ereport(ERROR,
+				(errcode(ERRCODE_INTERNAL_ERROR),
+				 errmsg("%s", msg),
+				 errdetail("SPI_connect() failed, returning %d.", result)));
+	}
 }
 
 /**
@@ -51,14 +59,19 @@ veil2_spi_connect(bool *p_pushed)
  * tells us whether to revert to a previously active SPI connection. 
  * @result integer giving an SPI error code or success.
  */
-int
-veil2_spi_finish(bool pushed)
+void
+veil2_spi_finish(bool pushed, const char *msg)
 {
 	int spi_result = SPI_finish();
 	if (pushed) {
 		SPI_pop();
 	}
-	return spi_result;
+	if (spi_result != SPI_OK_FINISH) {
+		ereport(ERROR,
+				(errcode(ERRCODE_INTERNAL_ERROR),
+				 errmsg("%s", msg),
+				 errdetail("SPI_finish() failed, returning %d.", spi_result)));
+	}
 }
 
 /** 
@@ -70,6 +83,7 @@ veil2_spi_finish(bool pushed)
  * @param argtypes Pointer to an array containing the OIDs of the data
  * @param args Actual parameters
  * types of the parameters 
+ * @param nulls TODO: describe
  * @param read_only Whether the query should be read-only or not
  * @param saved_plan Adress of void pointer into which the query plan
  * will be saved.  Passing the same void pointer on a subsequent call
@@ -81,6 +95,7 @@ prepare_query(const char *qry,
 			  int nargs,
 			  Oid *argtypes,
 			  Datum *args,
+			  const char *nulls,
 			  bool read_only,
 			  void **saved_plan)
 {
@@ -107,7 +122,7 @@ prepare_query(const char *qry,
 		}
     }
 	
-	exec_result = SPI_execute_plan(plan, args, NULL, read_only, 0);
+	exec_result = SPI_execute_plan(plan, args, nulls, read_only, 0);
 	if (exec_result < 0) {
 		ereport(ERROR,
 				(errcode(ERRCODE_INTERNAL_ERROR),
@@ -117,30 +132,16 @@ prepare_query(const char *qry,
     }
 }
 
-/** 
- * Execute a query and process the results.
- * @param qry The text of the SQL query to be performed.
- * @param nargs The number of input parameters ($1, $2, etc) to the query
- * @param argtypes Pointer to an array containing the OIDs of the data
- * @param args Actual parameters types of the parameters 
- * @param read_only Whether the query should be read-only or not.
- * @param saved_plan Adress of void pointer into which the query plan
- * will be saved.  Passing the same void pointer on a subsequent call
- * will cause the saved query plan to be re-used.  This may be NULL,
- * in which case the query plan will not be saved.
- * @param process_row  A Fetch_fn() to process each tuple retruned by
- * the query.
- * @param fn_param  A parameter to pass to process_row.
- */
 int
-veil2_query(const char *qry,
-			int nargs,
-			Oid *argtypes,
-			Datum *args,
-			bool  read_only,
-			void **saved_plan,
-			Fetch_fn process_row,
-			void *fn_param)
+veil2_query_wn(const char *qry,
+			   int nargs,
+			   Oid *argtypes,
+			   Datum *args,
+			   const char *nulls,
+			   bool  read_only,
+			   void **saved_plan,
+			   Fetch_fn process_row,
+			   void *fn_param)
 {
     int  row;
 	int  fetched;
@@ -148,7 +149,7 @@ veil2_query(const char *qry,
 	bool cntinue;
 	SPITupleTable *tuptab;
 
-    prepare_query(qry, nargs, argtypes, args, read_only, saved_plan);
+    prepare_query(qry, nargs, argtypes, args, nulls, read_only, saved_plan);
 	fetched = SPI_processed;
 	tuptab = SPI_tuptable;
 	if (process_row) {
@@ -167,6 +168,37 @@ veil2_query(const char *qry,
 }
 
 /** 
+ * Execute a query and process the results.
+ * @param qry The text of the SQL query to be performed.
+ * @param nargs The number of input parameters ($1, $2, etc) to the query
+ * @param argtypes Pointer to an array containing the OIDs of the data
+ * @param args Actual parameters types of the parameters 
+ * @param read_only Whether the query should be read-only or not.
+ * @param saved_plan Adress of void pointer into which the query plan
+ * will be saved.  Passing the same void pointer on a subsequent call
+ * will cause the saved query plan to be re-used.  This may be NULL,
+ * in which case the query plan will not be saved.
+ * @param process_row  A Fetch_fn() to process each tuple retruned by
+ * the query.
+ * @param fn_param  A parameter to pass to process_row.
+ *
+ * @result The number of rows processed.
+ */
+int
+veil2_query(const char *qry,
+			int nargs,
+			Oid *argtypes,
+			Datum *args,
+			bool  read_only,
+			void **saved_plan,
+			Fetch_fn process_row,
+			void *fn_param)
+{
+	return veil2_query_wn(qry, nargs, argtypes, args, NULL,
+						  read_only, saved_plan, process_row, fn_param);
+}
+
+/** 
  * ::Fetch_fn function for processing a single row of a single integer for 
  * ::query.
  * \param tuple The row to be processed
@@ -179,8 +211,8 @@ veil2_query(const char *qry,
 static bool
 fetch_one_bool(HeapTuple tuple, TupleDesc tupdesc, void *p_result)
 {
-	static bool ignore_this = false;
-    bool col = DatumGetBool(SPI_getbinval(tuple, tupdesc, 1, &ignore_this));
+	bool is_null = false;
+    bool col = DatumGetBool(SPI_getbinval(tuple, tupdesc, 1, &is_null));
     *((bool *) p_result) = col;
 	
     return false;

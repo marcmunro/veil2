@@ -6,6 +6,7 @@
 \pset pager off
 
 -- This is needed for a test below.
+
 create function demo.insert_connect() returns void as
 $$
 insert

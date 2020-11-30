@@ -22,16 +22,6 @@ begin;
 select '...test veil2 session handling...';
 
 
-create or replace
-function test_privs() returns void as
-$$
-begin
-
-end;
-$$
-language plpgsql security definer;
-
-
 select plan(102);
 
 -- Perform a reset session without returning a row.  This ensures the
@@ -93,7 +83,7 @@ select is((session_id is null), true,
           'There should not be an actual session')
   from sessions;
 
--- Invalid authentication type with vailid accessor yields
+-- Invalid authentication type with valid accessor yields
 -- a session that will subsequently not open
 with session as (select * from veil2.create_session('eve', 'wibble'))
 select is((session.session_id is not null),
@@ -116,17 +106,20 @@ select is((reported_session_id is null), false,
   from sessions
  union all
 select is((session_id is null), false,
-           'There should be an actual session_id(2)')
+           'There should not be an actual session_id(2)')
   from sessions;
 
 -- We have a created session from the last tests above.  Now we will try
 -- opening that session.  Given that the authentication method was
 -- invalid, we expect appropriate failures.
+create temporary table prev_context as
+select * from veil2_session_context;
+
 with session as
   (
     select os.*
-      from veil2_session_context sp
-     cross join veil2.open_connection(sp.session_id, 1, 'wibble') os
+      from prev_context pc
+     cross join veil2.open_connection(pc.session_id, 1, 'wibble') os
   )
 select is(success, false, 'Authentication should have failed(1)')
   from session

@@ -3,7 +3,7 @@
   <para>
     The <literal>Veil2</literal> demo exists to demonstrate a
     <link linkend="what-is-relational-security">Relational Security
-    System</link>, show its capabilities and provide an example of 
+    System</link>, show its capabilities, and provide an example of 
     <literal>Veil2</literal> in use.  It is a trivial, simple and
     incomplete example but provides enough of a foundation to explore
     and understand what <literal>Veil2</literal> is capable of.

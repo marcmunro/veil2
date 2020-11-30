@@ -78,8 +78,8 @@ INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
 # This definition is needed in order to publish the docs and data
 # dirs from veil2 functions.
 PG_CFLAGS = -D DATA_PATH=\"$(DESTDIR)$(datadir)/$(datamoduledir)\" \
-	    -D DOCS_PATH=\"$(DESTDIR)$(docdir)/$(docmoduledir)\" 
-
+	    -D DOCS_PATH=\"$(DESTDIR)$(docdir)/$(docmoduledir)\" \
+	    -O0
 
 # Build per-source dependency files for inclusion
 # This ignores header files and any other non-local files (such as
@@ -185,6 +185,7 @@ $(ANCHORS_DIR): doxy.tag $(DOC_SOURCES)
 	@touch $(ANCHORS_DIR)
 
 doxygen: doxy.tag $(ANCHORS_DIR)
+	@mkdir -p $(HTMLDIR)//doxygen 2>/dev/null
 	@cp LICENSE $(HTMLDIR)/doxygen
 
 
@@ -385,7 +386,7 @@ local_clean:
 	done || true
 	echo Cleaning intermediate and target files...
 	@rm -f $(INTERMEDIATE_FILES) $(TARGET_FILES) 2>/dev/null || true
-	@rmdir $(TARGET_DIRS) 2>/dev/null || true
+	@rm -rf $(TARGET_DIRS) 2>/dev/null || true
 
 # Make PGXS clean target use our cleanup target.
 clean: local_clean

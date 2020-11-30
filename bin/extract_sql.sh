@@ -34,6 +34,8 @@ extract_definition ()
 	  }
 	  /^create '$1'.*'$2'$/ { start_reading() }
 	  /^create '$1'.*'$2' / { start_reading() }
+	  /^create unlogged '$1'.*'$2'$/ { start_reading() }
+	  /^create unlogged '$1'.*'$2' / { start_reading() }
           /^alter '$1'.*'$2' / { start_reading() }
           /^'$1'.*'$2'[\( ]/ { start_reading() }
           /^materialized '$1'.*'$2' / { start_reading() }
@@ -178,7 +180,7 @@ if [ "x$1" = "x-D" ]; then
     # dependencies file.  This helps us figure out whether the
     # dependencies list is out of date.
     shift
-    find $1 -name '*xml' | xargs grep -l '<?sql-definition' |
+    find $1 -name '*xml' | xargs grep -l '<\?sql-definition' |
 	sort -u | xargs
 elif [ "x$1" = "x-d" ]; then
     # We have been asked to generate the dependencies between our
@@ -186,7 +188,7 @@ elif [ "x$1" = "x-d" ]; then
     shift
     version=`cut -d" " -f1 VERSION`
     find $1 -name '*xml' | xargs \
-        gawk '/<?sql-definition/ {printf("'$2'/%s.xml: %s\n", $3, $4)}' |
+        gawk '/<\?sql-definition/ {printf("'$2'/%s.xml: %s\n", $3, $4)}' |
 	sed -e "s/&version_number;/${version}/" | sort -u
 elif [ "x$1" = "x-1" ]; then
     # We have been asked to extract for a single database object.

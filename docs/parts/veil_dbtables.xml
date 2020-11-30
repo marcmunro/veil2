@@ -64,11 +64,11 @@
       <?sql-definition table veil2.role_roles sql/veil2--&version_number;.sql ?>
     </sect2>
     <sect2 id="entity_session_context">
-      <title>Session Context Type and Table</title>
+      <title>Session Context Type and Temp Table</title>
       <?sql-definition type session_context_t sql/veil2--&version_number;.sql ?>
     </sect2>
     <sect2 id="entity_session_privilege">
-      <title>Session Privileges Type and Table</title>
+      <title>Session Privileges Type and Temp Table</title>
       <?sql-definition type session_privileges_t sql/veil2--&version_number;.sql ?>
     </sect2>
     <sect2 id="entity_authentication_detail">

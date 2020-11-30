@@ -1,3 +1,107 @@
 <chapter id="performance">
   <title>Performance</title>
+  <para>
+    Adding <literal>Veil2</literal> to your database introduces 2
+    specific overheads to  your database performance.
+    <orderedlist>
+      <listitem>
+	the overhead of session management;
+      </listitem>
+      <listitem>
+	the overhead of privilege testing in your relations.
+      </listitem>
+    </orderedlist>
+  </para>
+  <sect1>
+    <title>Data For Evaluating Performance</title>
+    <para>
+      In order to get a feel for the overheads associated with
+      <literal>Veil2</literal>, we need some realistic volumes of
+      data for roles, privileges, and accessors with their associated
+      mappings.  The script, <literal>demo_bulk_data.sql</literal>,
+      which can be found as described <link
+      linkend="next_steps">here</link> provides a good starting point
+      for this.
+    </para>
+    <para>
+      After creating a demo database (as <link
+      linkend="veil_demo">described here</link>) you can install this
+      data using psql, eg:
+      <programlisting>
+marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo_bulk_data.sql 
+      </programlisting>
+    </para>
+    <para>
+      This will create around 8000 accessors, around 300 roles, and
+      around 2000 privileges, which should be enough to be exercise
+      the privilege testing and session management functionality.
+    </para>
+  </sect1>
+  <sect1>
+    <title>Session Management Ovehead</title>
+    <para>
+      The two biggest overheads in session management are the use of
+      <literal>bcrypt()</literal> for authentication (which is
+      CPU-intensive by intent), and the loading of session
+      privileges.  In the following evaluation,
+      <literal>bcrypt()</literal> is avoided. 
+    </para>
+    <para>
+      Session privileges once loaded (from <link
+      linkend="view_session_privileges_v"><literal>veil2.session_privileges_v</literal></link>
+      are cached (in <link
+      linkend="entity_accessor_privileges_cache"><literal>veil2.accessor_privileges_cache</literal></link>).
+      This means that subsequent loading of privileges should be
+      considerably faster than the initial one for each accessor.
+    </para>
+    <para>
+      A simple performance checking script <literal>perf.sql</literal>
+      is provided in the same directory as the bulk data loading
+      script.  Assuming the same directory as the example above you
+      would run it as follows:
+      <programlisting>
+marc:veil2$ psql -d vpd -f demo/perf.sql 
+Creating sessions: elapsed = 21 milliseconds.
+Opening sessions: elapsed = 51 milliseconds.
+Re-opening sessions: elapsed = 60 milliseconds.
+marc:veil2$ 
+      </programlisting>
+      The script creates 6 sessions, opens each of them, and then
+      re-opens them.  The elapsed times shown are cumulative, in this
+      case giving the time to open and initialize the sessions as
+      being approximately 30 milliseconds (5 milliseconds each), with
+      the session reloads taking about 9 milliseconds (1.5
+      milliseconds each).  
+    </para>
+    <para>
+      This is on an ageing desktop PC with the following CPU spec:
+      <programlisting>
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i5-3570K CPU @ 3.40GHz
+stepping	: 9
+microcode	: 0xc
+cpu MHz		: 3411.376
+cache size	: 6144 KB
+      </programlisting>
+    </para>
+    <para>
+      It may be possible to further improve the performance by
+      re-implementing the session management functions in C, though
+      initial experiments yielded only minor gains which, given the
+      loss in flexibility resulting from a C implementation, were not
+      felt to be worthwhile.
+    </para>
+    <para>
+      Until anyone claims otherwise, the author is going to claim that
+      this is pretty fast.
+    </para>
+  </sect1>
+  <sect1>
+    <title>Privilege Testing Ovehead</title>
+    <para>
+      
+    </para>
+  </sect1>
 </chapter>

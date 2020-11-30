@@ -685,7 +685,9 @@ grant select on veil2.accessor_roles to veil_user;
 
 
 \echo ......sessions...
-create sequence veil2.session_id_seq;
+create sequence veil2.session_id_seq
+  minvalue 1
+  maxvalue 2000000000 cycle;
 
 create unlogged table veil2.sessions (
   session_id			integer not null
@@ -1301,7 +1303,7 @@ select accessor_id, role_id,
        context_type_id, context_id
   from veil2.all_accessor_roles
  union all
-select accessor_id, 2, 1, accessor_id
+select accessor_id, 2, 2, accessor_id
   from veil2.accessors;
 
 comment on view veil2.all_accessor_roles_plus is
@@ -2439,11 +2441,11 @@ is an appropriate authentication.';
 
 \echo ...ok()...
 create or replace
-function veil2.ok() returns boolean
-     as '$libdir/veil2', 'veil2_ok'
+function veil2.session_ready() returns boolean
+     as '$libdir/veil2', 'veil2_session_ready'
      language C stable strict;
 
-comment on function veil2.ok() is
+comment on function veil2.session_ready() is
 'Predicate to indicate whether veil2.reset_session() has been
 successfully called for this session.  If not, none of the
 C language i_have_privilege functions will return true.  
@@ -2618,6 +2620,26 @@ end;
 $$
 language 'plpgsql' security definer volatile
 set client_min_messages = 'error';
+
+/*
+-- Tried without a significant performance improvement
+
+create or replace
+function veil2.create_accessor_session(
+    accessor_id in integer,
+    authent_type in text,
+    context_type_id in integer,
+    context_id in integer,
+    session_context_type_id in integer,
+    session_context_id in integer,
+    authent_accessor_id in integer default null,
+    session_id out integer,
+    session_token out text,
+    session_supplemental out text)
+  returns record
+     as '$libdir/veil2', 'veil2_create_accessor_session'
+     language C security definer volatile;
+*/
 
 comment on function veil2.create_accessor_session(
     integer, text, integer, integer, integer, integer, integer) is
@@ -2892,20 +2914,6 @@ declare
   _prevprev_accessor_id integer;
   _need_filter boolean := false;
 begin
-  execute veil2.reset_session();
-  insert
-    into veil2_session_context
-        (accessor_id, authent_accessor_id, session_id,
-         login_context_type_id, login_context_id,
-         session_context_type_id, session_context_id,
-	 mapping_context_type_id, mapping_context_id)
-  select _accessor_id, s.authent_accessor_id, load_session_privs.session_id,
-         login_context_type_id, login_context_id,
-         session_context_type_id, session_context_id,
-         mapping_context_type_id, mapping_context_id
-    from veil2.sessions s
-   where s.session_id = load_session_privs.session_id;
-
   if _prev_session_id is not null then
     select accessor_id,
       	   case when s.authent_type = 'become'
@@ -3010,7 +3018,7 @@ declare
   can_connect bool;
 begin
   success := false;
-  truncate table veil2_session_privileges;
+  perform veil2.reset_session();
   select s.accessor_id, s.expires < now(),
          s.nonces, s.authent_type,
 	 ac.context_type_id,
@@ -3053,6 +3061,20 @@ begin
     end if;
 
     if success then
+      -- Reload session context
+      insert
+        into veil2_session_context
+            (accessor_id, authent_accessor_id, session_id,
+             login_context_type_id, login_context_id,
+             session_context_type_id, session_context_id,
+    	 mapping_context_type_id, mapping_context_id)
+      select _accessor_id, s.authent_accessor_id, open_connection.session_id,
+             login_context_type_id, login_context_id,
+             session_context_type_id, session_context_id,
+             mapping_context_type_id, mapping_context_id
+        from veil2.sessions s
+       where s.session_id = open_connection.session_id;
+
       if _has_authenticated then
         -- The session has already been opened.  From here on we 
 	-- use different authentication tokens for each open_connection()
@@ -3361,14 +3383,15 @@ username rather than accessor_id.';
 select veil2.reset_session();
 
 \echo ......true()...
+
 create or replace
-function veil2.true(integer) returns boolean
+function veil2.always_true(integer) returns boolean
      as '$libdir/veil2', 'veil2_true'
      language C security definer stable leakproof;
 
-comment on function veil2.true(integer) is
+comment on function veil2.always_true(integer) is
 'Performance testing function - always returns true.  Used to
-establish the mimumu overhead of security policies for tables.';
+establish the minimum overhead of security policies for tables.';
 
 
 \echo ......i_have_global_priv()...
@@ -3486,24 +3509,11 @@ revoke all on function veil2.result_counts() from public;
 create or replace
 function veil2.delete_expired_sessions() returns void as
 $$
-declare
-  session_id integer;
-begin
-  for session_id in
-    select s.session_id
-      from veil2.sessions s
-     where expires <= now()
-       for update
-  loop
-    delete
-      from veil2.session_privileges sp
-     where sp.session_id = session_id;
-    delete from veil2.sessions s
-     where p.session_id = session_id;
-  end loop;
-end;
+delete
+  from veil2.sessions s
+     where expires <= now();
 $$
-language 'plpgsql' security definer volatile;
+language 'sql' security definer volatile;
 
 comment on function veil2.delete_expired_sessions() is
 'Utility function to clean-up  session data.  This should be

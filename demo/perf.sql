@@ -32,6 +32,19 @@ select 1110, 0, 4, 1020
         and role_id = 0
 	and context_id = 1020);
 	
+-- Allow plaintext authentication for Alice as bcrypt slows everything
+-- down.
+
+insert
+  into veil2.authentication_details
+      (accessor_id, authentication_type, authent_token)
+select 1080, 'plaintext', 'passwd1'
+ where not exists (
+    select null
+      from veil2.authentication_details
+     where accessor_id = 1080
+       and authentication_type = 'plaintext');
+
 \c vpd demouser
 
 create or replace
@@ -72,7 +85,7 @@ create temporary table start_time as select current_timestamp;
 -- Create our sessions table and start a session for Alice
 create temporary table perf_sessions as
   select 'Alice' as name, 1 as next_nonce, *
-    from veil2.create_session('Alice', 'bcrypt', 4, 1000);
+    from veil2.create_session('Alice', 'plaintext', 4, 1000);
 
 -- Start session for Bob and the others.
 insert into perf_sessions

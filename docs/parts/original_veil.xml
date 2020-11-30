@@ -12,7 +12,7 @@
       able to run the same query and see different results
     </para>
     <para>
-      <literal>Veil</literal> provides a set of primitives for dealing
+      <literal>Veil</literal> provides a set of components for dealing
       with bitmaps as variables, and for maintaining these variables
       in shared or session state.
     </para>
@@ -46,7 +46,7 @@
       Although it was clear to the author that <literal>Veil</literal>
       had a serious deficiency in its lack of integration with
       Postgres' transaction management, it wasn't obvious how to
-      resolve them.
+      resolve it.
     </para>
     <para>
       The original <literal>Veil</literal> release was in 2011.  One
@@ -62,22 +62,23 @@
       Eventually the author realised that the hstore module was just
       what was needed, and so set out to create a Postgres native
       bitmap type.  This was pgbitmap.  It worked pretty well and was
-      simple and elegant. All of
-      <literal>Veil</literal> could be replaced with pgbitmap, hstore
-      and arrays.
+      simple and elegant. All of <literal>Veil</literal> could be
+      replaced with pgbitmap, hstore and arrays, with all session
+      objects being storable in temporary tables and shared objects in
+      normal tables.
     </para>
     <para>
       On further reflection, the author realised that some proper
-      integration was needed, and a decent framework for building VPDs
-      using pgbitmap.  It wouldn't be much work, and didn't need to
-      contain much code.
+      integration was needed, along with a decent framework for
+      building VPDs using pgbitmap.  It wouldn't be much work, and
+      didn't need to contain much code.
     </para>
     <para>
       As he tackled the problem of <literal>Veil2</literal>, he
       realised that much of what the user had to implement in a
       <literal>Veil</literal>-based system was going to be common to
       all users.  And he had a SaaS project that he'd worked on as a
-      guide to what was needed.
+      guide to what was needed.  So the project grew.
     </para>
     <para>
       Ironically, as the implementation proceeded, the need for hstore
@@ -89,9 +90,9 @@
       dropped out.
     </para>
     <para>
-      With a small number of relatively simple concepts, that many
-      developers and even some PHBs could understand, it became clear
-      that the underlying model was sound, but that implementation
+      With a small number of relatively simple concepts that many
+      developers, and even some PHBs could understand, it became clear
+      that the underlying model was sound but that each implementation
       would be tricky and a lot of work.  This was not something that
       most developers would be given the opportunity to build for
       themselves from a set of components.  And given that the
@@ -103,7 +104,10 @@
   <sect1>
     <title>What If It Doesn't Work For Me?</title>
     <para>
-      There is always pgbitmap, hstore and arrays.
+      There is always pgbitmap, hstore and arrays.  And it is pretty
+      extensible.  But if you have a specific requirement that seems
+      like it should be pretty common, and you'd like to help with the
+      analysis and testing you could try the contact links.
     </para>
   </sect1>
 </chapter>

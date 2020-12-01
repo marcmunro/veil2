@@ -847,10 +847,11 @@ veil2_i_have_priv_in_scope_or_superior(PG_FUNCTION_ARGS)
 			veil2_spi_finish(pushed,
 							 "SPI finish failed in "
 							 "veil2_i_have_priv_in_scope_or_superior()");
+			result = found && result;
 		}
 	}
-	result_counts[found && result]++;
-	return found && result;
+	result_counts[result]++;
+	return result;
 }
 
 
@@ -874,8 +875,9 @@ veil2_i_have_priv_in_scope_or_superior(PG_FUNCTION_ARGS)
 Datum
 veil2_i_have_priv_in_scope_or_superior_or_global(PG_FUNCTION_ARGS)
 {
-	static void *saved_plan1 = NULL;
-	static void *saved_plan2 = NULL;
+	static int global_context_idx = -1;
+	static int given_context_idx = -1;
+	static void *saved_plan = NULL;
 	bool result;
 	bool found;
 	bool pushed;
@@ -887,22 +889,16 @@ veil2_i_have_priv_in_scope_or_superior_or_global(PG_FUNCTION_ARGS)
 					Int32GetDatum(scope_type_id),
 					Int32GetDatum(scope_id)};
 	
-	veil2_spi_connect(&pushed,
-					  "SPI connect failed in "
-					  "veil2_i_have_priv_in_scope_or_superior()");
-
-	if (session_ready) {
-		found = veil2_bool_from_query(
-			"select coalesce("
-			" (select union_of(privs) ? $1"
-			"    from veil2_session_privileges v"
-			"   where (    v.scope_type_id = $2"
-			"          and v.scope_id = $3)"
-			"      or (    v.scope_type_id = 1"
-			"          and v.scope_id = 0)), false)",
-			3, argtypes, args,
-			&saved_plan1, &result);
-		if (!(found && result)) {
+	if ((result = checkSessionReady())) {
+		load_privs();
+		result =
+			(checkContext(&global_context_idx, 1, 0, priv) ||
+			 checkContext(&given_context_idx, scope_type_id,
+						  scope_id, priv));
+		if (!result) {
+			veil2_spi_connect(&pushed,
+							  "SPI connect failed in "
+							  "veil2_i_have_priv_in_scope_or_superior()");
 			found = veil2_bool_from_query(
 				"select true"
 				"  from veil2.all_superior_scopes asp"
@@ -913,24 +909,16 @@ veil2_i_have_priv_in_scope_or_superior_or_global(PG_FUNCTION_ARGS)
 				"   and asp.scope_id = $3"
 				"   and sp.privs ? $1",
 				3, argtypes, args,
-				&saved_plan2, &result);
+				&saved_plan, &result);
+
+			veil2_spi_finish(pushed,
+							 "SPI finish failed in "
+							 "veil2_i_have_priv_in_scope_or_superior()");
+			result = found && result;
 		}
-		veil2_spi_finish(pushed,
-						 "SPI finish failed in "
-						 "veil2_i_have_priv_in_scope_or_superior()");
-		result_counts[found && result]++;
-		return found && result;
 	}
-	if (error_if_no_session()) {
-		ereport(ERROR,
-				(errcode(ERRCODE_INTERNAL_ERROR),
-				 errmsg("Attempt to check privileges before call to  "
-						"veil2_reset_session.")));
-	}
-	else {
-		result_counts[false]++;
-	}
-	return false;
+	result_counts[result]++;
+	return result;
 }
 
 

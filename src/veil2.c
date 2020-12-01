@@ -111,19 +111,17 @@ static bool session_privs_loaded = false;
 /**
  * Locate a particular ContextPriv entry in ::session_privs.
  *
- * @param start The index for the entry in the
+ * @param p_idx Pointer to a cached index value for the entry in the
  * ::session_privs->active_contexts that the search should start from.
  * This allows the caller to cache the last returned index in the hope
  * that they will be looking for the same entry next time.  If no
- * cached value exists, the caller should provide -1.
- * @param scope_type The scope_type_id of the ContextPrivs entry we are
- * looking for.
- * @param scope The scope_id of the ContextPrivs entry we are
- * looking for.
- *
- * @result the index into ::session_privs->active_contexts for the given
- * scope_type and scope, and starting at start.  If not found, return
- * -1.
+ * cached value exists, the caller should provide -1.  The index of
+ * the found ContextPrivs entry will be returned through this, or -1
+ * if no context can be found.
+ * @param scope_type The scope_type_id of the ContextPrivs entry we
+ * are looking for.
+ * @param scope The scope_id of the ContextPrivs entry we are looking
+ * for.
  */
 static void
 findContext(int *p_idx, int scope_type, int scope)
@@ -168,6 +166,26 @@ findContext(int *p_idx, int scope_type, int scope)
 	}
 }
 
+/**
+ * Wrapper for findContext() that finds the context and checks for a
+ * privilege in a single operation.
+ *
+ * @param p_idx Pointer to a cached index value for the entry in the
+ * ::session_privs->active_contexts that the search should start from.
+ * This allows the caller to cache the last returned index in the hope
+ * that they will be looking for the same entry next time.  If no
+ * cached value exists, the caller should provide -1.  The index of
+ * the found ContextPrivs entry will be returned through this, or -1
+ * if no context can be found.
+ * @param scope_type The scope_type_id of the ContextPrivs entry we
+ * are looking for.
+ * @param scope The scope_id of the ContextPrivs entry we are looking
+ * for.
+ * @param priv The privilege to test for.
+ *
+ * @return false if no context can be found, otherwise true if the
+ * user has priv in the supplied scope.
+ */
 static bool
 checkContext(int *p_idx, int scope_type, int scope, int priv)
 {
@@ -184,7 +202,7 @@ checkContext(int *p_idx, int scope_type, int scope, int priv)
  * Free a ContextPrivs entry.  This just means freeing the privileges
  * Bitmap and zeroing the pointer for it.
  * 
- * @param the ContextPrivs entry to be cleared out.
+ * @param cp The ContextPrivs entry to be cleared out.
  */
 static void
 freeContextPrivs(ContextPrivs *cp)
@@ -264,9 +282,9 @@ extendSessionPrivs(SessionPrivs *session_privs)
 /**
  * Add a ContextPrivs entry to ::session_privs, from the parameters.
  *
- * @param the scope_type for the new entry
- * @param the scope for the new entry
- * @param the privileges Bitmap for the new entry
+ * @param scope_type The scope_type for the new entry
+ * @param the scope scope for the new entry
+ * @param privs The privileges Bitmap for the new entry
  */
 static void
 add_scope_privs(int scope_type, int scope, Bitmap *privs)
@@ -294,6 +312,11 @@ add_scope_privs(int scope_type, int scope, Bitmap *privs)
  * A ::Fetch_fn for veil2_query() that retrieves the details for a
  * ContextPrivs entry and adds it to ::session_privs using
  * add_scope_privs(). 
+ *
+ * @param tuple  The ::HeapTuple returned from a Postgres SPI query.
+ * This will contain a tuple of 2 integers.
+ * @param tupdesc The ::TupleDesc returned from the same Postgres SPI query
+ * @param p_result This should be null.
  *
  * @result true, to indicate to veil2_query() that there may be more
  * records to fetch.
@@ -364,7 +387,6 @@ load_privs()
  * determination of whether to error or return false is based on the
  * value of the veil2.system_parameter 'error on uninitialized
  * session' at the time that the database session is established.
- * 
  *
  * @return boolean, whether or not to raise an error.
  */
@@ -396,7 +418,6 @@ error_if_no_session()
  * 
  * @param tuple  The ::HeapTuple returned from a Postgres SPI query.
  * This will contain a tuple of 2 integers.
- *
  * @param tupdesc The ::TupleDesc returned from the same Postgres SPI query
  * @param p_result Pointer to a ::tuple_2ints struct into which the 2
  * integers from the SPI query will be placed.
@@ -443,6 +464,7 @@ create_temp_tables()
 		NULL, NULL);
 }
 
+
 /** 
  * Truncate the veil2_session_privileges and veil2_session_context
  * temporary tables (actually we use deletion rather than truncation
@@ -461,8 +483,6 @@ truncate_temp_tables()
 		0, NULL, NULL,
 		false, 	NULL,
 		NULL, NULL);
-	
-
 }
 
 
@@ -479,9 +499,6 @@ veil2_session_ready(PG_FUNCTION_ARGS)
 {
     PG_RETURN_BOOL(session_ready);
 }
-
-#define USE_BITMAPS_DIRECTLY
-
 
 
 /**
@@ -594,6 +611,14 @@ veil2_true(PG_FUNCTION_ARGS)
 	return true;
 }
 
+/**
+ * Check whether a session has been properly initialized.  If not, and
+ * we are supposed to fail in such a situation, fail with an appropriate
+ * error message.  Otherwise return true if the session is ready to
+ * go.
+ *
+ * @result boolean True if our session has been properly initialized.
+ */
 static bool
 checkSessionReady()
 {
@@ -615,7 +640,7 @@ checkSessionReady()
  * Predicate to determine whether the current session user has a given
  * privilege, <code>priv</code>, with global scope.
  *
- * @param int privilege_id of privilege to test for
+ * @param privilege_id Integer giving privilege to test for
  *
  * @return boolean true if the session has the given privilege
  */
@@ -642,8 +667,9 @@ veil2_i_have_global_priv(PG_FUNCTION_ARGS)
  * privilege, <code>priv</code>, in their personal scope (ie for data
  * pertaining to themselves).
  *
- * @param int privilege_id of privilege to test for
- * @param int accessor_id of the record being checked.
+ * @param privilege_id Integer giving privilege to test for
+ * @param accessor_id Integer id for a party from the record being
+ * checked.
  *
  * @return boolean true if the session has the given privilege in the
  * personal scope of the given accessor_id
@@ -673,9 +699,9 @@ veil2_i_have_personal_priv(PG_FUNCTION_ARGS)
  * privilege, <code>priv</code>, in a specific scope
  * (<code>scope_type_id</code>, <code>scope_id</code>).
  *
- * @param int privilege_id of privilege to test for
- * @param int scope_type_id of the record being checked.
- * @param int scope_id for the record being checked.
+ * @param privilege_id Integer giving privilege to test for
+ * @param scope_type_id Integer id of the scope type to be checked
+ * @param scope_id Integer id of the scop to be checked
  *
  * @return boolean true if the session has the given privilege for the
  * given scope_type_id and scope_id
@@ -706,9 +732,9 @@ veil2_i_have_priv_in_scope(PG_FUNCTION_ARGS)
  * privilege, <code>priv</code>, in a specific scope
  * (<code>scope_type_id</code>, <code>scope_id</code>), or in global scope.
  *
- * @param int privilege_id of privilege to test for
- * @param int scope_type_id of the record being checked.
- * @param int scope_id for the record being checked.
+ * @param privilege_id Integer giving privilege to test for
+ * @param scope_type_id Integer id of the scope type to be checked
+ * @param scope_id Integer id of the scop to be checked
  *
  * @return boolean true if the session has the given privilege for the
  * given scope_type_id and scope_id
@@ -743,9 +769,9 @@ veil2_i_have_priv_in_scope_or_global(PG_FUNCTION_ARGS)
  * privilege, <code>priv</code>, in a superior scope to that supplied: 
  * <code>scope_type_id</code>, <code>scope_id</code>.
  *
- * @param int privilege_id of privilege to test for
- * @param int scope_type_id of the record being checked.
- * @param int scope_id for the record being checked.
+ * @param privilege_id Integer giving privilege to test for
+ * @param scope_type_id Integer id of the scope type to be checked
+ * @param scope_id Integer id of the scop to be checked
  *
  * @return boolean true if the session has the given privilege in a
  * scope superior to that given by scope_type_id and scope_id
@@ -798,9 +824,9 @@ veil2_i_have_priv_in_superior_scope(PG_FUNCTION_ARGS)
  * privilege, <code>priv</code>, in the supplied scope or a superior one: 
  * <code>scope_type_id</code>, <code>scope_id</code>.
  *
- * @param int privilege_id of privilege to test for
- * @param int scope_type_id of the record being checked.
- * @param int scope_id for the record being checked.
+ * @param privilege_id Integer giving privilege to test for
+ * @param scope_type_id Integer id of the scope type to be checked
+ * @param scope_id Integer id of the scop to be checked
  *
  * @return boolean true if the session has the given privilege in the
  * scope given by scope_type_id and scope_id or a supeior one.
@@ -864,9 +890,9 @@ veil2_i_have_priv_in_scope_or_superior(PG_FUNCTION_ARGS)
  * scope, or a superior one: 
  * <code>scope_type_id</code>, <code>scope_id</code>.
  *
- * @param int privilege_id of privilege to test for
- * @param int scope_type_id of the record being checked.
- * @param int scope_id for the record being checked.
+ * @param privilege_id Integer giving privilege to test for
+ * @param scope_type_id Integer id of the scope type to be checked
+ * @param scope_id Integer id of the scop to be checked
  *
  * @return boolean true if the session has the given privilege in the
  * scope given by scope_type_id and scope_id or a supeior one or
@@ -992,380 +1018,3 @@ veil2_datapath(PG_FUNCTION_ARGS)
 }
 
 
-#ifdef TRIED_WITH_NO_PERFORMANCE_GAIN
-PG_FUNCTION_INFO_V1(veil2_create_accessor_session);
-typedef struct {
-	int accessor_id;
-	int authent_accessor_id;
-	int session_id;
-	int login_context_type_id;
-	int login_context_id;
-	int session_context_type_id;
-	int session_context_id;
-	int mapping_context_type_id;
-	int mapping_context_id;      
-} SessionContext;
-
-static bool
-fetch_session_context(HeapTuple tuple, TupleDesc tupdesc, void *args)
-{
-	SessionContext *session_context = (SessionContext *) args;
-	bool is_null;
-	int mapping_context_type;
-	int mapping_context;
-	
-	session_context->session_id = 
-		DatumGetInt32(SPI_getbinval(tuple, tupdesc, 1, &is_null));
-	
-	mapping_context_type = 
-		DatumGetInt32(SPI_getbinval(tuple, tupdesc, 2, &is_null));
-
-	if (mapping_context_type == 1) {
-		/* Mapping is in global_context */
-		session_context->mapping_context_type_id = 1;
-		session_context->mapping_context_id = 0;
-	}
-	else {
-		mapping_context = 
-			DatumGetInt32(SPI_getbinval(tuple, tupdesc, 3, &is_null));
-		if (is_null) {
-			session_context->mapping_context_type_id =
-				session_context->session_context_type_id;
-			session_context->mapping_context_id = 
-				session_context->session_context_id;
-		}
-		else {
-			session_context->mapping_context_type_id = mapping_context_type;
-			session_context->mapping_context_id = mapping_context;
-		}
-	}
-
-	return false;  // Only want one row: this stopes further processing.
-}
-
-// TODO:
-// later add a static to indicate whether session is currently reset
-// and do nothing in reset_session if so
-static void
-get_session_context(SessionContext *session_context)
-{
-	static void *saved_plan = NULL;
-	int processed;
-	Oid argtypes[] = {INT4OID, INT4OID};
-	Datum args[] = {Int32GetDatum(session_context->session_context_type_id),
-					Int32GetDatum(session_context->session_context_type_id)};
-
-	processed = veil2_query(
-		"select nextval('veil2.session_id_seq')::integer,"
-		"       sp.parameter_value::integer,"
-		"       asp.superior_scope_id"
-		"  from veil2.system_parameters sp"
-		"  left outer join veil2.all_superior_scopes asp"
-		"    on asp.scope_type_id = $1"
-		"   and asp.scope_id = $2"
-		"   and asp.superior_scope_type_id = sp.parameter_value::integer"
-		"   and asp.is_type_promotion"
-		" where sp.parameter_name = 'mapping context target scope type'",
-		2, argtypes, args, true, &saved_plan,
-		fetch_session_context, (void *) session_context);
-
-	if (!(processed == 1)) {
-		ereport(ERROR,
-				(errcode(ERRCODE_NO_DATA_FOUND),
-				 errmsg("Failed to fetch session context.")));
-	}
-}
-
-static void
-save_session_context(SessionContext *session_context)
-{
-	static void *saved_plan = NULL;
-	Oid argtypes[] = {INT4OID, INT4OID, INT4OID,
-	                  INT4OID, INT4OID, INT4OID,
-	                  INT4OID, INT4OID, INT4OID};
-	Datum args[] = {
-		Int32GetDatum(session_context->accessor_id),
-		Int32GetDatum(session_context->authent_accessor_id),
-		Int32GetDatum(session_context->session_id),
-		Int32GetDatum(session_context->login_context_type_id),
-		Int32GetDatum(session_context->login_context_id),
-		Int32GetDatum(session_context->session_context_type_id),
-		Int32GetDatum(session_context->session_context_id),
-		Int32GetDatum(session_context->mapping_context_type_id),
-		Int32GetDatum(session_context->mapping_context_id)};
-
-	(void) veil2_query(
-		"insert"
-		"  into veil2_session_context"
-        "        (accessor_id, authent_accessor_id, session_id,"
-		"         login_context_type_id, login_context_id,"
-		"         session_context_type_id, session_context_id,"
-		"         mapping_context_type_id, mapping_context_id)"
-		" values ($1, $2, $3,"
-		"         $4, $5,"
-		"         $6, $7,"
-		"         $8, $9)",
-		9, argtypes, args, false, &saved_plan, NULL, NULL);
-}
-
-typedef struct {
-	int accessor_id;
-	char *authent_type;
-	char *supplemental_fn;
-	char *session_token;
-	char *session_supplemental;
-} AuthentDetails;
-
-static bool
-fetch_authent_details(HeapTuple tuple, TupleDesc tupdesc, void *args)
-{
-	AuthentDetails *authent_details = (AuthentDetails *) args;
-	Datum val;
-	bool is_null;
-
-	if ((val = SPI_getbinval(tuple, tupdesc, 1, &is_null))) {
-		authent_details->supplemental_fn = TextDatumGetCString(val);
-	}
-	else {
-		authent_details->supplemental_fn = NULL;
-		authent_details->session_supplemental = NULL;
-	}
-	authent_details->session_token = 
-		TextDatumGetCString(SPI_getbinval(tuple, tupdesc, 2, &is_null));
-
-	return false;  // Only want one row: this stopes further processing.
-}
-
-static bool
-fetch_supplemental_tokens(HeapTuple tuple, TupleDesc tupdesc, void *args)
-{
-	AuthentDetails *authent_details = (AuthentDetails *) args;
-	Datum val;
-	bool is_null;
-
-	if ((val = SPI_getbinval(tuple, tupdesc, 1, &is_null))) {
-		/* If session_token is null, we leave the original value in
-		 * place, otherwise we overwrite it below. */
-		authent_details->session_token = TextDatumGetCString(val);
-	}
-
-	if ((val = SPI_getbinval(tuple, tupdesc, 2, &is_null))) {
-		authent_details->session_supplemental = TextDatumGetCString(val);
-	}
-	else {
-		authent_details->session_supplemental = NULL;
-	}
-
-	return false;  // Only want one row: this stopes further processing.
-}
-
-#define EXEC_SUPPLEMENTAL_FN_START "select * from %s($1, $2)"
-
-static void
-get_authent_details(AuthentDetails *authent_details)
-{
-	static void *saved_plan = NULL;
-	static void *saved_plan2 = NULL;
-	int processed;
-	Oid argtypes[] = {TEXTOID};
-	Datum args[] = {CStringGetTextDatum(authent_details->authent_type)};
-	char *qrystr;
-	
-	/* Query designed to always return a sesion token regardless of
-     * whether the authentication type matches a record. */
-	processed = veil2_query(
-		"select a2.supplemental_fn,"
-		"       encode(digest(random()::text || now()::text, 'sha256'),"
-		"                     'base64') as session_token"
-		"  from (select $1 as auth_type) a1"
-		"  left outer join veil2.authentication_types a2"
-		"    on a2.shortname = a1.auth_type",
-		1, argtypes, args, true, &saved_plan,
-		fetch_authent_details, (void *) authent_details);
-
-	if (!(processed == 1)) {
-		ereport(ERROR,
-				(errcode(ERRCODE_NO_DATA_FOUND),
-				 errmsg("Failed to fetch authentication details.")));
-	}
-
-	if (authent_details->supplemental_fn) {
-		Oid argtypes[] = {INT4OID, TEXTOID};
-		Datum args[] = {
-			Int32GetDatum(authent_details->accessor_id),
-			CStringGetTextDatum(authent_details->session_token)};
-		
-		qrystr = (char *) palloc(sizeof(char *) *
-								 (strlen(EXEC_SUPPLEMENTAL_FN_START) +
-								  strlen(authent_details->supplemental_fn)));
-		(void) sprintf(qrystr,
-					   EXEC_SUPPLEMENTAL_FN_START,
-					   authent_details->supplemental_fn);
-
-		processed = veil2_query(
-			qrystr,
-			1, argtypes, args, true, &saved_plan2,
-			fetch_supplemental_tokens, (void *) authent_details);
-	}
-}
-
-static bool
-valid_accessor_context(SessionContext *session_context)
-{
-	static void *saved_plan = NULL;
-	bool found;
-	bool is_valid;
-	Oid argtypes[] = {INT4OID, INT4OID, INT4OID};
-	Datum args[] = {
-		Int32GetDatum(session_context->accessor_id),
-		Int32GetDatum(session_context->login_context_type_id),
-		Int32GetDatum(session_context->login_context_id)};
-
-	found = veil2_bool_from_query(
-		"select true"
-		"  from veil2.accessors a"
-		" inner join veil2.accessor_contexts ac"
-		"    on ac.accessor_id = a.accessor_id"
-		" where a.accessor_id = $1"
-		"   and ac.context_type_id = $2"
-		"  and ac.context_id = $3",
-		3, argtypes, args, &saved_plan, &is_valid);
-	return found;
-}
-
-static void
-record_session(SessionContext *session_context,
-			   AuthentDetails *authent_details)
-{
-	static void *saved_plan = NULL;
-	char *nulls;
-	Oid argtypes[] = {INT4OID, INT4OID, INT4OID,
-					  INT4OID, INT4OID, INT4OID,
-					  INT4OID, INT4OID, INT4OID,
-					  TEXTOID, TEXTOID, TEXTOID};
-	Datum args[] = {
-		Int32GetDatum(session_context->accessor_id),
-		Int32GetDatum(session_context->authent_accessor_id),
-		Int32GetDatum(session_context->session_id),
-		Int32GetDatum(session_context->login_context_type_id),
-		Int32GetDatum(session_context->login_context_id),
-		Int32GetDatum(session_context->session_context_type_id),
-		Int32GetDatum(session_context->session_context_id),
-		Int32GetDatum(session_context->mapping_context_type_id),
-		Int32GetDatum(session_context->mapping_context_id),
-		CStringGetTextDatum(authent_details->authent_type),
-		(Datum) NULL,
-		CStringGetTextDatum(authent_details->session_token)};
-
-	if (authent_details->session_supplemental) {
-		args[10] = CStringGetTextDatum(authent_details->session_supplemental);
-		nulls = NULL;  /* No nulls. */
-	}
-	else {
-		/* session_supplemental is null */
-		nulls = "          n ";
-	}
-		
-	(void) veil2_query_wn(
-		"insert"
-		"  into veil2.sessions"
-        "      (accessor_id, authent_accessor_id, session_id,"
-		"       login_context_type_id, login_context_id,"
-		"       session_context_type_id, session_context_id,"
-		"       mapping_context_type_id, mapping_context_id,"
-		"       authent_type, has_authenticated,"
-		"       session_supplemental, expires,"
-		"       token) "
-		"select $1, $2, $3,"
-		"       $4, $5,"
-		"       $6, $7,"
-		"       $8, $9,"
-		"       $10, false,"
-		"       $11, now() + sp.parameter_value::interval,"
-		"       $12"
-		"  from veil2.system_parameters sp"
-		" where sp.parameter_name = 'shared session timeout'",
-		12, argtypes, args, nulls, false, &saved_plan, NULL, NULL);
-}
-
-/** 
- * <code>veil2.create_accessor_session(params) returns record</code> 
- *
- * TODO: explain this
- *
- * @param accessor_id in integer
- * @param authent_type in text
- * @param context_type_id in integer
- * @param context_id in integer
- * @param session_context_type_id in integer
- * @param session_context_id in integer
- * @param authent_accessor_id in integer default null
- * @param session_id out integer
- * @param session_token out text
- * @param session_supplemental out text
- *
- * @return record
- */
-Datum
-veil2_create_accessor_session(PG_FUNCTION_ARGS)
-{
-	SessionContext session_context;
-	AuthentDetails authent_details;
-	TupleDesc tuple_desc;
-	HeapTuple tuple;
-	Datum results[3];
-	bool nulls[3] = {false, false, false};
-	bool pushed;
-	
-	session_context.accessor_id = PG_GETARG_INT32(0);
-	session_context.login_context_type_id = PG_GETARG_INT32(2);
-	session_context.login_context_id = PG_GETARG_INT32(3);
-	session_context.session_context_type_id = PG_GETARG_INT32(4);
-	session_context.session_context_id = PG_GETARG_INT32(5);
-	if (PG_ARGISNULL(6)) {
-		session_context.authent_accessor_id = session_context.accessor_id;
-	}
-	else {
-		session_context.authent_accessor_id = PG_GETARG_INT32(6);
-	}
-	authent_details.accessor_id = session_context.accessor_id;
-	authent_details.authent_type = TextDatumGetCString(PG_GETARG_TEXT_P(1));
-	
-	veil2_spi_connect(&pushed, "failed to get_session_context (1)");
-	do_reset_session();
-
-	get_session_context(&session_context);
-	save_session_context(&session_context);
-	get_authent_details(&authent_details);
-	if (valid_accessor_context(&session_context)) {
-		record_session(&session_context, &authent_details);
-	}
-	
-	veil2_spi_finish(pushed, "failed to get_session_context (2)");
-
-	/* Create results record. */
-	if (get_call_result_type(fcinfo, NULL,
-							 &tuple_desc) != TYPEFUNC_COMPOSITE) {
-		ereport(ERROR,
-				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-				 errmsg("function returning record called in context "
-						"that cannot accept type record")));
-	}
-
-	/* Return the results set. */
-	results[0] = Int32GetDatum(session_context.session_id);
-	results[1] = CStringGetTextDatum(authent_details.session_token);
-	if (authent_details.session_supplemental) {
-		results[2] = CStringGetTextDatum(authent_details.session_supplemental);
-	}
-	else
-	{
-		nulls[2] = true;
-		results[2] = (Datum) NULL;
-	}
-	tuple_desc = BlessTupleDesc(tuple_desc);
-	tuple = heap_form_tuple(tuple_desc, results, nulls);
-	return HeapTupleGetDatum(tuple);
-}
-
-#endif

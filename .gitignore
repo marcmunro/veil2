@@ -3,8 +3,26 @@
 \#*#
 \.\#*
 
+# Build files
+PG_CONFIG
+PG_VERSION
+
 # Log files
 *.log
+
+# Target/intermediate files in diagrams
+diagrams/*png
+diagrams/*map
+diagrams/*coords
+diagrams/*xml
+
+# Target/intermediate files in docs
+docs/extracts/
+docs/anchors/
+
+# Other target/intermediate files for docs
+doxy.tag
+extracts.d
 
 # The html directory
 html

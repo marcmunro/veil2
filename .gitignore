@@ -17,6 +17,9 @@ docs/system-stylesheet.xsl
 autom4te.cache
 config.status
 
+# C dependency files
+src/*.d
+
 # My notes
 NOTES
 TODO

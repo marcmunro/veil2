@@ -76,7 +76,7 @@
       database in a matter of hours.
     </para>
     <para>
-      With <literal>Veil2</literal> we secure the database itself and
+      With <literal>Veil2</literal> you secure the database itself and
       not just applications that use it.  This means that even if your
       application server is compromised, an attacker's ability to
       access data will be limited to the data for which they can steal
@@ -96,10 +96,11 @@
     </para>
     <para>
       <literal>Veil2</literal> is mostly implemented in SQL and
-      PL/pgSQL, with a small amount of security-critical code written
-      in C.  It is designed to be fast, flexible and customizable, and
-      aims to make the security of your system better, faster, more
-      complete and easier to understand.
+      PL/pgSQL, with a small amount of security and
+      performance-critical code written in C.  It is designed to be
+      fast, flexible and customizable, and aims to make the security
+      of your system better, faster, more complete and easier to
+      understand.
     </para>
     <para>
       If you would like to see what <literal>Veil2</literal> can do,

@@ -37,10 +37,15 @@
 # Default target
 all:
 
+# Phony targets.  These do not match filenames and must always be
+# executed even if a file of the same name exists and appears to be up
+# to date.
 .PHONY: all make_deps deps install install-doc-tree \
-	doxygen extracts.d extracts images docs docs_clean \
-	db drop unit mostly_clean distclean \
-	list help
+	doxygen extracts images docs docs_clean \
+	db drop unit \
+	check_meta check_branch check_tag check_docs \
+	check_commit check_origin \
+	zipfile do_zipfile mostly_clean distclean list help
 
 # What constitutes general garbage files.
 garbage_files := \\\#*  .\\\#*  *~ 
@@ -118,7 +123,7 @@ MODULE_big = veil2
 MODULEDIR = veil2
 VEIL2_LIB = $(addsuffix $(DLSUFFIX), veil2)
 
-PG_CONFIG := $(shell ./find_pg_config)
+PG_CONFIG := $(shell bin/find_pg_config)
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 DATA = $(wildcard sql/veil2--*.sql) $(wildcard demo/*.sql) 
 # This is for installing documentation.  We cannot just use DOCS as
@@ -378,6 +383,85 @@ unit: db
 
 
 ##
+# release targets
+#
+ZIPFILE_BASENAME = veil2-$(VERSION_NUMBER)
+ZIPFILENAME = $(ZIPFILE_BASENAME).zip
+ONLINE_DOCS = https://marcmunro.github.io/veil2/html/index.html
+GIT_UPSTREAM = github origin
+
+# Ensure that we are in the master git branch
+check_branch:
+	@[ `git rev-parse --abbrev-ref HEAD` = master ] || \
+	    (echo "    CURRENT GIT BRANCH IS NOT MASTER" 1>&2 && exit 2)
+
+# Check that our metadata file for pgxs is up to date.  This is very
+# simplistic but aimed only at ensuring you haven't forgotten to
+# update the file.
+check_meta: META.json
+	@grep '"version"' META.json | head -2 | cut -d: -f2 | \
+	    tr -d '",' | \
+	    while read a; do \
+	      	[ "x$$a" = "x$(VERSION_NUMBER)" ] || \
+		  (echo "    INCORRECT VERSION ($$a) IN META.json"; exit 2); \
+	    done
+	@grep '"file"' META.json | cut -d: -f2 | tr -d '",' | \
+	    while read a; do \
+	      	[ "x$$a" = "xveil2--$(VERSION_NUMBER).sql" ] || \
+		  (echo "    INCORRECT FILE NAME ($$a) IN META.json"; exit 2); \
+	    done
+
+# Check that head has been tagged.  We assume that if it has, then it
+# has been tagged correctly.
+check_tag:
+	@tag=`git tag --points-at HEAD`; \
+	if [ "x$${tag}" = "x" ]; then \
+	    echo "    NO GIT TAG IN PLACE"; \
+	    exit 2; \
+	fi
+
+# Check that the latest docs have been published.
+check_docs: docs
+	@[ "x`cat html/index.html | md5sum`" = \
+	   "x`curl -s $(ONLINE_DOCS) | md5sum`" ] || \
+	    (echo "    LATEST DOCS NOT PUBLISHED"; exit 2)
+
+# Check that there are no uncomitted changes.
+check_commit:
+	@git status -s | wc -l | grep '^0$$' || \
+	    (echo "    UNCOMMITTED CHANGES FOUND"; exit 2)
+
+# Check that we have pushed the latest changes
+check_origin:
+	@err=0; \
+	 for origin in $(GIT_UPSTREAM); do \
+	    git diff --quiet master $${origin}/master 2>/dev/null || \
+	    { echo "    UNPUSHED UPDATES FOR $${origin}"; \
+	      err=1; }; \
+	done; exit $$err
+
+
+# Create a zipfile for release to pgxn, but only if everthing is ready
+# to go.  Note that we distribute our dependencies in case our user is
+# going to build things manually and can't build them themselves, and
+# our built docs as we don't require users to have a suitable build
+# environment for building them themselves, and having the docs
+# installed locally is a good thing.
+zipfile: 
+	@$(MAKE) -k --no-print-directory \
+	    check_branch check_meta check_tag check_docs \
+	    check_commit check_origin 2>&1 | \
+	    bin/makefilter 1>&2
+	@$(MAKE) do_zipfile
+
+do_zipfile: mostly_clean deps
+	git archive --format zip --prefix=$(ZIPFILE_BASENAME)/ \
+	    --output $(ZIPFILENAME) master
+
+TARGET_FILES += $(ZIPFILENAME)
+
+
+##
 # clean targets
 #
 
@@ -391,11 +475,10 @@ mostly_clean:
 	   echo Cleaning $${i}...; \
 	   (cd $${i}; rm -f $(garbage_files)); \
 	done || true
-	echo Cleaning intermediate and target files...
 	@rm -f $(INTERMEDIATE_FILES) $(TARGET_FILES) 2>/dev/null || true
 	@rm -rf $(TARGET_DIRS) 2>/dev/null || true
 
-# Make PGXS clean target use our cleanup target.
+# Make PGXS clean target use our cleanup targets.
 clean: mostly_clean docs_clean
 
 distclean: clean

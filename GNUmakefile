@@ -438,7 +438,7 @@ check_origin:
 	    git diff --quiet master $${origin}/master 2>/dev/null || \
 	    { echo "    UNPUSHED UPDATES FOR $${origin}"; \
 	      err=1; }; \
-	done; exit $$err
+	done; [ "x$$err" = "x0" ]
 
 
 # Create a zipfile for release to pgxn, but only if everthing is ready

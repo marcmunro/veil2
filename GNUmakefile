@@ -428,7 +428,7 @@ check_docs: docs
 
 # Check that there are no uncomitted changes.
 check_commit:
-	@git status -s | wc -l | grep '^0$$' || \
+	@git status -s | wc -l | grep '^0$$' >/dev/null || \
 	    (echo "    UNCOMMITTED CHANGES FOUND"; exit 2)
 
 # Check that we have pushed the latest changes
@@ -438,7 +438,7 @@ check_origin:
 	    git diff --quiet master $${origin}/master 2>/dev/null || \
 	    { echo "    UNPUSHED UPDATES FOR $${origin}"; \
 	      err=1; }; \
-	done; [ "x$$err" = "x0" ]
+	done; exit $$err
 
 
 # Create a zipfile for release to pgxn, but only if everthing is ready

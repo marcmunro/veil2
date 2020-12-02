@@ -77,6 +77,31 @@ where party_name like '%Bob%';
       investigate.  Note that in a reporting environment where ad-hoc
       reports can be run, this may prove less useful.
     </para>
+    <para>
+      Adding such a check is pretty straightforward.  Consider this
+      policy:
+      <programlisting>
+create policy wibble__select
+    on wibble
+   for select
+ using (veil2.i_have_global_priv(42));
+      </programlisting>
+      To add logging on error, you can simply add a final
+      <literal>or</literal> to the policy with a function call to a
+      logging function (that always returns false), eg:
+      <programlisting>
+create policy wibble__select
+    on wibble
+   for select
+   using (veil2.i_have_global_priv(42) or
+          log_unwanted_access('wibble', &lt;concatenation of key fields&gt;));
+      </programlisting>
+      Your logging function needs to take enough parameters to
+      identify the record to which access has been attempted, must
+      return false, and should identify the accessor by querying from
+      veil2_session_context.  Performance should not be a great
+      concern as you expect the function to rarely be called.
+    </para>
   </sect1>
   <sect1>
     <title>Consider Testing With and Without Security</title>
@@ -134,7 +159,7 @@ where party_name like '%Bob%';
       option to <literal>drop</literal> will allow the drop to proceed
       but will result in dependent <literal>Veil2</literal> objects
       being dropped as well.  Recovering from this can be a tedious
-      and potenially error-prone process.
+      and potentially error-prone process.
     </para>
     <para>
       We recommend avoiding the user of

@@ -14,7 +14,8 @@
     </para>
     <para>
       Alternatively it can be downloaded from github and built
-      locally.  For more on this see the TODO: DEVELOPERS CHAPTER
+      locally.  For more on this see the <link
+      linkend="for_developers">developers section</link>.
     </para>
     <sect2 id="pgxn_install_with_client">
       <title>Installing To Your Server Using The <literal>pgxn</literal> Client</title>
@@ -22,10 +23,11 @@
 	If you have the <literal>pgxn</literal> client available on
 	your database server you can simply do this:
 	<programlisting>
-$ pgxn install veil2
+# pgxn install veil2
 	</programlisting>
 	If not, you can download <literal>Veil2</literal> from PGXN or
-	github, and then build and install it locally.  TODO: LINK
+	github, and then build and install it locally as described
+	<link linkend="for_developers">here</link>.
       </para>
     </sect2>
     <sect2 id="pgxn_install_with_client">
@@ -53,7 +55,7 @@ dbname# create extension veil2 cascade;
       demo files on your database server by executing the following
       query:
 	<programlisting>
-dbname# select * from veil2.sql_files;
+dbname# select * from <link linkend="view_sql_files">veil2.sql_files</link>;
 	</programlisting>
       This lists a number of files that you can take a look at.  There
       are 3 files that you should take copies of:
@@ -64,7 +66,7 @@ dbname# select * from veil2.sql_files;
 	  </para>
 	  <para>
 	    This is referenced from most of the following chapters,
-	    and provides useful, though oten incomplete, examples of
+	    and provides useful, though often incomplete, examples of
 	    what needs to be done at each step.
 	  </para>
 	</listitem>
@@ -73,7 +75,7 @@ dbname# select * from veil2.sql_files;
 	    the <literal>Veil2</literal> minimal-demo creation script;
 	  </para>
 	  <para>
-	    This provides a complete example of the simpest possible
+	    This provides a complete example of the simplest possible
 	    <literal>Veil2</literal> installation.  It avoids using
 	    the more sophisticated features of
 	    <literal>Veil2</literal> but by virtue of being a complete
@@ -96,7 +98,7 @@ dbname# select * from veil2.sql_files;
     <para>
       If you cannot access these files on your database server, you
       can most easily access them from github or by downloading from
-      pgxn.  See TODO: LINK for more details.
+      pgxn.
     </para>
   </sect1>
 </chapter>

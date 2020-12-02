@@ -92,7 +92,7 @@ select 5, s.scope_id,   -- Project to org promotions
     <para>
       If your scope hierarchy changes in a way that could affect the
       privileges that might be assigned to accessors, you should
-      refresh all <link linkend="cache">materialized views and
+      refresh all <link linkend="caches">materialized views and
       caches</link>.  Since determining what sort of updates might
       require this is somewhat complicated, we recommend that
       <emphasis>any</emphasis> change that would result in the <link
@@ -107,7 +107,7 @@ select 5, s.scope_id,   -- Project to org promotions
       the case, and you encounter a performance penalty from having
       the <link
       linkend="view_accessor_privileges_cache"><literal>veil2.accessor_privileges_cache</literal></link>
-      cache table releatedly cleared, you may be able to instead of
+      cache table repeatedly cleared, you may be able to instead of
       truncating that table, selectively delete records based on the
       session contexts that are affected by your changes.  Our
       recommendation is not to tackle this until you know that you

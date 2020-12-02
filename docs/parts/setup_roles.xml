@@ -3,7 +3,7 @@
   <para>
     The demo chooses to use only <literal>Veil2</literal>'s role
     tables for its roles implementation.  This makes things very
-    simple, but may be unhelpful as an example.  The author apologises
+    simple, but may be unhelpful as an example.  The author apologizes
     but there are some things you will have to do for yourselves.
     Look for  STEP 8 in the file
     <literal>demo/veil2_demo--&version;.sql</literal>.
@@ -97,7 +97,7 @@
       </para>
       <para>
 	If you are building a new system from scratch, this should be
-	your prefered approach.
+	your preferred approach.
       </para>
     </sect2>
   </sect1>
@@ -142,7 +142,7 @@
     <title>Refreshing Materialized Views - Do Nothing</title>
     <para>
       Any time that role to role or role to privilege mappings are
-      updated, all <link linkend="cache">materialized views and
+      updated, all <link linkend="caches">materialized views and
       caches</link> must be updated. 
     </para>
     <para>

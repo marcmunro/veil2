@@ -7,7 +7,7 @@
   <sect1>
     <title>Performing Local Builds</title>
     <para>
-      For most users there will never be aby need to build
+      For most users there will never be any need to build
       <literal>Veil2</literal> locally using anything except the
       <literal>pgxn</literal> client as described in the <link
       linkend="installation">Installation section</link>. 
@@ -30,7 +30,7 @@
 	    <term><literal>bin</literal></term>
 	    <listitem>
 	      <para>
-		Home to a smal number of helper scripts for the
+		Home to a small number of helper scripts for the
 		documentation build.
 	      </para>
 	    </listitem>
@@ -59,7 +59,7 @@
 		Contains, mostly, xml source files for the
 		documentation system.  Is also used for some
 		intermediate files for the documentation build,
-		includding the <literal>anchors</literal> and
+		including the <literal>anchors</literal> and
 		<literal>extracts</literal>directories.
 	      </para>
 	    </listitem>
@@ -79,7 +79,7 @@
 	    <term><literal>sql</literal></term>
 	    <listitem>
 	      <para>
-		Contains the sql sources for
+		Contains the SQL sources for
 		<literal>Veil2</literal>.
 	      </para>
 	    </listitem>
@@ -105,7 +105,7 @@
 	</variablelist>
       </para>
       <para>
-	You may notice makefiles in many subdirectories.  These simply
+	You may notice makefiles in many sub-directories.  These simply
 	change directory to their parent directory before re-running
 	<literal>make</literal> there.  This enables
 	<literal>make</literal> to be run from any directory in the
@@ -257,7 +257,7 @@
 	    <term><literal>docs</literal></term>
 	    <listitem>
 	      <para>
-		Creates an html documentation tree including doxygen
+		Creates an html documentation tree including Doxygen
 		documentation.
 	      </para>
 	    </listitem>
@@ -324,14 +324,14 @@ marc:veil2$
     <para>
       The <literal>Veil2</literal> documentation is built using
       docbook.  It is a relatively complex beast though as there is
-      automated extraction of sql code, automated creation of diagram
-      images and maps, and linkage with doxygen documentation.  This
+      automated extraction of SQL code, automated creation of diagram
+      images and maps, and linkage with Doxygen documentation.  This
       is what you need to know:
     </para>
     <sect2>
       <title>General</title>
       <para>
-	There is a lot of nasty shell scipting involved.  Trying to do
+	There is a lot of nasty shell scripting involved.  Trying to do
 	this in a non-Unix environment is probably not an option.  
       </para>
     </sect2>
@@ -340,7 +340,7 @@ marc:veil2$
       <para>
 	Images are converted into <literal>.png</literal> files from
 	their <literal>.dia</literal> sources using
-	<literal>pstoimg</literal>, which on debian comes from the
+	<literal>pstoimg</literal>, which on Debian comes from the
 	<literal>latex2html</literal> package.  This is done by a
 	general <literal>%.png: %.dia</literal> rule in the makefile.
       </para>
@@ -360,7 +360,7 @@ marc:veil2$
       <title>SQL Extracts</title>
       <para>
 	The Appendices A, B and C contain documentation that is
-	largely automatically generated from the main veil sql
+	largely automatically generated from the main veil SQL
 	script.  The extracts are created from the makefile by some
 	fairly ugly shell scripts.  Look for targets containing the
 	word extract in the makefile.

@@ -227,7 +227,8 @@
       assignment of this role to team members would be implicit.
     </para>
     <para>
-      TODO: link to implementation notes
+      More details on this can be found <link
+      linkend="role_assignment_contexts">here.</link> 
     </para>
   </sect1>
   <sect1 id="security-contexts">
@@ -283,7 +284,7 @@
 	    context of a specific subdivision of that corporation.
 	    The access rights for the user will be determined from
 	    this session context.  If they are allowed to create
-	    sessions in multipe contexts, their access rights may be
+	    sessions in multiple contexts, their access rights may be
 	    different in each one.
 	  </para>
 	</listitem>
@@ -496,7 +497,7 @@
     </para>
     <para>
       For example, consider that our authentication context is at the
-      level of a corporation (so usernames must be unique withi nthe
+      level of a corporation (so usernames must be unique within the
       entire corporation), but that we log in to the web-site for a
       subdivision.  Our authentication context would be the
       corporation context, and the session context would be the
@@ -505,7 +506,7 @@
     <para>
       The context of a user's session will determine the access rights
       for that session.  Role assignments in contexts that are
-      unrelated to the session context will be ignored.  TODO: Check this. 
+      unrelated to the session context will be ignored.
     </para>
   </sect1>
 </chapter>

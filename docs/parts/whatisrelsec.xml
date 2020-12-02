@@ -8,11 +8,11 @@
     which that privilege applies.
   </para>
   <para>
-    Users aquire their privileges in various ways: all users may get a
+    Users acquire their privileges in various ways: all users may get a
     basic set of privileges; some users may be members of teams or
     departments and their roles in those things may give them implied
     privilege assignments; and some users may be granted specific
-    roles explictly.  Even with explicit role assignments, those
+    roles explicitly.  Even with explicit role assignments, those
     assignments may occur in different contexts giving the user access
     to greater or smaller subsets of data: you might be a given the
     manager role for a project, or for a department, or for a

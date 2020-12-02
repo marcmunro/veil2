@@ -24,8 +24,6 @@
       linkend="setup_privs">privileges;</link></listitem> 
       <listitem>integrate and/or create <link
       linkend="setup_roles">roles</link>;</listitem>
-      <listitem>deal with <link linkend="oddities">oddities and corner
-      cases</link>;</listitem> 
       <listitem><link linkend="secure_tables">secure your
       tables</link>;</listitem> 
       <listitem><link linkend="secure_views">secure your

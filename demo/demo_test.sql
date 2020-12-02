@@ -38,7 +38,7 @@ $$;
 select plan(19);
 
 -- Log Alice in.
-\timing on
+--\timing on
 with login as
   (
     select *
@@ -48,7 +48,7 @@ with login as
 select is(success, true,
           'Alice successfully logs in as a global superuser')
   from login;
-\timing off
+--\timing off
 
 select is(cnt, 25,
           'Alice sees all parties')
@@ -69,7 +69,7 @@ select is(cnt, 25,
 
 
 -- Log Bob in and continue his session with 2nd open_connection call
-\timing on
+--\timing on
 with login as
   (
     select o2.success -- *
@@ -82,7 +82,7 @@ with login as
 select is(success, true,
           'Bob successfully logs in as a superuser for secured corp')
   from login;
-\timing off
+--\timing off
 
 select is(cnt, 13,
           'Bob sees all parties for secured corp')
@@ -103,7 +103,7 @@ select is(cnt, 13,
 
 
 -- Log Carol in.
-\timing on
+--\timing on
 with login as
   (
     select *
@@ -113,7 +113,7 @@ with login as
 select is(success, true,
           'Carol successfully logs in as a superuser for protected corp')
   from login;
-\timing off
+--\timing off
 
 select is(cnt, 9,
           'Carol sees all parties for protected corp')
@@ -134,7 +134,7 @@ select is(cnt, 9,
 
 
 -- Log Eve in to Veil Corp
-\timing on
+--\timing on
 with login as
   (
     select *
@@ -144,7 +144,7 @@ with login as
 select is(success, true,
           'Eve successfully logs in to Veil Corp')
   from login;
-\timing off
+--\timing off
 
 select is(cnt, 1,
           'Eve sees no parties except herself')
@@ -235,7 +235,7 @@ select is(cnt, 10,
 
 
 -- Log Sue in.
-\timing on
+--\timing on
 with login as
   (
     select *
@@ -245,7 +245,7 @@ with login as
 select is(success, true,
           'Sue successfully logs in as a superuser for Dept S')
   from login;
-\timing off
+--\timing off
 
 select is(cnt, 7,
           'Sue sees all parties for Dept S')
@@ -266,7 +266,7 @@ select is(cnt, 7,
 
 
 -- Log Simon in.
-\timing on
+--\timing on
 with login as
   (
     select *
@@ -276,7 +276,7 @@ with login as
 select is(success, true,
           'Sue successfully logs in as a Project Manager for Project S.1')
   from login;
-\timing off
+--\timing off
   
 select is(cnt, 2,
           'Simon sees only himself and the org in parties')

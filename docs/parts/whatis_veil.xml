@@ -188,7 +188,7 @@ create policy projects__select
 	      filtering-out records from the result-set then we are
 	      unnecessarily retrieving those records, and are having
 	      to process them in order to determine their
-	      unsuitability.  This would be a large and unncessary
+	      unsuitability.  This would be a large and unnecessary
 	      overhead.
 	    </para>
 	  </listitem>
@@ -321,7 +321,7 @@ create policy projects__select
       <title>Performance Denormalizations</title>
       <para>
 	You will be applying access controls to each relation in your
-	system.  Some of them may benefit from data denormalization to
+	system.  Some of them may benefit from data denormalizations to
 	improve the performance of the security tests.  Typically you
 	may want to add ownership columns to some of your tables so
 	that ownership can be determined without the need for extra

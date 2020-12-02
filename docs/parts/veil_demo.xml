@@ -89,7 +89,7 @@ local   whateverdbnameyoulike demouser                          trust
     <sect2>
       <title>Corp Context</title>
       <para>
-	The demo uses the <literal>parties</literal> table to identfiy
+	The demo uses the <literal>parties</literal> table to identify
 	organizations and persons.  There is a tree structured
 	organizational hierarchy of organizations.  The top-level of
 	each organizational tree is called a corp, or corporation.
@@ -102,7 +102,7 @@ local   whateverdbnameyoulike demouser                          trust
     <sect2>
       <title>Org Context</title>
       <para>
-	Within each corp there is a tree of organisational parts, or
+	Within each corp there is a tree of organizational parts, or
 	orgs.  Privileges applied in org contexts apply in all
 	subordinate orgs.  Technically, there is little to
 	distinguish between corp context and a top-level org context,
@@ -166,7 +166,7 @@ $ make db; psql -d vpd -f demo/demo.sql
 	The code that follows uses a shortcut single query
 	authentication process.  You should probably not do this in
 	real life.  The overhead of an extra database round-trip will,
-	in most cases, be so small that it will not be noticable, and
+	in most cases, be so small that it will not be noticeable, and
 	the ability to subsequently use the two-step authentication
 	protocol as a means to further improve your authentication
 	security is something that you may not want to lose.  For more

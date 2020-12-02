@@ -37,7 +37,13 @@
 # Default target
 all:
 
-.PHONY: help list docs deps images extracts clean distclean doxygen
+.PHONY: all make_deps deps install install-doc-tree \
+	doxygen extracts.d extracts images docs docs_clean \
+	db drop unit mostly_clean distclean \
+	list help
+
+# What constitutes general garbage files.
+garbage_files := \\\#*  .\\\#*  *~ 
 
 
 ##
@@ -45,7 +51,6 @@ all:
 # Autoconf/configure is primarily for configuring the build of the
 # Veil2 documentation.
 #
-
 include Makefile.global
 include extracts.d
 
@@ -55,13 +60,11 @@ Makefile.global: ./configure Makefile.global.in
 ./configure:
 	autoconf
 
-# What constitutes general garbage files.
-garbage_files := \\\#*  .\\\#*  *~ 
 AUTOCONF_TARGETS := Makefile.global ./configure autom4te.cache \
 		    config.log config.status
 
 ##
-# C Language building stuff
+# C Language stuff
 #
 HEADERS = $(wildcard src/*.h)
 SOURCES = $(wildcard src/*.c)
@@ -75,11 +78,13 @@ BITCODES = $(SOURCES:%.c=%.bc)
 
 INTERMEDIATE_FILES += $(DEPS) $(BITCODES) $(OBJS)
 
-# This definition is needed in order to publish the docs and data
-# dirs from veil2 functions.
+# These definitions are needed in order to publish the docs and data
+# dirs from veil2 functions.  
 PG_CFLAGS = -D DATA_PATH=\"$(DESTDIR)$(datadir)/$(datamoduledir)\" \
-	    -D DOCS_PATH=\"$(DESTDIR)$(docdir)/$(docmoduledir)\" \
-	    -O0
+	    -D DOCS_PATH=\"$(DESTDIR)$(docdir)/$(docmoduledir)\" 
+
+# This allows us to use pgbitmap utility functions.
+SHLIB_LINK = $(DESTDIR)$(pkglibdir)/pgbitmap.so
 
 # Build per-source dependency files for inclusion
 # This ignores header files and any other non-local files (such as
@@ -127,16 +132,13 @@ TARGET_FILES := PG_CONFIG PG_VERSION $(OBJS) $(VEIL2_LIB)
 
 include $(PGXS)
 
-
-# Hack to add the install-data-tree target to the standard install
-# target.  This is for installing documentation as an html
-# documentation tree.
+# Add the install-data-tree target to the standard install target.
+# This is for installing documentation as an html documentation tree.
 install: install-doc-tree
 
 # Install the contents of DOCS_TREE into the appropriate docs
-# directory.  It unfortunately relies on knowledge of the contents of
-# the pgxs makefile to do it but this should be relatively stable so I
-# think it's acceptable.
+# directory.  Some of the variables below are defined in the pgxs
+# makefile. 
 install-doc-tree: 
 	@echo INSTALLING LOCAL DOCS
 	@if [ -d $(HTMLDIR) ]; then \
@@ -144,15 +146,16 @@ install-doc-tree:
 	        install -vDm 755 {} $(DESTDIR)$(docdir)/$(docmoduledir)/{} \; \
 	; fi
 
+
 ##
 # Documention targets
 #
 # The primary documentation is constructed using docbook xml.  Much of
 # the detailed documentation is extracted from the SQL source and
-# converted into xml.  Also the dia ERD diagram is processed below so
-# that each entity in the diagram is linked to the documentation for
-# the table that implements it.  There is also Doxygen documentation
-# generated from the C sources.
+# converted into xml.  Also, dia diagrams are processed below so that
+# each entity/view in the diagram is linked to the documentation for
+# the table/dbobject that implements it.  There is also Doxygen
+# documentation generated from the C sources.
 #
 DOC_SOURCES := $(wildcard docs/*.xml) $(wildcard docs/parts/*.xml) 
 BASE_STYLESHEET = $(DOCBOOK_STYLESHEETS)/html/chunkfast.xsl
@@ -161,14 +164,14 @@ STYLESHEET_IMPORTER = docs/system-stylesheet.xsl
 VERSION_FILE = docs/version.sgml
 VERSION_NUMBER := $(shell cut -d" " -f1 VERSION)
 ANCHORS_DIR = docs/anchors
-TARGET_FILES += $(HTMLDIR)/* doxy.tag $(ANCHORS_DIR)/* \
-		$(HTMLDIR)/doxygen/html/search/* \
-		$(HTMLDIR)/doxygen/html/* $(HTMLDIR)/doxygen/*
+DOCS_TARGET_FILES += $(HTMLDIR)/* doxy.tag $(ANCHORS_DIR)/* \
+		     $(HTMLDIR)/doxygen/html/search/* \
+		     $(HTMLDIR)/doxygen/html/* $(HTMLDIR)/doxygen/*
 
-TARGET_DIRS += $(HTMLDIR)/doxygen/html/search $(HTMLDIR)/doxygen/html \
-	       $(HTMLDIR)/doxygen $(HTMLDIR) $(ANCHORS_DIR)
+DOCS_TARGET_DIRS += $(HTMLDIR)/doxygen/html/search $(HTMLDIR)/doxygen/html \
+	       	    $(HTMLDIR)/doxygen $(HTMLDIR) $(ANCHORS_DIR)
 
-INTERMEDIATE_FILES += $(STYLESHEET_IMPORTER) $(VERSION_FILE)
+DOCS_INTERMEDIATE_FILES += $(STYLESHEET_IMPORTER) $(VERSION_FILE)
 
 # Create doxygen-based docs for the C-language stuff.  We use the
 # doxygen tag file as a proxy for the output document set.
@@ -178,16 +181,18 @@ doxy.tag: $(SOURCES) $(HEADERS)
 	doxygen docs/Doxyfile || \
 	    (echo "Doxygen fails: is it installed?"; exit 2)
 
+# This provides usable links into the Doxygen documentation from the
+# docbook documentation.
 $(ANCHORS_DIR): doxy.tag $(DOC_SOURCES) 
 	@echo "Recreating doxygen anchor files..."
 	@mkdir -p $(ANCHORS_DIR)
 	@bin/get_doxygen_anchors.sh doxy.tag docs $(ANCHORS_DIR)
 	@touch $(ANCHORS_DIR)
 
+# You can make just the doxygen docs using this target.
 doxygen: doxy.tag $(ANCHORS_DIR)
 	@mkdir -p $(HTMLDIR)//doxygen 2>/dev/null
 	@cp LICENSE $(HTMLDIR)/doxygen
-
 
 # Build the version entity for the docbook documentation.  This is
 # included into the docbook source.
@@ -228,7 +233,7 @@ extracts.d:
 	    `bin/extract_sql.sh -d docs docs/extracts | \
 	     cut -d: -f1 | xargs`" >>$@
 
-INTERMEDIATE_FILES += extracts.d 
+DOCS_INTERMEDIATE_FILES += extracts.d 
 
 # Phony target for extracts - makes it easier to build for test and
 # development purposes.
@@ -245,8 +250,8 @@ docs/extracts: $(DATA)
 
 $(EXTRACTS): docs/extracts
 
-TARGET_FILES += $(EXTRACTS) docs/extracts/*xml
-TARGET_DIRS += docs/extracts
+DOCS_TARGET_FILES += $(EXTRACTS) docs/extracts/*xml
+DOCS_TARGET_DIRS += docs/extracts
 
 # Handle the generation of diagrams and coordinate maps.  Coordinate
 # maps allow us to embed links from the entities in our ERD to the
@@ -260,7 +265,7 @@ DIAGRAM_COORDS := $(DIAGRAM_SOURCES:%.dia=%.coords)
 DIAGRAM_MAPS := $(DIAGRAM_SOURCES:%.dia=%.map)
 DIAGRAM_INTERMEDIATES := $(DIAGRAM_IMAGES) $(DIAGRAM_XMLS) \
 			 $(DIAGRAM_COORDS) $(DIAGRAM_MAPS)
-INTERMEDIATE_FILES += $(DIAGRAM_INTERMEDIATES)
+DOCS_INTERMEDIATE_FILES += $(DIAGRAM_INTERMEDIATES)
 
 TARGET_IMAGES := $(patsubst $(DIAGRAMS_DIR)%, $(HTMLDIR)%, $(DIAGRAM_IMAGES))
 
@@ -299,13 +304,11 @@ $(HTMLDIR)/veil2_views.png: diagrams/veil2_views.png
 diagrams/veil2_views.map: diagrams/veil2_views.coords \
 			  diagrams/veil2_views.png 
 	@echo Creating HTML map file $@...
-	bin/erd2map diagrams/veil2_views $(HTMLDIR) view >$@
-
+	bin/erd2map -v diagrams/veil2_views $(HTMLDIR) view >$@
 
 # Phony target for building image files.
 #
 images: $(DIAGRAM_IMAGES)
-
 
 # This builds .png files from .dia files.
 #
@@ -314,8 +317,6 @@ images: $(DIAGRAM_IMAGES)
 	dia --nosplash  --export=$*.eps $< 2>/dev/null
 	pstoimg -antialias -transparent -crop tblr -scale 0.5 $*.eps
 	@rm $*.eps
-
-
 
 # Do the legwork of building our html documentation from docbook
 # sources.   The index.html file is built by this, but so are loads of
@@ -337,12 +338,18 @@ $(HTMLDIR)/mapped: $(HTMLDIR)/index.html $(DIAGRAM_MAPS)
 	@bin/addmap.sh $(HTMLDIR) $(DIAGRAM_MAPS)
 	@touch $@
 
-
 # The docs phony target ensures all html documentation targets are
 # built, including the ERD diagram map.
 #
 docs: $(STYLESHEET_IMPORTER) $(VERSION_FILE) extracts \
 	$(HTMLDIR)/index.html $(HTMLDIR)/mapped doxygen 
+
+docs_clean:
+	echo Cleaning docs intermediate and target files...
+	@rm -f $(DOCS_INTERMEDIATE_FILES) \
+	       $(DOCS_TARGET_FILES) 2>/dev/null || true
+	@rm -rf $(DOCS_TARGET_DIRS) 2>/dev/null || true
+
 
 ##
 # test targets
@@ -377,7 +384,7 @@ unit: db
 SUBDIRS = src docs/parts docs demo bin sql
 
 # Clean target that does not conflict with the same target from PGXS
-local_clean:
+mostly_clean:
 	@rm -f $(garbage_files) 2>/dev/null || true
 	@echo $(SUBDIRS)
 	@for i in $(SUBDIRS); do \
@@ -389,7 +396,7 @@ local_clean:
 	@rm -rf $(TARGET_DIRS) 2>/dev/null || true
 
 # Make PGXS clean target use our cleanup target.
-clean: local_clean
+clean: mostly_clean docs_clean
 
 distclean: clean
 	echo Cleaning autoconf files...

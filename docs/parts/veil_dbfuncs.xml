@@ -114,6 +114,12 @@
 	<link linkend="func_load_session_privs">load_session_privs()</link>;
       </listitem>
       <listitem>
+	<link linkend="func_save_session_privs">save_session_privs()</link>;
+      </listitem>
+      <listitem>
+	<link linkend="func_reload_session_privs">reload_session_privs()</link>;
+      </listitem>
+      <listitem>
 	<link linkend="func_check_continuation">check_continuation()</link>;
       </listitem>
       <listitem>
@@ -136,6 +142,7 @@
 
   <para>
     These functions are for testing session privileges:
+
     <itemizedlist>
       <listitem>
 	<link linkend="func_i_have_global_priv">i_have_global_priv()</link>;
@@ -170,6 +177,12 @@
     <itemizedlist>
       <listitem>
 	<link linkend="func_delete_expired_sessions">delete_expired_sessions()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_docpath">docpath()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_datapath">datapath()</link>;
       </listitem> 
       <listitem>
 	<link linkend="func_bcrypt">bcrypt()</link>.
@@ -212,6 +225,7 @@
   <para>
     Functions for checking the status of your <literal>Veil2</literal>
     secured database implementation:
+
     <itemizedlist>
       <listitem>
 	<link linkend="func_have_user_scope_types">have_user_scope_types()</link>;
@@ -243,7 +257,20 @@
     </itemizedlist>
   </para>
   <para>
+    Other trigger functions:
+
+    <itemizedlist>
+      <listitem> 
+	<link linkend="func_system_parameters_check">system_parameters_check()</link>;
+      </listitem> 
+      <listitem> 
+	<link linkend="func_make_user_defined">make_user_defined()</link>.
+      </listitem> 
+    </itemizedlist>
+  </para>
+  <para>
     And these triggers exist:
+
     <itemizedlist>
       <listitem> 
 	<link linkend="trig_context_role__context_fk">context_role__context_fk</link>;
@@ -267,7 +294,6 @@
 	<link linkend="trig_authentication_types_biu">authentication_types_biu</link>.
       </listitem> 
     </itemizedlist>
-    
   </para>
 
   <sect2 id="ri_functions">
@@ -404,6 +430,14 @@
       <title><literal>load_session_privs()</literal></title>
       <?sql-definition function veil2.load_session_privs sql/veil2--&version_number;.sql ?>
     </sect3>
+    <sect3 id="func_save_session_privs">
+      <title><literal>save_session_privs()</literal></title>
+      <?sql-definition function veil2.save_session_privs sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_reload_session_privs">
+      <title><literal>reload_session_privs()</literal></title>
+      <?sql-definition function veil2.reload_session_privs sql/veil2--&version_number;.sql ?>
+    </sect3>
     <sect3 id="func_check_continuation">
       <title><literal>check_continuation()</literal></title>
       <?sql-definition function veil2.check_continuation sql/veil2--&version_number;.sql ?>
@@ -496,6 +530,14 @@
       <title><literal>delete_expired_sessions()</literal></title>
       <?sql-definition function veil2.delete_expired_sessions sql/veil2--&version_number;.sql ?>
     </sect3>
+    <sect3 id="func_docpath">
+      <title><literal>func_docpath()</literal></title>
+      <?sql-definition function veil2.docpath sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_datapath">
+      <title><literal>func_datapath()</literal></title>
+      <?sql-definition function veil2.datapath sql/veil2--&version_number;.sql ?>
+    </sect3>
     <sect3 id="func_bcrypt">
       <title><literal>func_bcrypt()</literal></title>
       <?sql-definition function veil2.bcrypt sql/veil2--&version_number;.sql ?>
@@ -566,6 +608,17 @@
     <sect3 id="func_implementation_status">
       <title><literal>implementation_status()</literal></title>
       <?sql-definition function veil2.implementation_status sql/veil2--&version_number;.sql ?>
+    </sect3>
+  </sect2>
+  <sect2 id="other_trigger_fns">
+    <title>Other Trigger Functions</title>
+    <sect3 id="func_system_parameters_check">
+      <title><literal>system_parameters_check()</literal></title>
+      <?sql-definition function veil2.system_parameters_check sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_make_user_defined">
+      <title><literal>make_user_defined()</literal></title>
+      <?sql-definition function veil2.make_user_defined sql/veil2--&version_number;.sql ?>
     </sect3>
   </sect2>
   <sect2 id="triggers">

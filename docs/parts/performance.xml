@@ -12,7 +12,7 @@
       </listitem>
     </orderedlist>
   </para>
-  <sect1>
+  <sect1 id="load_perf_data">
     <title>Data For Evaluating Performance</title>
     <para>
       In order to get a feel for the overheads associated with
@@ -38,7 +38,7 @@ marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo_bulk_data.sql
     </para>
   </sect1>
   <sect1>
-    <title>Session Management Ovehead</title>
+    <title>Session Management Overhead</title>
     <para>
       The two biggest overheads in session management are the use of
       <literal>bcrypt()</literal> for authentication (which is
@@ -60,7 +60,7 @@ marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo_bulk_data.sql
       script.  Assuming the same directory as the example above you
       would run it as follows:
       <programlisting>
-marc:veil2$ psql -d vpd -f demo/perf.sql 
+marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/perf.sql 
 Creating sessions: elapsed = 21 milliseconds.
 Opening sessions: elapsed = 51 milliseconds.
 Re-opening sessions: elapsed = 60 milliseconds.
@@ -74,7 +74,7 @@ marc:veil2$
       milliseconds each).  
     </para>
     <para>
-      This is on an ageing desktop PC with the following CPU spec:
+      This is on an aging desktop PC with the following CPU spec:
       <programlisting>
 vendor_id	: GenuineIntel
 cpu family	: 6
@@ -99,9 +99,139 @@ cache size	: 6144 KB
     </para>
   </sect1>
   <sect1>
-    <title>Privilege Testing Ovehead</title>
+    <title>Privilege Testing Overhead</title>
     <para>
-      
+      For testing the overhead of running privilege tests, you should
+      load the performance evaluation data as described <link linkend="load_perf_data">above</link>.
+    </para>
+    <para>
+      The script <literal>perf2.sql</literal> sets up 3 identical
+      tables for performance testing, and runs some simple queries.
+      The tables are:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    x;
+	  </para>
+	  <para>
+	    This table has no security policy.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    y;
+	  </para>
+	  <para>
+	    This table has a minimal security policy, calling <link
+	    linkend="func_always_true"><literal>veil2.always_true()</literal></link>.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    z.
+	  </para>
+	  <para>
+	    This table has a security policy using <link
+	    linkend="func_i_have_global_priv"><literal>veil2.i_have_global_priv()</literal></link>.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      Here is the transcript of a performance testing run:
+      <programlisting>
+marc:veil2$ psql -d vpd -f  /usr/share/postgresql/12/veil2/perf2.sql
+Setting up tables...
+connecting as Alice...
+31|7argrXo++w024hrMnrRwUAnZwvb4i/DN8ZFbF0MMjcg=||t|
+Time: 24.037 ms
+running tests...
+...on x (3 times)...
+1995
+Time: 0.581 ms
+1995
+Time: 0.274 ms
+1995
+Time: 0.261 ms
+...on y (3 times)...
+1995
+Time: 0.576 ms
+1995
+Time: 0.316 ms
+1995
+Time: 0.291 ms
+result_counts (to keep us honest):
+0|0
+Time: 0.117 ms
+...on z (3 times)...
+1995
+Time: 0.826 ms
+1995
+Time: 0.383 ms
+1995
+Time: 0.365 ms
+result_counts again:
+0|5985
+Time: 0.140 ms
+marc:veil2$ 
+      </programlisting>
+    </para>
+    <para>
+      What this shows, for table z, is that the first query
+      experiences some small overhead (approx 0.5 millisecs), and that
+      subsequent queries have little more overhead than table y, which
+      has the smallest possible overhead for a table with a security
+      policy.  Based on all of this, the author is going to claim that
+      this is pretty damn fast.
+    </para>
+    <para>
+      The reason for the small initial overhead on the first test
+      against table Z is that on the first call to a privilege testing
+      function, the session's privileges must be loaded into session
+      memory.
+    </para>
+    <para>
+      Since these results look too good to be true, we perform a query
+      of <literal>veil2.result_counts()</literal> which shows the
+      number of false and true results from the privilege testing
+      functions.  This should be seen as proof that the privilege
+      tests were actually performed.  Obviously, you can repeat this
+      yourself.
+    </para>
+    <sect2>
+      <title>Other Privilege Test Functions</title>
+      <para>
+	The tests above only test
+	<literal>veil2.i_have_global_priv()</literal>, which is the
+	simplest of the privilege testing functions.  While this may
+	seem to be a cheat, testing privileges in other scopes is
+	pretty much just as fast as testing in the global scope.
+      </para>
+      <para>
+	That said, those functions that check for privileges in
+	superior scopes, have to run a query to discover the
+	appropriate superior scopes, and so will incur significantly
+	more overhead.  Experience suggests that this will still be
+	pretty small, easily dwarfed by any fetches from unhatched
+	rows.
+      </para>
+      <para>
+	If your application uses a lot of superior scope tests, or
+	those queries are used on large numbers of records, you should
+	run your own tests to ensure that performance is adequate.  If
+	not you may need to perform some denormalizations to record
+	the appropriate superior scope in each row.
+      </para>
+      <para>
+	Even with this caveat though, the author is still going to
+	claim that it's fast.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>In Conclusion</title>
+    <para>
+      Oh my, it's fast!
     </para>
   </sect1>
 </chapter>

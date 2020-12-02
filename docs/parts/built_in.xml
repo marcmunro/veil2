@@ -9,7 +9,7 @@
   <para>
     For most database implementations only a relatively small number
     of customizations will be needed.  These are primarily in order to
-    integerate <literal>Veil2</literal> with your database
+    integrate <literal>Veil2</literal> with your database
     implementation.  For those systems that have more complex
     requirements, almost all of <literal>Veil2</literal> is tweakable
     by providing your own overriding views and functions for those
@@ -70,7 +70,7 @@
       </para>
       <para>
 	The mechanism provided by <literal>Veil2</literal> to allow
-	for user-provided functionaity is to allow users to define
+	for user-provided functionality is to allow users to define
 	their own replacements for built-in <literal>Veil2</literal>
 	functions.  These replacement functions are owned by you
 	and are <emphasis role="bold">not</emphasis> part of the
@@ -216,7 +216,7 @@ select 5, s.scope_id,   -- Project to org promotions
 	    <link linkend="func_install_user_functions"><literal>veil2.install_user_functions()</literal></link>
 	    <para>
 	      This function copies all user-provided functions over
-	      their corresponding system-provided couterparts.  Before
+	      their corresponding system-provided counterparts.  Before
 	      doing this, it ensures that a backup copy of the original
 	      system-provided function exists.  Any function defined
 	      in the <literal>veil2</literal> schema with a name
@@ -226,7 +226,7 @@ select 5, s.scope_id,   -- Project to org promotions
 	    <para>
 	      This function should be called after any modification of
 	      your user-provided functions.  It is safe to call this
-	      function any number oftimes.
+	      function any number of times.
 	    </para>
 	  </listitem>
 	  <listitem>
@@ -252,7 +252,7 @@ select 5, s.scope_id,   -- Project to org promotions
 	    <para>
 	      This function should be called after any modification of
 	      your user-provided views.  It is safe to call this
-	      function any number oftimes.
+	      function any number of times.
 	    </para>
 	  </listitem>
 	  <listitem>
@@ -291,7 +291,7 @@ select 5, s.scope_id,   -- Project to org promotions
 	first attempt by a user to log in will call the
 	system-provided version of this function.  The system-provided
 	version of the function will only be in place during this
-	initiall call, and will have been replaced by the
+	initial call, and will have been replaced by the
 	user-provided version on subsequent calls.
       </para>
     </sect2>
@@ -598,7 +598,7 @@ select * from veil2.create_session(&lt;username&gt;, 4, 44);
       </para>
     </sect2>
   </sect1>
-  <sect1>
+  <sect1 id="role_assignment_contexts">
     <title>Role Assignment and Contexts</title>
     <para>
       Each role assignment in <literal>Veil2</literal> happens within
@@ -744,7 +744,7 @@ select accessor_id, 68, 5, project_id -- project context type is 5
     <para>
       <literal>Veil2</literal> allows this by providing different
       mapping contexts to apply to different groups of users.  The
-      mapping context that applies for a given role assignmen depends
+      mapping context that applies for a given role assignment depends
       on:
       <itemizedlist>
 	<listitem>

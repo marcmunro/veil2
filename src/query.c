@@ -30,7 +30,8 @@
  * whether we have saved a presiously active SPI connection.  This
  * allows recursive queries, which is probably overkill for our needs,
  * but since the overhead is low...
- * @param TODO: describe
+ * @param msg An error message string to be issued in the event of a
+ * failure.
  * @result integer giving an SPI error code or success.
  */
 void
@@ -57,6 +58,8 @@ veil2_spi_connect(bool *p_pushed, const char *msg)
  * Reciprocal function for veil2_spi_connect()
  * @param pushed  Boolean as set up by veil2_spi_connect().  This
  * tells us whether to revert to a previously active SPI connection. 
+ * @param msg An error message string to be issued in the event of a
+ * failure.
  * @result integer giving an SPI error code or success.
  */
 void
@@ -78,12 +81,16 @@ veil2_spi_finish(bool pushed, const char *msg)
  * Prepare a query for veil2_query().  This creates and executes a
  * plan.  The caller must have established an SPI connection.  It is
  * assumed that no parameters to the query will be null.
+ *
  * @param qry The text of the SQL query to be performed.
  * @param nargs The number of input parameters ($1, $2, etc) to the query
  * @param argtypes Pointer to an array containing the OIDs of the data
  * @param args Actual parameters
  * types of the parameters 
- * @param nulls TODO: describe
+ * @param nulls String identifying which args are null.  Null args
+ * contain 'n' in the appropriate character position, otherwise there
+ * will be a space.  If no args may be null, a NULL value can be used
+ * instead of a string.
  * @param read_only Whether the query should be read-only or not
  * @param saved_plan Adress of void pointer into which the query plan
  * will be saved.  Passing the same void pointer on a subsequent call
@@ -132,6 +139,28 @@ prepare_query(const char *qry,
     }
 }
 
+/** 
+ * Execute a query with nulls (ie allowing null arguments) and process
+ * the results. 
+ * @param qry The text of the SQL query to be performed.
+ * @param nargs The number of input parameters ($1, $2, etc) to the query
+ * @param argtypes Pointer to an array containing the OIDs of the data
+ * @param args Actual parameters types of the parameters 
+ * @param nulls String identifying which args are null.  Null args
+ * contain 'n' in the appropriate character position, otherwise there
+ * will be a space.  If no args may be null, a NULL value can be used
+ * instead of a string.
+ * @param read_only Whether the query should be read-only or not.
+ * @param saved_plan Adress of void pointer into which the query plan
+ * will be saved.  Passing the same void pointer on a subsequent call
+ * will cause the saved query plan to be re-used.  This may be NULL,
+ * in which case the query plan will not be saved.
+ * @param process_row  A Fetch_fn() to process each tuple retruned by
+ * the query.
+ * @param fn_param  A parameter to pass to process_row.
+ *
+ * @result The number of rows processed.
+ */
 int
 veil2_query_wn(const char *qry,
 			   int nargs,
@@ -168,7 +197,8 @@ veil2_query_wn(const char *qry,
 }
 
 /** 
- * Execute a query and process the results.
+ * Execute a query (with all args being non-null) and process the
+ * results.
  * @param qry The text of the SQL query to be performed.
  * @param nargs The number of input parameters ($1, $2, etc) to the query
  * @param argtypes Pointer to an array containing the OIDs of the data

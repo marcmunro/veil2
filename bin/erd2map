@@ -73,7 +73,7 @@ find_refs ()
 # and the entities' html refs.
 #
 make_areas () {
-    (cat - $1) | gawk -v BASENAME="$2" '
+    (cat - $1) | gawk -v BASENAME="$2" -v OBJTYPE="${objtype}" '
     # Read coordinates attributes from a coords file line.
     function coords() {
         x = int(gensub(/.*x=\"([^\"]*).*/, "\\1", "g") * x_scale + x_offset)
@@ -83,6 +83,12 @@ make_areas () {
 	return x "," y
     }
     BEGIN {
+        if (OBJTYPE == "view") {
+	    obj_tail = " view"
+	}
+	else {
+	    obj_tail = "s table"
+	}
         printf("<div id=\"%s_div\">\n", BASENAME)
         printf("  <map name=\"%s_map\">\n", BASENAME)
     }
@@ -124,8 +130,8 @@ make_areas () {
     /<bottom-right/ {
         if (href != "") {
  	   bottom_right = coords()
-	   printf("    <area alt=\"%s entity\" title=\"%ss table\"\n",
-           	  refobject_name, refobject_name)
+	   printf("    <area alt=\"%s entity\" title=\"%s%s\"\n",
+           	  refobject_name, refobject_name, obj_tail)
 	   printf("      target=\"_self\" shape=\"rect\"\n")
 	   printf("      coords=\"%s,%s\"\n", top_left, bottom_right)
 	   printf("      href=\"%s\">\n", href)
@@ -140,6 +146,13 @@ referenced_objects ()
 {
     gawk '/<refobject/ { print gensub(/.*value=\"([^\"]*).*/, "\\1", "g") }' $1
 }
+
+if [ "x$1" = "x-v" ]; then
+    export objtype=view
+    shift
+else
+    export objtype=table
+fi
 
 thisdir=`basename $0`
 diagram_basename=`basename $1`

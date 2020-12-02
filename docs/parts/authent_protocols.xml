@@ -106,12 +106,6 @@
     <sect2>
       <title>Properties of the Solution Space</title>
       <para>
-	We are not going to claim that <literal>Veil2</literal>'s
-	session management is perfect or even adequate, but we believe
-	it does	provide a good foundation and starting point from which
-	you can build something truly secure.  XXXX TODO: rewrite this
-      </para>
-      <para>
 	This is what <literal>Veil2</literal> provides,
 	out-of-the-box, for session management:
 	<itemizedlist>
@@ -667,6 +661,18 @@
       <programlisting>
 select veil2.hello();
       </programlisting>
+    </para>
+  </sect1>
+  <sect1>
+    <title>Custom Database Sessions</title>
+    <para>
+      If the built-in session management does not work for you, you
+      can always build your own.  The critical functions that your
+      session management functions need to call are
+      <link
+	  linkend="func_load_session_privs"><literal>veil2.load_session_privs()</literal></link>
+      and <link
+      linkend="func_reset_session"><literal>veil2.reset_session()</literal></link>.
     </para>
   </sect1>
 </appendix>

@@ -67,14 +67,6 @@ static int result_counts[] = {0, 0};
 
 
 /**
- * Load minimal set of pgbitmap functionality.  Ideally, we'd link to
- * the pgbitmap extension but I haven't figured our how to do that.
- * This is a pretty nasty hack, but I think it's safe.
- */
-#include "../../pgbitmap/src/pgbitmap_utils.c"
-
-
-/**
  * Used to record an in-memory set of privileges associated with a
  * specfic scope (security context).
  */
@@ -303,7 +295,7 @@ add_scope_privs(int scope_type, int scope, Bitmap *privs)
 	 * cleaned-up as transactions come and go. */
 	
 	old_context = MemoryContextSwitchTo(TopMemoryContext);
-	session_privs->context_privs[idx].privileges = copyBitmap(privs);
+	session_privs->context_privs[idx].privileges = bitmapCopy(privs);
 	MemoryContextSwitchTo(old_context);
 }
 
@@ -328,7 +320,7 @@ fetch_scope_privs(HeapTuple tuple, TupleDesc tupdesc, void *p_result)
 	int scope_type;
 	int scope;
 	Bitmap *privs;
-
+	
 	scope_type = DatumGetInt32(SPI_getbinval(tuple, tupdesc, 1, &isnull));
     scope = DatumGetInt32(SPI_getbinval(tuple, tupdesc, 2, &isnull));
     privs = DatumGetBitmap(SPI_getbinval(tuple, tupdesc, 3, &isnull));
@@ -810,9 +802,10 @@ veil2_i_have_priv_in_superior_scope(PG_FUNCTION_ARGS)
 		veil2_spi_finish(pushed,
 						 "SPI finish failed in "
 						 "veil2_i_have_priv_in_superior_scope()");
+		result = found && result;
 	}
-	result_counts[found && result]++;
-	return found && result;
+	result_counts[result]++;
+	return result;
 }
 
 

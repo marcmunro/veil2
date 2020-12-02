@@ -25,7 +25,7 @@
     You will also need to consider whether your role mappings will
     apply globally, or whether different subsets of users are going to
     see different <link
-    linkend="role_mapping">contextually-dependendent
+    linkend="role_mapping">contextually-dependent
     role-mappings</link>.  If your users have different <link
     linkend="authentication_context">authentication contexts</link>,
     that is they log in using different web forms for different

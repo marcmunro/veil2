@@ -6,12 +6,6 @@
     these as they are, extend them, or replace them entirely.
   </para>
   <para>
-    This section provides an introduction to what is needed,
-    references to more detailed explanations and a final, simple, list
-    of <link linkend="authent_what">actions</link> you need to take or
-    consider.
-  </para>
-  <para>
     Look for "STEP 3" in the file
     <literal>veil2_demo--&lt;version&gt;.sql</literal>.
   </para>
@@ -93,7 +87,7 @@
     <para>
       If your application requires any special session management
       functionality, this is the time to create it.  There is little
-      we can say here about waht that functionality might be, as it
+      we can say here about what that functionality might be, as it
       will very much depend on your needs.  This section simply tries
       to provide some useful background information.
     </para>

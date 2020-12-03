@@ -14,7 +14,7 @@
 # so that the diagrams can be used to navigate to entity descriptions,
 # and also to create automated documentation from the sql scripts.
 # The GNUmakefiles in subdirectories are just there to automatically
-# invoke this makefile in such a way that make can be onvoked from
+# invoke this makefile in such a way that make can be invoked from
 # those subdirectories, and emacs' compile and next-error handling
 # will still work if you are not in the root directory.
 
@@ -28,7 +28,7 @@
 # git commit -a
 # git checkout gh-pages
 # git merge master
-# make html
+# make docs
 # git commit -a
 # git push origin gh-pages
 # git checkout master
@@ -504,6 +504,7 @@ list help:
  doxygen   - create doxygen html documentation only\n\
  images    - create all diagram images from sources\n\
  extracts  - create all doc extracts sql scripts\n\
+ zipfile   - create a zipfile for release to PGXN\n\
  clean     - clean out unwanted files\n\
 \n\
 "

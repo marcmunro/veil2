@@ -487,6 +487,19 @@ select 5, s.scope_id,   -- Project to org promotions
 	when their session is established.  As supplied it has no
 	privileges.
       </para>
+      <para>
+	It may initially seem odd that there is a <link
+	linkend="roles">role</link> with the same name as a <link
+	linkend="security-contexts">security context</link> but here
+	is the reasoning.  The only privileges that apply in your
+	<literal>personal scope</literal> are those that are assigned
+	in <literal>personal context</literal> and this is done
+	through a single, implied, role assignment.  We could have
+	named that role <quote><literal>role that is assigned only in
+	personal context</literal></quote> but it isn't really a
+	better name so <quote><literal>personal
+	context</literal></quote> it is.
+      </para>
     </sect2>
   </sect1>
   <sect1>
@@ -686,7 +699,7 @@ select accessor_id, 68, 5, project_id -- project context type is 5
       ignored; or it can require the supplied context to be the
       authentication context; or it can require that the supplied
       context is related to the authentication context (eg a child
-      context of the authentication context.  What it chooses to do is
+      context of the authentication context).  What it chooses to do is
       entirely up to your implementation.
     </para>
     <para>

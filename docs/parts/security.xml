@@ -146,11 +146,12 @@
 	With <literal>Veil2</literal> an attacker can only access the
 	set of data for which they can steal credentials.  If they can
 	steal Bob's login credentials, then they can see all of the
-	data that Bob can see.  But no more than that.  And <ulink
-	url="https://xkcd.com/538/"> they could probably steal</ulink>
-	Bob's credentials without going to the trouble of breaking in
-	to the application server.  Furthermore, if you implement the
-	<link linkend="report_breaches">reporting of blocked
+	data that Bob can see.  But no more than that.  And they could
+	probably <ulink
+	url="https://imgs.xkcd.com/comics/security.png">steal Bob's
+	credentials</ulink> without going to the trouble of breaking
+	in to the application server.  Furthermore, if you implement
+	the <link linkend="report_breaches">reporting of blocked
 	accesses</link> as suggested in the <link linkend="tips">tips
 	chapter</link>, you will probably be alerted as soon as any
 	intruder attempts to access the database.

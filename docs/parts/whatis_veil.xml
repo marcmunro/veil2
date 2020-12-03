@@ -9,7 +9,7 @@
   </para>
   <para>
     It links to your database through functions, triggers and foreign
-    keys, and provides fast, tested, mechanisms to identify, load and
+    keys, and provides fast tested mechanisms to identify, load and
     test a user's privileges in various scopes.
   </para>
   <para>
@@ -23,14 +23,13 @@
     make this integration work.
   </para>
   <para>
-    To aid in this, <literal>Veil2</literal> provides for
-    user-provided views and functions to take precedence over the
-    built-in system-provided ones.  This mechanism aims to provide
-    maximum flexibility while still allowing <literal>Veil2</literal>
-    to be distributed as a PostgreSQL extension.  This means that
-    future <literal>Veil2</literal> bug-fixes and upgrades can be
-    easily applied to your database without breaking your
-    customizations.
+    To aid in this, <literal>Veil2</literal> allows user-provided
+    views and functions to take precedence over the built-in
+    system-provided ones.  This mechanism aims to provide maximum
+    flexibility while still allowing <literal>Veil2</literal> to be
+    distributed as a PostgreSQL extension.  This means that future
+    <literal>Veil2</literal> bug-fixes and upgrades can be easily
+    applied to your database without breaking your customizations.
   </para>
   <para>
     There is various documentation to help you with this:
@@ -86,10 +85,10 @@
 	for both <link
 	linkend="dedicated_session_management">dedicated</link> and
 	<link linkend="shared_session_management">shared</link>
-	database connections.  It is up to the user or the user's
-	application to ensure that the session protocols are followed.
-	If they are not, the user will have access to no data at all,
-	or access to data based on another user's access rights.
+	database connections.  It is up to you or your application to
+	ensure that the session protocols are followed.  If they are
+	not, the user will have access to no data at all, or access to
+	data based on another user's access rights.
       </para>
       <para>
 	By calling the appropriate session management functions with
@@ -162,14 +161,14 @@ create policy projects__select
 	the first place and will often be effectively unmeasurable.
       </para>
       <para>
-	Note that you should not rely solely on the VPD implementation
-	to limit the number of records returned from a query to your
-	user.  Your application should be constructing
-	<literal>where</literal>-clauses that only return records that
-	your user is entitled to see.  That is, your
-	<literal>Veil2</literal> implementation should act as a final 
-	back-stop safety check, and not as, a hidden, part of your
-	system's functionality.
+	Note that you should not rely solely on your VPD (Virtual
+	Private Database) implementation to limit the number of
+	records returned from queries to your users.  Your application
+	should be constructing <literal>where</literal>-clauses that
+	only return records that your user is entitled to see.  That
+	is, your <literal>Veil2</literal> implementation should act as
+	a final back-stop safety check and not as a (hidden) part of
+	your system's functionality.
       </para>
       <para>
 	There are 2 reasons for this:
@@ -205,9 +204,9 @@ create policy projects__select
 	      For the truly security conscious, you may want to modify
 	      the privilege testing functions so that attempts to view
 	      records to which you have no access, result in logs
-	      being recorded.  Note though that such logs would be
+	      being recorded.  Note though, that such logs would be
 	      essentially unusable and would become a significant
-	      overhead, if significant numbers of queries required
+	      overhead if significant numbers of queries required
 	      results to be filtered.
 	    </para>
 	  </listitem>

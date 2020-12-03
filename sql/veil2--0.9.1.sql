@@ -4285,7 +4285,7 @@ begin
   perform veil2.init();
   if not veil2.have_user_scope_types() then
     ok := false;
-    return next 'You need to define some relational scopes (step 2)';
+    return next 'You need to define some scope types (step 2)';
   end if;
   if not veil2.view_exists('my_accessor_contexts') then
     ok := false;
@@ -4295,13 +4295,18 @@ begin
     ok := false;
     return next 'You need to define a get_accessor() function (step 3)';
   end if;
+  if not veil2.have_accessors() then
+    ok := false;
+    return next 'You need to create accessors (and maybe FK links) (step 4)';
+  end if;
+  
   if not veil2.have_user_privileges() then
     ok := false;
-    return next 'You need to define some privileges (step 4)';
+    return next 'You need to define some privileges (step 5)';
   end if;
   if not veil2.have_user_roles() then
     ok := false;
-    return next 'You need to define some roles (step 5)';
+    return next 'You need to define some roles (step 6)';
   end if;
   if not veil2.have_role_privileges() then
     ok := false;
@@ -4310,10 +4315,6 @@ begin
   if not veil2.have_role_roles() then
     ok := false;
     return next 'You need to create entries in role_roles (step 5)';
-  end if;
-  if not veil2.have_accessors() then
-    ok := false;
-    return next 'You need to create accessors (and maybe FK links) (step 6)';
   end if;
   if not veil2.have_user_scopes() then
     ok := false;

@@ -7,7 +7,7 @@
   <sect1 id="installation">
     <title>Installing <literal>Veil2</literal></title>
     <para>
-      Since version 0.9.1 of <literal>Veil2</literal>, it can and
+      Since version 0.9.1, <literal>Veil2</literal> can and
       should be installed as a PostgreSQL extension.  It is available
       from <ulink url="https://pgxn.org/">PGXN</ulink> the PostgreSQL
       Extension Network.

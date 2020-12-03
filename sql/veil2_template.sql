@@ -136,10 +136,10 @@ create table veil2.accessor_users_map (
 );
 
 alter table veil2.accessor_users_map add constraint accessor_users__pk 
-  primary_key (accessor_id);
+  primary key (accessor_id);
 
 alter table veil2.accessor_users_map add constraint accessor__accessor_fk
-  foreign_key (accessor_id)
+  foreign key (accessor_id)
   references veil2.accessors(accessor_id);
 
 -- You should probably index the other FK columns
@@ -148,7 +148,7 @@ create index accessor__user_idx
 
 -- And you must create FKs
 alter table veil2.accessor_users_map add constraint accessor__user_fk
-  foreign_key (??)
+  foreign key (??)
   references ??.??(??);
 
 */
@@ -222,7 +222,7 @@ begin
   -- appropriate records in veil2
   _accesor_id := nextval('veil2.accessor_id_seq');
   insert 
-    into accessors
+    into veil2.accessors
          (accessor_id, username)
   values (_accessor_id,
           new.<username field>);

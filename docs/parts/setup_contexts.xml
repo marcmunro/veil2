@@ -3,7 +3,7 @@
   <para>
     You need to identify the types of <link
     linkend="scopes">scopes</link> that your privileges will have.
-    You may find it easier easier to think in terms of <link
+    You may find it easier to think in terms of <link
     linkend="security-contexts">security contexts</link> rather than
     scopes (use whichever concept works better for you).  The two
     things are very similar but contexts are more user-facing and

@@ -107,13 +107,13 @@ select 5, s.scope_id,   -- Project to org promotions
       the case, and you encounter a performance penalty from having
       the <link
       linkend="view_accessor_privileges_cache"><literal>veil2.accessor_privileges_cache</literal></link>
-      cache table repeatedly cleared, you may be able to instead of
+      cache table repeatedly cleared, you may be able to, instead of
       truncating that table, selectively delete records based on the
       session contexts that are affected by your changes.  Our
       recommendation is not to tackle this until you know that you
       have a problem.  By then you should have enough local
       <literal>Veil2</literal> expertise that you can easily figure
-      our what to do.
+      out what to do.
     </para>
   </sect1>
 </chapter>

@@ -88,8 +88,9 @@
     </para>
     <para>
       And although it never became simple, the core concepts slowly
-      crystallized, and the concept of a Relational Security Model
-      dropped out.
+      crystallized, and the concept of a <link
+      linkend="what-is-relational-security">Relational Security
+      System</link> dropped out.
     </para>
     <para>
       With a small number of relatively simple concepts that many
@@ -101,16 +102,6 @@
       fundamental requirements were likely to be the same for many
       classes of problem, the direction for <literal>Veil2</literal>
       was set.
-    </para>
-  </sect1>
-  <sect1>
-    <title>What If It Doesn't Work For Me?</title>
-    <para>
-      There is always pgbitmap, hstore and arrays.  And it is pretty
-      extensible.  But if you have a specific requirement that seems
-      like it should be pretty common, and you'd like to help with the
-      analysis and testing, you could try the <link
-      linkend="contact">contact</link> links.
     </para>
   </sect1>
 </chapter>

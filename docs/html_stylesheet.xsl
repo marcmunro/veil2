@@ -26,12 +26,6 @@ Custom docbook stylesheet for html for Veil2 docs.
   <xsl:param name="toc.max.depth">2</xsl:param>
   <xsl:param name="toc.section.depth">2</xsl:param>
 
-  <!-- Add some sensible header stuff so that things size properly on 
-       small screens.  -->
-  <xsl:template name="system.head.content">
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  </xsl:template>
-
   <!-- Auto-numbering of sections -->
   <xsl:param name="section.autolabel" select="1"/>
   <xsl:param name="section.autolabel.max.depth" select="3"/>

@@ -77,11 +77,6 @@
       linkend="func_init">veil2.init()</link></literal>.
     </para>
   </sect1>
-  <sect1>
-    <title>Authentication</title>
-    <para>
-    </para>
-  </sect1>
   <sect1 id="session_management">
     <title>Notes on Session Management</title>
     <para>

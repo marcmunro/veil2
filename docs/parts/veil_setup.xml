@@ -43,7 +43,7 @@
       implementation.  To help you track your progress, and determine
       which steps have still to be taken, you can call the function
       <literal><link
-		   linkend="func_implementation_status">implementation_status()</link></literal>.
+		   linkend="func_implementation_status">veil2.implementation_status()</link></literal>.
       This function returns records for each step that is still to
       be performed.  Note that it cannot tell you anything about the
       <emphasis>correctness</emphasis> of your implementation; it just

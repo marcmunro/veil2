@@ -47,13 +47,13 @@ marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo.sql
         for simplicity and expediency.
       </para>
       <para>
-	If this doesn't work you, you can create a modified version of
-	the test script to use a more secure authentication method
-	that conforms with your site's policies and requirements.
-	However if you want to simply try the demo in a test or
-	development environment where security is not a concern, you
-	can enable trust-based authentication solely for the
-	<literal>demouser</literal> role, solely for your demo
+	If this doesn't work for you, you can create a modified
+	version of the test script to use a more secure authentication
+	method that conforms with your site's policies and
+	requirements.  However if you want to simply try the demo in a
+	test or development environment where security is not a
+	concern, you can enable trust-based authentication solely for
+	the <literal>demouser</literal> role, solely for your demo
 	database.
       </para>
       <para>
@@ -477,7 +477,7 @@ Triggers:
 	<para>
 	  The part of interest to us, is the <literal>POLICY</literal>
 	  stuff.  We see that we can be given select access via
-	  privilege 17 in various scopes, or 23 in in org scope for
+	  privilege 17 in various scopes, or 23 in org scope for
 	  the party.  If we look at the privileges table we can see
 	  that these privileges are <literal>select parties</literal>
 	  and <literal>select orgs</literal>.  Note that to view the

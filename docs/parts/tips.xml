@@ -162,11 +162,11 @@ create policy wibble__select
       and potentially error-prone process.
     </para>
     <para>
-      We recommend avoiding the user of
+      We recommend avoiding the use of
       <literal>drop... cascade</literal> and instead scripting a
       drop and rebuild process that will explicitly deal with each
       dependent object.  By making each drop explicit you can ensure
-      that your have a matching re-build of those objects.
+      that you correctly manage the re-building of those objects.
     </para>
   </sect1>
 </chapter>

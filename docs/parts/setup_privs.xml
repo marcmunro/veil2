@@ -23,10 +23,10 @@
     privileges.  They should be left alone.
   </para>
   <para>
-    At this point you need to make the decision for each relation
-    (table or view) what the appropriate scope is for its privileges.
-    You may, at this point, discover scopes that you hadn't previously
-    considered.  You can go back to the previous step if so.
+    At this point you need to determine the appropriate scope for
+    privileges on each relation (table or view).  You may, at this
+    point, discover scopes that you hadn't previously considered.  You
+    can go back to earlier steps if needed.
   </para>
   <para>
     You may find that you are unable to determine a suitable scope for

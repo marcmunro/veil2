@@ -191,10 +191,10 @@
     <title>Role Assignments</title>
     <para>
       Users are assigned <link linkend="roles">roles</link> in a
-      number of ways, and <literal>Veil2</literal> attempts to place
-      no limits on the mechanisms that an implementation may choose to
-      use.  Assignments may be explicit, implicit or even a
-      combination of the two.
+      number of ways, and <literal>Veil2</literal> places no limits on
+      the mechanisms that an implementation may choose to use.
+      Assignments may be explicit, implicit or even a combination of
+      the two.
     </para>
     <para>
       An explicit role assignment would consist of a record
@@ -206,10 +206,12 @@
     <para>
       Implicit role assignments can be made in a number of ways.  In
       <literal>Veil2</literal> each user, by default, is assigned the
-      <literal>personal context</literal> role.  This is done by
-      <literal>Veil2</literal> itself, and is not the result of any
-      record relating the role to the user.  Note that although the
-      role is assigned by default, it has no <link
+      <link linkend="personal_context_role"><literal>personal
+      context</literal></link> role, in their own personal context
+      <link linkend="personal-context">as described below</link>.
+      This is done by <literal>Veil2</literal> itself, and is not the
+      result of any record relating the role to the user.  Note that
+      although the role is assigned by default, it has no <link
       linkend="privileges">privileges</link>.  What <literal>personal
       context</literal> allows is up to your implementation.
     </para>
@@ -259,7 +261,7 @@
 	    may authenticate using different web pages or apps.  There
 	    may be completely distinct sets of users in the context of
 	    different corporate clients, with usernames only having to
-	    be unique within the context or each corporation.
+	    be unique within the context of each corporation.
 	  </para>
 	</listitem>
 	<listitem id="mapping-context">
@@ -268,7 +270,7 @@
 	  </para>
 	  <para>
 	    As described in <link linkend="role_mapping">contextual
-	    role mapping</link>, our role to role mappings may be
+	    role mapping</link>, your role to role mappings may be
 	    different for different users.  The context that is used
 	    for a given session's role mappings is known as the
 	    mapping context.
@@ -343,15 +345,15 @@
       <para>
 	Personal context is an implied context.  Each user has an
 	implicit assignment of the <literal>personal context</literal>
-	role in this context. 
+	role in this context.
       </para>
       <para>
         The personal context is all about the application user, ie the
         person that is using your application. It applies to data that
         is about that person.  This would include their authentication
         credentials, contact information, etc. The purpose of the
-        personal context is to give you access to your data, and no-one
-        else’s.
+        personal context is to give users access to their own data,
+        and no-one else’s.  Each user has their own personal context.
       </para>
     </sect2>
   </sect1>

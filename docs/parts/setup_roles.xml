@@ -128,14 +128,11 @@
       contiguously and re-use ids for records that get deleted.
     </para>
     <para>
-      Note that if you have decided to use 
-
-      defined that role to role mappings are done
-      in anything other than the global context (as described <link
-      linkend="role_mapping_context">here</link>) your role to role
-      mappings may need to be repeated for each context.  Your role
-      names may also need to be customized for those contexts.  This
-      is shown in the demo; look for the text STEP 8.
+      Note that if you have decided to use role to role mappings in
+      anything other than the global context you will need to define
+      your mappings in each of those contexts.  Your role names may
+      also need to be customized for those contexts.  This is shown in
+      the demo; look for the text STEP 8.
     </para>
   </sect1>
   <sect1>

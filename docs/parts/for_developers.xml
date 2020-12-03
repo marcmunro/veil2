@@ -60,7 +60,7 @@
 		documentation system.  Is also used for some
 		intermediate files for the documentation build,
 		including the <literal>anchors</literal> and
-		<literal>extracts</literal>directories.
+		<literal>extracts</literal> directories.
 	      </para>
 	    </listitem>
 	  </varlistentry>
@@ -323,7 +323,7 @@ marc:veil2$
     <title>The Documentation Build</title>
     <para>
       The <literal>Veil2</literal> documentation is built using
-      docbook.  It is a relatively complex beast though as there is
+      docbook.  It is a relatively complex beast though, as there is
       automated extraction of SQL code, automated creation of diagram
       images and maps, and linkage with Doxygen documentation.  This
       is what you need to know:
@@ -382,5 +382,67 @@ marc:veil2$
 	<literal>docs/html_stylesheet.xsl</literal> stylesheet.
       </para>
     </sect2>
+  </sect1>
+  <sect1>
+    <title>Releases</title>
+    <para>
+      Releasing a new version of <literal>Veil2</literal> to the world
+      involves a number of steps.  The makefile provides various
+      targets to help in this process, primarily the
+      <literal>zipfile</literal> target which creates a zipfile for
+      release to <literal>PGXN</literal> once <literal>make</literal>
+      is satisfied that all necesary steps have been taken.
+    </para>
+    <para>
+      Specifically, before creating the zipfile,
+      <literal>make</literal> insists on the following:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    that the <literal>PGXN</literal> metadata file,
+	    <literal>META.json</literal> contains correct filename and
+	    version information;
+	  </para>
+	  <para>
+	    Specifically, that the version numbers match what is
+	    defined in the <literal>VERSION</literal> file.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that there are no uncommitted changes;
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that the current <literal>git</literal> branch is
+	    <literal>master</literal>;
+	  </para>
+	  <para>
+	    This is particularly necessary as other branches have to
+	    be used when uploading documentation to
+	    <literal>github</literal>.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that the <literal>HEAD</literal> branch in
+	    <literal>git</literal> has been tagged;
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that github and other upstream repositories are up to date
+	    with respect to the local <literal>git</literal> repository;
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that the latest version of documentation has been published
+	    to github pages.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
   </sect1>
 </chapter>

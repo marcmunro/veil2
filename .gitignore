@@ -35,8 +35,11 @@ docs/system-stylesheet.xsl
 autom4te.cache
 config.status
 
-# C dependency files
+# C dependency and object files
 src/*.d
+src/*.o
+src/*.bc
+veil2.so
 
 # My notes
 NOTES

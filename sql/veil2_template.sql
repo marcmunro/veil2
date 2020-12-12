@@ -372,7 +372,7 @@ alter table veil2.scope_links add constraint scope_link__type_fk
 
 -- Define FKs for each <newcolumns>
 alter table veil2.scope_links
-  add constraint scope_link__party_fk
+  add constraint scope_link__<scopename>_fk
   foreign key (<new id column>)
   references <source table for new id column>(<new id column>)
   on update cascade on delete cascade;
@@ -455,11 +455,11 @@ select accessor_id, role_id,
        context_type_id, context_id
   from veil2.accessor_roles
  union all
-select party_id, role_id, 
+select <??>, role_id, 
        <appropriate scope type id>, <foreign key column>
   from <foreign scope table>
  union all
-select party_id, role_id, 
+select <???>, role_id, 
        <appropriate scope type id>, <foreign key column>
   from <foreign scope table>;
 */
@@ -598,7 +598,7 @@ create policy <table name>_select
  using veil2.i_have_xxxx(<priv>,??);
 
 revoke all on <table name> from public;
-greant <appropriate operations> on table_name to <your access role>;
+grant <appropriate operations> on table_name to <your access role>;
 
 */
 

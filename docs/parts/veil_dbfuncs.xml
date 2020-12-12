@@ -117,7 +117,7 @@
 	<link linkend="func_save_session_privs">save_session_privs()</link>;
       </listitem>
       <listitem>
-	<link linkend="func_reload_session_privs">reload_session_privs()</link>;
+	<link linkend="func_load_cached_privs">load_cached_privs()</link>;
       </listitem>
       <listitem>
 	<link linkend="func_check_continuation">check_continuation()</link>;
@@ -434,9 +434,9 @@
       <title><literal>save_session_privs()</literal></title>
       <?sql-definition function veil2.save_session_privs sql/veil2--&version_number;.sql ?>
     </sect3>
-    <sect3 id="func_reload_session_privs">
-      <title><literal>reload_session_privs()</literal></title>
-      <?sql-definition function veil2.reload_session_privs sql/veil2--&version_number;.sql ?>
+    <sect3 id="func_load_cached_privs">
+      <title><literal>load_cached_privs()</literal></title>
+      <?sql-definition function veil2.load_cached_privs sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3 id="func_check_continuation">
       <title><literal>check_continuation()</literal></title>

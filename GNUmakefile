@@ -437,8 +437,29 @@ check_origin:
 	 for origin in $(GIT_UPSTREAM); do \
 	    git diff --quiet master $${origin}/master 2>/dev/null || \
 	    { echo "    UNPUSHED UPDATES FOR $${origin}"; \
-	      err=1; }; \
+	      err=2; }; \
 	done; exit $$err
+
+# Check that this version appears in the change history
+check_history:
+	@grep "<entry>$(VERSION_NUMBER)" \
+	    docs/parts/change_history.xml >/dev/null || \
+	    (echo "    CURRENT VERSION NOT RECORDED IN CHANGE HISTORY"; \
+	     exit 2)
+
+# Check that the correct version is recorded in the control file
+check_control:
+	@grep "version.*$(VERSION_NUMBER)" \
+	    veil2.control >/dev/null || \
+	    (echo "    INCORRECT VERSION IN veil2.control"; \
+	     exit 2)
+
+# Check that the correct version is recorded in the demo control file
+check_demo_control:
+	@grep "version.*$(VERSION_NUMBER)" \
+	    veil2_demo.control >/dev/null || \
+	    (echo "    INCORRECT VERSION IN veil2_demo.control"; \
+	     exit 2)
 
 
 # Create a zipfile for release to pgxn, but only if everthing is ready
@@ -450,7 +471,8 @@ check_origin:
 zipfile: 
 	@$(MAKE) -k --no-print-directory \
 	    check_branch check_meta check_tag check_docs \
-	    check_commit check_origin 2>&1 | \
+	    check_commit check_origin check_history \
+	    check_control check_demo_control 2>&1 | \
 	    bin/makefilter 1>&2
 	@$(MAKE) do_zipfile
 

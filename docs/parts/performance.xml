@@ -205,15 +205,14 @@ marc:veil2$
 	<literal>veil2.i_have_global_priv()</literal>, which is the
 	simplest of the privilege testing functions.  While this may
 	seem to be a cheat, testing privileges in other scopes is
-	pretty much just as fast as testing in the global scope.
+	just as fast as testing in the global scope.
       </para>
       <para>
 	That said, those functions that check for privileges in
 	superior scopes, have to run a query to discover the
-	appropriate superior scopes, and so will incur significantly
-	more overhead.  Experience suggests that this will still be
-	pretty small, easily dwarfed by any fetches from unhatched
-	rows.
+	appropriate superior scopes, and so will incur more overhead.
+	Experience suggests that this will still be pretty small,
+	easily dwarfed by any fetches from uncached rows.
       </para>
       <para>
 	If your application uses a lot of superior scope tests, or

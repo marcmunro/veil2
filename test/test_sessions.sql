@@ -22,7 +22,7 @@ begin;
 select '...test veil2 session handling...';
 
 
-select plan(102);
+select plan(93);
 
 -- Perform a reset session without returning a row.  This ensures the
 -- temporary table is created.
@@ -512,13 +512,15 @@ select is(errmsg, 'AUTHFAIL',
 
 -- Make the context a valid one
 create or replace
-view veil2.accessor_contexts (
+view veil2.my_accessor_contexts (
   accessor_id, context_type_id, context_id
 ) as
 select accessor_id, 1, 0
   from veil2.accessors
  union all select -2, -3, -31  -- Give Eve two authentication contexts
  union all select -2, -3, -3;
+
+select veil2.init();
 
 -- Now we should have connect privilege.  Authentication should succeed.
 with session as
@@ -566,7 +568,6 @@ union all
 select is(veil2.i_have_priv_in_scope(25, -4, -41), true,
          'Bob should have priv 25 in context -4,-41');
 
-
 -- connect as eve
 with session as
   (
@@ -577,10 +578,10 @@ with session as
 select is(success, true, 'Eve should be authenticated (global)')
   from session;
 
-select is(authent_accessor_id, -2, 'Eve''s authent_accessor_id is Eve')
+select is(accessor_id, -2, 'Eve''s accessor_id is Eve')
   from veil2_session_context;
 
-
+/*
 -- eve becomes bob
 -- Need to record the session_token for later use.
 create temporary table session_tt (
@@ -592,16 +593,28 @@ create temporary table session_tt (
 with session as
   (
     select * from veil2.become_user('bob', 1, 0)
-    --select * from veil2.become_accessor(-5, 1, 0)
   )
 insert into session_tt select * from session;
 
-
-select is(success, true, 'Eve should now be Bob')
+select is(success, true, 'Eve should have successully become Bob')
   from session_tt;
 
-select is(authent_accessor_id, -2, 'Bob''s authent_accessor_id is Eve')
-  from veil2_session_context;
+select is(accessor_id, -9, 'Bob''s accessor_id is Eve')
+  from veil2_session_context
+ where login_context_type_id is null;
+
+
+    \pset tuples_only false
+    \pset format aligned
+select * from session_tt;
+select * from veil2_session_context;
+select * from veil2.sessions where session_id >= 11;
+select * from veil2.session_privileges_v;
+    \pset format unaligned
+    \pset tuples_only true
+
+
+
 
 -- Check Eve-as-Bob's privs: should be mostly the same but without
 -- priv 20 which Eve did not have.
@@ -623,12 +636,45 @@ select is(veil2.i_have_priv_in_scope(25, -4, -41), true,
 select is(accessor_id, -5, 'Eve should now have Bob''s accessor_id')
   from veil2_session_context;
 
+
 -- ......continuation...
 select is(o.success, true, 'Bob''s session should have continued')
   from session_tt
  cross join veil2.open_connection(session_id, 2,
               encode(digest(session_token || to_hex(2), 'sha1'),
 	             'base64')) o;
+
+
+    \pset tuples_only false
+    \pset format aligned
+select * from veil2_session_context;
+select * from veil2.sessions
+ where session_id = (select session_id from veil2_session_context);
+    \pset format unaligned
+    \pset tuples_only true
+
+-- Recheck Eve-as-Bob's privs: should be mostly the same but without
+-- priv 20 which Eve did not have.
+--select is(veil2.i_have_priv_in_scope(20, -5, -51), false,
+--         'Bob should not have priv 20 in context -5,-51 again')
+--union all
+select is(veil2.i_have_priv_in_scope(21, -5, -51), true,
+          'Bob should have priv 21 in context -5,-51 (2) again')
+union all
+select is(veil2.i_have_priv_in_scope(23, -5, -51), true,
+          'Bob should have priv 23 in context -5,-51 (2) again')
+union all
+select is(veil2.i_have_priv_in_scope(24, -5, -51), true,
+          'Bob should have priv 24 in context -5,-51 (2) again')
+union all
+select is(veil2.i_have_priv_in_scope(25, -4, -41), true,
+          'Bob should have priv 25 in context -4,-41 (2) again');
+
+select is(accessor_id, -5, 'Eve should now have Bob''s accessor_id again')
+  from veil2_session_context;
+*/
+
+
 
 -- ...contextual role mapppings...
 -- We will use eve with some new role assignments

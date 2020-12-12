@@ -461,20 +461,25 @@ create_temp_tables()
  * Truncate the veil2_session_privileges and veil2_session_context
  * temporary tables (actually we use deletion rather than truncation
  * as it seems faster.
+ *
+ * @param clear_context  Whether veil2_session_context should be
+ * cleared as well as the privileges temp tables.
  */
 static void
-truncate_temp_tables()
+truncate_temp_tables(bool clear_context)
 {
 	(void) veil2_query(
 		"delete from veil2_session_privileges",
 		0, NULL, NULL,
 		false, 	NULL,
 		NULL, NULL);
-	(void) veil2_query(
-		"delete from veil2_session_context",
-		0, NULL, NULL,
-		false, 	NULL,
-		NULL, NULL);
+	if (clear_context) {
+		(void) veil2_query(
+			"delete from veil2_session_context",
+			0, NULL, NULL,
+			false, 	NULL,
+			NULL, NULL);
+	}
 }
 
 
@@ -495,9 +500,12 @@ veil2_session_ready(PG_FUNCTION_ARGS)
 
 /**
  * Does the database donkey-work for veil2_reset_session().
+ * 
+ * @param clear_context  Whether veil2_session_context should be
+ * cleared as well as the privileges temp tables.
  */
 static void
-do_reset_session()
+do_reset_session(bool clear_context)
 {
 	tuple_2ints my_tup;
 	int processed;
@@ -547,7 +555,7 @@ do_reset_session()
 			}
 			/* Access to temp tables looks kosher.  Truncate the
 			 * tables. */
-			truncate_temp_tables();
+			truncate_temp_tables(clear_context);
 			session_ready = true;
 		}
 		else {
@@ -582,11 +590,30 @@ veil2_reset_session(PG_FUNCTION_ARGS)
 	session_ready = false;
 	clear_session_privs();
 	veil2_spi_connect(&pushed, "failed to reset session (1)");
-	do_reset_session();
+	do_reset_session(true);
 	veil2_spi_finish(pushed, "failed to reset session (2)");
  	PG_RETURN_VOID();
 }
 
+/** 
+ * <code>veil2.reset_session_privs() returns void</code> 
+ *
+ * Clears the temp table and cached privileges for a postgres
+ * session and reloads them.
+ *
+ * @return void
+ */
+Datum
+veil2_reset_session_privs(PG_FUNCTION_ARGS)
+{
+	bool pushed;
+
+	clear_session_privs();
+	veil2_spi_connect(&pushed, "failed to reset session privs (1)");
+	do_reset_session(false);
+	veil2_spi_finish(pushed, "failed to reset session privs (2)");
+ 	PG_RETURN_VOID();
+}
 
 /** 
  * <code>veil2.true(params) returns bool</code> 
@@ -653,7 +680,7 @@ veil2_i_have_global_priv(PG_FUNCTION_ARGS)
 
 
 /** 
- * <code>veil2.i_have_personal_priv(priv) returns bool</code> 
+ * <code>veil2.i_have_personal_priv(priv, accessor_id) returns bool</code> 
  *
  * Predicate to determine whether the current session user has a given
  * privilege, <code>priv</code>, in their personal scope (ie for data

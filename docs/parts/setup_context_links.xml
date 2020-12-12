@@ -2,7 +2,7 @@
   <title>Link Your Scopes and Security Contexts (STEP 5)</title>
   <para>
     The <literal>Veil2 <link
-    linkend="entity_scope">scopes</link></literal> table is the most
+    linkend="entity_scope">scopes</link></literal> table is an
     important link between <literal>Veil2</literal> and the database
     that it is protecting.  It provides the semantic link between
     <link linkend="scopes">scopes</link> as understood by the security

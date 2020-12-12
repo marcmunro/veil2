@@ -66,6 +66,7 @@ extern bool veil2_bool_from_query(const char *qry,
 /* veil2.c */
 Datum veil2_session_ready(PG_FUNCTION_ARGS);
 Datum veil2_reset_session(PG_FUNCTION_ARGS);
+Datum veil2_reset_session_privs(PG_FUNCTION_ARGS);
 Datum veil2_true(PG_FUNCTION_ARGS);
 Datum veil2_i_have_global_priv(PG_FUNCTION_ARGS);
 Datum veil2_i_have_personal_priv(PG_FUNCTION_ARGS);
@@ -87,6 +88,3 @@ Datum veil2_datapath(PG_FUNCTION_ARGS);
 #define DATA_PATH "<path to postgres extension data files>"
 #endif
 
-#ifdef TRIED_WITH_NO_PERFORMANCE_GAIN
-Datum veil2_create_accessor_session(PG_FUNCTION_ARGS);
-#endif

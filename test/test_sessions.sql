@@ -22,7 +22,7 @@ begin;
 select '...test veil2 session handling...';
 
 
-select plan(93);
+select plan(107);
 
 -- Perform a reset session without returning a row.  This ensures the
 -- temporary table is created.
@@ -581,7 +581,6 @@ select is(success, true, 'Eve should be authenticated (global)')
 select is(accessor_id, -2, 'Eve''s accessor_id is Eve')
   from veil2_session_context;
 
-/*
 -- eve becomes bob
 -- Need to record the session_token for later use.
 create temporary table session_tt (
@@ -595,26 +594,13 @@ with session as
     select * from veil2.become_user('bob', 1, 0)
   )
 insert into session_tt select * from session;
-
 select is(success, true, 'Eve should have successully become Bob')
   from session_tt;
+
 
 select is(accessor_id, -9, 'Bob''s accessor_id is Eve')
   from veil2_session_context
  where login_context_type_id is null;
-
-
-    \pset tuples_only false
-    \pset format aligned
-select * from session_tt;
-select * from veil2_session_context;
-select * from veil2.sessions where session_id >= 11;
-select * from veil2.session_privileges_v;
-    \pset format unaligned
-    \pset tuples_only true
-
-
-
 
 -- Check Eve-as-Bob's privs: should be mostly the same but without
 -- priv 20 which Eve did not have.
@@ -636,7 +622,6 @@ select is(veil2.i_have_priv_in_scope(25, -4, -41), true,
 select is(accessor_id, -5, 'Eve should now have Bob''s accessor_id')
   from veil2_session_context;
 
-
 -- ......continuation...
 select is(o.success, true, 'Bob''s session should have continued')
   from session_tt
@@ -644,20 +629,11 @@ select is(o.success, true, 'Bob''s session should have continued')
               encode(digest(session_token || to_hex(2), 'sha1'),
 	             'base64')) o;
 
-
-    \pset tuples_only false
-    \pset format aligned
-select * from veil2_session_context;
-select * from veil2.sessions
- where session_id = (select session_id from veil2_session_context);
-    \pset format unaligned
-    \pset tuples_only true
-
 -- Recheck Eve-as-Bob's privs: should be mostly the same but without
 -- priv 20 which Eve did not have.
---select is(veil2.i_have_priv_in_scope(20, -5, -51), false,
---         'Bob should not have priv 20 in context -5,-51 again')
---union all
+select is(veil2.i_have_priv_in_scope(20, -5, -51), false,
+         'Bob should not have priv 20 in context -5,-51 again')
+union all
 select is(veil2.i_have_priv_in_scope(21, -5, -51), true,
           'Bob should have priv 21 in context -5,-51 (2) again')
 union all
@@ -672,8 +648,6 @@ select is(veil2.i_have_priv_in_scope(25, -4, -41), true,
 
 select is(accessor_id, -5, 'Eve should now have Bob''s accessor_id again')
   from veil2_session_context;
-*/
-
 
 
 -- ...contextual role mapppings...

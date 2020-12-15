@@ -33,7 +33,7 @@ marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo_bulk_data.sql
     </para>
     <para>
       This will create around 8000 accessors, around 300 roles, and
-      around 2000 privileges, which should be enough to be exercise
+      around 2000 privileges, which should be enough to exercise
       the privilege testing and session management functionality.
     </para>
   </sect1>
@@ -95,7 +95,7 @@ cache size	: 6144 KB
     </para>
     <para>
       Until anyone claims otherwise, the author is going to claim that
-      this is pretty fast.
+      this is fast enough.
     </para>
   </sect1>
   <sect1>
@@ -209,10 +209,10 @@ marc:veil2$
       </para>
       <para>
 	That said, those functions that check for privileges in
-	superior scopes, have to run a query to discover the
-	appropriate superior scopes, and so will incur more overhead.
-	Experience suggests that this will still be pretty small,
-	easily dwarfed by any fetches from uncached rows.
+	superior scopes, run a query to discover the appropriate
+	superior scopes, and so incur more overhead.  Experience
+	suggests that this will still be easily dwarfed by any fetches
+	from uncached rows.
       </para>
       <para>
 	If your application uses a lot of superior scope tests, or

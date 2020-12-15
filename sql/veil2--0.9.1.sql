@@ -705,7 +705,7 @@ create unlogged table veil2.sessions (
   has_authenticated		boolean not null,
   session_supplemental		text,
   nonces			bitmap,
-  linked_session_id		integer
+  parent_session_id		integer
 );
 
 comment on table veil2.sessions is
@@ -735,8 +735,8 @@ used for role->role mapping by this session.';
 comment on column veil2.sessions.mapping_context_id is
 'See comment on veil2.sessions.mapping_context_type_id';
 
-comment on column veil2.sessions.linked_session_id is
-'The session_id for a become_user session descending from this session.';
+comment on column veil2.sessions.parent_session_id is
+'Used by become-user sessions to record their parent session_id';
 
 alter table veil2.sessions add constraint session__pk
   primary key(session_id);
@@ -815,7 +815,7 @@ create type veil2.session_context_t as (
   session_context_id		integer,
   mapping_context_type_id	integer,
   mapping_context_id		integer,
-  linked_session_id		integer
+  parent_session_id		integer
 );
 
 comment on type veil2.session_context_t is
@@ -1539,16 +1539,16 @@ grant select on veil2.session_assignment_contexts to veil_user;
 \echo ......all_session_roles...
 create or replace
 view veil2.all_session_roles as
-select -- All roles without filtering if we are logged-in in global
+select -- All roles without filtering if our session context is global
        -- context.
        aar.accessor_id, aar.role_id,
        aar.context_type_id, aar.context_id
   from veil2.session_context() sc
  inner join veil2.all_accessor_roles aar
     on aar.accessor_id = sc.accessor_id
- where sc.login_context_type_id = 1
+ where sc.session_context_type_id = 1
  union
-select -- Globally assigned roles, if we are logged in in non-global
+select -- Globally assigned roles, if our session context is non-global
        -- context.
        aar.accessor_id, aar.role_id,
        aar.context_type_id, aar.context_id
@@ -1562,7 +1562,7 @@ select -- Globally assigned roles, if we are logged in in non-global
      or (    sac.context_type_id = aar.context_type_id
          and sac.context_id = aar.context_id
 	 and aar.context_type_id != 1)
- where sc.login_context_type_id != 1
+ where sc.session_context_type_id != 1
  union
 select sc.accessor_id, 2,   -- Personal context role
        2, sc.accessor_id    -- Personal scope for accessor
@@ -1577,6 +1577,81 @@ grant select on veil2.all_session_roles to veil_user;
 
 
 create or replace
+function veil2.all_accessor_roles(
+   accessor_id in out integer,
+   session_context_type_id in integer,
+   session_context_id in integer,
+   role_id out integer,
+   context_type_id out integer,
+   context_id out integer)
+  returns setof record as
+$$
+  select -- All roles without filtering if our session context is global
+         -- context.
+         aar.accessor_id, aar.role_id,
+	 aar.context_type_id, aar.context_id
+    from veil2.all_accessor_roles aar
+   where aar.accessor_id = all_accessor_roles.accessor_id
+     and all_accessor_roles.session_context_type_id = 1
+   union all
+  select -- Globally assigned roles, if our session context is non-global
+         -- context.
+         aar.accessor_id, aar.role_id,
+	 aar.context_type_id, aar.context_id
+    from veil2.all_accessor_roles_plus aar
+   inner join veil2.session_assignment_contexts sac
+      on -- Matching login context and assignment context
+         -- Also session_context and assignment context
+         aar.context_type_id = 1
+      or (    sac.context_type_id = aar.context_type_id
+          and sac.context_id = aar.context_id
+ 	  and aar.context_type_id != 1)
+   where aar.accessor_id = all_accessor_roles.accessor_id
+     and all_accessor_roles.session_context_type_id != 1
+   union all
+  select accessor_id, 2, 2, accessor_id;
+$$
+language sql security definer stable;
+
+
+create or replace
+function veil2.base_accessor_roleprivs(
+    accessor_id in out integer,
+    session_context_type_id in integer,
+    session_context_id in integer,
+    mapping_context_type_id in out integer,
+    mapping_context_id in out integer,
+    assignment_context_type_id out integer,
+    assignment_context_id out integer,
+    role_id out integer,
+    roles out bitmap,
+    privileges out bitmap)
+  returns setof record as
+$$
+  select aar.accessor_id, arp.mapping_context_type_id,
+         arp.mapping_context_id,  aar.context_type_id,
+         aar.context_id, aar.role_id,
+	 coalesce(arp.roles, bitmap(aar.role_id)),
+	 coalesce(arp.privileges, bitmap())
+    from veil2.all_accessor_roles(
+                        base_accessor_roleprivs.accessor_id,
+			base_accessor_roleprivs.session_context_type_id,
+			base_accessor_roleprivs.session_context_id) aar
+    left outer join veil2.all_role_privileges arp
+      on arp.role_id = aar.role_id
+     and (   (    arp.mapping_context_type_id =
+     	              base_accessor_roleprivs.mapping_context_type_id
+              and arp.mapping_context_id =
+	      	      base_accessor_roleprivs.mapping_context_id)
+          or (    arp.mapping_context_type_id = 1
+              and arp.mapping_context_id = 0)
+          or (    arp.mapping_context_type_id is null
+              and arp.mapping_context_id is null));
+$$
+language sql security definer stable;
+
+
+create or replace
 view veil2.session_privileges_v as
   with session_context as
     (
@@ -1585,24 +1660,20 @@ view veil2.session_privileges_v as
     ),
   base_accessor_privs as
     (
-      select aar.accessor_id, aar.role_id, 
-             aar.context_type_id as assignment_context_type_id,
-             aar.context_id as assignment_context_id,
-             arp.mapping_context_type_id,
-             arp.mapping_context_id,
-             arp.roles,
-             arp.privileges
+      select barp.accessor_id, barp.role_id,
+      	     barp.assignment_context_type_id,
+                 barp.assignment_context_id,
+             barp.mapping_context_type_id, barp.mapping_context_id,
+	     barp.roles, barp.privileges
         from session_context sc
-       inner join veil2.all_session_roles aar
-          on aar.accessor_id = sc.accessor_id
-       inner join veil2.all_role_privileges arp
-          on arp.role_id = aar.role_id
-         and (   (    arp.mapping_context_type_id = sc.mapping_context_type_id
-                  and arp.mapping_context_id = sc.mapping_context_id)
-	      or (    arp.mapping_context_type_id = 1
-                  and arp.mapping_context_id = 0)
-	      or (    arp.mapping_context_type_id is null
-                  and arp.mapping_context_id is null))
+       -- Making the following an inner join (rather than cross-join)
+       -- even though the condition is redundant improves performance
+       -- (Postgres 12.5).
+       inner join veil2.base_accessor_roleprivs(
+       	     	            sc.accessor_id, sc.session_context_type_id,
+			    sc.session_context_id, sc.mapping_context_type_id,
+			    sc.mapping_context_id) barp
+          on barp.accessor_id = sc.accessor_id
     ),
   promoted_privs as
     (
@@ -2512,6 +2583,7 @@ function veil2.new_session_context(
     login_context_id in integer,
     session_context_type_id in integer,
     session_context_id in integer,
+    parent_session_id in integer default null,
     session_id out integer,
     mapping_context_type_id out integer,
     mapping_context_id out integer)
@@ -2522,7 +2594,8 @@ $$
         (accessor_id, session_id,
 	 login_context_type_id, login_context_id,
 	 session_context_type_id, session_context_id,
-	 mapping_context_type_id, mapping_context_id)
+	 mapping_context_type_id, mapping_context_id,
+	 parent_session_id)
   select new_session_context.accessor_id,  nextval('veil2.session_id_seq'),
 	 new_session_context.login_context_type_id,
 	   new_session_context.login_context_id,
@@ -2533,7 +2606,8 @@ $$
 	               new_session_context.session_context_type_id) end,
            case when sp.parameter_value = '1' then 0
            else coalesce(asp.superior_scope_id,
-	                 new_session_context.session_context_id) end
+	                 new_session_context.session_context_id) end,
+	 new_session_context.parent_session_id
     from veil2.system_parameters sp
     left outer join veil2.all_superior_scopes asp
       on asp.scope_type_id = new_session_context.session_context_type_id
@@ -2623,9 +2697,8 @@ begin
 		            'base64');
   end if;
 
-  -- TOOD: CHECK WHETHER THIS SHOULD BE SESSION CONTEXT vvvv
   if veil2.have_accessor_context(accessor_id, login_context_type_id,
-     				  login_context_id)
+     				 login_context_id)
   then
     insert
       into veil2.sessions
@@ -2755,7 +2828,7 @@ $$
 declare
   reslt bitmap;
   i integer;
-target_bitmin integer;
+  target_bitmin integer;
 begin
   reslt := coalesce(nonces, bitmap()) + nonce;
   if (bitmax(reslt) - bitmin(reslt)) > 192 then
@@ -2779,57 +2852,69 @@ comment on function veil2.update_nonces(integer, bitmap) is
 gets too large.'; 
 
 
+
 \echo ......filter_privs()...
 create or replace
 function veil2.filter_privs()
   returns void as
 $$
 begin
-  -- We are going to update veil2_session_privileges to remove any roles and
-  -- privileges that do not exist in veil2_orig_privileges.  This is part of
-  -- the become user process, to ensure that become user cannot lead
-  -- to privilege escalation.
-  with new_privs as
+  -- We are going to update veil2_session_privileges to remove any
+  -- roles and privileges that do not exist in
+  -- veil2_ancestor_privileges.  This is part of the become user
+  -- process, to ensure that become user cannot lead to privilege
+  -- escalation.
+  with updatable_privs as
     (
       select sp.scope_type_id, sp.scope_id
         from veil2_session_privileges sp
+       where scope_type_id != 2
     ),
   superior_scopes as
     (
-      select np.scope_type_id, np.scope_id,
-             asp.superior_scope_type_id, asp.superior_scope_id
-        from new_privs np
+      -- For each scope, other than personal, in
+      -- veil2_session_privileges, identify all scopes that could give
+      -- us equivalent privileges.
+      select up.scope_type_id, up.scope_id,
+      	     asp.scope_type_id as test_scope_type_id,
+	       asp.scope_id as test_scope_id
+        from updatable_privs up
        inner join veil2.all_superior_scopes asp
-          on asp.scope_type_id = np.scope_type_id
-         and asp.scope_id = np.scope_id
-       union
-       select scope_type_id, scope_id, scope_type_id, scope_id
-        from new_privs
-       union
-       select scope_type_id, scope_id, 1, 0  -- global scope is superior
-        from new_privs
+          on asp.scope_type_id = up.scope_type_id
+         and asp.scope_id = up.scope_id
+       union all
+      select scope_type_id, scope_id, scope_type_id, scope_id
+        from updatable_privs
+       union all
+      select scope_type_id, scope_id, 1, 0  -- global scope is superior
+        from updatable_privs
     ),
-  allowable_privs as
+  effective_ancestor_privs as
     (
+      -- The set of privileges our ancestor effectively has at each
+      -- scope level.  These privileges may be from global or other
+      -- superior scopes.
       select ss.scope_type_id, ss.scope_id,
-             union_of(op.roles) as roles,
-  	   union_of(op.privs) as privs
+      	     union_of(coalesce(vap.roles, bitmap())) as roles,
+	       union_of(coalesce(vap.privs, bitmap())) as privs
         from superior_scopes ss
-       inner join veil2_orig_privileges op
-          on op.scope_type_id = ss.superior_scope_type_id
-         and (   op.scope_id = ss.superior_scope_id
-              or op.scope_type_id = 2)  -- Personal scope: do not test scope_id
-      group by ss.scope_type_id, ss.scope_id
+        left outer join veil2_ancestor_privileges vap
+          on vap.scope_type_id = ss.test_scope_type_id
+	 and vap.scope_id = ss.test_scope_id
+       group by ss.scope_type_id, ss.scope_id
     ),
   final_privs as
     (
+      -- What the become-user session's roles and privs should be
+      -- after filtering any that the ancestor session did not
+      -- effectively have.
       select sp.scope_type_id, sp.scope_id,
-             sp.roles * ap.roles as roles,
-             sp.privs * ap.privs as privs
+             sp.roles * eap.roles as roles,
+             sp.privs * eap.privs as privs
         from veil2_session_privileges sp
-       inner join allowable_privs ap
-          on ap.scope_type_id = sp.scope_type_id
-         and ap.scope_id = sp.scope_id
+       inner join effective_ancestor_privs eap
+          on eap.scope_type_id = sp.scope_type_id
+         and eap.scope_id = sp.scope_id
     )
   update veil2_session_privileges sp
      set roles = fp.roles,
@@ -2843,25 +2928,126 @@ language 'plpgsql' security definer volatile;
 
 comment on function veil2.filter_privs() is
 'Remove any privileges from veil2_session_privileges that would not be
-provided by veil2_orig_privileges.  This is part of the become user
+provided by veil2_ancestor_privileges.  This is part of the become user
 functionality.  We perform this filtering in order to ensure that a
 user cannot increase their privileges using become user.';
 
 
-\echo ......save_privs_as_orig()...
+
+
+\echo ......load_ancestor_privs(parent_session_id)...
 create or replace
-function veil2.save_privs_as_orig () returns void as
+function veil2.load_ancestor_privs(parent_session_id integer)
+  returns void as
 $$
 begin
-  truncate table veil2_orig_privileges;
-  insert into veil2_orig_privileges select * from veil2_session_privileges;
+  with recursive ancestors as
+    (
+      select *
+        from veil2.sessions
+       where session_id = load_ancestor_privs.parent_session_id
+       union all
+      select s.*
+        from ancestors a
+       inner join veil2.sessions s
+          on s.session_id = a.parent_session_id
+    ),
+   base_accessor_privs as
+    (
+      select barp.accessor_id, barp.role_id,
+      	     barp.assignment_context_type_id,
+                 barp.assignment_context_id,
+             barp.mapping_context_type_id, barp.mapping_context_id,
+	     barp.roles, barp.privileges
+        from ancestors a
+       -- Making the following an inner join (rather than cross-join)
+       -- even though the condition is redundant improves performance
+       -- (Postgres 12.5).
+       inner join veil2.base_accessor_roleprivs(
+       	     	            a.accessor_id, a.session_context_type_id,
+			    a.session_context_id, a.mapping_context_type_id,
+			    a.mapping_context_id) barp
+          on barp.accessor_id = a.accessor_id
+       where assignment_context_type_id != 2 -- ignore personal context
+    ),
+  promoted_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, ss.superior_scope_id as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id != 1
+       inner join veil2.all_superior_scopes ss
+          on ss.scope_type_id = bap.assignment_context_type_id
+         and ss.scope_id = bap.assignment_context_id
+         and ss.superior_scope_type_id = pp.scope_type_id
+	 and ss.is_type_promotion
+    ),
+  global_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, 0 as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id = 1
+    ),  
+  all_role_privs as
+    (
+      select accessor_id, 
+      	     mapping_context_type_id, mapping_context_id,
+  	     assignment_context_type_id as scope_type_id,
+             assignment_context_id as scope_id,
+             roles + role_id as roles,  privileges
+        from base_accessor_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from promoted_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from global_privs
+    ),
+  grouped_role_privs as
+    (
+      select scope_type_id, scope_id,
+             union_of(roles) as roles, union_of(privileges) as privs
+        from all_role_privs
+       group by scope_type_id, scope_id
+    )
+  insert
+    into veil2_ancestor_privileges
+        (scope_type_id, scope_id, roles, privs)
+  select scope_type_id, scope_id, roles, privs
+    from grouped_role_privs;
+end;
+$$
+language plpgsql security definer volatile;
+
+
+\echo ......filter_session_privs(parent_session_id)...
+create or replace
+function veil2.filter_session_privs(parent_session_id integer)
+  returns void as
+$$
+begin
+  perform veil2.load_ancestor_privs(parent_session_id);
+  perform veil2.filter_privs();
+  
 end;
 $$
 language 'plpgsql' security definer volatile;
-
-comment on function veil2.save_privs_as_orig() is
-'Save the current contents of the veil2_session_privileges table to
-veil2_orig_privileges.  This is part of the become user process.';
+  
 
 
 \echo ......session_privileges()...
@@ -2999,6 +3185,67 @@ comment on function veil2.load_cached_privs() is
 current session.';
 
 
+\echo ......update_session()...
+create or replace
+function veil2.update_session(
+    _session_id integer,
+    _nonces bitmap,
+    _authenticated boolean)
+  returns void as
+$$
+  with recursive sessions as
+    (
+      select parent_session_id
+        from upd_cur_session
+       union all
+      select s2.parent_session_id
+        from sessions s1
+       inner join veil2.sessions s2
+          on s1.parent_session_id is not null
+	 and s2.session_id = s1.parent_session_id
+	 and s2.parent_session_id is not null
+    ),
+  timeout as
+    (
+      select parameter_value::interval as increment
+        from veil2.system_parameters
+       where parameter_name = 'shared session timeout'
+    ),
+  upd_cur_session as
+    (
+      update veil2.sessions s
+	 set expires =
+	     case when _authenticated
+	       then now() + t.increment
+	       else s.expires
+	       end,
+	     nonces = coalesce(_nonces, nonces),
+	     has_authenticated = has_authenticated or _authenticated
+        from timeout t
+       where s.session_id = _session_id
+      returning parent_session_id
+    )
+  update veil2.sessions s
+     set expires =
+	   case when _authenticated
+	     then now() + t.increment
+	     else s.expires
+	     end
+   from timeout t
+  where s.session_id in (select parent_session_id from sessions);
+$$
+language sql security definer volatile;
+
+comment on function veil2.update_session(integer, bitmap, boolean) is
+'Update the veil2.sessions records associated with the current session
+to show a new expiry date, record new nonces, and ongoing session
+validity.  This updates the identified sessions record with nonces,
+validity and expiry, and also updates any ancestor sessions with
+expiry.   Although this might be more clearly expressed in plpgsql,
+being able to do it in pure sql is cool and has the potential to be
+faster as it requires only a single statement.';
+
+
 \echo ......open_connection()...
 create or replace
 function veil2.open_connection(
@@ -3016,9 +3263,9 @@ declare
   _has_authenticated boolean;
   _session_token text;
   _context_type_id integer;
-  _linked_session_id integer;
   authent_type text;
   expired boolean;
+  _parent_session_id integer;
 begin
   success := false;
   perform veil2.reset_session();
@@ -3086,47 +3333,40 @@ begin
            login_context_type_id, login_context_id,
            session_context_type_id, session_context_id,
   	   mapping_context_type_id, mapping_context_id,
-	   linked_session_id)
+	   parent_session_id)
     select s.accessor_id, s.session_id,
            s.login_context_type_id, s.login_context_id,
            s.session_context_type_id, s.session_context_id,
            s.mapping_context_type_id, s.mapping_context_id,
-	   s.linked_session_id
+	   s.parent_session_id
       from veil2.sessions s
      where s.session_id = open_connection.session_id
-    returning linked_session_id into _linked_session_id;
+    returning parent_session_id into _parent_session_id;
 
     if not veil2.load_cached_privs() then
       if not veil2.load_session_privs() then
         raise warning 'SECURITY: Accessor % has no connect privilege.',
                       _accessor_id;
         errmsg := 'AUTHFAIL';
-	success := false;	
+	success := false;
       end if;
-    end if;
-    if _linked_session_id is not null then
-      success := veil2.overload_session_privs(_linked_session_id);
     end if;
   end if;
 
-  if not success then
+  if success then
+    if _parent_session_id is not null then
+      perform veil2.filter_session_privs(_parent_session_id);
+    end if;
+  else
     perform veil2.reset_session();
   end if;
   
   -- Regardless of the success of the preceding checks we record the
   -- use of the latest nonce.  If all validations succeeded, we
   -- extend the expiry time of the session.
-  update veil2.sessions s
-     set expires =
-         case when success
-	   then now() + sp.parameter_value::interval
-	   else s.expires
-	   end,
-         nonces = veil2.update_nonces(nonce, _nonces),
-	   has_authenticated = has_authenticated or success
-      from veil2.system_parameters sp
-     where s.session_id = open_connection.session_id
-       and sp.parameter_name = 'shared session timeout';
+  perform veil2.update_session(session_id,
+			       veil2.update_nonces(nonce, _nonces),
+			       success);
 end;
 $$
 language 'plpgsql' security definer volatile
@@ -3141,7 +3381,8 @@ Failures may be for several reasons with errmsg as described below:
 
  - non-existence of session [errmsg: ''AUTHFAIL''];
 
- - expiry of session (while session record still exists - has not been cleaned away) [errmsg: ''EXPIRED''];
+ - expiry of session (while session record still exists - has not been 
+   cleaned away) [errmsg: ''EXPIRED''];
 
  - incorrect credentials being used [errmsg: ''AUTHFAIL''];
 
@@ -3150,13 +3391,13 @@ Failures may be for several reasons with errmsg as described below:
  - the user has no connect privilege [errmsg: ''AUTHFAIL''].
 
 The _nonce is a number that may only be used once per session, and is
-used to prevent replay attacks.  Each open_connection() call should provide
-a new nonce ascending in value from the last.  As connections may be
-asynchronous, we do not require a strictly ascending order but nonces
-may not be out of sequence by a value of more than 64.  This allows us
-to keep track of used nonces without excess overhead while still
-allowing an application to have multiple database connections per 
-user session. 
+used to prevent replay attacks.  Each open_connection() call should
+provide a new nonce ascending in value from the last.  As connections
+may be asynchronous, we do not require a strictly ascending order but
+nonces may not be out of sequence by a value of more than 64.  This
+allows us to keep track of used nonces without excess overhead while
+still allowing an application to have multiple database connections
+per user session.
 
 The value of _authent_token depends upon the authentication method
 chosen.  See the authentication function for your session''s
@@ -3174,7 +3415,7 @@ function veil2.close_connection() returns boolean as
 $$
 begin
   perform veil2.reset_session();
-  truncate table veil2_session_privileges;
+  delete from veil2_session_privileges;
   return true;
 end;
 $$
@@ -3258,8 +3499,8 @@ begin
   then
     return null;
   else
-    raise warning 'SECURITY: become_user() (%): no privilege for % in'
-    	          'context %.%', label, accessor_id,
+    raise warning 'SECURITY: become_user() (%): no privilege for % in '
+    	          'context %,%', label, accessor_id,
 		  context_type_id, context_id;
     return 'NOPRIV';
   end if;
@@ -3283,7 +3524,7 @@ begin
     return null;
   else
     raise warning 'SECURITY: become_user() (%): invalid context for %'
-    	          '- %.%', label, accessor_id, context_type_id, context_id;
+    	          ' - %,%', label, accessor_id, context_type_id, context_id;
     return 'INCNTX';
   end if;
 end;
@@ -3295,8 +3536,10 @@ language 'plpgsql' security definer volatile;
 create or replace
 function veil2.become_accessor(
     accessor_id in integer,
-    context_type_id in integer,
-    context_id in integer,
+    login_context_type_id in integer,
+    login_context_id in integer,
+    session_context_type_id in integer,
+    session_context_id in integer,
     session_id out integer,
     session_token out text,
     success out boolean,
@@ -3306,75 +3549,91 @@ $$
 declare
   orig_session_id integer;
   orig_accessor_id integer;
-  _result boolean;
+  _mapping_context_type_id integer;
+  _mapping_context_id integer;
 begin
   select sc.session_id, sc.accessor_id
     into orig_session_id, orig_accessor_id
     from veil2_session_context sc;
 
-  -- TODO: Replace this with a single call
-  if veil2.i_have_global_priv(1) or
-     veil2.i_have_priv_in_scope(1, context_type_id, context_id) or
-     veil2.i_have_priv_in_superior_scope(1, context_type_id, context_id)
-  then
-    -- Ensure accessor_id and context are valid
-    select true
-      into _result
-      from veil2.accessor_contexts ac
-     where ac.accessor_id = become_accessor.accessor_id
-       and ac.context_type_id = become_accessor.context_type_id
-       and ac.context_id = become_accessor.context_id;
-    if found then
-      -- Create local copy of current privileges.  This is used to
-      -- ensure that we don't gain more privileges than we started
-      -- with by becoming the new user, ie <become user> privilege
-      -- should not be a mechanism for privilege escalation.
+  -- We must check that login context is valid for both the current
+  -- and target accessors.
+  errmsg := veil2.check_become_user_priv('AAA', orig_accessor_id, 
+  	        login_context_type_id, login_context_id);
 
-      execute veil2.save_privs_as_orig();
+  if errmsg is null then
+    errmsg := veil2.check_accessor_context('BBB', orig_accessor_id, 
+  	          login_context_type_id, login_context_id);
+  end if;
 
-      -- Now create the session.
-      select cas.session_id, cas.session_token
-        into become_accessor.session_id, become_accessor.session_token
-        from veil2.create_accessor_session(
-             become_accessor.accessor_id, 'become',
-	     context_type_id, context_id,
-	     context_type_id, context_id,
-	     orig_accessor_id) cas;
+  if errmsg is null then
+    errmsg := veil2.check_accessor_context('CCC', accessor_id, 
+  	          login_context_type_id, login_context_id);
+  end if;
+  
+  if errmsg is null then
+    -- Create new session_context record
+    perform veil2.reset_session();
 
-      -- Update sessions to show which was our original session.
-      update veil2.sessions s
-         set session_supplemental = orig_session_id::text,
-	     has_authenticated = true
-       where s.session_id = become_accessor.session_id;
+    select *
+      into session_id, _mapping_context_type_id,
+	   _mapping_context_id
+      from veil2.new_session_context(accessor_id,
+		     login_context_type_id, login_context_id,
+	             session_context_type_id, session_context_id,
+		     orig_session_id) x;
 
-      -- Update sessions to modify the timeout of our original session
-      update veil2.sessions s
-         set expires = now() + sp.parameter_value::interval
-        from veil2.system_parameters sp
-       where s.session_id = orig_session_id
-         and sp.parameter_name = 'shared session timeout';
+    -- Create new session record.
+    insert
+      into veil2.sessions
+          (accessor_id, session_id,
+	   login_context_type_id, login_context_id,
+	   session_context_type_id, session_context_id,
+	   mapping_context_type_id, mapping_context_id,
+	   authent_type, has_authenticated,
+	   session_supplemental, expires,
+	   token, parent_session_id)
+    select become_accessor.accessor_id, become_accessor.session_id,
+	   become_accessor.login_context_type_id,
+	     become_accessor.login_context_id,
+	   become_accessor.session_context_type_id,
+	     become_accessor.session_context_id,
+    	   _mapping_context_type_id,
+	     _mapping_context_id,
+	   'become', true,
+	   null, now() + sp.parameter_value::interval,
+	   encode(digest(random()::text || now()::text, 'sha256'),
+		  'base64'),
+	     orig_session_id
+      from veil2.system_parameters sp
+     where sp.parameter_name = 'shared session timeout'
+    returning token into session_token;
 
-      -- Load the session privs as though we were the new user.
-      success := veil2.load_session_privs();
-      if success then
-        execute veil2.filter_privs();
-      else
-        errmsg := 'LOADPRIV';
-      end if;
+    -- Update expiry of parent session.
+    perform veil2.update_session(orig_session_id, null::bitmap, true);
+
+    if not veil2.load_session_privs() then
+      raise warning 'SECURITY: Accessor % has no connect privilege.',
+                     _accessor_id;
+      errmsg := 'AUTHFAIL';
     else
-      errmsg := 'INVARGS';
-      success := false;
+      raise warning 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+      perform veil2.filter_session_privs(orig_session_id);
     end if;
+  end if;
+
+  if errmsg is null then
+     success := true;
   else
-    errmsg := 'NOPRIV';
-    success := false;
+     success := false;
   end if;
 end;
 $$
 language 'plpgsql' security definer volatile
 set client_min_messages = 'error';
 
-comment on function veil2.become_accessor(integer, integer, integer) is
+comment on function veil2.become_accessor(
+    integer, integer, integer, integer, integer) is
 'Create a new opened session for the given accessor_id and context.
 This allows a suitably privileged accessor to emulate another user.
 The intended use-case for this is in testing and debugging access
@@ -3385,12 +3644,16 @@ set of privileges that may be less than the user they have become
 would normally get.';
 
 
+
+
 \echo ......become_user()...
 create or replace
 function veil2.become_user(
     username in text,
-    context_type_id in integer,
-    context_id in integer,
+    login_context_type_id in integer,
+    login_context_id in integer,
+    session_context_type_id in integer default null,
+    session_context_id in integer default null,
     session_id out integer,
     session_token out text,
     success out boolean,
@@ -3400,19 +3663,24 @@ $$
 declare
   _accessor_id integer;
 begin
-  _accessor_id := veil2.get_accessor(username, context_type_id, context_id);
+  _accessor_id := veil2.get_accessor(username, login_context_type_id,
+				     login_context_id);
 
   select ba.session_id, ba.session_token,
   	 ba.success, ba.errmsg
     into become_user.session_id, become_user.session_token,
          become_user.success, become_user.errmsg
     from veil2.become_accessor(
-             _accessor_id, context_type_id, context_id) ba;
+             _accessor_id,
+	     login_context_type_id, login_context_id,
+	     coalesce(session_context_type_id, login_context_type_id), 
+	     coalesce(session_context_id, login_context_id)) ba;
 end;
 $$
 language 'plpgsql' security definer volatile;
 
-comment on function veil2.become_user(text, integer, integer) is
+comment on function veil2.become_user(
+    text, integer, integer, integer, integer) is
 'See comments for become_accessor().  This is the same but takes a
 username rather than accessor_id.';
 

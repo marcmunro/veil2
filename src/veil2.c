@@ -443,7 +443,7 @@ create_temp_tables()
 		false, NULL,
 		NULL, NULL);
 	(void) veil2_query(
-		"create temporary table veil2_orig_privileges"
+		"create temporary table veil2_ancestor_privileges"
 		"    of veil2.session_privileges_t",
 		0, NULL, NULL,
 		false, NULL,
@@ -516,9 +516,10 @@ do_reset_session(bool clear_context)
 		"  from pg_catalog.pg_class c"
 		" where c.relname in ('veil2_session_privileges',"
 		"                     'veil2_session_context',"
-		"                     'veil2_orig_privileges')"
+		"                     'veil2_ancestor_privileges')"
 		"   and c.relkind = 'r'"
-		"   and c.relpersistence = 't'",
+		"   and c.relpersistence = 't'"
+		"   and pg_catalog.pg_table_is_visible(c.oid)",
 		0, NULL, NULL,
 		false, 	NULL,
 		fetch_2ints, (void *) &my_tup);

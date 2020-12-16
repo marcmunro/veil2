@@ -9,13 +9,8 @@
 -- Usage:  Called from test_veil2.sql
 --
 
-
-
 -- TODO:
--- test privileges after failed open
--- test i_have_priv_in_superior_scope()
---      and access to veil2.context_roles in various contexts
--- test use of personal_context access rights
+-- test privileges after close
 
 
 begin;
@@ -463,6 +458,8 @@ select is(cnt > 0, true, 'Expect to see rows from role_privileges')
   from (select count(*)::integer as cnt
           from veil2.role_privileges) x;
 
+select veil2.reload_connection_privs();
+
 select is(cnt > 0, true, 'Expect to see rows from role_roles')
   from (select count(*)::integer as cnt
           from veil2.role_roles) x;
@@ -478,6 +475,8 @@ select is(cnt > 0, true, 'Expect to see rows from authentication_types')
 select is(cnt > 0, true, 'Expect to see rows from authentication_details')
   from (select count(*)::integer as cnt
           from veil2.authentication_details) x;
+
+select veil2.reload_connection_privs();
 
 select is(cnt > 0, true, 'Expect to see rows from accessor_roles')
   from (select count(*)::integer as cnt
@@ -611,8 +610,10 @@ select is(veil2.i_have_priv_in_scope(21, -5, -51), true,
           'Bob should have priv 21 in context -5,-51 (2)')
 union all
 select is(veil2.i_have_priv_in_scope(23, -5, -51), true,
-          'Bob should have priv 23 in context -5,-51 (2)')
-union all
+          'Bob should have priv 23 in context -5,-51 (2)');
+
+select veil2.reload_connection_privs();
+	  
 select is(veil2.i_have_priv_in_scope(24, -5, -51), true,
           'Bob should have priv 24 in context -5,-51 (2)')
 union all

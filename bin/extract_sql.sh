@@ -10,11 +10,11 @@
 #  extract_sql.sh [-d|-D] <docs_dir> <target_dir>
 #  extract_sql.sh -1 <objtype> <objname> <sourcefile>
 #
-# This is very tightly bound to Marc's SQL coding style.  It does the
-# job but is pretty fragile.
-#
 # Extract definitions from sql files to generate inclusions for
 # docbook documentation.
+#
+# This is very tightly bound to Marc's SQL coding style.  It does the
+# job but is pretty fragile.
 #
 
 # Usage:
@@ -208,12 +208,12 @@ else
         gawk '/<?sql-definition/ {print $2, $3, $4}' | 
 	sed -e "s/&version_number;/${version}/" | sort -u |
         while read objtype name file; do
-    	echo Creating extract for ${name}...
-    	(
-    	    echo "<extract>"
-                extract_definition ${objtype} ${name} ${file}
-    	    extract_comments ${objtype} ${name} ${file}
-    	    echo "</extract>"
-    	) >$2/${name}.xml
+    	    echo Creating extract for ${objtype} ${name}...
+    	    (
+    	        echo "<extract>"
+                    extract_definition ${objtype} ${name} ${file}
+    	        extract_comments ${objtype} ${name} ${file}
+    	        echo "</extract>"
+    	    ) >$2/${objtype}_${name}.xml
         done
 fi

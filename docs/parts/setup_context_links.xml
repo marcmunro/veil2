@@ -224,7 +224,7 @@ select 5, project_id, project_id
       <subtitle>(Triggers for Maintaining our Accessor Privileges Cache)</subtitle>
       <para>
 	All changes to role assignments must result in <link
-	linkend="view_accessor_privileges_cache"><literal>accessor_privileges_cache</literal></link>
+	linkend="entity_accessor_privileges_cache"><literal>accessor_privileges_cache</literal></link>
 	entries being cleared for the accessor in question.
       </para>
       <para>

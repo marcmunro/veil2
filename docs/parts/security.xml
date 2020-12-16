@@ -120,14 +120,14 @@
 	server will result in an attacker having the same rights to
 	your database that your application server has been given, and
 	the chances are that your application server needs access to
-	almost every relation in your database.  This is very bad.
+	almost every relation in your database.
       </para>
       <para>
-	It is also entirely baffling.  We put the web-application
-	server in a special untrusted segment of the network because
-	we don't trust it, and then we demand that the database server
-	treat that server as trusted.  This is just asking for
-	trouble.
+	In summary: currently acceptable practice is to put
+	web-application servers in a special untrusted segment of the
+	network, because we don't trust them, and require that database
+	servers treat all traffic from them as trusted.  What could
+	possibly go wrong?
       </para>
     </sect2>
     <sect2>

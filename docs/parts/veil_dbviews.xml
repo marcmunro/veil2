@@ -53,7 +53,7 @@
       of this view is critical, and has been carefully developed and
       optimised.  Even so, <literal>Veil2</literal>'s session
       management functions will usually load this data from the <link
-      linkend="view_accessor_privileges_cache"><literal>accessor_privileges_cache</literal></link>
+      linkend="entity_accessor_privileges_cache"><literal>accessor_privileges_cache</literal></link>
       table.
     </para>
     <para>
@@ -157,10 +157,6 @@
 	<title>Session Assignment Contexts View</title>
 	<?sql-definition view veil2.session_assignment_contexts sql/veil2--&version_number;.sql ?>
       </sect3>
-      <sect3 id="view_all_session_roles">
-	<title>All Session Roles View</title>
-	<?sql-definition view veil2.all_session_roles sql/veil2--&version_number;.sql ?>
-      </sect3>
       <sect3 id="view_promotable_privileges">
 	<title>Promotable Privileges View</title>
         <?sql-definition view veil2.promotable_privileges sql/veil2--&version_number;.sql ?>
@@ -186,7 +182,7 @@
         <title>All Role Privileges Materialized View</title>
         <?sql-definition view veil2.all_role_privileges sql/veil2--&version_number;.sql ?>
       </sect3>
-      <sect3 id="view_accessor_privileges_cache">
+      <sect3 id="entity_accessor_privileges_cache">
         <title>Accessor Privileges Cache Table</title>
         <?sql-definition table veil2.accessor_privileges_cache sql/veil2--&version_number;.sql ?>
       </sect3>

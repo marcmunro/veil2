@@ -181,7 +181,9 @@ begin
   return new;
 end;
 $$
-language 'plpgsql' security definer stable;
+language plpgsql security definer stable;
+
+revoke all on function veil2.context_exists_chk() from public;
 
 comment on function veil2.context_exists_chk() is
 'Trigger to be used instead of FK-constraints against the scopes
@@ -1477,7 +1479,9 @@ exception
     raise;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.session_context() from public;
 
 comment on function veil2.session_context() is
 'Safe function to return the context of the current session.  If no
@@ -1536,46 +1540,7 @@ revoke all on veil2.session_assignment_contexts from public;
 grant select on veil2.session_assignment_contexts to veil_user;
 
 
-\echo ......all_session_roles...
-create or replace
-view veil2.all_session_roles as
-select -- All roles without filtering if our session context is global
-       -- context.
-       aar.accessor_id, aar.role_id,
-       aar.context_type_id, aar.context_id
-  from veil2.session_context() sc
- inner join veil2.all_accessor_roles aar
-    on aar.accessor_id = sc.accessor_id
- where sc.session_context_type_id = 1
- union
-select -- Globally assigned roles, if our session context is non-global
-       -- context.
-       aar.accessor_id, aar.role_id,
-       aar.context_type_id, aar.context_id
-  from veil2.session_context() sc
- inner join veil2.all_accessor_roles_plus aar
-    on aar.accessor_id = sc.accessor_id
- inner join veil2.session_assignment_contexts sac
-     on -- Matching login context and assignment context
-        -- Also session_context and assignment context
-        aar.context_type_id = 1
-     or (    sac.context_type_id = aar.context_type_id
-         and sac.context_id = aar.context_id
-	 and aar.context_type_id != 1)
- where sc.session_context_type_id != 1
- union
-select sc.accessor_id, 2,   -- Personal context role
-       2, sc.accessor_id    -- Personal scope for accessor
-  from veil2.session_context() sc;
-
-comment on view veil2.all_session_roles is
-'Return all roles assigned to the currently authenticated accessor
-that apply given the accessor''s session_context.';
-
-revoke all on veil2.all_session_roles from public;
-grant select on veil2.all_session_roles to veil_user;
-
-
+\echo ......all_accessor_roles(function)...
 create or replace
 function veil2.all_accessor_roles(
    accessor_id in out integer,
@@ -1590,7 +1555,7 @@ $$
          -- context.
          aar.accessor_id, aar.role_id,
 	 aar.context_type_id, aar.context_id
-    from veil2.all_accessor_roles aar
+    from veil2.all_accessor_roles_plus aar
    where aar.accessor_id = all_accessor_roles.accessor_id
      and all_accessor_roles.session_context_type_id = 1
    union all
@@ -1613,7 +1578,15 @@ $$
 $$
 language sql security definer stable;
 
+revoke all on function veil2.all_accessor_roles(
+    integer, integer, integer)
+  from public;
 
+comment on function veil2.all_accessor_roles(integer, integer, integer) is
+'Return all roles for the given accessor in the given session context.';
+
+
+\echo ......base_accessor_roleprivs(function)...
 create or replace
 function veil2.base_accessor_roleprivs(
     accessor_id in out integer,
@@ -1650,7 +1623,18 @@ $$
 $$
 language sql security definer stable;
 
+revoke all on function veil2.base_accessor_roleprivs(
+    integer, integer, integer, integer, integer)
+  from public;
 
+comment on function veil2.base_accessor_roleprivs(
+    integer, integer, integer, integer, integer) is
+'Give the set of base (ignoring privilege promotion) roles and
+privileges that apply to a given accessor in given mapping and session
+contexts.';
+
+
+\echo ......session_privileges_v...
 create or replace
 view veil2.session_privileges_v as
   with session_context as
@@ -1816,12 +1800,12 @@ $$
   refresh materialized view veil2.all_role_privileges;
   truncate table veil2.accessor_privileges_cache;
 $$
-language 'sql' security definer volatile leakproof;
+language sql security definer volatile;
+
+revoke all on function veil2.refresh_all_matviews() from public;
 
 comment on function veil2.refresh_all_matviews() is
 'Clear all matviews and caches unconditionally.';
-
-revoke all on function veil2.refresh_all_matviews() from public;
 
 
 \echo ......refresh_scopes_matviews()...
@@ -1835,7 +1819,9 @@ begin
   return new;
 end;
 $$
-language 'plpgsql' security definer volatile leakproof;
+language plpgsql security definer;
+
+revoke all on function veil2.refresh_scopes_matviews() from public;
 
 comment on function veil2.refresh_scopes_matviews() is
 'Trigger function to refresh all  materialized views and caches that 
@@ -1854,7 +1840,9 @@ begin
   return new;
 end;
 $$
-language 'plpgsql' security definer volatile leakproof;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.refresh_privs_matviews() from public;
 
 comment on function veil2.refresh_privs_matviews() is
 'Trigger function to refresh all materialized views and caches that
@@ -1873,7 +1861,9 @@ begin
   return new;
 end;
 $$
-language 'plpgsql' security definer volatile leakproof;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.refresh_roles_matviews() from public;
 
 comment on function veil2.refresh_roles_matviews() is
 'Trigger function to refresh all materialized views and caches that
@@ -1890,7 +1880,9 @@ begin
   return new;
 end;
 $$
-language 'plpgsql' security definer volatile leakproof;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.clear_accessor_privs_cache() from public;
 
 comment on function veil2.clear_accessor_privs_cache() is
 'Clear  cached role and privileges information for all accessors.';
@@ -1921,12 +1913,13 @@ begin
   end if;
 end;
 $$
-language 'plpgsql' security definer volatile leakproof;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.clear_accessor_privs_cache_entry() from public;
 
 comment on function veil2.clear_accessor_privs_cache_entry() is
 'Clear the cached role and privileges information for the affected
 accessor.';
-
 
 
 \echo ...creating materialized view refresh triggers...
@@ -2025,6 +2018,9 @@ function veil2.docpath() returns text
      as '$libdir/veil2', 'veil2_docpath'
      language C stable strict;
 
+revoke all on function veil2.docpath() from public;
+grant execute on function veil2.docpath() to veil_user;
+
 comment on function veil2.docpath() is
 'Return the path to the directory under which Veil2 documents will be
 installed.';
@@ -2035,6 +2031,9 @@ create or replace
 function veil2.datapath() returns text
      as '$libdir/veil2', 'veil2_datapath'
      language C stable strict;
+
+revoke all on function veil2.datapath() from public;
+grant execute on function veil2.datapath() to veil_user;
 
 comment on function veil2.datapath() is
 'Return the path to the directory under which Veil2 scripts will be
@@ -2083,7 +2082,9 @@ begin
   return _result;
 end;
 $$
-language 'plpgsql' security definer stable;
+language plpgsql security definer stable;
+
+revoke execute on function veil2.function_definition(text, oid) from public;
 
 comment on function veil2.function_definition(text, oid) is
 'Returns the text to create a function named
@@ -2105,7 +2106,9 @@ begin
   execute fn_defn;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.replace_function(text, oid) from public;
 
 comment on function veil2.replace_function(text, oid) is
 'Create or replace the function named <literal>fn_name</literal> based
@@ -2137,7 +2140,9 @@ begin
   end loop;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.restore_system_functions() from public;
 
 comment on function veil2.restore_system_functions() is
 'Restore system-provided functions that have been replaced by
@@ -2177,7 +2182,9 @@ begin
   end loop;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.install_user_functions() from public;
 
 comment on function veil2.install_user_functions() is
 'Install any user-provided functions that are to replace
@@ -2203,7 +2210,9 @@ begin
   return found;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.function_exists(text) from public;
 
 comment on function veil2.function_exists(text) is
 'Predicate returning true if a function named
@@ -2229,7 +2238,9 @@ begin
   return found;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.view_exists(text) from public;
 
 comment on function veil2.view_exists(text) is
 'Predicate returning true if a view named
@@ -2251,7 +2262,9 @@ begin
   execute view_defn;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.replace_view(text, oid) from public;
 
 comment on function veil2.replace_view(text, oid) is
 'Create or replace the view named <literal>view_name</literal> based
@@ -2285,10 +2298,11 @@ begin
   end loop;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.restore_system_views() from public;
 
 comment on function veil2.restore_system_views() is
-
 'Restore system-provided views that have been replaced by
 user-provided ones.  The originals for the system-provided view
 will have been saved as backups by veil2.install_user_views()';
@@ -2328,7 +2342,9 @@ begin
   end loop;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.install_user_views() from public;
 
 comment on function veil2.install_user_views() is
 'Install any user-provided views that are to replace
@@ -2349,6 +2365,8 @@ end;
 $$
 language plpgsql security definer volatile;
 
+revoke all on function veil2.init() from public;
+
 comment on function veil2.init() is
 'Perform some basic setup and reset tasks.  This creates
 user-modifiable views that are not already defined and refreshes all
@@ -2367,7 +2385,9 @@ begin
   return new;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.deferred_install_fn() from public;
 
 comment on function veil2.deferred_install_fn() is
 'Install user-provided functions and views.  This is called from an
@@ -2402,8 +2422,11 @@ function veil2.authenticate_false(
 $$
 select false;
 $$
-language 'sql' security definer stable leakproof;
+language sql security definer stable;
 
+revoke all on function veil2.authenticate_false(integer, text)
+  from public;
+  
 comment on function veil2.authenticate_false(integer, text) is
 'Authentication predicate for unimplemented or disabled authentication
 types.  This function always returns false, causing authentication to
@@ -2424,7 +2447,10 @@ select coalesce(
         and authentication_type = 'plaintext'),
     false);
 $$
-language 'sql' security definer stable leakproof;
+language sql security definer stable;
+
+revoke all on function veil2.authenticate_plaintext(integer, text)
+  from public;
 
 comment on function veil2.authenticate_plaintext(integer, text) is
 'Authentication predicate for plaintext authentication.  Return true if
@@ -2447,8 +2473,11 @@ select coalesce(
         and authentication_type = 'bcrypt'),
     false);
 $$
-language 'sql' security definer stable leakproof;
+language sql security definer stable;
 
+revoke all on function veil2.authenticate_bcrypt(integer, text)
+  from public;
+  
 comment on function veil2.authenticate_bcrypt(integer, text) is
 'Authentication predicate for bcrypt authentication.  Return true if
 running bcrypt on the supplied token, using the salt from the
@@ -2504,7 +2533,10 @@ begin
   return false;
 end;
 $$
-language 'plpgsql' security definer stable leakproof;
+language plpgsql security definer stable;
+
+revoke all on function veil2.authenticate(integer, text, text)
+  from public;
 
 comment on function veil2.authenticate(integer, text, text) is
 'For the given accessor_id and authentication_type check whether token
@@ -2518,6 +2550,8 @@ create or replace
 function veil2.session_ready() returns boolean
      as '$libdir/veil2', 'veil2_session_ready'
      language C stable strict;
+
+revoke all on function veil2.session_ready() from public;
 
 comment on function veil2.session_ready() is
 'Predicate to indicate whether veil2.reset_session() has been
@@ -2534,10 +2568,25 @@ function veil2.reset_session() returns void
      as '$libdir/veil2', 'veil2_reset_session'
      language C volatile strict security definer;
 
+revoke all on function veil2.reset_session() from public;
+
 comment on function veil2.reset_session() is
 'Ensure our temp tables exist, are of the expected type (temporary
 tables); that the session user has no unexpected access rights on
 them; and clear them.';
+
+
+\echo ......reset_session_privs()...
+create or replace
+function veil2.reset_session_privs() returns void
+     as '$libdir/veil2', 'veil2_reset_session_privs'
+     language C volatile strict security definer;
+
+revoke all on function veil2.reset_session_privs() from public;
+
+comment on function veil2.reset_session_privs() is
+'Safely clear the contents of the veil2_session_privileges temporary
+table.';
 
 
 \echo ......get_accessor()...
@@ -2565,7 +2614,10 @@ begin
   return 0;
 end;
 $$
-language plpgsql security definer volatile leakproof;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.get_accessor(text, integer, integer)
+  from public;
 
 comment on function veil2.get_accessor(text, integer, integer) is
 'Retrieve accessor_id based on username and context.  A user-provided
@@ -2619,7 +2671,16 @@ $$
             veil2_session_context.mapping_context_type_id,
             veil2_session_context.mapping_context_id;
 $$
-language sql security definer volatile leakproof;
+language sql security definer volatile;
+
+revoke all on function veil2.new_session_context(
+    integer, integer, integer, integer, integer, integer)
+  from public;
+
+comment on function veil2.new_session_context(
+    integer, integer, integer, integer, integer, integer) is
+'Create a veil2_session_context record for the given parameters,
+returning session_id and mapping context.';
 
 
 \echo ......have_accessor_context()...
@@ -2646,7 +2707,15 @@ begin
   return result;
 end;
 $$
-language plpgsql security definer volatile leakproof;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.have_accessor_context(
+    integer, integer, integer) from public;
+
+comment on function veil2.have_accessor_context(
+    integer, integer, integer) is
+'Predicate to determine whether an accessor has the right to use the
+given session context.';
 
 
 \echo ......create_accessor_session()...
@@ -2724,8 +2793,11 @@ begin
   end if;
 end;
 $$
-language 'plpgsql' security definer volatile
+language plpgsql security definer volatile
 set client_min_messages = 'error';
+
+revoke all on function veil2.create_accessor_session(
+    integer, text, integer, integer, integer, integer) from public;
 
 comment on function veil2.create_accessor_session(
     integer, text, integer, integer, integer, integer) is
@@ -2766,10 +2838,19 @@ begin
 	     coalesce(session_context_id, context_id)) cas;
 end;
 $$
-language 'plpgsql' security definer volatile
+language plpgsql security definer volatile
 set client_min_messages = 'error';
 
-comment on function veil2.create_session(text, text, integer, integer, integer, integer) is
+revoke all on function veil2.create_session(
+    text, text, integer, integer, integer, integer)
+  from public;
+
+grant execute on function veil2.create_session(
+    text, text, integer, integer, integer, integer)
+  to veil_user;
+
+comment on function veil2.create_session(
+    text, text, integer, integer, integer, integer) is
 'Get session credentials for a new session.  
 
 Returns session_id, authent_token and session_supplemental.
@@ -2811,7 +2892,9 @@ $$
 	 when nonce > (bitmax(nonces) + 64) then false
 	 else true end;
 $$
-language 'sql' security definer stable leakproof;
+language sql security definer stable;
+
+revoke all on function veil2.check_nonce(integer, bitmap) from public;
 
 comment on function veil2.check_nonce(integer, bitmap) is
 'Check that nonce has not already been used and is within the range of
@@ -2845,7 +2928,9 @@ begin
   return reslt;
 end;
 $$
-language 'plpgsql' security definer stable leakproof;
+language plpgsql security definer stable;
+
+revoke all on function veil2.update_nonces(integer, bitmap) from public;
 
 comment on function veil2.update_nonces(integer, bitmap) is
 'Add nonce to the list of used nonces, slimming the bitmap down when it
@@ -2924,15 +3009,15 @@ begin
      and sp.scope_id = fp.scope_id;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.filter_privs() from public;
 
 comment on function veil2.filter_privs() is
 'Remove any privileges from veil2_session_privileges that would not be
 provided by veil2_ancestor_privileges.  This is part of the become user
 functionality.  We perform this filtering in order to ensure that a
 user cannot increase their privileges using become user.';
-
-
 
 
 \echo ......load_ancestor_privs(parent_session_id)...
@@ -3034,6 +3119,15 @@ end;
 $$
 language plpgsql security definer volatile;
 
+revoke all on function veil2.load_ancestor_privs(integer) from public;
+
+comment on function veil2.load_ancestor_privs(integer) is
+'Load the privileges for all ancestor sessions into
+veil2_ancestor_privileges.  We will use this to ensure that a
+become_user() session does not gain privileges that the parent session
+did not have (ie we aim to stop it from being used as a mechanism for
+privilege escalation).';
+
 
 \echo ......filter_session_privs(parent_session_id)...
 create or replace
@@ -3043,11 +3137,15 @@ $$
 begin
   perform veil2.load_ancestor_privs(parent_session_id);
   perform veil2.filter_privs();
-  
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
   
+revoke all on function veil2.filter_session_privs(integer) from public;
+
+comment on function veil2.filter_session_privs(integer) is
+'Remove from veil2_session_privileges any roles and privileges not
+held by the ancestor session(s).';
 
 
 \echo ......session_privileges()...
@@ -3078,7 +3176,9 @@ exception
     raise;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.session_privileges() from public;
 
 comment on function veil2.session_privileges() is
 'Safe function to return a user-readable version of the privileges for
@@ -3123,7 +3223,9 @@ begin
   end if;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.load_session_privs() from public;
 
 comment on function veil2.load_session_privs() is
 'Load the temporary table veil2_session_privileges for session_id, with the
@@ -3143,7 +3245,10 @@ $$
 select encode(digest(session_token || to_hex(nonce), 'sha1'),
               'base64') = authent_token;
 $$
-language 'sql' security definer stable;
+language sql security definer stable;
+
+revoke all on function veil2.check_continuation(integer, text, text)
+  from public;
 
 comment on function veil2.check_continuation(integer, text, text) is
 'Checks whether the combination of nonce, session_token and
@@ -3179,6 +3284,8 @@ begin
 end;
 $$
 language 'plpgsql' security definer volatile;
+
+revoke all on function veil2.load_cached_privs() from public;
 
 comment on function veil2.load_cached_privs() is
 'Reload cached session privileges for the session''s accessor into our
@@ -3236,6 +3343,9 @@ $$
 $$
 language sql security definer volatile;
 
+revoke all on function veil2.update_session(
+    integer, bitmap, boolean) from public;
+   
 comment on function veil2.update_session(integer, bitmap, boolean) is
 'Update the veil2.sessions records associated with the current session
 to show a new expiry date, record new nonces, and ongoing session
@@ -3244,6 +3354,89 @@ validity and expiry, and also updates any ancestor sessions with
 expiry.   Although this might be more clearly expressed in plpgsql,
 being able to do it in pure sql is cool and has the potential to be
 faster as it requires only a single statement.';
+
+
+\echo ......load_connection_privs()...
+create or replace
+function veil2.load_connection_privs(
+    parent_session_id integer)
+  returns boolean as
+$$
+begin
+  raise warning 'XXXXXXXXXXXXXXXXXX LOADING PRIVS XXXXXXXXXXXXXXXXXXXXXXX';
+  if not veil2.load_cached_privs() then
+    if not veil2.load_session_privs() then
+      return false;
+    end if;
+  end if;
+
+  if parent_session_id is not null then
+    perform veil2.filter_session_privs(parent_session_id);
+  end if;
+  return true;
+end;
+$$
+language plpgsql security definer volatile;
+
+revoke all on function veil2.load_connection_privs(integer) from public;
+
+comment on function veil2.load_connection_privs(integer) is
+'Load veil_session_privileges temp table for a session, filtering the
+privileges if neccesary for a become_user() session.';
+
+
+\echo ......reload_session_context()...
+create or replace
+function veil2.reload_session_context(_session_id integer)
+  returns integer as
+$$
+    insert
+      into veil2_session_context
+          (accessor_id, session_id,
+           login_context_type_id, login_context_id,
+           session_context_type_id, session_context_id,
+  	   mapping_context_type_id, mapping_context_id,
+	   parent_session_id)
+    select s.accessor_id, s.session_id,
+           s.login_context_type_id, s.login_context_id,
+           s.session_context_type_id, s.session_context_id,
+           s.mapping_context_type_id, s.mapping_context_id,
+	   s.parent_session_id
+      from veil2.sessions s
+     where s.session_id = _session_id
+    returning parent_session_id;
+$$
+language sql security definer volatile;
+
+revoke all on function veil2.reload_session_context(integer) from public;
+
+comment on function veil2.reload_session_context(integer) is
+'(Re)load veil2_session_context for a given session_id.';
+
+
+\echo ......reload_connection_privs()...
+create or replace
+function veil2.reload_connection_privs()
+  returns boolean as
+$$
+declare
+  _parent_session_id integer;
+begin
+  perform veil2.reset_session_privs();
+  select parent_session_id
+    into _parent_session_id
+    from veil2_session_context;
+  return veil2.load_connection_privs(_parent_session_id);
+end;
+$$
+language plpgsql security definer volatile;
+
+revoke all on function veil2.reload_connection_privs() from public;
+grant execute on function veil2.reload_connection_privs() to veil_user;
+
+comment on function veil2.reload_connection_privs() is
+'Reload a session''s privileges.  This would be done in the event that
+cached privileges need to be reloaded.';
 
 
 \echo ......open_connection()...
@@ -3265,10 +3458,9 @@ declare
   _context_type_id integer;
   authent_type text;
   expired boolean;
-  _parent_session_id integer;
+  parent_session_id integer;
 begin
   success := false;
-  perform veil2.reset_session();
   select s.accessor_id, s.expires < now(),
          veil2.check_nonce(nonce, s.nonces), s.nonces,
 	 s.authent_type,
@@ -3302,7 +3494,7 @@ begin
     errmsg := 'NONCEFAIL';
   else
     success := true;
-    
+      
     if _has_authenticated then
       -- The session has already been opened.  From here on we 
       -- use different authentication tokens for each open_connection()
@@ -3326,38 +3518,19 @@ begin
   end if;
   
   if success then
+    perform veil2.reset_session();
     -- Reload session context
-    insert
-      into veil2_session_context
-          (accessor_id, session_id,
-           login_context_type_id, login_context_id,
-           session_context_type_id, session_context_id,
-  	   mapping_context_type_id, mapping_context_id,
-	   parent_session_id)
-    select s.accessor_id, s.session_id,
-           s.login_context_type_id, s.login_context_id,
-           s.session_context_type_id, s.session_context_id,
-           s.mapping_context_type_id, s.mapping_context_id,
-	   s.parent_session_id
-      from veil2.sessions s
-     where s.session_id = open_connection.session_id
-    returning parent_session_id into _parent_session_id;
+    parent_session_id := veil2.reload_session_context(session_id);
 
-    if not veil2.load_cached_privs() then
-      if not veil2.load_session_privs() then
-        raise warning 'SECURITY: Accessor % has no connect privilege.',
-                      _accessor_id;
-        errmsg := 'AUTHFAIL';
-	success := false;
-      end if;
+    if not veil2.load_connection_privs(parent_session_id) then
+      raise warning 'SECURITY: Accessor % has no connect privilege.',
+                    _accessor_id;
+      errmsg := 'AUTHFAIL';
+      success := false;
     end if;
   end if;
 
-  if success then
-    if _parent_session_id is not null then
-      perform veil2.filter_session_privs(_parent_session_id);
-    end if;
-  else
+  if not success then
     perform veil2.reset_session();
   end if;
   
@@ -3369,8 +3542,14 @@ begin
 			       success);
 end;
 $$
-language 'plpgsql' security definer volatile
+language plpgsql security definer volatile
 set client_min_messages = 'error';
+
+revoke all on function veil2.open_connection(integer, integer, text) 
+  from public;
+
+grant execute on function veil2.open_connection(integer, integer, text) 
+  to veil_user;
 
 comment on function veil2.open_connection(integer, integer, text) is
 'Attempt to open or re-open a session.  This is used to authenticate
@@ -3420,6 +3599,9 @@ begin
 end;
 $$
 language 'plpgsql' security definer volatile;
+
+revoke all on function veil2.close_connection() from public;
+grant execute on function veil2.close_connection() to veil_user;
 
 comment on function veil2.close_connection() is
 'Close the current session.  We use this to ensure that a shared
@@ -3478,13 +3660,17 @@ begin
   return success;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.hello(integer, integer) from public;
+grant execute on function veil2.hello(integer, integer) to veil_user;
 
 comment on function veil2.hello(integer, integer) is
 'This is used to begin a veil2 session for a database user, ie someone
 who can directly access the database.';
 
 
+\echo ......check_become_user_priv()...
 create or replace
 function veil2.check_become_user_priv(
     label text,
@@ -3506,9 +3692,19 @@ begin
   end if;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.check_become_user_priv(
+    text, integer, integer, integer) from public;
+
+comment on function veil2.check_become_user_priv(
+    text, integer, integer, integer) is
+'Determine whether the accessor has become_user privilege for the
+supplied context (including superior and global).  Return ''NOPRIV''
+to the caller if not.';
 
 
+\echo ......check_accessor_context()...
 create or replace
 function veil2.check_accessor_context(
     label text,
@@ -3529,7 +3725,15 @@ begin
   end if;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
+
+revoke all on function veil2.check_accessor_context(
+    text, integer, integer, integer) from public;
+
+comment on function veil2.check_accessor_context(
+    text, integer, integer, integer) is
+'Determine whether the geven accessor has rights to the given session
+context.  Return ''INCNTX'' if not.';
 
 
 \echo ......become_accessor()...
@@ -3629,8 +3833,11 @@ begin
   end if;
 end;
 $$
-language 'plpgsql' security definer volatile
+language plpgsql security definer volatile
 set client_min_messages = 'error';
+
+revoke all on function veil2.become_accessor(
+    integer, integer, integer, integer, integer) from public;
 
 comment on function veil2.become_accessor(
     integer, integer, integer, integer, integer) is
@@ -3642,8 +3849,6 @@ more privileges than they already have, so the usage of this should
 probably be confined to superusers.  Any other user is likely to get a
 set of privileges that may be less than the user they have become
 would normally get.';
-
-
 
 
 \echo ......become_user()...
@@ -3677,13 +3882,18 @@ begin
 	     coalesce(session_context_id, login_context_id)) ba;
 end;
 $$
-language 'plpgsql' security definer volatile;
+language plpgsql security definer volatile;
 
+revoke all on function veil2.become_user(
+    text, integer, integer, integer, integer) from public;
+    
+grant execute on function veil2.become_user(
+    text, integer, integer, integer, integer) to veil_user;
+    
 comment on function veil2.become_user(
     text, integer, integer, integer, integer) is
 'See comments for become_accessor().  This is the same but takes a
 username rather than accessor_id.';
-
 
 
 \echo ...creating veil2 privilege testing functions...
@@ -4021,35 +4231,6 @@ table into veil2.session_privileges after ensuring that there is no
 existing data present for the session.  This saves our
 session_privileges data for future use in the session.';
 
-
-\echo ......reload_session_privs()...
-create or replace
-function veil2.reload_session_privs(session_id integer)
-  returns boolean as
-$$
-begin
-  insert
-    into veil2_session_privileges
-        (scope_type_id,	 scope_id,
-	 roles, privs)
-  select apc.scope_type_id, apc.scope_id,
-  	 apc.roles, apc.privs
-    from veil2_session_context sc
-   inner join veil2.accessor_privileges_cache apc
-      on apc.accessor_id = sc.accessor_id
-     and apc.login_context_type_id = sc.login_context_type_id
-     and apc.login_context_id = sc.login_context_id
-     and apc.session_context_type_id = sc.session_context_type_id
-     and apc.session_context_id = sc.session_context_id
-     and apc.mapping_context_type_id = sc.mapping_context_type_id
-     and apc.mapping_context_id = sc.mapping_context_id;
-  return found;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-comment on function veil2.reload_session_privs(integer) is
-'Reload cached session privileges into our current session.';
 
 
 \echo ......scope_types...

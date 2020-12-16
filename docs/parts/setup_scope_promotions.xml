@@ -106,7 +106,7 @@ select 5, s.scope_id,   -- Project to org promotions
       It is assumed that such changes will be rare but if this is not
       the case, and you encounter a performance penalty from having
       the <link
-      linkend="view_accessor_privileges_cache"><literal>veil2.accessor_privileges_cache</literal></link>
+      linkend="entity_accessor_privileges_cache"><literal>veil2.accessor_privileges_cache</literal></link>
       cache table repeatedly cleared, you may be able to, instead of
       truncating that table, selectively delete records based on the
       session contexts that are affected by your changes.  Our

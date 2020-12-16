@@ -81,10 +81,22 @@
 	<link linkend="func_ok">ok()</link>;
       </listitem>
       <listitem>
+	<link linkend="func_session_ready">session_ready()</link>;
+      </listitem>
+      <listitem>
 	<link linkend="func_reset_session">reset_session()</link>;
       </listitem>
       <listitem>
+	<link linkend="func_reset_session_privs">reset_session_privs()</link>;
+      </listitem>
+      <listitem>
 	<link linkend="func_get_accessor">get_accessor()</link>;
+      </listitem>
+      <listitem>
+      <link linkend="func_new_session_context">new_session_context()</link>;
+      </listitem>
+      <listitem>
+      <link linkend="func_have_accessor_context">have_accessor_context()</link>;
       </listitem>
       <listitem>
       <link linkend="func_create_accessor_session">create_accessor_session()</link>;
@@ -102,7 +114,19 @@
 	<link linkend="func_filter_privs">filter_privs()</link>;
       </listitem>
       <listitem>
+	<link linkend="func_load_ancestor_privs">load_ancestor_privs()</link>;
+      </listitem>
+      <listitem>
+	<link linkend="func_filter_session_privs">filter_session_privs()</link>;
+      </listitem>
+      <listitem>
 	<link linkend="func_save_privs_as_orig">save_privs_as_orig()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_all_accessor_roles">all_accessor_roles()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_base_accessor_roleprivs">base_accessor_roleprivs()</link>;
       </listitem> 
       <listitem>
 	<link linkend="func_session_context">session_context()</link>;
@@ -120,6 +144,18 @@
 	<link linkend="func_load_cached_privs">load_cached_privs()</link>;
       </listitem>
       <listitem>
+	<link linkend="func_update_session">update_session()</link>;
+      </listitem>
+      <listitem>
+	<link linkend="func_load_connection_privs">load_connection_privs()</link>;
+      </listitem>
+      <listitem>
+	<link linkend="func_reload_session_context">reload_session_context()</link>;
+      </listitem>
+      <listitem>
+	<link linkend="func_reload_connection_privs">reload_connection_privs()</link>;
+      </listitem>
+      <listitem>
 	<link linkend="func_check_continuation">check_continuation()</link>;
       </listitem>
       <listitem>
@@ -130,6 +166,12 @@
       </listitem> 
       <listitem>
 	<link linkend="func_hello">hello()</link>;
+      </listitem>
+      <listitem>
+	<link linkend="func_check_become_user_priv">check_become_user_priv()</link>;
+      </listitem>
+      <listitem>
+	<link linkend="func_check_accessor_context">check_accessor_context()</link>;
       </listitem>
       <listitem>
 	<link linkend="func_become_accessor">become_accessor()</link>;
@@ -144,6 +186,9 @@
     These functions are for testing session privileges:
 
     <itemizedlist>
+      <listitem>
+	<link linkend="func_always_true">always_true()</link>;
+      </listitem> 
       <listitem>
 	<link linkend="func_i_have_global_priv">i_have_global_priv()</link>;
       </listitem> 
@@ -175,6 +220,9 @@
     Utility and administration functions:
 
     <itemizedlist>
+      <listitem>
+	<link linkend="func_result_counts">result_counts()</link>;
+      </listitem> 
       <listitem>
 	<link linkend="func_delete_expired_sessions">delete_expired_sessions()</link>;
       </listitem> 
@@ -382,6 +430,14 @@
 	<?doxygen-ulink function veil2_session_ready here?>.
       </para>
     </sect3>
+    <sect3 id="func_session_ready">
+      <title><literal>session_ready()</literal></title>
+      <?sql-definition function veil2.session_ready sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_session_ready here?>.
+      </para>
+    </sect3>
     <sect3 id="func_reset_session">
       <title><literal>reset_session()</literal></title>
       <?sql-definition function veil2.reset_session sql/veil2--&version_number;.sql ?>
@@ -390,9 +446,25 @@
 	<?doxygen-ulink function veil2_reset_session here?>.
       </para>
     </sect3>
+    <sect3 id="func_reset_session_privs">
+      <title><literal>reset_session_privs()</literal></title>
+      <?sql-definition function veil2.reset_session_privs sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_reset_session_privs here?>.
+      </para>
+    </sect3>
     <sect3 id="func_get_accessor">
       <title><literal>get_accessor()</literal></title>
       <?sql-definition function veil2.get_accessor sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_new_session_context">
+      <title><literal>new_session_context()</literal></title>
+      <?sql-definition function veil2.new_session_context sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_have_accessor_context">
+      <title><literal>have_accessor_context()</literal></title>
+      <?sql-definition function veil2.have_accessor_context sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3 id="func_create_accessor_session">
       <title><literal>create_accessor_session()</literal></title>
@@ -414,9 +486,25 @@
       <title><literal>filter_privs()</literal></title>
       <?sql-definition function veil2.filter_privs sql/veil2--&version_number;.sql ?>
     </sect3>
+    <sect3 id="func_load_ancestor_privs">
+      <title><literal>load_ancestor_privs()</literal></title>
+      <?sql-definition function veil2.load_ancestor_privs sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_filter_session_privs">
+      <title><literal>filter_session_privs()</literal></title>
+      <?sql-definition function veil2.filter_session_privs sql/veil2--&version_number;.sql ?>
+    </sect3>
     <sect3 id="func_save_privs_as_orig">
       <title><literal>save_privs_as_orig()</literal></title>
       <?sql-definition function veil2.save_privs_as_orig sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_all_accessor_roles">
+      <title><literal>all_accessor_roles()</literal></title>
+      <?sql-definition function veil2.all_accessor_roles sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_base_accessor_roleprivs">
+      <title><literal>base_accessor_roleprivs()</literal></title>
+      <?sql-definition function veil2.base_accessor_roleprivs sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3 id="func_session_context">
       <title><literal>session_context()</literal></title>
@@ -438,6 +526,22 @@
       <title><literal>load_cached_privs()</literal></title>
       <?sql-definition function veil2.load_cached_privs sql/veil2--&version_number;.sql ?>
     </sect3>
+    <sect3 id="func_update_session">
+      <title><literal>update_session()</literal></title>
+      <?sql-definition function veil2.update_session sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_load_connection_privs">
+      <title><literal>load_connection_privs()</literal></title>
+      <?sql-definition function veil2.load_connection_privs sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_reload_session_context">
+      <title><literal>reload_session_context()</literal></title>
+      <?sql-definition function veil2.reload_session_context sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_reload_connection_privs">
+      <title><literal>reload_connection_privs()</literal></title>
+      <?sql-definition function veil2.reload_connection_privs sql/veil2--&version_number;.sql ?>
+    </sect3>
     <sect3 id="func_check_continuation">
       <title><literal>check_continuation()</literal></title>
       <?sql-definition function veil2.check_continuation sql/veil2--&version_number;.sql ?>
@@ -454,6 +558,14 @@
       <title><literal>hello()</literal></title>
       <?sql-definition function veil2.hello sql/veil2--&version_number;.sql ?>
     </sect3>
+    <sect3 id="func_check_become_user_priv">
+      <title><literal>check_become_user_priv()</literal></title>
+      <?sql-definition function veil2.check_become_user_priv sql/veil2--&version_number;.sql ?>
+    </sect3>
+    <sect3 id="func_check_accessor_context">
+      <title><literal>check_accessor_context()</literal></title>
+      <?sql-definition function veil2.check_accessor_context sql/veil2--&version_number;.sql ?>
+    </sect3>
     <sect3 id="func_become_accessor">
       <title><literal>become_accessor()</literal></title>
       <?sql-definition function veil2.become_accessor sql/veil2--&version_number;.sql ?>
@@ -466,6 +578,14 @@
   
   <sect2 id="privilege_functions">
     <title>Privilege Testing Functions</title>
+    <sect3 id="func_always_true">
+      <title><literal>always_true()</literal></title>
+      <?sql-definition function veil2.always_true sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_true here?>.
+      </para>
+    </sect3>
     <sect3 id="func_i_have_global_priv">
       <title><literal>i_have_global_priv()</literal></title>
       <?sql-definition function veil2.i_have_global_priv sql/veil2--&version_number;.sql ?>
@@ -526,6 +646,14 @@
 
   <sect2 id="utility_admin_functions">
     <title>Utility and Administration Functions</title>
+    <sect3 id="func_result_counts">
+      <title><literal>result_counts()</literal></title>
+      <?sql-definition function veil2.result_counts sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_result_counts here?>.
+      </para>
+    </sect3>
     <sect3 id="func_delete_expired_sessions">
       <title><literal>delete_expired_sessions()</literal></title>
       <?sql-definition function veil2.delete_expired_sessions sql/veil2--&version_number;.sql ?>

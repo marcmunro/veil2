@@ -152,10 +152,17 @@
     <title><literal>Veil2</literal> C Implementation</title>
     <para>
       A small core of <literal>Veil2</literal> functionality is
-      implemented in C for security reasons.  This is done to ensure
-      that our session privileges data structures cannot be tampered
-      with (unless you have superuser rights in which case you can't
-      be stopped anyway).
+      implemented in C for security and performance.
+    </para>
+    <para>
+      Improved security is achieved by ensuring that our session
+      privileges data structures cannot be tampered with (unless you
+      have superuser rights in which case you can't be stopped
+      anyway).
+    </para>
+    <para>
+      Our privilege testing functions achieve high performance by
+      being implemented in C using an in-memory cache of privileges.
     </para>
     <para>
       The C implementation is documented internally using

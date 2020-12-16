@@ -23,12 +23,13 @@
 PG_MODULE_MAGIC;
 
 
-/* These definitions are up here rather than immediately preceding the
+/* These definitions are here rather than immediately preceding the
  * function declarations themselves as this code seems to confuse
  * Doxygen's call graph stuff.
  */
 PG_FUNCTION_INFO_V1(veil2_session_ready); 
 PG_FUNCTION_INFO_V1(veil2_reset_session);
+PG_FUNCTION_INFO_V1(veil2_reset_session_privs);
 PG_FUNCTION_INFO_V1(veil2_true);
 PG_FUNCTION_INFO_V1(veil2_i_have_global_priv);
 PG_FUNCTION_INFO_V1(veil2_i_have_personal_priv);
@@ -77,7 +78,7 @@ typedef struct {
 } ContextPrivs;
 
 /**
- * Used to record the set of ContextPrivs for the current user's sesion.
+ * Used to record the set of ContextPrivs for the current user's session.
  */
 typedef struct {
 	/** How many ContextPrivs we can currently store.  If we need

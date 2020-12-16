@@ -232,6 +232,8 @@ Custom docbook stylesheet for html for Veil2 docs.
   <xsl:template match="processing-instruction('sql-definition')">
     <xsl:variable name="filename">
       <xsl:value-of select="concat('extracts/',
+                                   substring-before(., ' '), 
+			           '_',
 			            substring-before(
                                         substring-after(., ' '), 
                                         ' '),

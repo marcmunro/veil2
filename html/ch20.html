@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 20. Exploring The Veil2 Demos</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt03.html" title="Part III. Implementation Details">
+<link rel="prev" href="pt03.html" title="Part III. Implementation Details">
+<link rel="next" href="ch21.html" title="Chapter 21. The Veil2 Implementation: What You Need To Know">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="pt03.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch21.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Part III. Implementation Details </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 21. The Veil2 Implementation: What You Need To Know</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="veil_demos"></a>Chapter 20. Exploring The <code class="literal">Veil2</code> Demos</h2></div></div></div>
+<p>
+    <code class="literal">Veil2</code> is supplied with 2 demo applications,
+    packaged as extensions. These are:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+	  <code class="literal">veil2_demo</code>;
+	</p>
+<p>
+	  This provides an extension that demonstrates multiple types
+	  of scopes emulating a Sofware As A Service implementation
+	  for multiple corporate clients.  The demo is workable but
+	  incomplete as not all triggers, rules, etc are provided.
+	</p>
+</li>
+<li class="listitem">
+<p>
+	  <code class="literal">veil2_minimal_demo</code>;
+	</p>
+<p>
+	  This aims to be a more complete implementation than
+	  <code class="literal">veil2_demo</code>, but of a much simpler
+	  system.  It emulates a social media site that allows users
+	  to make postings that are private, public, or for friends
+	  only.  Most access controls are based on the friend
+	  relationships between users.
+	</p>
+</li>
+</ul></div>
+<p>
+  </p>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="veil_demo"></a>20.1. The <code class="literal">veil2_demo</code> Extension</h2></div></div></div>
+<p>
+      The <code class="literal">Veil2</code> demo exists to demonstrate a <a class="link" href="ch01.html" title="Chapter 1. What Is A Relational Security System?">Relational Security
+      System</a>, show its capabilities, and provide an example of
+      <code class="literal">Veil2</code> in use.  It is a trivial, simple and
+      incomplete example but provides enough of a foundation to
+      explore and understand what <code class="literal">Veil2</code> is capable
+      of.
+    </p>
+<p>
+      You are encouraged to dissect, play with, and hack on, the demo.
+      There is much that has not been implemented.  Feel free to
+      implement the missing parts.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1189"></a>20.1.1. Installation</h3></div></div></div>
+<p>
+	The demo can be most easily installed as a package from within
+	postgres:
+	</p>
+<pre class="programlisting">
+vpd=# create extension veil2_demo cascade;
+CREATE EXTENSION
+vpd=# 
+	</pre>
+<p>
+      </p>
+<p>
+	As an alternative you can run the <code class="literal">demo.sql</code>
+	script which can be found as described <a class="link" href="ch08.html#next_steps" title="8.2. Next Steps">here</a>, eg
+	</p>
+<pre class="programlisting">
+marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo.sql
+	</pre>
+<p>
+	This installs the veil2_demo and runs a simple set of tests on
+	it.  Note that in order to run the tests as supplied, the
+	postgres user <code class="literal">demouser</code> must be given access
+	as described below
+      </p>
+<p>
+	As a final option, if you have cloned the
+	<code class="literal">Veil2</code> source from github you can use make:
+	</p>
+<pre class="programlisting">
+marc:veil2$ make demo
+	</pre>
+<p>
+      </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="demouser-access"></a>20.1.1.1. Allowing Access For The Demo User</h4></div></div></div>
+<p>
+          The <code class="literal">Veil2</code> test script
+          <code class="literal">demo/demo_test.sql</code> accesses the test
+          database using demo user <code class="literal">demouser</code>, which
+          it assumes is a trusted user (ie no password is needed).
+          Note that this is not a good security practice and is done
+          simply for simplicity and expediency.
+	</p>
+<p>
+	  If this doesn't work for you, you can create a modified
+	  version of the test script to use a more secure
+	  authentication method that conforms with your site's
+	  policies and requirements.  However if you want to simply
+	  try the demo in a test or development environment where
+	  security is not a concern, you can enable trust-based
+	  authentication solely for the <code class="literal">demouser</code>
+	  role, solely for your demo database.
+	</p>
+<p>
+          To allow <code class="literal">demouser</code> to access the demo
+          database without needing to provide authentication you will
+          need to add a <span class="quote">“<span class="quote">trust</span>”</span> authentication definition
+          to your <code class="literal">pg_hba.conf</code> file.  This line
+          should look something like this:
+          </p>
+<pre class="programlisting">
+local   whateverdbnameyoulike demouser                          trust
+          </pre>
+<p>
+	</p>
+<p>
+          This defines that local (ie non-networked) connections to
+          the <code class="literal">whateverdbnameyoulike</code> database by the
+          <code class="literal">demouser</code> user are to be trusted.  This
+          line must appear <span class="bold"><strong>before</strong></span> any
+          <code class="literal">local</code> definition for
+          <code class="literal">all</code> databases or <code class="literal">all</code>
+          users.
+	</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1221"></a>20.1.2. The Security Contexts</h3></div></div></div>
+<p>
+	The demo provides 3 relational contexts:
+	</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">corp context;</li>
+<li class="listitem">org context;</li>
+<li class="listitem">project context</li>
+</ul></div>
+<p>
+      </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1228"></a>20.1.2.1. Corp Context</h4></div></div></div>
+<p>
+	  The demo uses the <code class="literal">parties</code> table to
+	  identify organizations and persons.  There is a tree
+	  structured organizational hierarchy of organizations.  The
+	  top-level of each organizational tree is called a corp, or
+	  corporation.  The corp context applies to all data owned by
+	  the corp, and by all organizations within it.  Many tables
+	  contain a <code class="literal">corp_id</code> field as a data
+	  denormalization to make privilege testing in corp context
+	  easier and faster.
+	</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1233"></a>20.1.2.2. Org Context</h4></div></div></div>
+<p>
+	  Within each corp there is a tree of organizational parts, or
+	  orgs.  Privileges applied in org contexts apply in all
+	  subordinate orgs.  Technically, there is little to
+	  distinguish between corp context and a top-level org
+	  context, but corp context provides faster privilege checks
+	  in this implementation.
+	</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1236"></a>20.1.2.3. Project Context</h4></div></div></div>
+<p>
+	  Projects have their own contexts.  Assignment to a project
+	  uses a different mechanism from the more explicit role
+	  assignments made in the other contexts.
+	</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1239"></a>20.1.3. The Organizational Hierarchy</h3></div></div></div>
+<p>
+	See the above descriptions of corp and org contexts for an
+	introduction to this.  Persons work for specific orgs in the
+	org hierarchy.  The company they work for provides their login
+	context.  There are comments in the
+	<code class="literal">demo/demo.sql</code> file that should help it all
+	make sense.  Take a look at them.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1243"></a>20.1.4. Exploring It</h3></div></div></div>
+<p>
+	You can install the demo to a database that already had
+	<code class="literal">Veil2</code> objects installed by running the file
+	<code class="literal">demo/demo.sql</code> against it.  To create a
+	clean veil2-enabled database you could use
+	<code class="literal">make</code>.  The following command, run from the
+	<code class="literal">Veil2</code> root directory would create a new
+	database called <code class="literal">vpd</code> with the demo
+	installed:
+	</p>
+<pre class="programlisting">
+$ make db; psql -d vpd -f demo/demo.sql	
+	</pre>
+<p>
+      </p>
+<p>
+	The setup script creates an unprivileged
+	<code class="literal">demouser</code> (demo user) account, which you
+	should use to explore the demo.  Using a privileged account
+	will bypass the security which would be pointless and
+	uninteresting.
+      </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1254"></a>20.1.4.1. Users</h4></div></div></div>
+<p>
+	  This section describes a number of the users defined for the
+	  demo.  These users are mostly assigned the same roles, but
+	  they each see different subsets of data.  This should be a
+	  pretty convincing demonstration of the power of relational
+	  security contexts.  Note that although the users are
+	  connecting in a number of different login contexts, their
+	  <a class="link" href="ch04.html#role_mapping" title="4.3.1. Contextual Role Mapping">role mapping</a> contexts
+	  are all the same (the global context).
+	</p>
+<p>
+	  The code that follows uses a shortcut single query
+	  authentication process.  You should probably not do this in
+	  real life.  The overhead of an extra database round-trip
+	  will, in most cases, be so small that it will not be
+	  noticeable, and the ability to subsequently use the two-step
+	  authentication protocol as a means to further improve your
+	  authentication security is something that you may not want
+	  to lose.  For more on this see the <a class="link" href="ape.html" title="Appendix E. Veil2 Authentication Protocols">authentication protocols</a>
+	  appendix.
+	</p>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1260"></a>Alice</h5></div></div></div>
+<p>
+	    Alice is a global superuser.  She works for Veil Corp
+	    (corp 1000).  She authenticates using bcrypt.  You can
+	    connect as Alice using this query:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+vpd-#  from veil2.create_session('Alice', 'bcrypt', 4, 1000) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd1');
+	    </pre>
+<p>
+	  </p>
+<p>
+	    Because she has global superuser privilege, Alice can see
+	    all records.
+	  </p>
+<p>
+	    To see which privileges she has, and how she has arrived
+	    at them, run the following query:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+vpd-#  from veil2.privilege_assignments
+vpd-# where accessor_id = 1080;
+	    </pre>
+<p>
+	  </p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1267"></a>Bob</h5></div></div></div>
+<p>
+	    Bob is a superuser in corp context for Secured Corp.  He
+	    works for Secured Corp (corp 1010).  He authenticates
+	    using plaintext.  You can connect as Bob using this query:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+vpd-#  from veil2.create_session('Bob', 'plaintext', 4, 1010) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd2') o1;
+	    </pre>
+<p>
+	  </p>
+<p>
+	    Because he has superuser privilege for Secured Corp, Bob
+	    can see all records associated with Secured Corp.
+	  </p>
+<p>
+	    If you compare Bob's
+	    <code class="literal">privilege_assignments</code> with Alice's, you
+	    will see that Bob has all of the same privileges that
+	    Alice has, but assigned in different contexts.  This is
+	    why Bob sees fewer records than Alice.
+	  </p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1274"></a>Carol</h5></div></div></div>
+<p>
+	    Carol is a superuser in corp context for Protected Corp.
+	    She works for Protected Corp (corp 1020).  She
+	    authenticates using plaintext.  You can connect as Carol
+	    using this query:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+vpd-#  from veil2.create_session('Carol', 'plaintext', 4, 1020) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd3') o1;
+	    </pre>
+<p>
+	  </p>
+<p>
+	    Unlike Bob, Carol can see no projects.  This is because
+	    Protected Corp has no projects.
+	  </p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1279"></a>Eve</h5></div></div></div>
+<p>
+	    Eve is a superuser in corp context for both Secure Corp
+	    and Protected Corp.  She works for Veil Corp (corp 1000).
+	    She authenticates using plaintext.  She has the <a class="link" href="ch21.html#connect_role" title="21.4.1. The Connect Role"><code class="literal">connect</code></a>
+	    role for Veil Corp and Secured Corp.  This means she
+	    authenticates within Veil Corp but also has the right to
+	    connect to Secured Corp.
+	  </p>
+<p>
+	    You can connect as Eve in Veil Corp using this query:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+vpd-#  from veil2.create_session('Eve', 'plaintext', 4, 1000) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+	    </pre>
+<p>
+	  </p>
+<p>
+	    Connected to Veil Corp, Eve can only see her own party
+	    record.
+	  </p>
+<p>
+	    To connect Eve in the context of Secured Corp you cab do
+	    this:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+vpd-#  from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1010) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+	    </pre>
+<p>
+	  </p>
+<p>
+	    Eve now sees all parties in corp 1010 (plus herself).  She
+	    sees all projects and project assignments within corp
+	    1010.
+	  </p>
+<p>
+	    Eve cannot log in to Protected Corp, even though she has
+	    the <code class="literal">superuser</code> role because she has not
+	    been given the <code class="literal">connect</code> role in that
+	    context.  If you wish, you can verify this using:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+vpd-#  from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1020) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+	    </pre>
+<p>
+	    If you give Eve the <code class="literal">connect</code> role for
+	    Protected Corp she will then be able to log in and see all
+	    parties for Protected Corp:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+vpd-#  from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1020) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+ session_id |                session_token                 | session_supplemental | success |  errmsg  
+------------+----------------------------------------------+----------------------+---------+----------
+         28 | v3AvfSi6KQ0h4zhR0Yoha3XZ6JT8WHgVRUqGQAC+4R8= |                      | f       | AUTHFAIL
+(1 row)
+
+vpd=# select * from demo.parties;
+ party_id | party_type_id | corp_id | org_id | party_name | password 
+----------+---------------+---------+--------+------------+----------
+(0 rows)
+
+vpd=# insert
+vpd-#   into veil2.accessor_roles
+vpd-#        (accessor_id, role_id, context_type_id, context_id)
+vpd-# values (1110, 0, 4, 1020);
+INSERT 0 1
+vpd=# select *                   
+  from veil2.create_session('Eve', 'plaintext', 4, 1000, 4, 1020) c
+ cross join veil2.open_connection(c.session_id, 1, 'passwd4') o1;
+ session_id |                session_token                 | session_supplemental | success | errmsg 
+------------+----------------------------------------------+----------------------+---------+--------
+         29 | fA3tsbnh0nhC9j6KTXSKOEQCgiZNU7//McP7IcxZPVU= |                      | t       | 
+(1 row)
+
+vpd=# select * from demo.parties;
+ party_id | party_type_id | corp_id | org_id |   party_name   |   password   
+----------+---------------+---------+--------+----------------+--------------
+     1020 |             2 |    1020 |   1020 | Protected Corp | 
+     1100 |             1 |    1020 |   1020 | Carol          | xxxxxxxxxxxx
+     1110 |             1 |    1000 |   1000 | Eve            | xxxxxxxxxxxx
+     1180 |             2 |    1020 |   1020 | Department P   | 
+     1190 |             2 |    1020 |   1020 | Department P2  | 
+     1200 |             1 |    1020 |   1020 | Paul           | xxxxxxxxxxxx
+     1210 |             1 |    1020 |   1020 | Pippa          | xxxxxxxxxxxx
+     1220 |             1 |    1020 |   1020 | Phil           | xxxxxxxxxxxx
+     1230 |             1 |    1020 |   1020 | Pete           | xxxxxxxxxxxx
+     1240 |             1 |    1020 |   1020 | Pam            | xxxxxxxxxxxx
+(10 rows)
+
+vpd=# 
+	    </pre>
+<p>
+	    What this shows is that Eve can see all users in both
+	    corps, but only for one corp at a time, depending on how
+	    she has logged in.  Pretty cool, eh?
+	  </p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1296"></a>Sue</h5></div></div></div>
+<p>
+	    Sue is a superuser in org context for Department S.  She
+	    works for Department S (org 1050).  She authenticates
+	    using plaintext.  You can connect as Sue using this query:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+  from veil2.create_session('Sue', 'plaintext', 4, 1050) c
+ cross join veil2.open_connection(c.session_id, 1, 'passwd5') o1;
+	    </pre>
+<p>
+	  </p>
+<p>
+	    Sue sees only those party, party_assignment and project
+	    records for Department S.  Of particular interest are the
+	    <code class="literal">project_assignment</code> records for which
+	    Sue gets the appropriate privilege in a scope superior to
+	    the context of the project itself.  Try executing these 2
+	    queries:
+	    </p>
+<pre class="programlisting">
+vpd=# select veil2.i_have_priv_in_scope(26, 5, 1);
+vpd=# select veil2.i_have_priv_in_superior_scope(26, 5, 1);
+	    </pre>
+<p>
+	  </p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="idm1303"></a>Simon</h5></div></div></div>
+<p>
+	    Simon is a project manager for project S.1.  He works for
+	    Department S (org 1050).  He authenticates using
+	    plaintext.  You can connect as Simon using this query:
+	    </p>
+<pre class="programlisting">
+vpd=# select *
+vpd-#  from veil2.create_session('Simon', 'plaintext', 4, 1050) c
+vpd-# cross join veil2.open_connection(c.session_id, 1, 'passwd7') o1;
+	    </pre>
+<p>
+	  </p>
+<p>
+	    Simon's only assigned roles, are
+	    <code class="literal">connect</code>, assigned in global context in
+	    <code class="literal">veil2.accessor_roles</code>, and
+	    <code class="literal">project manager</code> assigned in the context
+	    of project 1 in
+	    <code class="literal">demo.project_assignments</code>.
+	  </p>
+<p>
+	    This limits what Simon can see to data about project 1,
+	    and data about himself through privileges assigned in
+	    personal context.  What is interesting, and cool, is that
+	    Simon is able to see the <code class="literal">demo.parties</code>
+	    record for the org that owns project 1:
+	    </p>
+<pre class="programlisting">
+vpd=# select * from demo.parties;
+ party_id | party_type_id | corp_id | org_id |  party_name  |   password   
+----------+---------------+---------+--------+--------------+--------------
+     1050 |             2 |    1010 |   1030 | Department S | 
+     1140 |             1 |    1010 |   1050 | Simon        | xxxxxxxxxxxx
+(2 rows)
+vpd=&gt; 
+	    </pre>
+<p>
+	  </p>
+<p>
+	    His access to the record for Department S arises from the
+	    <code class="literal">project viewer</code> role, which has been
+	    assigned the <code class="literal">select orgs</code> privilege.
+	    This privilege allows the privilege holder to select from
+	    parties that are organizations (not persons), and when
+	    assigned in a lesser context (like project context)
+	    promotes to apply in org scope.  Simon has the
+	    <code class="literal">project viewer</code> role indirectly as it
+	    has been assigned to the <code class="literal">project
+	    manager</code> role.
+	  </p>
+<p>
+	    Understanding how a user gains their privileges, and the
+	    contexts in which they apply, can be tricky.  This is
+	    where the developer views, and general postgres expertise
+	    come in.
+	  </p>
+<p>
+	    Let's begin by understanding what privileges could be
+	    giving us access to <code class="literal">demo.parties</code>.  The
+	    <code class="literal">psql \d</code> command can be used to describe
+	    a relation:
+	    </p>
+<pre class="programlisting">
+vpd=# \d demo.parties
+                   View "demo.parties"
+    Column     |  Type   | Collation | Nullable | Default 
+---------------+---------+-----------+----------+---------
+ party_id      | integer |           |          | 
+ party_type_id | integer |           |          | 
+ corp_id       | integer |           |          | 
+ org_id        | integer |           |          | 
+ party_name    | text    |           |          | 
+ password      | text    |           |          | 
+	    </pre>
+<p>
+	  </p>
+<p>
+	    Hmmm <code class="literal">demo.parties</code> is a view, not a
+	    table.  It appears, on inspection using
+	    <code class="literal">\d+</code>, to not have any security
+	    restrictions (calls to <code class="literal">Veil2</code> privilege
+	    testing functions) on it, so let's take a look at the
+	    underlying table: <code class="literal">demo.parties_tbl</code>:
+	    </p>
+<pre class="programlisting">
+vpd=# \d demo.parties_tbl
+                 Table "demo.parties_tbl"
+    Column     |  Type   | Collation | Nullable | Default 
+---------------+---------+-----------+----------+---------
+ party_id      | integer |           | not null | 
+ party_type_id | integer |           | not null | 
+ corp_id       | integer |           | not null | 
+ org_id        | integer |           | not null | 
+ party_name    | text    |           | not null | 
+ password      | text    |           |          | 
+Indexes:
+    "parties_tbl_pkey" PRIMARY KEY, btree (party_id)
+Foreign-key constraints:
+    "parties_tbl_corp_id_fkey" FOREIGN KEY (corp_id) REFERENCES demo.parties_tbl(party_id)
+    "parties_tbl_org_id_fkey" FOREIGN KEY (org_id) REFERENCES demo.parties_tbl(party_id)
+    "parties_tbl_party_type_id_fkey" FOREIGN KEY (party_type_id) REFERENCES demo.party_types(party_type_id)
+Referenced by:
+    TABLE "veil2.accessor_party_map" CONSTRAINT "accessor_party_map__party_fk" FOREIGN KEY (accessor_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "demo.parties_tbl" CONSTRAINT "parties_tbl_corp_id_fkey" FOREIGN KEY (corp_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "demo.parties_tbl" CONSTRAINT "parties_tbl_org_id_fkey" FOREIGN KEY (org_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "demo.project_assignments" CONSTRAINT "project_assignments_party_id_fkey" FOREIGN KEY (party_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "demo.projects" CONSTRAINT "projects_corp_id_fkey" FOREIGN KEY (corp_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "demo.projects" CONSTRAINT "projects_org_id_fkey" FOREIGN KEY (org_id) REFERENCES demo.parties_tbl(party_id)
+    TABLE "veil2.scope_links" CONSTRAINT "scope_link__party_fk" FOREIGN KEY (party_id) REFERENCES demo.parties_tbl(party_id) ON DELETE CASCADE
+Policies:
+    POLICY "parties_tbl__select" FOR SELECT
+      USING ((veil2.i_have_priv_in_scope_or_global(21, 3, corp_id) OR veil2.i_have_priv_in_scope(21, 4, org_id) OR veil2.i_have_priv_in_scope(21, 4, party_id) OR veil2.i_have_personal_priv(21, party_id) OR ((party_type_id = 2) AND veil2.i_have_priv_in_scope(27, 4, party_id))))
+Triggers:
+    parties_tbl_ait AFTER INSERT ON demo.parties_tbl FOR EACH ROW EXECUTE FUNCTION demo.parties_tbl_ai()
+    parties_tbl_aut AFTER UPDATE ON demo.parties_tbl FOR EACH ROW WHEN (new.password &lt;&gt; old.password) EXECUTE FUNCTION demo.parties_tbl_au()
+	    </pre>
+<p>
+	  </p>
+<p>
+	    The part of interest to us, is the
+	    <code class="literal">POLICY</code> stuff.  We see that we can be
+	    given select access via privilege 21 in various scopes, or
+	    27 in org scope for the party.  If we look at the
+	    privileges table we can see that these privileges are
+	    <code class="literal">select parties</code> and <code class="literal">select
+	    orgs</code>.  Note that to view the contents of the
+	    <code class="literal">veil2.privileges</code> table you will need to
+	    connect to a more privileged user as
+	    <code class="literal">demouser</code> has no select privilege on
+	    that table.
+	  </p>
+<p>
+	    So, does Simon have privileges 21 and/or 27?  Let's try
+	    running the privilege testing functions directly.  We can
+	    see <code class="literal">party</code> records 1140 and 1050.  It
+	    seems likely that we can see record 1140 because its our
+	    record (we are being Simon at this point).  And maybe we
+	    can see record 1050 because its the owner or project 1,
+	    for which we have the <code class="literal">project manager</code>
+	    role.
+	    </p>
+<pre class="programlisting">
+vpd=# select veil2.i_have_personal_priv(21, 1140);
+ i_have_personal_priv 
+----------------------
+ t
+(1 row)
+
+vpd=# select veil2.i_have_priv_in_scope(27, 4, 1050);
+ i_have_priv_in_scope 
+----------------------
+ t
+(1 row)
+	    </pre>
+<p>
+	    Well, that appears to explain it but it required a few
+	    assumptions about which scopes might apply.  Let's try do
+	    it again, without those assumptions.
+	  </p>
+<p>
+	    We can discover the full set of Simon's privileges by
+	    selecting from <code class="literal"><a class="link" href="apa.html#entity_session_privilege" title="A.1.15. Session Privileges Type and Temp Table">session_privileges</a></code>.
+	    However, this contains bitmaps, which are difficult to
+	    read, so it is better to use the helper view
+	    <code class="literal"><a class="link" href="apb.html#view_session_privileges_info" title="B.1.2.5. Session Privileges Info View">session_privileges_info</a></code>.
+	    </p>
+<pre class="programlisting">
+vpd=# select * from veil2.session_privileges_info;
+scope_type_id | scope_id |   roles    |     privs     
+---------------+----------+------------+---------------
+             3 |     1010 | {13,14,16} | {}
+             2 |     1140 | {2}        | {10,13,21,26}
+             1 |        0 | {0}        | {0,20}
+             5 |        1 | {10,11,12} | {20,25,26,27}
+             4 |     1050 | {}         | {27}
+(5 rows)
+	    </pre>
+<p>
+	  </p>
+<p>
+	    This shows us that we have:
+	    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+		roles 10, 11, 12 and privileges 20, 25, 26 and 27 in
+		project scope for project 1;
+	      </li>
+<li class="listitem">
+		role 0 and privileges 0 and 20 in global scope;
+	      </li>
+<li class="listitem">
+		privilege 27 in org scope for org 1050;
+	      </li>
+<li class="listitem">
+		role 2 and privileges 10, 13, 21 and 26 in personal
+		scope for accessor 1140 (Simon);
+	      </li>
+<li class="listitem">
+		roles 13, 14, 16 (with no privileges) in org
+		scope for Secured Corp.
+	      </li>
+</ul></div>
+<p>
+	  </p>
+<p>
+	    This tells us which privileges we have in which scopes, as
+	    well as which roles we have been assigned, directly or
+	    indirectly, in which contexts.  What it doesn't tell us is
+	    which roles gave us which privileges, and whether roles
+	    were assigned directly or indirectly.
+	  </p>
+<p>
+	    We can get more detailed information about privilege
+	    assignments from the <code class="literal"><a class="link" href="apb.html#view_privilege_assignments" title="B.1.2.1. Privilege Assignments View">veil2.privilege_assignments</a></code>
+	    view:
+	    </p>
+<pre class="programlisting">
+vpd=# select distinct privilege_id as priv_id, ass_cntxt_type_id as cntxt_type,
+vpd-#        ass_cntxt_id as cntxt_id, scope_type_id as scope_type,
+vpd-#        scope_id, ass_role_id as role_id,
+vpd-#        priv_bearing_role_id as priv_role_id,
+vpd-#        role_id_mapping
+vpd-#   from veil2.privilege_assignments
+vpd-#  where accessor_id = 1140 and privilege_id in (21, 27);
+ priv_id | cntxt_type | cntxt_id | scope_type | scope_id | role_id | priv_role_id | role_id_mapping 
+---------+------------+----------+------------+----------+---------+--------------+-----------------
+      21 |          2 |     1140 |          2 |     1140 |       2 |            2 | 2
+      27 |          5 |        1 |          4 |     1050 |      10 |           11 | 10-&gt;11
+(2 rows)
+	    </pre>
+<p>
+	  </p>
+<p>
+	    This gives us pretty much the whole story.  We get
+	    privilege 21 in personal scope from role 2
+	    (<code class="literal">personal context</code> assigned in personal
+	    context.  And privilege 27 in org scope for org 1050, from
+	    role 11, mapped from role 10 assigned to us in project
+	    scope of project 1.
+	  </p>
+<p>
+	    You are encouraged to become familiar with the developer
+	    views.  There is more there than this quick tour shows,
+	    and they can provide invaluable information to help you
+	    debug and understand your security model.
+	  </p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="veil_minimal_demo"></a>20.2. The <code class="literal">veil2_minimal_demo</code> Extension</h2></div></div></div>
+<p>
+      This aims to be a more complete but less extensive demonstration
+      of <code class="literal">Veil2</code>'s abilities.  You are encouraged to
+      explore this on your own.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1367"></a>20.2.1. Installation</h3></div></div></div>
+<p>
+	The demo can be most easily installed as a package from within
+	postgres:
+	</p>
+<pre class="programlisting">
+vpd=# create extension veil2_minimal_demo cascade;
+CREATE EXTENSION
+vpd=# 
+	</pre>
+<p>
+      </p>
+<p>
+	As an alternative you can run the <code class="literal">demo.sql</code>
+	script which can be found as described <a class="link" href="ch08.html#next_steps" title="8.2. Next Steps">here</a>, eg
+	</p>
+<pre class="programlisting">
+marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/minimal_demo.sql
+	</pre>
+<p>
+	This installs the veil2_demo and runs a simple set of tests on
+	it.  Note that in order to run the tests as supplied, the
+	postgres user <code class="literal">demouser</code> must be given access
+	as described below
+      </p>
+<p>
+	As a final option, if you have cloned the
+	<code class="literal">Veil2</code> source from github you can use make:
+	</p>
+<pre class="programlisting">
+marc:veil2$ make mindemo
+	</pre>
+<p>
+      </p>
+</div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="pt03.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch21.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Part III. Implementation Details </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 21. The Veil2 Implementation: What You Need To Know</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

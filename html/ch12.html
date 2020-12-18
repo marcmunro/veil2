@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 12. Link Your Scopes and Security Contexts (STEP 5)</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt02.html" title="Part II. Creating Your Veil2-based VPD Step By Step">
+<link rel="prev" href="ch11.html" title="Chapter 11. Link Your Users To Veil2's Accessors (STEP 4)">
+<link rel="next" href="ch13.html" title="Chapter 13. Define Your Scope Hierarchy (STEP 6)">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch11.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch13.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 11. Link Your Users To <code class="literal">Veil2</code>'s Accessors (STEP
+  4) </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 13. Define Your Scope Hierarchy (STEP 6)</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="link_scopes"></a>Chapter 12. Link Your Scopes and Security Contexts (STEP 5)</h2></div></div></div>
+<p>
+    The <code class="literal">Veil2 <a class="link" href="apa.html#entity_scope" title="A.1.5. Scopes Table">scopes</a></code> table is an
+    important link between <code class="literal">Veil2</code> and the database
+    that it is protecting.  It provides the semantic link between
+    <a class="link" href="ch04.html#scopes" title="4.2. Scopes">scopes</a> as understood by the security
+    model, and the <a class="link" href="ch04.html#security-contexts" title="4.5. Security Contexts">security
+    contexts</a> provided or implied by the data model: it maps
+    logical scopes in the protected database, to
+    <code class="literal">Veil2</code>'s physical scopes, keyed by
+    <code class="literal">scope_type_id</code> and <code class="literal">scope_id</code>.
+  </p>
+<p>
+    Look for STEP 5 in the file
+    <code class="literal">veil2_demo--&lt;version&gt;.sql</code>.
+  </p>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm915"></a>12.1. Create Foreign Key Links</h2></div></div></div>
+<p>
+      You will start by creating a table that inherits from
+      <code class="literal"><a class="link" href="apa.html#entity_scope" title="A.1.5. Scopes Table">veil2.scopes</a></code>.  To this
+      you will add columns that reference your tables.
+    </p>
+<p>
+      For instance if you have a project context based on a user's
+      membership of projects, and your <code class="literal">project</code>
+      table has an integer <code class="literal">project_id</code> field as its
+      primary key, you would do the following:
+      </p>
+<pre class="programlisting">
+create table veil2.scope_links (
+  party_id 	integer,
+  project_id	integer
+) inherits (veil2.scopes);
+
+-- Set PK and FKs to match those in the parent scopes table
+
+alter table veil2.scope_links add constraint scope_link__pk
+  primary key(scope_type_id, scope_id);
+
+alter table veil2.scope_links add constraint scope_link__type_fk
+  foreign key(scope_type_id)
+  references veil2.scope_types;
+
+alter table veil2.scope_links
+  add constraint scope_link__party_fk
+  foreign key (party_id)
+  references demo.parties_tbl(party_id)
+  on delete cascade;
+
+alter table veil2.scope_links
+  add constraint scope_link__project_fk
+  foreign key (project_id)
+  references demo.projects(project_id)
+  on on delete cascade;
+      </pre>
+<p>
+    </p>
+<p>
+      Using the cascade options ensures that deletions of record in
+      the <code class="literal">projects</code> table are propagated to
+      <code class="literal">scopes</code>.  This saves us from having to
+      implement our own triggers for deletions.
+    </p>
+<p>
+      It is wise to also ensure that project_id fields are only used
+      with the appropriate scope type.  A check constraint like the
+      following should be used:
+      </p>
+<pre class="programlisting">
+alter table veil2.scope_links
+  add constraint scope_link__check_fk_type
+  check (case
+         when scope_type_id in (3, 4) then
+              party_id is not null
+	 when scope_type_id = 5 then
+	      project_id is not null
+	 else true end);
+      </pre>
+<p>
+      Where, we assume, a <code class="literal">scope_type_id</code> of
+      <code class="literal">5</code> means project scope, <code class="literal">4</code>
+      means org scope and <code class="literal">3</code> means corp scope.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm933"></a>12.1.1. A Note on Keys</h3></div></div></div>
+<p>
+	If the linked scope in your protected database uses a simple
+	integer primary key, this can safely be used as the
+	<code class="literal">scope_id</code> in the links table as the primary
+	key of a scope is the combination of
+	<code class="literal">scope_type_id</code> and
+	<code class="literal">scope_id</code>.
+      </p>
+<p>
+	If your source table's primary key is of some other form you
+	could simply allocate a <code class="literal">scope_id</code> for the
+	link table from a sequence, however each call to <a class="link" href="apc.html#func_i_have_priv_in_scope" title="C.5.4. i_have_priv_in_scope()">i_have_priv_in_scope()</a>
+	will now need to map to the <code class="literal">Veil2</code> scope key
+	through our links table.  This is likely to badly affect
+	performance.
+      </p>
+<p>
+	In such a case, we recommend refactoring your source table to
+	include a new unique integer key which can be used in the link
+	table as both the foreign key to the source scope, and as part
+	of the primary key to <code class="literal">Veil2</code>'s scope.
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm945"></a>12.2. Create Insert Triggers</h2></div></div></div>
+<p>
+      We need to ensure that new scopes (in the demo these are
+      projects, orgs and corps) created in the underlying tables are
+      automatically propagated to the scopes tables.  Triggers on
+      insert to those tables should be created do do this.
+    </p>
+<p>
+      There should be no need for update or delete triggers as we have
+      defined our foreign key constraint to cascade updates and
+      deletes.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm949"></a>12.3. Create Update Triggers</h2></div></div></div>
+<p>
+      Next, we want to ensure that the keys used by scopes do not
+      change, or that if they do, we handle it.
+    </p>
+<p>
+      Ideally our on-update trigger function will ensure that the
+      scope's key fields do not change and cause an error if an
+      attempt is made to do so.
+    </p>
+<p>
+      If, for some reason, key changes must be allowed, then we must
+      propagate such changes into our scope_links table, and we must
+      clear all caches and refresh all materialized views that may be
+      affected.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm954"></a>12.4. Copy Existing Scopes Into The Links Table</h2></div></div></div>
+<p>
+      Now we need to copy our existing scope records into our new
+      <code class="literal">scope_links</code> table.
+      projects.  Something like this (for projects):
+      </p>
+<pre class="programlisting">
+insert
+  into veil2.scope_links
+      (scope_type_id, scope_id, project_id)
+select 5, project_id, project_id
+  from demo.projects;
+      </pre>
+<p>
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm959"></a>12.5. Update the <code class="literal">all_accessor_roles</code> View</h2></div></div></div>
+<p>
+      If you have role assignments that are not managed solely through
+      the <code class="literal">veil2.accessor_roles</code> table, you will need
+      to modify the <code class="literal"><a class="link" href="apb.html#view_all_accessor_roles" title="B.1.1.3. All Accessor Roles View">all_accessor_roles</a></code>
+      view.  For example, in the demo, roles are assigned in project
+      context using the <code class="literal">demo.project_assignments</code>
+      table.
+    </p>
+<p>
+      To enable the creation of custom security contexts,
+      <code class="literal">Veil2</code> determines an accessor's roles and the
+      contexts in which they apply from the
+      <code class="literal">veil2.all_accessor_roles</code> view, which you can
+      modify by providing your own
+      <code class="literal">veil2.my_all_accessor_roles</code>.
+    </p>
+<p>
+      In the demo we make this view return results from both the
+      <code class="literal">veil2.accessor_roles</code> and the
+      <code class="literal">demo.project_assignments</code> tables.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm974"></a>12.6. On Caches</h2></div></div></div>
+<p>
+      For performance reasons <code class="literal">Veil2</code> <a class="link" href="apb.html#caches" title="B.1.4. Materialized Views and Caches">caches a lot of scope-related privilege
+      data</a>.  Some steps in your <code class="literal">Veil2</code> VPD
+      implementation will require the explicit clearing or refreshing
+      of some or all of those caches.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm980"></a>12.6.1. Changes To Scopes</h3></div></div></div>
+<p>
+	Changes to scopes do not require the refresh of materialized
+	views or the clearing of caches.  The rationale for this is as
+	follows: 
+      </p>
+<p>
+	In the event of a new scope being created, there can exist no
+	records relating to that scope (assuming that you cannot
+	create descendent records of your scopes before creating the
+	scope itself - ie we assume proper referential integrity is
+	being maintained in the source database), particularly records
+	relating to role assignments, so there can be no new
+	privileges or roles assigned to any users and therefore no
+	need to update the caches.
+      </p>
+<p>
+	In the event of scope deletion, there will be no records
+	remaining in that scope to which access must be controlled, so
+	temporarily retaining redundant privileges for dead scopes can
+	have no security implications.
+      </p>
+<p>
+	Updates to the scope keys are the only situation where we may
+	need to clear caches and refresh materialized views, and we
+	strongly recommend that triggers are put in place to prevent
+	such updates.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div>
+<div><h3 class="title">
+<a name="idm986"></a>12.6.2. Changes To Role Assignments</h3></div>
+<div><h4 class="subtitle">(Triggers for Maintaining our Accessor Privileges Cache)</h4></div>
+</div></div>
+<p>
+	All changes to role assignments must result in <a class="link" href="apb.html#entity_accessor_privileges_cache" title="B.1.4.3. Accessor Privileges Cache Table"><code class="literal">accessor_privileges_cache</code></a>
+	entries being cleared for the accessor in question.
+      </p>
+<p>
+	This should be done by adding triggers to the tables
+	underlying your version of the
+	<code class="literal">all_accessor_roles</code> view.  These triggers
+	should call <a class="link" href="apc.html#func_clear_accessor_privs_cache_entry" title="C.7.6. Clear Accessor Privs Cache Entry Function"><code class="literal">veil2.clear_accessor_privs_cache_entry()</code></a>
+	or <a class="link" href="apc.html#func_clear_accessor_privs_cache" title="C.7.5. Clear Accessor Privs Cache Function"><code class="literal">veil2.clear_accessor_privs_cache()</code></a>.
+      </p>
+</div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch11.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch13.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 11. Link Your Users To <code class="literal">Veil2</code>'s Accessors (STEP
+  4) </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 13. Define Your Scope Hierarchy (STEP 6)</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

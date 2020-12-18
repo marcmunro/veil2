@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 15. Integrate And/Or Create Roles (STEP 8)</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt02.html" title="Part II. Creating Your Veil2-based VPD Step By Step">
+<link rel="prev" href="ch14.html" title="Chapter 14. Create Initial Privileges (STEP 7)">
+<link rel="next" href="ch16.html" title="Chapter 16. Secure Your Tables (STEP 9)">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch14.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch16.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 14. Create Initial Privileges (STEP 7) </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 16. Secure Your Tables (STEP 9)</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="setup_roles"></a>Chapter 15. Integrate And/Or Create Roles (STEP 8)</h2></div></div></div>
+<p>
+    The demo chooses to use only <code class="literal">Veil2</code>'s role
+    tables for its roles implementation.  This makes things very
+    simple, but may be unhelpful as an example.  The author apologizes
+    but there are some things you will have to do for yourselves.
+    Look for  STEP 8 in the file
+    <code class="literal">demo/veil2_demo--0.9.1 (beta).sql</code>.
+  </p>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1054"></a>15.1. Integrating Existing Roles</h2></div></div></div>
+<p>
+      If your existing system has roles of some sort that you wish to
+      keep using, you are going to have to find a way to integrate
+      them with the <code class="literal">veil2.roles</code> table.
+    </p>
+<p>
+      There are essentially three options:
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1059"></a>15.1.1. Link <code class="literal">Veil2</code> To Your Existing Data</h3></div></div></div>
+<p>
+	This is likely to be a reasonably complex process.  You are
+	going to need:
+	</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<p>
+	      an id mapping mechanism;
+	    </p>
+<p>
+	      Your existing role keys are not going to work with
+	      <code class="literal">Veil2</code>, so we will need a way to map
+	      your role keys with <code class="literal">Veil2</code>'s
+	      <code class="literal">role_ids</code>.  Note that you need to keep
+	      the range of <code class="literal">role_id</code>s as small as
+	      possible in order to keep their bitmap representations
+	      small.
+	    </p>
+<p>
+	      You will need to create a table that maps between 
+	      <code class="literal">veil2.roles</code> and your database's roles
+	      table(s).  Use foreign key relationships and triggers to
+	      ensure that your mapping table is kept in step with your
+	      existing table and the <code class="literal">veil2.roles</code>
+	      table. 
+	    </p>
+<p>
+	      For some examples of how the triggers can be constructed
+	      take a look at the demo.  In particular the way that the
+	      demo's <code class="literal">parties</code> table is linked to
+	      <code class="literal">veil2.accessors</code>. 
+	    </p>
+</li></ul></div>
+<p>
+      </p>
+<p>
+	Whether this will work, will depend on the semantics of your
+	existing role implementation.  If they are similar to
+	<code class="literal">Veil2</code>'s role semantics, this may work.  You
+	will have to do some careful thinking about this.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1079"></a>15.1.2. Make <code class="literal">Veil2</code>'s Roles Provide Your Role
+      Data</h3></div></div></div>
+<p>
+	In this option, we replace your roles implementation with that
+	from <code class="literal">Veil2</code> but make it look like your
+	existing implementation is still in place.
+      </p>
+<p>
+	The key to this is to use views and instead-of triggers to
+	make the <code class="literal">Veil2</code> table function in the same
+	way as your existing table.
+      </p>
+<p>
+	As with the previous option, this will require some serious
+	thinking, but it will probably give you a simpler system than
+	the previous option.  Roles and privileges are complex enough
+	without adding an extra level of redirection.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1087"></a>15.1.3. Update Your Application To Use <code class="literal">Veil2</code>'s Roles</h3></div></div></div>
+<p>
+	This is conceptually the simplest approach but the amount of
+	work will very much depend on your existing system and its
+	needs.
+      </p>
+<p>
+	The demo chooses to use <code class="literal">Veil2</code>'s
+	implementation of roles, rather than integrating any existing
+	role implementation.  Since the demo was built with
+	<code class="literal">Veil2</code> in mind this makes a lot of sense as
+	it keeps the implementation much cleaner and simpler.
+      </p>
+<p>
+	If you are building a new system from scratch, this should be
+	your preferred approach.
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1095"></a>15.2. Create New Roles and Mappings</h2></div></div></div>
+<p>
+      If your application has user-level roles (roles that are
+      assigned to users), you may be able to re-use them.  You will
+      probably not have function-level roles however, and you will
+      need to at least create a minimal set of these.
+    </p>
+<p>
+      The minimal set of user-level roles should be enough to give you
+      2 or more pieces of functionality that you can then use to test
+      your access control mechanisms.  To these roles, you will
+      assign privileges by creating records in
+      <code class="literal">veil2.role_privileges</code>.
+    </p>
+<p>
+      You will then need to create role to role mappings, making your
+      function-level roles available to your user-level roles.  You
+      will do this by creating records in
+      <code class="literal">veil2.role_roles</code>.
+    </p>
+<p>
+      As with privileges, you should keep the range of
+      <code class="literal">role_ids</code> as small as possible, allocating them
+      contiguously and re-use ids for records that get deleted.
+    </p>
+<p>
+      Note that if you have decided to use role to role mappings in
+      anything other than the global context you will need to define
+      your mappings in each of those contexts.  Your role names may
+      also need to be customized for those contexts.  This is shown in
+      the demo; look for the text STEP 8.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1105"></a>15.3. Refreshing Materialized Views - Do Nothing</h2></div></div></div>
+<p>
+      Any time that role to role or role to privilege mappings are
+      updated, all <a class="link" href="apb.html#caches" title="B.1.4. Materialized Views and Caches">materialized views and
+      caches</a> must be updated. 
+    </p>
+<p>
+      Since these mappings are managed exclusively from
+      <code class="literal">Veil2</code> tables, all the necessary triggers to
+      refresh our materialized views are already in place.
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch14.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch16.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 14. Create Initial Privileges (STEP 7) </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 16. Secure Your Tables (STEP 9)</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

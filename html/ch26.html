@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 26. Security</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt03.html" title="Part III. Implementation Details">
+<link rel="prev" href="ch25.html" title="Chapter 25. Performance">
+<link rel="next" href="ch27.html" title="Chapter 27. Contact Links">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch25.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch27.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 25. Performance </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 27. Contact Links</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div>
+<div><h2 class="title">
+<a name="security"></a>Chapter 26. Security</h2></div>
+<div><h3 class="subtitle"><i>(So, How Secure Is This?)</i></h3></div>
+</div></div>
+<p>
+    Although a well-implemented <code class="literal">Veil2</code>-based VPD
+    will give you a more secure system than one without
+    <code class="literal">Veil2</code>, there are some fundamental limits to how
+    secure your database can ever be.
+  </p>
+<div class="sect1">
+<div class="titlepage"><div>
+<div><h2 class="title" style="clear: both">
+<a name="idm2135"></a>26.1. Fundamental Security Weaknesses</h2></div>
+<div><h3 class="subtitle">(Game-Over Scenarios)</h3></div>
+</div></div>
+<p>
+      There are many security threats that <code class="literal">Veil2</code>
+      can do nothing for.  <code class="literal">Veil2</code> can only limit
+      access to data for users that are, or appear to be legitimate.
+      Here are some things <code class="literal">Veil2</code> can't protect
+      against:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+	  an attacker with credentials for the owner of the database
+	  objects;
+	</li>
+<li class="listitem">
+	  an attacker with credentials for the postgres account;
+	</li>
+<li class="listitem">
+	  an attacker with credentials for root;
+	</li>
+<li class="listitem">
+	  an attacker who can become root through a local privilege
+	  escalation attack;
+	</li>
+<li class="listitem">
+	  an attacker with access to the database filesystem;
+	</li>
+<li class="listitem">
+	  an attacker with access to database backups;
+	</li>
+<li class="listitem">
+	  an attacker with access to a replica/failover/reporting
+	  database.
+	</li>
+</ul></div>
+<p>
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm2150"></a>26.2. So, What Is It Good For?</h2></div></div></div>
+<p>
+      <code class="literal">Veil2</code> is designed primarily to protect
+      sensitive data from legitimate users.  It is not intended to
+      keep attackers out of your systems.  It cannot hope to keep your
+      data secure against attacks from state actors, or highly skilled
+      black-hat hackers.  
+    </p>
+<p>
+      It protects sensitive data from overly inquisitive users;
+      against opportunist attacks from <a class="ulink" href="https://en.wikipedia.org/wiki/Script_kiddie" target="_top">script
+      kiddies</a>; and can greatly limit the damage that can arise
+      from a compromised application server.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm2156"></a>26.3. Compromised Application Server, Really?</h2></div></div></div>
+<p>
+      Yep.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm2159"></a>26.3.1. The Problem</h3></div></div></div>
+<p>
+	If your database is being accessed from a web-based system it
+	is in hostile territory.  Typically, your web-facing
+	application server will be running in a walled-off part of
+	your network which is considered <span class="quote">“<span class="quote">untrusted</span>”</span>.
+	This is often referred to as a <a class="ulink" href="https://en.wikipedia.org/wiki/DMZ_%28computing%29" target="_top"><code class="literal">DMZ</code></a>.
+      </p>
+<p>
+	This partitioning of your network is to keep servers that are
+	publicly accessed from the internet, separate from any
+	sensitive infrastructure.  This is partly because of the poor
+	history of web application security, and partly from a
+	justifiable sense of caution.
+      </p>
+<p>
+	Servers in the <code class="literal">DMZ</code> are often viewed as
+	disposable, and easily rebuilt and replaced.  The problem
+	though, is that these servers must be given access, whether
+	directly or indirectly, to your data and therefore to your
+	databases.  So, your databases have to accept queries from
+	these <span class="quote">“<span class="quote">untrusted</span>”</span> servers.
+      </p>
+<p>
+	When everything is secure and working as it should, your
+	database will process many different queries on behalf of
+	many different users having many different levels of access.
+	It is likely that most of your database tables, and most of
+	their contents need to be accessible to one legitimate user or
+	another.  Which means that the database server generally has
+	to provide almost unlimited access to its data, to a server
+	that by definition is not to be trusted.
+      </p>
+<p>
+	Aside: many developers consider web-services to be a solution
+	to this, but all they do is add an intermediate layer.
+	Whether your web application provides access to different
+	aspects of customer data indirectly via multiple web services,
+	or directly via a link to the database, the result is the
+	same: the web application server has access to
+	<span class="emphasis"><em>all</em></span> of your data.  Although each web
+	service can be given its own database account which can limit
+	the data that <span class="emphasis"><em>it</em></span> can see, the aggregation
+	of all web services has to provide the same degree of data
+	access that a more traditional application would have been
+	granted directly in the absence of such web services.
+      </p>
+<p>
+	What this means is that any breach of your web application
+	server will result in an attacker having the same rights to
+	your database that your application server has been given, and
+	the chances are that your application server needs access to
+	almost every relation in your database.
+      </p>
+<p>
+	In summary: currently acceptable practice is to put
+	web-application servers in a special untrusted segment of the
+	network, because we don't trust them, and require that database
+	servers treat all traffic from them as trusted.  What could
+	possibly go wrong?
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm2175"></a>26.3.2. The (<code class="literal">Veil2</code>) Solution</h3></div></div></div>
+<p>
+	<code class="literal">Veil2</code> removes the need to trust your
+	application server.  As each user must individually
+	authenticate to the database server itself, a compromised
+	application server is less of a threat.  It does not much
+	matter if an attacker can send <code class="literal">select * from
+	customers</code> to the database server if that database
+	server is only going to let the attacker see the records for
+	which they have appropriate credentials.
+      </p>
+<p>
+	With <code class="literal">Veil2</code> an attacker can only access the
+	set of data for which they can steal credentials.  If they can
+	steal Bob's login credentials, then they can see all of the
+	data that Bob can see.  But no more than that.  And they could
+	probably <a class="ulink" href="https://imgs.xkcd.com/comics/security.png" target="_top">steal Bob's
+	credentials</a> without going to the trouble of breaking
+	in to the application server.  Furthermore, if you implement
+	the <a class="link" href="ch24.html#report_breaches" title="24.2. Consider Reporting Blocked Accesses">reporting of blocked
+	accesses</a> as suggested in the <a class="link" href="ch24.html" title="Chapter 24. Tips and Guidelines">tips
+	chapter</a>, you will probably be alerted as soon as any
+	intruder attempts to access the database.
+      </p>
+</div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch25.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch27.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 25. Performance </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 27. Contact Links</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

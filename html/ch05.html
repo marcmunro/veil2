@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 5. What is Veil2 And What Does It Provide?</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt01.html" title="Part I. Understanding Veil2 And Relational Security">
+<link rel="prev" href="ch04.html" title="Chapter 4. Veil2 Concepts">
+<link rel="next" href="ch06.html" title="Chapter 6. How Difficult Is This?">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch04.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt01.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch06.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 4. <code class="literal">Veil2</code> Concepts </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 6. How Difficult Is This?</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="whatis"></a>Chapter 5. What is <code class="literal">Veil2</code> And What Does It Provide?</h2></div></div></div>
+<p>
+    <code class="literal">Veil2</code> is a collection of database objects,
+    written in C and SQL, that provides an implementation of roles,
+    privileges, contexts, scopes and session management that can be
+    used to secure your database with relatively little custom
+    implementation work.
+  </p>
+<p>
+    It links to your database through functions, triggers and foreign
+    keys, and provides fast, tested mechanisms to identify, load and
+    test a user's privileges in various scopes.
+  </p>
+<p>
+    It is important to realize at this point that
+    <code class="literal">Veil2</code> is not a complete application or a
+    product: it cannot be used stand-alone and can only be integrated
+    into your database by careful work on your part.  You will need to
+    define the links between <code class="literal">Veil2</code> and your
+    database schema, and you will need to provide
+    <code class="literal">Veil2</code> with customized functions and views to
+    make this integration work.
+  </p>
+<p>
+    To aid in this, <code class="literal">Veil2</code> allows user-provided
+    views and functions to take precedence over the built-in
+    system-provided ones.  This mechanism aims to provide maximum
+    flexibility while still allowing <code class="literal">Veil2</code> to be
+    distributed as a PostgreSQL extension.  This means that future
+    <code class="literal">Veil2</code> bug-fixes and upgrades can be easily
+    applied to your database without breaking your customizations.
+  </p>
+<p>
+    There is various documentation to help you with this:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">this document, especially the setup sections starting
+      <a class="link" href="ch07.html" title="Chapter 7. Setting Up A Veil2 Virtual Private Database - Overview">here</a>;</li>
+<li class="listitem">comments in the database objects;</li>
+<li class="listitem">comments in the <code class="literal">Veil2</code> creation
+      scripts;</li>
+<li class="listitem">the (commented) <code class="literal">Veil2</code> demos.</li>
+</ul></div>
+<p>
+  </p>
+<p>
+    You should familiarize yourself with at least this document and
+    the <a class="link" href="ch20.html" title="Chapter 20. Exploring The Veil2 Demos">demos</a> before starting out on
+    your implementation.
+  </p>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm476"></a>5.1. How It Works - An Overview</h2></div></div></div>
+<p>
+      <code class="literal">Veil2</code> works by:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+	  ensuring the database knows which user is connected;
+	</li>
+<li class="listitem">
+	  providing a set of contextual privileges to each user;
+	</li>
+<li class="listitem">
+	  providing a fast means of testing a user's privileges;
+	</li>
+<li class="listitem">
+	  individually securing each accessible relation using
+	  privilege tests.
+	</li>
+</ul></div>
+<p>
+    </p>
+<p>
+      What this means is that when Alice tries to select the user
+      record for Bob, Alice will only see that record if she has been
+      assigned the necessary privilege to view Bob's user record in an
+      appropriate scope.  As each user's privilege assignments will
+      be different, each user will see a different subset of data.
+    </p>
+<p>
+      The following sections provide more detail on each of the above
+      list items.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm487"></a>5.1.1. Knowing The User</h3></div></div></div>
+<p>
+	<code class="literal">Veil2</code> provides session management functions
+	for both <a class="link" href="ape.html#dedicated_session_management" title="E.2. Dedicated Database Sessions">dedicated</a> and
+	<a class="link" href="ape.html#shared_session_management" title="E.1. Shared Session Authentication">shared</a>
+	database connections.  It is up to you or your application to
+	ensure that the session protocols are followed.  If they are
+	not, the user will have access to no data at all, or access to
+	data based on another user's access rights.
+      </p>
+<p>
+	By calling the appropriate session management functions with
+	appropriate authentication tokens, a <code class="literal">Veil2</code>
+	session will be created.  This causes session parameters to be
+	set up in secure temporary tables from which they can be
+	quickly retrieved.  These session parameters include session
+	privileges with one record for each scope in which the user
+	has privileges.
+      </p>
+<p>
+	The set of privileges in each scope is stored in a single
+	bitmap.  This is a space-efficient array of numbered bits,
+	with each bit indicating the presence or absence of a
+	privilege.  Tests for the presence of a privilege in a bitmap
+	are very fast.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm496"></a>5.1.2. Contextual Privileges Per User</h3></div></div></div>
+<p>
+	At the start of each session, the user's privileges are
+	determined based upon the roles that have been assigned to
+	them and the contexts of those role assignments.  This is a
+	highly optimized process, using pre-built, cached, bitmaps and
+	materialized views.  These caches and materialized views are
+	automatically updated as needed.
+      </p>
+<p>
+	Each privilege assigned to a user acts within a scope that
+	depends on the context in which it was assigned.  Some
+	scopes will allow all records in a table to be seen or
+	manipulated, and some will allow large, small or smaller
+	subsets of data to be seen.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm500"></a>5.1.3. Fast Privilege Testing</h3></div></div></div>
+<p>
+	As stated above, the set of privileges in each scope is stored
+	in a bitmap, and tests for the presence of a privilege in the
+	bitmap are very fast.  The security rules for a relation will
+	typically be defined something like this (from the
+	<code class="literal">veil2_demo</code> extension):
+	<a name="table_security_example"></a></p>
+<pre class="programlisting">
+alter table demo.projects enable row level security;
+
+create policy projects__select
+    on demo.projects
+   for select
+ using (   veil2.i_have_global_priv(25)
+        or veil2.i_have_priv_in_scope(25, 3, corp_id)
+        or veil2.i_have_priv_in_scope(25, 4, org_id)
+        or veil2.i_have_priv_in_scope(25, 5, project_id));
+	</pre>
+<p>
+      </p>
+<p>
+	Each of the test functions is checking whether the user has
+	the privilege, <code class="literal">select projects</code> (privilege
+	25), to view the current record.  Tests are made in global
+	scope, then corp scope (scope type 3) of the owning corp, then
+	org scope (scope type 4) of the owning org, and finally in
+	project scope (scope type 5) of the project itself.  Each of
+	these tests causes a different bitmap in the users session
+	privileges to be checked.
+      </p>
+<p>
+	Although having so many tests performed for each record
+	returned might seem like a significant overhead, in fact it is
+	very small compared with the cost of retrieving the record in
+	the first place and will often be effectively unmeasurable.
+      </p>
+<p>
+	Note that you should not rely solely on your VPD (Virtual
+	Private Database) implementation to limit the number of
+	records returned from queries to your users.  Your application
+	should be constructing <code class="literal">where</code>-clauses that
+	only return records that your user is entitled to see.  That
+	is, your <code class="literal">Veil2</code> implementation should act as
+	a final back-stop safety check and not as a (hidden) part of
+	your system's functionality.
+      </p>
+<p>
+	There are 2 reasons for this:
+	</p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+	    performance;
+	    <p>
+	      Relying on <code class="literal">Veil2</code> to filter unsuitable
+	      records means that your <code class="literal">where</code>-clauses
+	      are essentially incomplete, which in turn means that the
+	      RDBMS has not been given all of the information that it
+	      needs in order to best optimize your queries.
+	    </p>
+<p>
+	      Furthermore, if <code class="literal">Veil2</code> is
+	      filtering-out records from the result-set then we are
+	      unnecessarily retrieving those records, and are having
+	      to process them in order to determine their
+	      unsuitability.  This would be a large and unnecessary
+	      overhead.
+	    </p>
+</li>
+<li class="listitem">
+	    security.
+	    <p>
+	      If our queries are running slower than they should
+	      because <code class="literal">Veil2</code> is having to filter-out
+	      unsuitable records, it may be possible for an attacker
+	      to use a timing attack to determine the existence of
+	      records they are not entitled to see.
+	    </p>
+<p>
+	      For the truly security conscious, you may want to modify
+	      the privilege testing functions so that attempts to view
+	      records to which you have no access, result in logs
+	      being recorded.  Note though, that such logs would be
+	      essentially unusable and would become a significant
+	      overhead if significant numbers of queries required
+	      results to be filtered.
+	    </p>
+</li>
+</ol></div>
+<p>
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm523"></a>5.1.4. Individually Securing Each Relation</h3></div></div></div>
+<p>
+	Every table and view is given its own individual security
+	definition.  For tables, they will be much as shown <a class="link" href="ch05.html#table_security_example">above</a> but
+	will include definitions for insert, update and delete as well
+	as select.
+      </p>
+<p>
+	Views are secured in a similar way, but with the privilege
+	testing functions defined in the view itself.  Sometimes using
+	views can improve the performance of the privilege tests as
+	they can be incorporated more deeply within the view, meaning
+	that the tests do not have to be executed for every row used
+	by the view's query.
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm528"></a>5.2. Refactoring Your Systems To Use <code class="literal">Veil2</code>
+</h2></div></div></div>
+<p>
+      Integrating your systems with <code class="literal">Veil2</code> is not a
+      trivial task, but it is straightforward.  Once you have
+      understood at least the <a class="link" href="ch04.html" title="Chapter 4. Veil2 Concepts">core
+      concepts</a>, you can simply follow the steps described in
+      the <a class="link" href="ch07.html" title="Chapter 7. Setting Up A Veil2 Virtual Private Database - Overview">Setting Up A <code class="literal">Veil2</code>
+      Virtual Private Database - Overview</a> section. 
+    </p>
+<p>
+      The following sections describe the major areas that you will
+      need to address in order to protect an existing system with
+      <code class="literal">Veil2</code>.  This is intended as an introduction
+      to the process solely in order to give you a feel for what is
+      required.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm538"></a>5.2.1. Web Session Management</h3></div></div></div>
+<p>
+	The <code class="literal">Veil2</code>-protected database needs to know
+	which user is accessing it all times.  It provides a
+	session-management protocol for use from web applications.
+	Your web application will have to provide handling of this
+	session management protocol.  Generally this will be handled
+	as triggers or hooks into the database connection pool
+	management.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm542"></a>5.2.2. Integration of Role Handling</h3></div></div></div>
+<p>
+	<code class="literal">Veil2</code> has its own view of what roles should
+	do and what they should look like.  If your own system uses
+	roles for its existing access control purposes, you will have
+	to somehow integrate your system's role requirements with
+	those of <code class="literal">Veil2</code>.  You essentially have two
+	choices:
+	</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+	      Bring your roles to <code class="literal">Veil2</code>. 
+	    </p>
+<p>
+	      Make your roles the source of <code class="literal">Veil2</code>
+	      roles.  Use triggers and Foreign Key (FK) constraints to
+	      make and maintain copies of your roles within
+	      <code class="literal">Veil2</code>.
+	    </p>
+</li>
+<li class="listitem">
+<p>
+	      Refactor your system to only use
+	      <code class="literal">Veil2</code> roles. 
+	    </p>
+<p>
+	      The advantage of this is that you will end up with a
+	      cleaner system, with fewer moving parts.  The downside
+	      is that your applications will probably require more
+	      refactoring.
+	    </p>
+</li>
+</ul></div>
+<p>
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm558"></a>5.2.3. Integration of Security Contexts</h3></div></div></div>
+<p>
+	For every type of security context/scope that you wish to provide,
+	you will need to provide a link from your existing tables back
+	to <code class="literal">Veil2</code>.  This will be handled with
+	triggers and FK-constraints.  There are examples of how this
+	may be done in the demos.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm562"></a>5.2.4. Integration of Users</h3></div></div></div>
+<p>
+	All of your users must be associated with
+	<code class="literal">Veil2</code> accessors (users who access your
+	database), and any existing credentials must be migrated.
+	Again this can be handled by triggers and FK-constraints, and
+	the demos provide examples.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm566"></a>5.2.5. Performance Denormalizations</h3></div></div></div>
+<p>
+	You will be applying access controls to each relation in your
+	system.  Some of them may benefit from data denormalizations to
+	improve the performance of the security tests.  Typically you
+	may want to add ownership columns to some of your tables so
+	that ownership can be determined without the need for extra
+	joins.  If an access control function has to perform extra
+	queries for each row returned, performance is likely to
+	suffer.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm569"></a>5.2.6. Authentication</h3></div></div></div>
+<p>
+	You may need to implement a new authentication system for
+	users.  Or the built-in <a class="ulink" href="https://en.wikipedia.org/wiki/Bcrypt" target="_top">bcrypt</a>
+	implementation may be enough. 
+      </p>
+</div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch04.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt01.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch06.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 4. <code class="literal">Veil2</code> Concepts </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 6. How Difficult Is This?</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

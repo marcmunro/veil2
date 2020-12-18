@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 13. Define Your Scope Hierarchy (STEP 6)</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt02.html" title="Part II. Creating Your Veil2-based VPD Step By Step">
+<link rel="prev" href="ch12.html" title="Chapter 12. Link Your Scopes and Security Contexts (STEP 5)">
+<link rel="next" href="ch14.html" title="Chapter 14. Create Initial Privileges (STEP 7)">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch12.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch14.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 12. Link Your Scopes and Security Contexts (STEP 5) </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 14. Create Initial Privileges (STEP 7)</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="superior_scopes"></a>Chapter 13. Define Your Scope Hierarchy (STEP 6)</h2></div></div></div>
+<p>
+    In your database, you are likely to have a hierarchy of <a class="link" href="ch04.html#scopes" title="4.2. Scopes">scopes</a>.  What this means is that one scope
+    is contained within another.  For instance a project scope might be
+    contained within the department scope of the department that owns
+    the project.  This hierarchy is used in 2 ways:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+	for <a class="link" href="ch04.html#scope-promotion" title="4.6. Scope (and Context) Promotion">scope
+	promotions</a>;
+      </li>
+<li class="listitem">
+	for determining access rights to data within inferior scopes.
+      </li>
+</ul></div>
+<p>
+  </p>
+<p>
+    Determining which scopes may be promoted to which other scopes is
+    done through the <code class="literal"><a class="link" href="apb.html#view_superior_scopes" title="B.1.1.2. Superior Scopes View">superior_scopes</a></code>
+    view.  This identifies, for each scope, what directly superior
+    scopes exist.  It does not identify global scope, and does not
+    require a recursive query to identify grandparent scopes etc.
+    These are handled elsewhere.
+  </p>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1009"></a>13.1. Customizing The <code class="literal">superior_scopes</code>View</h2></div></div></div>
+<p>
+      You will need to create a custom version of the <code class="literal"><a class="link" href="apb.html#view_superior_scopes" title="B.1.1.2. Superior Scopes View">superior_scopes</a></code>
+      view.  This is done (as described <a class="link" href="ch21.html#custom-views" title="21.1.3. Customized Views">here</a>) by creating an over-riding
+      custom view named <code class="literal">my_superior_scopes</code>.
+      The provided <code class="literal">Veil2</code> base version of this
+      view is simply a placeholder.
+    </p>
+<p>
+      You will define this view as the union of a number of selects.
+      Each select will represent a single type of superior scope.  The
+      following example is from the demo.  See STEP 6 in the file
+      <code class="literal">demo/veil2_demo--0.9.1 (beta).sql</code>.
+      </p>
+<pre class="programlisting">
+create or replace
+view veil2.my_superior_scopes (
+  scope_type_id, scope_id,
+  superior_scope_type_id, superior_scope_id
+) as
+select 4, party_id,  -- Promote org to corp scope
+       3, corp_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+union all
+select 4, party_id,  -- Promotion of org to higher org
+       4, org_id
+  from demo.parties_tbl
+ where party_type_id = 2
+   and party_id != org_id  -- Cannot promote to self
+union all
+select 5, s.scope_id,   -- Project to corp promotions
+       3, p.corp_id
+  from demo.projects p
+ inner join veil2.scope_links s
+    on s.project_id = p.project_id
+union all
+select 5, s.scope_id,   -- Project to org promotions
+       4, p.org_id
+  from demo.projects p
+ inner join veil2.scope_links s
+    on s.project_id = p.project_id;
+      </pre>
+<p>
+    </p>
+<p>
+      Note that if you have something like an organizational hierarchy
+      in which you want someone that is assigned a role in an
+      organizational context, to automatically have those rights in
+      all subordinate organizational contexts, you will need to define
+      scope promotions within that hierarchy.  This is done by the
+      second query in the above union.
+    </p>
+<p>
+      Any time you redefine this view you should call 
+      <code class="literal"><a class="link" href="apc.html#func_init" title="C.2.10. init()">veil2.init()</a></code> to
+      update the base definition and refresh the materialized views
+      that depend on it.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1025"></a>13.2. Handle Refresh of Materialized Views</h2></div></div></div>
+<p>
+      If your scope hierarchy changes in a way that could affect the
+      privileges that might be assigned to accessors, you should
+      refresh all <a class="link" href="apb.html#caches" title="B.1.4. Materialized Views and Caches">materialized views and
+      caches</a>.  Since determining what sort of updates might
+      require this is somewhat complicated, we recommend that
+      <span class="emphasis"><em>any</em></span> change that would result in the <a class="link" href="apb.html#view_superior_scopes" title="B.1.1.2. Superior Scopes View"><code class="literal">veil2.superior_scopes</code></a>
+      view returning different data should result in a full refresh of
+      all materialized views.  For this you should call the trigger
+      function <a class="link" href="apc.html#func_refresh_scopes_matviews" title="C.7.2. Refresh Scopes Matviews Function"><code class="literal">veil2.refresh_scopes_matviews()</code></a>.
+    </p>
+<p>
+      It is assumed that such changes will be rare but if this is not
+      the case, and you encounter a performance penalty from having
+      the <a class="link" href="apb.html#entity_accessor_privileges_cache" title="B.1.4.3. Accessor Privileges Cache Table"><code class="literal">veil2.accessor_privileges_cache</code></a>
+      cache table repeatedly cleared, you may be able to, instead of
+      truncating that table, selectively delete records based on the
+      session contexts that are affected by your changes.  Our
+      recommendation is not to tackle this until you know that you
+      have a problem.  By then you should have enough local
+      <code class="literal">Veil2</code> expertise that you can easily figure
+      out what to do.
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch12.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch14.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 12. Link Your Scopes and Security Contexts (STEP 5) </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 14. Create Initial Privileges (STEP 7)</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

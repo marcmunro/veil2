@@ -1,0 +1,26 @@
+var veil2_8h =
+[
+    [ "tuple_2ints", "structtuple__2ints.html", "structtuple__2ints" ],
+    [ "DATA_PATH", "veil2_8h.html#ac26a668e32beeb7eae8b6e4adbe5d1e1", null ],
+    [ "DOCS_PATH", "veil2_8h.html#aae31c3af59a0c656226a4160757441ee", null ],
+    [ "Fetch_fn", "veil2_8h.html#a42368367f5a1eef750ff948f44890274", null ],
+    [ "veil2_bool_from_query", "veil2_8h.html#a7b701739e7cf328e55d3aa4b99b96632", null ],
+    [ "veil2_datapath", "veil2_8h.html#a379c0a0e5ec4e3935f496438a1884537", null ],
+    [ "veil2_docpath", "veil2_8h.html#a13b2eb72a23e976299bf366ff30d3277", null ],
+    [ "veil2_i_have_global_priv", "veil2_8h.html#a8e71efc46ff230ffeb1e48a78cfca9db", null ],
+    [ "veil2_i_have_personal_priv", "veil2_8h.html#a539af88f225acfc5b55a94d4b058c7c1", null ],
+    [ "veil2_i_have_priv_in_scope", "veil2_8h.html#a1dc17129b2343775fc9f0ddc2b77059b", null ],
+    [ "veil2_i_have_priv_in_scope_or_global", "veil2_8h.html#a4e6018dd48b0009812bbc828e7323b99", null ],
+    [ "veil2_i_have_priv_in_scope_or_superior", "veil2_8h.html#ad56082fdc0f3a7e77ae1df537d8f56a0", null ],
+    [ "veil2_i_have_priv_in_scope_or_superior_or_global", "veil2_8h.html#af50e54afeca629cf976ae6c8586c4ceb", null ],
+    [ "veil2_i_have_priv_in_superior_scope", "veil2_8h.html#a648057497d4b27dc775f7d4224592aa2", null ],
+    [ "veil2_query", "veil2_8h.html#ac43e6b3b80193c907eb796da31304f49", null ],
+    [ "veil2_query_wn", "veil2_8h.html#a4581cfcfaec084668c31d2680430da86", null ],
+    [ "veil2_reset_session", "veil2_8h.html#a24024528f9349a7cfafe1e08b1f92697", null ],
+    [ "veil2_reset_session_privs", "veil2_8h.html#aeb238a60d69020a855db79484047edda", null ],
+    [ "veil2_result_counts", "veil2_8h.html#aa5fa872416278e2e318ad0135ab04c99", null ],
+    [ "veil2_session_ready", "veil2_8h.html#a7c12b52b5e1ad8addb27eb33dd014213", null ],
+    [ "veil2_spi_connect", "veil2_8h.html#a4603875664db61438ab4e9997812b0b4", null ],
+    [ "veil2_spi_finish", "veil2_8h.html#aef1d49813efe3aec5c7511a84d4b723d", null ],
+    [ "veil2_true", "veil2_8h.html#a04e7d69cda94d76fb81177c955ca56e8", null ]
+];

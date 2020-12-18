@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Introduction to Veil2</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="prev" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="next" href="pt01.html" title="Part I. Understanding Veil2 And Relational Security">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="index.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="pt01.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Veil2 0.9.1 (beta) Documentation </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Part I. Understanding Veil2 And Relational Security</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="preface">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="introduction"></a>Introduction to Veil2</h1></div></div></div>
+<p>
+      <code class="literal">Veil2</code> is a Postgres <a class="ulink" href="https://pgxn.org/dist/veil2/" target="_top">extension</a> for
+      implementing relational security systems.
+    </p>
+<p>
+      A <a class="link" href="ch01.html" title="Chapter 1. What Is A Relational Security System?">relational
+      security system</a> Is one in which access rights are
+      determined by the user’s relationships to the objects being
+      accessed.
+    </p>
+<p>
+      The primary aims of a relational security system are to make the
+      management of access to data a seamless, and necessary, component of
+      your application, and to make its implementation as simple as
+      possible and as sophisticated as needed.
+    </p>
+<p>
+      <code class="literal">Veil2</code> is designed to make the implementation
+      of relational security systems as easy as possible.  It provides
+      an extensible framework of permissions, permission checks, and
+      user authentication so that you can start building a secure
+      database in a matter of hours.
+    </p>
+<p>
+      With <code class="literal">Veil2</code> you secure the database itself and
+      not just applications that use it.  This means that even if your
+      application server is compromised, an attacker's ability to
+      access data will be limited to the data for which they can steal
+      access credentials.  This gives them little more access than
+      the application itself would give them.
+    </p>
+<p>
+      The security of database applications is more usually managed by
+      building the access control rules into application servers, and
+      typically these access control rules offer a fairly coarse level
+      of granularity.  This is often because reasoning about access
+      controls at the level of functionality is difficult.  With
+      relational security modelling, it can be much easier to reason
+      about what sort of user needs what sort of access, and using
+      <code class="literal">Veil2</code> the implementation of access control
+      rules becomes trivial.
+    </p>
+<p>
+      <code class="literal">Veil2</code> is mostly implemented in SQL and
+      PL/pgSQL, with a small amount of security and
+      performance-critical code written in C.  It is designed to be
+      fast, flexible and customizable, and aims to make the security
+      of your system better, faster, more complete and easier to
+      understand.
+    </p>
+<p>
+      If you would like to see what <code class="literal">Veil2</code> can do,
+      you can install and explore the <a class="link" href="ch20.html" title="Chapter 20. Exploring The Veil2 Demos"><code class="literal">Veil2</code> demos</a>. 
+    </p>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="index.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="pt01.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Veil2 0.9.1 (beta) Documentation </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Part I. Understanding Veil2 And Relational Security</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

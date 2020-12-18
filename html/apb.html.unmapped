@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Appendix B. Veil2 Views, Materialized Views and Caches</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="prev" href="apa.html" title="Appendix A. Veil2 ERD and Database Objects">
+<link rel="next" href="apc.html" title="Appendix C. Veil2 Functions and Triggers">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="apa.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="apc.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Appendix A. <code class="literal">Veil2</code> ERD and Database Objects </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Appendix C. Veil2 Functions and Triggers</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="appendix">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="idm2260"></a>Appendix B. <code class="literal">Veil2</code> Views, Materialized Views and Caches</h1></div></div></div>
+<p></p>
+<div class="mediaobject"><img src="veil2_views.png"></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm2267"></a>B.1. Veil2 Views</h2></div></div></div>
+<p>
+      Establishing whether an accessor has a given privilege in a
+      given scope is a complex operation.  Privileges are assigned via
+      roles, which may be assigned by other roles.  Furthermore the
+      contexts in which those role assignments occur, and the context
+      of the role to role mappings are largely user-defined.  To deal
+      with both the complexity, and the need to allow
+      user-customization, we determine an accessor's privileges through
+      views.
+    </p>
+<p>
+      For performance reasons, some of these views are materialized.
+      Where materialized views alone are not enough we use cache
+      tables which are similar in nature to materialized views but:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+	  are implemented manually;
+	</li>
+<li class="listitem">
+	  can be refreshed incrementally;
+	</li>
+<li class="listitem">
+	  can be indexed.
+	</li>
+</ul></div>
+<p>
+    </p>
+<p>
+      The (clickable) diagram above shows the relationship of views
+      with each other and with <code class="literal">Veil2</code>, and other,
+      tables and functions.
+    </p>
+<p>
+      The bottom-most view in the diagram, <a class="link" href="apb.html#view_session_privileges_v" title="B.1.3.7. Session Privileges V View"><code class="literal">session_privileges_v</code></a>
+      provides the data that determines an accessors privileges.  This
+      view is used directly by the function <a class="link" href="apc.html#func_load_session_privs" title="C.4.19. load_session_privs()"><code class="literal">load_session_privs</code></a>
+      to load the set of applicable roles and privileges, in all
+      applicable contexts for an accessor's session.  The performance
+      of this view is critical, and has been carefully developed and
+      optimised.  Even so, <code class="literal">Veil2</code>'s session
+      management functions will usually load this data from the <a class="link" href="apb.html#entity_accessor_privileges_cache" title="B.1.4.3. Accessor Privileges Cache Table"><code class="literal">accessor_privileges_cache</code></a>
+      table.
+    </p>
+<p>
+      A few of the views shown do not contribute to
+      <code class="literal">session_privileges_v</code>.  These are developer
+      views, aimed at providing data for development and debugging.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm2287"></a>B.1.1. User-Supplied Views</h3></div></div></div>
+<p>
+	Although all of <code class="literal">Veil2</code>'s views may be
+	replaced by user-supplied versions, the following views are
+	expected to be.  These views are expected to directly query
+	user-provided tables which will be part of the set of data
+	being protected by <code class="literal">Veil2</code>.
+      </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_accessor_contexts"></a>B.1.1.1. Accessor Contexts View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.accessor_contexts (
+  accessor_id, context_type_id, context_id
+) as
+select accessor_id, 1, 0
+  from veil2.accessors;
+
+</pre>
+<p>
+This view lists the allowed session (and login, where different)
+contexts for accessors.  The system-provided version of this view may
+be overridden by providing an equivalent view called
+veil2.my_accessor_contexts.
+</p>
+<p>
+When an accessor opens a session, they choose a session context.  This
+session context determines which set of role to role mappings are in
+play.  Typically, there will only be one such set, as provided by the
+default implementation of this view.  If however, your application
+requires separate contexts to have different role to role mappings,
+you should modify this view to map your accessors with that context.
+</p>
+<p>
+Typically this will be used in a situation where your application
+serves a number of different clients, each of which have their own
+role definitions.  Each accessor will belong to one of those clients
+and this view should be modified to make that mapping apparent.
+</p>
+<p>
+A typical view definition might be:
+</p>
+<pre class="programlisting">
+select party_id, 3, client_id
+  from app_schema.parties
+ union all 
+select party_id, 1, 0
+  from mycorp_schema.superusers;
+
+</pre>
+<p>
+which would allow those defined in the superusers table to connect in
+the global scope, and those defined in the parties table to connect
+in the context of the client that they work for.
+</p>
+<p>
+Note that any change to the underlying data of this view (ie one that
+changes what the view will show) *must* cause a full refresh of all
+Veil2 materialized views and caches.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_superior_scopes"></a>B.1.1.2. Superior Scopes View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.superior_scopes (
+  scope_type_id, scope_id,
+  superior_scope_type_id, superior_scope_id
+) as
+select null::integer, null::integer,
+       null::integer, null::integer
+where false;
+
+</pre>
+<p>
+This view identifies superior scopes for determining the scope
+hierarchy.  This is used for determing how to promote privileges when
+privilege promotion is needed, which happens when a role that is
+assigned in a restricted security context has privileges that must be
+applied in a less restricted scope.  Note that promotion to global
+scope is always possible and is not managed through this view.
+</p>
+<p>
+If you have restricted scopes which are descendant scopes of less
+restricted ones, and you need privileges assigned in the restricted
+context to be promoted to the less restricted one, you must override
+this view to show which scopes may be promoted to which other scopes.
+For example if you have a corp scope type and a dept scope type which
+is a sub-scope of it, and your departments table identifies the
+corp_id for each department, you would define your over-riding view
+something like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+create or replace
+view veil2.my_superior_scopes (
+  scope_type_id, scope_id,
+  superior_scope_type_id, superior_scope_id
+) as
+select 96,   -- dept scope type id
+       department_id,
+       95,   -- corp scope type id 
+       corp_id
+  from departments;
+
+</pre>
+<p>
+Multi-level context promotions (eg to grandparent or great-grandparent
+scopes) will be handled by veil2.all_superior_scopes which you should
+have no need to modify.
+</p>
+<p>
+Note that any change to the underlying data of this view (ie one that
+changes what the view will show) *must* cause a full refresh of all
+Veil2 materialized views and caches.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_all_accessor_roles"></a>B.1.1.3. All Accessor Roles View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.all_accessor_roles (
+  accessor_id, role_id, context_type_id, context_id
+) as
+select accessor_id, role_id,
+       context_type_id, context_id
+  from veil2.accessor_roles;
+
+</pre>
+<p>
+Provides all of an accessor's explicit role assignments, ie it does
+not provide the personal context role.
+</p>
+<p>
+If you have any explicitly assigned roles that are not granted through
+the veil2.accessor_role table, you must provide your own definition of
+this view (called veil2.my_all_accessor_roles).  For example if you
+have a project context that is dependent on an accessor being assigned
+to a project you might redefine the view as follows:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+create or replace
+view veil2.my_all_accessor_roles (
+  accessor_id, role_id, context_type_id, context_id
+) as
+select accessor_id, role_id,
+       context_type_id, context_id
+  from veil2.accessor_roles
+ union all
+select party_id, role_id,
+       99,  -- id for project context_type
+       project_id
+  from project_parties;
+
+</pre>
+<p>
+Note that any change to the underlying data of this view (ie one that
+changes what the view will show) *must* cause a full or partial
+refresh of all Veil2 materialized views and caches.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm2298"></a>B.1.2. Developer Views</h3></div></div></div>
+<p>
+	These views do not directly contribute to
+	<code class="literal">Veil2</code> functionality.  They exist to help
+	developers in visuallizing and debugging data.
+      </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_privilege_assignments"></a>B.1.2.1. Privilege Assignments View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.privilege_assignments as
+select aar.accessor_id, rp.privilege_id,
+       aar.context_type_id as ass_cntxt_type_id,
+       aar.context_id as ass_cntxt_id,
+       coalesce(p.promotion_scope_type_id,
+                aar.context_type_id) as scope_type_id,
+       coalesce(asp.superior_scope_id,
+	        aar.context_id) as scope_id,
+       rc.primary_role_id as ass_role_id,
+       rc.assigned_role_id as priv_bearing_role_id,
+       rc.id_chain as role_id_mapping,
+       rc.name_chain as role_name_mapping,
+       rc.context_type_id as map_cntxt_type_id,
+       rc.context_id as map_cntxt_id
+  from (
+    select role_id, privilege_id
+      from veil2.role_privileges
+    union all
+    select 1, privilege_id
+      from veil2.privileges
+       ) rp
+ inner join veil2.privileges p
+    on p.privilege_id = rp.privilege_id
+ inner join veil2.role_chains rc
+    on rc.assigned_role_id = rp.role_id
+ inner join veil2.all_accessor_roles_plus aar
+    on aar.role_id = rc.primary_role_id
+  left outer join veil2.all_superior_scopes asp
+    on asp.scope_type_id = aar.context_type_id
+   and asp.scope_id = aar.context_id
+   and asp.superior_scope_type_id = p.promotion_scope_type_id
+   and asp.is_type_promotion;
+
+</pre>
+<p>
+Developer view that shows how accessors get privileges.  It shows the
+roles that the user is assigned, and the context in which they are
+assigned, as well as the mappings from role to role to privilege which
+give that resulting privilege to the accessor.
+</p>
+<p>
+If you are uncertain how accessor 999 has privilege 333, then simply
+run:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+select * 
+  from veil2.privilege_assignments 
+ where accessor_id = 999 
+   and privilege_id = 333;
+</pre>
+<p>
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_all_role_privileges_info"></a>B.1.2.2. All Role Privileges Info View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.all_role_privileges_info as
+select role_id, mapping_context_type_id,
+       mapping_context_id, to_array(roles) as roles,
+       to_array(privileges) as privileges
+  from veil2.all_role_privileges_v;
+
+</pre>
+<p>
+Developer view on all_role_privileges showing roles and privileges as
+arrays of integers for easier comprehension.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_scope_tree"></a>B.1.2.3. Scope Tree View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.scope_tree (scope_tree) as
+with recursive
+top_scopes as
+  (
+    select distinct
+           sp.superior_scope_id as root_scope_id,
+	   sp.superior_scope_type_id as root_scope_type_id,
+	   st.scope_type_name as root_scope_type_name,
+	   st.scope_type_id || ' (' || st.scope_type_name || 
+	     ').' || sp.superior_scope_id as root_full_name
+      from veil2.superior_scopes sp
+     inner join veil2.scope_types st
+        on st.scope_type_id = sp.superior_scope_type_id
+     where (sp.superior_scope_type_id, sp.superior_scope_id) not in (
+        select sp2.scope_type_id, sp2.scope_id
+	  from veil2.superior_scopes sp2)
+  ),
+recursive_part as
+  (
+    select 1 as depth,
+           root_scope_id as scope_id,
+	   root_scope_type_id as scope_type_id,
+	   root_full_name as full_name,
+	   '(' || root_scope_type_id || '.' || root_scope_id || ')' as path,
+	   length(root_full_name) as path_length
+      from top_scopes
+     union all
+    select rp.depth + 1,
+           sp.scope_id,
+	   sp.scope_type_id,
+	   st.scope_type_id || ' (' ||
+	       st.scope_type_name || ').' || sp.scope_id,
+	   rp.path || '(' || sp.scope_type_id || '.' || sp.scope_id || ')',
+	   length(st.scope_type_name || '.' || sp.scope_id) + path_length
+      from recursive_part rp
+     inner join veil2.superior_scopes sp
+        on sp.superior_scope_id = rp.scope_id
+       and sp.superior_scope_type_id = rp.scope_type_id
+     inner join veil2.scope_types st
+        on st.scope_type_id = sp.scope_type_id
+  )
+select format('%' || ((depth * 4) - 2) || 's', '+ ') ||
+       full_name
+from recursive_part
+order by path;
+
+</pre>
+<p>
+Provides a simple ascii-formatted tree representation of our scope
+promotions tree.  This is an aid to data visualisation for data
+designers and administrators and is not used elsewhere in Veil2.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_promotable_privileges_info"></a>B.1.2.4. Promotable Privileges Info View</h4></div></div></div>
+<pre class="programlisting">
+create view veil2.promotable_privileges_info (
+  scope_type_id, privilege_ids)
+as
+select scope_type_id, to_array(privilege_ids)
+  from veil2.promotable_privileges;
+
+</pre>
+<p>
+As veil2.promotable_privileges with bitmaps shown as arrays.  Info
+views are intended as developer-readable versions of the non-info
+views.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_session_privileges_info"></a>B.1.2.5. Session Privileges Info View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.session_privileges_info as
+select *
+  from veil2.session_privileges();
+
+</pre>
+<p>
+Provides a user-readable view of the veil2.session_privileges
+temporary table.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_role_chains"></a>B.1.2.6. Role Chains View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.role_chains as
+with recursive role_chains
+as
+  (
+    select rr.primary_role_id, rr.assigned_role_id,
+    	   rr.primary_role_id::text || '-&gt;' ||
+	       rr.assigned_role_id::text as id_chain,
+	   r1.role_name || '-&gt;' || r2.role_name as name_chain,
+	   rr.context_type_id,
+	   rr.context_id,
+	   bitmap(rr.primary_role_id) + rr.assigned_role_id as roles_bitmap
+      from veil2.role_roles rr
+     inner join veil2.roles r1
+        on r1.role_id = rr.primary_role_id
+     inner join veil2.roles r2
+        on r2.role_id = rr.assigned_role_id
+     union all
+    select rc.primary_role_id, rr.assigned_role_id,
+           rc.id_chain || '-&gt;' || rr.assigned_role_id::text,
+	   rc.name_chain || '-&gt;' || r.role_name,
+	   rc.context_type_id,
+	   rc.context_id,
+	   rc.roles_bitmap + rr.assigned_role_id
+      from role_chains rc
+     inner join veil2.role_roles rr
+        on rr.primary_role_id = rc.assigned_role_id
+       and rr.context_type_id = rc.context_type_id
+       and rr.context_id = rc.context_id
+     inner join veil2.roles r
+        on r.role_id = rr.assigned_role_id
+     where not rc.roles_bitmap ? rr.assigned_role_id
+   ),
+  all_contexts as
+   (
+     select distinct context_type_id, context_id
+       from role_chains
+   ),
+  base_roles as
+   (
+     select r.role_id as primary_role_id, 
+            r.role_id as assigned_role_id, 
+            r.role_id::text as id_chain,
+            r.role_name as name_chain,
+            ac.context_type_id,
+            ac.context_id
+       from veil2.roles r
+      cross join all_contexts ac
+   )  
+select primary_role_id, assigned_role_id,
+       context_type_id,
+       context_id, id_chain, name_chain
+  from role_chains
+ union all
+select primary_role_id, assigned_role_id,
+       context_type_id,
+       context_id, id_chain, name_chain
+  from base_roles
+order by 3, 4, 1, 2;
+
+</pre>
+<p>
+This is a developer view.  It is intended for development and
+debugging, and provides a way to view role mappings in a simple but
+complete way.  Try it, it should immediately make sense.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm2314"></a>B.1.3. <code class="literal">Veil2</code> Core Views</h3></div></div></div>
+<p>
+	These views are fundamental to the proper operation of
+	<code class="literal">Veil2</code>.  You may provide your own versions
+	of these views if needed, but you should be aware that future
+	versions of <code class="literal">Veil2</code> may redefine and
+	redevelop these views.  Although your user-supplied views will
+	take precedence, you run the risk of missing important
+	improvements to performance and functionality, and more
+	importantly, if the view semantics change, you risk
+	breaking assumptions made by the <code class="literal">Veil2</code>
+	developers, which could have unforeseen consequences.
+      </p>
+<p>
+	That said, if you need to create a user-supplied version of
+	one of these views, you are free to do so.  If so, you should
+	carefully review any revisions to <code class="literal">Veil2</code>
+	before applying the extension upgrade.  You are also advised
+	to discuss your needs with the <code class="literal">Veil2</code>
+	developers.  Contact links can be found <a class="link" href="ch27.html" title="Chapter 27. Contact Links">here</a>.
+      </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_all_role_roles"></a>B.1.3.1. All Role Roles View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.all_role_roles (
+    primary_role_id, assigned_role_id,
+    context_type_id, context_id) as
+with recursive assigned_roles (
+    primary_role_id, assigned_role_id,
+    context_type_id, context_id) as
+  (
+    -- get all role-&gt;role assignments, both direct and indirect, in all contexts
+    select primary_role_id, assigned_role_id,
+           context_type_id, context_id,
+	   bitmap(primary_role_id) + assigned_role_id as roles_encountered
+      from veil2.role_roles
+     union all
+    select ar.primary_role_id, rr.assigned_role_id,
+    	   ar.context_type_id, ar.context_id,
+	   ar.roles_encountered + rr.assigned_role_id
+      from assigned_roles ar
+     inner join veil2.role_roles rr
+        on rr.primary_role_id = ar.assigned_role_id
+       and rr.context_type_id = ar.context_type_id
+       and rr.context_id = ar.context_id
+       and not ar.roles_encountered ? rr.assigned_role_id
+       and rr.primary_role_id != 1 -- Superuser role is handled below
+  ),
+  superuser_roles (primary_role_id, assigned_role_id) as
+  (
+    select 1, role_id
+      from veil2.roles
+     where role_id not in (1, 0)  -- not connect and not superuser
+       and not implicit           -- and not implicitly assigned roles
+  )
+select primary_role_id, assigned_role_id,
+       context_type_id, context_id
+  from assigned_roles
+ union all
+select primary_role_id, assigned_role_id,
+       null, null
+  from superuser_roles;
+
+</pre>
+<p>
+Show all role to role mappings in all contexts.  If the context is
+null, the mapping applies in all contexts, taking into account
+role mappings that occur indirectly through other role mappings.
+</p>
+<p>
+Indirect mappings occur through other mappings (ie mappings are
+transitive).  Eg if a is assigned to b and b to c, then by transitivity
+a is assigned (indirectly) to c.
+</p>
+<p>
+Note that the superuser role is implicitly assigned all non-implicit
+roles except connect.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_all_superior_scopes_v"></a>B.1.3.2. All Superior Scopes View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.all_superior_scopes_v (
+  scope_type_id, scope_id,
+  superior_scope_type_id, superior_scope_id,
+  is_type_promotion
+) as
+with recursive recursive_superior_scopes as
+  (
+    select scope_type_id, scope_id,
+           superior_scope_type_id, superior_scope_id,
+	   scope_type_id != superior_scope_type_id
+      from veil2.superior_scopes
+     union
+    select rsp.scope_type_id, rsp.scope_id,
+           sp.superior_scope_type_id, sp.superior_scope_id,
+	   sp.scope_type_id != sp.superior_scope_type_id
+      from recursive_superior_scopes rsp
+     inner join veil2.superior_scopes sp
+        on sp.scope_type_id = rsp.superior_scope_type_id
+       and sp.scope_id = rsp.superior_scope_id
+     where not (    sp.superior_scope_type_id = rsp.superior_scope_type_id
+                and sp.superior_scope_id = rsp.superior_scope_id)
+  )
+select *
+  from recursive_superior_scopes;
+
+</pre>
+<p>
+This takes the simple user-provided view veil2.superior_scopes and
+makes it recursive so that if context a contains scope b and scope b
+contains scope c, then this view will return rows for scope c
+promoting to both scope b and scope a.
+</p>
+<p>
+You should not need to modify this view when creating your custom VPD
+implementation.
+</p>
+<p>
+Note that for performance reasons a materialized version of this view,
+veil2.all_superior_scopes, has been created.  Any change to the data
+underlying this view must result in the materialized view being
+refreshed.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_all_accessor_roles_plus"></a>B.1.3.3. All Accessor Roles Plus View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.all_accessor_roles_plus as
+select accessor_id, role_id,
+       context_type_id, context_id
+  from veil2.all_accessor_roles
+ union all
+select accessor_id, 2, 2, accessor_id
+  from veil2.accessors;
+
+</pre>
+<p>
+As all_accessor_roles but also providing the implicitly assigned
+personal context role for each accessor. 
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_all_role_privileges_v"></a>B.1.3.4. All Role Privileges View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.all_role_privileges_v as
+with superuser_privs as
+  (
+    -- Superuser role has implied assignments of all privileges except
+    -- connect.
+    select bitmap_of(privilege_id) as privileges
+      from veil2.privileges
+     where privilege_id != 0  
+  )
+select r.role_id as role_id,
+       rr.context_type_id as mapping_context_type_id,
+       rr.context_id as mapping_context_id,
+       coalesce(bitmap_of(rr.assigned_role_id) + r.role_id,
+                bitmap(r.role_id)) as roles,
+       case
+       when r.role_id = 1 then (select privileges from superuser_privs)
+       else coalesce(bitmap_of(rp.privilege_id),
+		     bitmap())
+       end as privileges
+  from veil2.roles r
+  left outer join veil2.all_role_roles rr
+    on rr.primary_role_id = r.role_id 
+  left join veil2.role_privileges rp
+    on rp.role_id = r.role_id
+    or rp.role_id = rr.assigned_role_id
+ group by r.role_id, rr.context_type_id,
+       rr.context_id;
+
+</pre>
+<p>
+Provides all role to role mappings, with their resulting privileges
+in all mapping contexts.  If the mapping context is null, the mapping
+applies in all mapping contexts.
+</p>
+<p>
+For performance reasons a materialized view veil2.all_role_privileges,
+has been created.  This must be refreshed whenever data underlying
+this view is updated.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_session_assignment_contexts"></a>B.1.3.5. Session Assignment Contexts View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.session_assignment_contexts as
+select login_context_type_id as context_type_id,
+       login_context_id as context_id
+  from veil2.session_context() sc
+ union
+select session_context_type_id as context_type_id,
+       session_context_id as context_id
+  from veil2.session_context() sc
+ union
+select ass.superior_scope_type_id,
+       ass.superior_scope_id
+  from veil2.session_context() sc
+ inner join veil2.all_superior_scopes ass
+    on (    ass.scope_type_id = sc.login_context_type_id
+        and ass.scope_id = sc.login_context_id)
+    or (    ass.scope_type_id = sc.session_context_type_id
+        and ass.scope_id = sc.session_context_id)
+ union
+select ass.scope_type_id,
+       ass.scope_id
+  from veil2.session_context() sc
+ inner join veil2.all_superior_scopes ass
+    on (    ass.superior_scope_type_id = sc.login_context_type_id
+        and ass.superior_scope_id = sc.login_context_id)
+    or (    ass.superior_scope_type_id = sc.session_context_type_id
+        and ass.superior_scope_id = sc.session_context_id)
+ union
+select 1, 0
+ union
+select 2, accessor_id
+  from veil2.session_context();
+
+</pre>
+<p>
+Provides the set of security contexts which are valid for role
+assignments within the current session.  The purpose of this is to
+filter out any role assignments which should not apply to the current
+session, as those roles could contain privileges which could be
+promoted to global_scope.
+</p>
+<p>
+The situation this prevents is for users that are allowed to login in
+different contexts with different roles in those contexts.  We do not
+want the roles provided in one context to provide privileges that
+have not been assigned when we are logged-in in a different context.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_promotable_privileges"></a>B.1.3.6. Promotable Privileges View</h4></div></div></div>
+<pre class="programlisting">
+create view veil2.promotable_privileges (
+  scope_type_id, privilege_ids)
+as
+select p.promotion_scope_type_id, bitmap_of(p.privilege_id)
+  from veil2.privileges p
+ where p.promotion_scope_type_id is not null
+group by p.promotion_scope_type_id;
+
+</pre>
+<p>
+Provide bitmaps of those privileges that may be promoted, mapped to the
+context types to which they should promote.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_session_privileges_v"></a>B.1.3.7. Session Privileges V View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.session_privileges_v as
+  with session_context as
+    (
+      select *
+        from veil2.session_context() sc
+    ),
+  base_accessor_privs as
+    (
+      select barp.accessor_id, barp.role_id,
+      	     barp.assignment_context_type_id,
+                 barp.assignment_context_id,
+             barp.mapping_context_type_id, barp.mapping_context_id,
+	     barp.roles, barp.privileges
+        from session_context sc
+       -- Making the following an inner join (rather than cross-join)
+       -- even though the condition is redundant improves performance
+       -- (Postgres 12.5).
+       inner join veil2.base_accessor_roleprivs(
+       	     	            sc.accessor_id, sc.session_context_type_id,
+			    sc.session_context_id, sc.mapping_context_type_id,
+			    sc.mapping_context_id) barp
+          on barp.accessor_id = sc.accessor_id
+    ),
+  promoted_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, ss.superior_scope_id as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id != 1
+       inner join veil2.all_superior_scopes ss
+          on ss.scope_type_id = bap.assignment_context_type_id
+         and ss.scope_id = bap.assignment_context_id
+         and ss.superior_scope_type_id = pp.scope_type_id
+	 and ss.is_type_promotion
+    ),
+  global_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, 0 as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id = 1
+    ),  
+  all_role_privs as
+    (
+      select accessor_id, 
+      	     mapping_context_type_id, mapping_context_id,
+  	     assignment_context_type_id as scope_type_id,
+             assignment_context_id as scope_id,
+             roles + role_id as roles,  privileges
+        from base_accessor_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from promoted_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from global_privs
+    ),
+  grouped_role_privs as
+    (
+      select accessor_id,
+             scope_type_id, scope_id,
+             union_of(roles) as roles, union_of(privileges) as privileges
+        from all_role_privs
+       group by accessor_id,
+                scope_type_id, scope_id
+    ),
+  have_global_connect as
+    (
+      select exists (
+          select null
+            from grouped_role_privs
+           where scope_type_id = 1
+             and scope_id = 0
+             and privileges ? 0) as have_global_connect
+    ),
+  have_session_connect as
+    (
+      select exists (
+    	  select null
+    	    from session_context sc
+    	   cross join grouped_role_privs grp
+    	   where grp.privileges ? 0
+	     and (   (    grp.scope_type_id = sc.session_context_type_id
+    	              and grp.scope_id = sc.session_context_id)
+    	          or (grp.scope_type_id, grp.scope_id) in (
+    	      select ass.superior_scope_type_id, ass.superior_scope_id
+    		from veil2.all_superior_scopes ass
+    	       where ass.scope_type_id = sc.session_context_type_id
+    	         and ass.scope_id = sc.session_context_id)))
+             as have_session_connect
+    ),
+  have_login_connect as
+    (
+      select exists (
+    	  select null
+    	    from session_context sc
+    	   cross join grouped_role_privs grp
+    	   where grp.privileges ? 0
+	     and (   (    grp.scope_type_id = sc.login_context_type_id
+    	              and grp.scope_id = sc.login_context_id)
+    	          or (grp.scope_type_id, grp.scope_id) in (
+    	      select ass.superior_scope_type_id, ass.superior_scope_id
+    		from veil2.all_superior_scopes ass
+    	       where ass.scope_type_id = sc.login_context_type_id
+    	         and ass.scope_id = sc.login_context_id)))
+             as have_login_connect
+    ),
+  have_connect as
+    (
+      select true as have_connect
+        from have_global_connect
+       where have_global_connect
+       union
+      select have_login_connect and have_session_connect
+        from have_global_connect
+       cross join have_login_connect
+       cross join have_session_connect
+       where not have_global_connect
+    )
+  select scope_type_id, scope_id,
+         roles, privileges
+    from grouped_role_privs
+   where exists (select null from have_connect where have_connect);
+
+</pre>
+<p>
+View used to dynamically figure out the roles and privileges in all
+contexts for the current session.  If the accessor for the session
+does not have connect privilege in both the authentication and login
+contexts, then no rows are returned.
+</p>
+<p>
+This view is used as the basis for loading session privileges into the
+veil2_session_privileges temporary table and into the
+veil2.accessor_privileges_cache table.  Note that the cache table is
+used in preference to querying from this view if it has records for
+the session's accessor and session context.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="caches"></a>B.1.4. Materialized Views and Caches</h3></div></div></div>
+<p>
+	Materized views and caches are used to improve query
+	performance.  The trade-off for improved performance is that
+	they need to be managed: whenever the data on which they
+	depend is modified, they must be refreshed.
+      </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_all_superior_scopes"></a>B.1.4.1. All Superior Scopes Materialized View</h4></div></div></div>
+<pre class="programlisting">
+materialized view veil2.all_superior_scopes
+as select * from veil2.all_superior_scopes_v;
+
+</pre>
+<p>
+This is a materialized view on veil2.all_superior_scopes_v.  It
+exists in order to improve the performance of
+veil2.session_privileges_v.
+</p>
+<p>
+It must be fully refreshed whenever the underlying data for
+veil2.superior_scopes is updated.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_all_role_privileges"></a>B.1.4.2. All Role Privileges Materialized View</h4></div></div></div>
+<p>
+Materialized view on veil2.all_role_privileges_v.  This exists to
+improve the performance of veil2.session_privileges_v.
+</p>
+<p>
+Any time that the data underlying all_role_privileges_v is modified,
+this materialized view should be refreshed.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="entity_accessor_privileges_cache"></a>B.1.4.3. Accessor Privileges Cache Table</h4></div></div></div>
+<pre class="programlisting">
+create table veil2.accessor_privileges_cache (
+  accessor_id			integer not null,
+  login_context_type_id		integer not null,
+  login_context_id		integer not null,
+  session_context_type_id       integer not null,
+  session_context_id		integer not null,
+  mapping_context_type_id	integer not null,
+  mapping_context_id		integer not null,
+  scope_type_id			integer not null,
+  scope_id			integer not null,
+  roles                         bitmap not null,
+  privs				bitmap not null
+);
+
+alter table veil2.accessor_privileges_cache enable row level security;
+
+</pre>
+<p>
+Table used to cache accessor_privileges returned by
+veil2.session_privileges_v.
+</p>
+<p>
+This is automatically populated by the Veil2 session management
+functions for any combination of accessor and session context for
+which it contains no data.
+</p>
+<p>
+It should be truncated whenever any underlying role, privilege or
+context data is updated, and records for individual accessors should
+be deleted whenever their role assignments are updated.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="miscellaneous"></a>B.1.5. Miscellaneous Helper Views</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_docs"></a>B.1.5.1. Docs View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.docs(file, purpose) as
+values (veil2.docpath() || '/html/index.html',
+        'Complete html documentation for Veil2');
+
+</pre>
+<p>
+Show where local Veil2 documentation can be found.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="view_sql_files"></a>B.1.5.2. SQL Files View</h4></div></div></div>
+<pre class="programlisting">
+view veil2.sql_files(file, purpose) as
+values (veil2.datapath() || '/demo.sql',
+       'Install demo and run test'),
+       (veil2.datapath() || '/demo_test.sql',
+       'Run simple tests against demo'),
+       (veil2.datapath() || '/demo_bulk_data.sql',
+       'Install some bulk role and priv data'),
+       (veil2.datapath() || '/perf.sql',
+       'Run session management performance check'),
+       (veil2.datapath() || '/veil2_demo--0.9.1.sql',
+       'Veil2 demo creation script'),
+       (veil2.datapath() || '/veil2_minimal_demo.sql',
+       'Veil2 minimal-demo creation script'),
+       (veil2.datapath() || '/veil2_template.sql',
+       'Veil2 implementation template.'),
+       (veil2.datapath() || '/veil2--0.9.1.sql',
+       'Veil2 extension creation script.');
+
+</pre>
+<p>
+Show where copies of useful Veil2 sql files can be found.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="apa.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="apc.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Appendix A. <code class="literal">Veil2</code> ERD and Database Objects </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Appendix C. Veil2 Functions and Triggers</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

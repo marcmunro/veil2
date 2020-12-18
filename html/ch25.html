@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 25. Performance</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt03.html" title="Part III. Implementation Details">
+<link rel="prev" href="ch24.html" title="Chapter 24. Tips and Guidelines">
+<link rel="next" href="ch26.html" title="Chapter 26. Security">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch24.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch26.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 24. Tips and Guidelines </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 26. Security</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="performance"></a>Chapter 25. Performance</h2></div></div></div>
+<p>
+    Adding <code class="literal">Veil2</code> to your database introduces 2
+    specific overheads to  your database performance.
+    </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+	the overhead of session management;
+      </li>
+<li class="listitem">
+	the overhead of privilege testing in your relations.
+      </li>
+</ol></div>
+<p>
+  </p>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="load_perf_data"></a>25.1. Data For Evaluating Performance</h2></div></div></div>
+<p>
+      In order to get a feel for the overheads associated with
+      <code class="literal">Veil2</code>, we need some realistic volumes of
+      data for roles, privileges, and accessors with their associated
+      mappings.  The script, <code class="literal">demo_bulk_data.sql</code>,
+      which can be found as described <a class="link" href="ch08.html#next_steps" title="8.2. Next Steps">here</a> provides a good starting point
+      for this.
+    </p>
+<p>
+      After creating a demo database (as <a class="link" href="ch20.html#veil_demo" title="20.1. The veil2_demo Extension">described here</a>) you can install this
+      data using psql, eg:
+      </p>
+<pre class="programlisting">
+marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo_bulk_data.sql 
+      </pre>
+<p>
+    </p>
+<p>
+      This will create around 8000 accessors, around 300 roles, and
+      around 2000 privileges, which should be enough to exercise
+      the privilege testing and session management functionality.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm2076"></a>25.2. Session Management Overhead</h2></div></div></div>
+<p>
+      The two biggest overheads in session management are the use of
+      <code class="literal">bcrypt()</code> for authentication (which is
+      CPU-intensive by intent), and the loading of session
+      privileges.  In the following evaluation,
+      <code class="literal">bcrypt()</code> is avoided. 
+    </p>
+<p>
+      Session privileges once loaded (from <a class="link" href="apb.html#view_session_privileges_v" title="B.1.3.7. Session Privileges V View"><code class="literal">veil2.session_privileges_v</code></a>
+      are cached (in <a class="link" href="apb.html#entity_accessor_privileges_cache" title="B.1.4.3. Accessor Privileges Cache Table"><code class="literal">veil2.accessor_privileges_cache</code></a>).
+      This means that subsequent loading of privileges should be
+      considerably faster than the initial one for each accessor.
+    </p>
+<p>
+      A simple performance checking script <code class="literal">perf.sql</code>
+      is provided in the same directory as the bulk data loading
+      script.  Assuming the same directory as the example above you
+      would run it as follows:
+      </p>
+<pre class="programlisting">
+marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/perf.sql 
+Creating sessions: elapsed = 21 milliseconds.
+Opening sessions: elapsed = 51 milliseconds.
+Re-opening sessions: elapsed = 60 milliseconds.
+marc:veil2$ 
+      </pre>
+<p>
+      The script creates 6 sessions, opens each of them, and then
+      re-opens them.  The elapsed times shown are cumulative, in this
+      case giving the time to open and initialize the sessions as
+      being approximately 30 milliseconds (5 milliseconds each), with
+      the session reloads taking about 9 milliseconds (1.5
+      milliseconds each).  
+    </p>
+<p>
+      This is on an aging desktop PC with the following CPU spec:
+      </p>
+<pre class="programlisting">
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i5-3570K CPU @ 3.40GHz
+stepping	: 9
+microcode	: 0xc
+cpu MHz		: 3411.376
+cache size	: 6144 KB
+      </pre>
+<p>
+    </p>
+<p>
+      It may be possible to further improve the performance by
+      re-implementing the session management functions in C, though
+      initial experiments yielded only minor gains which, given the
+      loss in flexibility resulting from a C implementation, were not
+      felt to be worthwhile.
+    </p>
+<p>
+      Until anyone claims otherwise, the author is going to claim that
+      this is fast enough.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm2093"></a>25.3. Privilege Testing Overhead</h2></div></div></div>
+<p>
+      For testing the overhead of running privilege tests, you should
+      load the performance evaluation data as described <a class="link" href="ch25.html#load_perf_data" title="25.1. Data For Evaluating Performance">above</a>.
+    </p>
+<p>
+      The script <code class="literal">perf2.sql</code> sets up 3 identical
+      tables for performance testing, and runs some simple queries.
+      The tables are:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+	    x;
+	  </p>
+<p>
+	    This table has no security policy.
+	  </p>
+</li>
+<li class="listitem">
+<p>
+	    y;
+	  </p>
+<p>
+	    This table has a minimal security policy, calling <a class="link" href="apc.html#func_always_true" title="C.5.1. always_true()"><code class="literal">veil2.always_true()</code></a>.
+	  </p>
+</li>
+<li class="listitem">
+<p>
+	    z.
+	  </p>
+<p>
+	    This table has a security policy using <a class="link" href="apc.html#func_i_have_global_priv" title="C.5.2. i_have_global_priv()"><code class="literal">veil2.i_have_global_priv()</code></a>.
+	  </p>
+</li>
+</ul></div>
+<p>
+    </p>
+<p>
+      Here is the transcript of a performance testing run:
+      </p>
+<pre class="programlisting">
+marc:veil2$ psql -d vpd -f  /usr/share/postgresql/12/veil2/perf2.sql
+Setting up tables...
+connecting as Alice...
+31|7argrXo++w024hrMnrRwUAnZwvb4i/DN8ZFbF0MMjcg=||t|
+Time: 24.037 ms
+running tests...
+...on x (3 times)...
+1995
+Time: 0.581 ms
+1995
+Time: 0.274 ms
+1995
+Time: 0.261 ms
+...on y (3 times)...
+1995
+Time: 0.576 ms
+1995
+Time: 0.316 ms
+1995
+Time: 0.291 ms
+result_counts (to keep us honest):
+0|0
+Time: 0.117 ms
+...on z (3 times)...
+1995
+Time: 0.826 ms
+1995
+Time: 0.383 ms
+1995
+Time: 0.365 ms
+result_counts again:
+0|5985
+Time: 0.140 ms
+marc:veil2$ 
+      </pre>
+<p>
+    </p>
+<p>
+      What this shows, for table z, is that the first query
+      experiences some small overhead (approx 0.5 millisecs), and that
+      subsequent queries have little more overhead than table y, which
+      has the smallest possible overhead for a table with a security
+      policy.  Based on all of this, the author is going to claim that
+      this is pretty damn fast.
+    </p>
+<p>
+      The reason for the small initial overhead on the first test
+      against table Z is that on the first call to a privilege testing
+      function, the session's privileges must be loaded into session
+      memory.
+    </p>
+<p>
+      Since these results look too good to be true, we perform a query
+      of <code class="literal">veil2.result_counts()</code> which shows the
+      number of false and true results from the privilege testing
+      functions.  This should be seen as proof that the privilege
+      tests were actually performed.  Obviously, you can repeat this
+      yourself.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm2119"></a>25.3.1. Other Privilege Test Functions</h3></div></div></div>
+<p>
+	The tests above only test
+	<code class="literal">veil2.i_have_global_priv()</code>, which is the
+	simplest of the privilege testing functions.  While this may
+	seem to be a cheat, testing privileges in other scopes is
+	just as fast as testing in the global scope.
+      </p>
+<p>
+	That said, those functions that check for privileges in
+	superior scopes, run a query to discover the appropriate
+	superior scopes, and so incur more overhead.  Experience
+	suggests that this will still be easily dwarfed by any fetches
+	from uncached rows.
+      </p>
+<p>
+	If your application uses a lot of superior scope tests, or
+	those queries are used on large numbers of records, you should
+	run your own tests to ensure that performance is adequate.  If
+	not you may need to perform some denormalizations to record
+	the appropriate superior scope in each row.
+      </p>
+<p>
+	Even with this caveat though, the author is still going to
+	claim that it's fast.
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm2126"></a>25.4. In Conclusion</h2></div></div></div>
+<p>
+      Oh my, it's fast!
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch24.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch26.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 24. Tips and Guidelines </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 26. Security</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

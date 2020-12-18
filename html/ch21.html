@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 21. The Veil2 Implementation: What You Need To Know</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt03.html" title="Part III. Implementation Details">
+<link rel="prev" href="ch20.html" title="Chapter 20. Exploring The Veil2 Demos">
+<link rel="next" href="ch22.html" title="Chapter 22. For Developers">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch20.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch22.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 20. Exploring The <code class="literal">Veil2</code> Demos </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 22. For Developers</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="Implementation"></a>Chapter 21. The Veil2 Implementation: What You Need To Know</h2></div></div></div>
+<p>
+    Although <code class="literal">Veil2</code> is built to be customized and
+    modified by you, it comes with a number of built-in features,
+    functionality and assumptions.  These exist to provide a sane
+    starting point for your implementation.
+  </p>
+<p>
+    For most database implementations only a relatively small number
+    of customizations will be needed.  These are primarily in order to
+    integrate <code class="literal">Veil2</code> with your database
+    implementation.  For those systems that have more complex
+    requirements, almost all of <code class="literal">Veil2</code> is tweakable
+    by providing your own overriding views and functions for those
+    provided by <code class="literal">Veil2</code>.
+  </p>
+<p>
+    This section provides details of the underlying
+    <code class="literal">Veil2</code> implementation, intended to help you with
+    your customization needs.
+  </p>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="user_customizations"></a>21.1. User Customizations</h2></div></div></div>
+<p>
+       As a PostgreSQL extension, allowing customization of
+       <code class="literal">Veil2</code> is something of a challenge.  The
+       issue is that <code class="literal">Veil2</code>'s own database objects
+       are expected by PostgreSQL to not be user-modifiable.  This is
+       so that extensions can be upgraded in place using standard
+       extension mechanisms; and so that backups taken using pg_dump
+       can allow a database to be restored by simply re-installing the
+       extension.  What this means is that any modifications you make
+       to database objects that are part of the
+       <code class="literal">Veil2</code> extension will be lost if you restore
+       from a pg_dump backup, or if you upgrade the
+       <code class="literal">Veil2</code> extension. 
+    </p>
+<p>
+      It is therefore vital that any user modifications are to objects
+      that are not owned by the extension. To deal with this, we limit
+      the ways in which customizations to <code class="literal">Veil2</code> are
+      made: 
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="custom_data"></a>21.1.1. Customized Data</h3></div></div></div>
+<p>
+	PostgreSQL allows tables in extensions to contain user-data.
+	Such tables must be registered with the extension mechanism
+	using
+	<code class="literal">pg_catalog.pg_extension_config_dump()</code>.
+	This allows a <code class="literal">where clause</code> to be defined
+	which specifies how to identify user-provided entries.
+      </p>
+<p>
+	All <code class="literal">Veil2</code> tables are managed in this way,
+	so you can safely add your own data to them.  What you cannot
+	do is extend those tables in other ways such as by adding
+	extra columns or constraints.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="custom-functions"></a>21.1.2. Customized Functions</h3></div></div></div>
+<p>
+	Although most <code class="literal">Veil2</code> functions are not
+	expected to be modified by the user, a small number must
+	provide functionality that is specific to your database
+	schema.  This means that some functionality must be
+	user-provided.
+      </p>
+<p>
+	The mechanism provided by <code class="literal">Veil2</code> to allow
+	for user-provided functionality is to allow users to define
+	their own replacements for built-in <code class="literal">Veil2</code>
+	functions.  These replacement functions are owned by you
+	and are <span class="bold"><strong>not</strong></span> part of the
+	<code class="literal">Veil2</code> extension.
+      </p>
+<p>
+	To define your own version of a <code class="literal">Veil2</code>
+	function, you simply create a new function, with the same
+	function signature, in the <code class="literal">veil2</code> schema,
+	with the function name prepended with
+	<code class="literal">my_</code>.
+      </p>
+<p>
+	The following example is from the
+	<code class="literal">veil2_demo</code> extension and redefines the
+	<code class="literal">veil2.get_accessor()</code> function:
+	</p>
+<pre class="programlisting">
+create or replace
+function veil2.my_get_accessor(
+    username in text,
+    context_type_id in integer,
+    context_id in integer)
+  returns integer as
+$$
+declare
+  _result integer;
+begin
+  select party_id
+    into _result
+    from demo.parties_tbl p
+   where p.party_name = username
+     and p.org_id = context_id
+     and context_type_id = 4;  -- Logins are in org context
+   return _result;
+end;
+$$
+language plpgsql security definer stable leakproof;
+	</pre>
+<p>
+	This provides an <code class="literal">accessor_id</code> for a user
+	based on their username and the	<a class="link" href="ch04.html#authentication_context" title="4.7. Authentication Contexts">authentication context</a>
+	for which they are logging-in.
+      </p>
+<p>
+	Note that in use, your user-provided function will replace the
+	<code class="literal">Veil2</code> system-provided function.  This means
+	that the name of the function when it is executed will not
+	include the <code class="literal">my_</code> prefix.  You should not
+	therefore use the function name as a prefix to a parameter
+	name in order to disambiguate a reference (see <a class="ulink" href="https://www.postgresql.org/docs/current/plpgsql-implementation.html" target="_top">this
+	link</a> for more details).
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="custom-views"></a>21.1.3. Customized Views</h3></div></div></div>
+<p>
+	Much of the heavy-lifting of managing users' privileges is
+	done through views and materialized views.  By redefining
+	views, we can alter functionality and expand the range of data
+	upon which we operate.
+      </p>
+<p>
+	For instance, the <code class="literal">veil2.superior_scopes</code>
+	view identifies the hierarchy of scopes for which privilege
+	promotions are available.  If we have a database which
+	provides scopes for projects and for organizations, the scope
+	promotion for a project might be to the organization which
+	owns the project.  A role assigned in a project context might
+	contain the privilege to view basic organization data, and
+	this privilege would need to be promoted to apply at the
+	organization level.  In order to perform this promotion,
+	<code class="literal">Veil2</code> needs to know which projects belong
+	to which organizations.  This is what the
+	<code class="literal">superior_scopes</code> view is intended to
+	provide, but can only do so if user-defined.
+      </p>
+<p>
+	Just as with functions, views owned by the
+	<code class="literal">Veil2</code> extension cannot be safely
+	redefined, but again, as with functions, we can create
+	alternative views and have <code class="literal">Veil2</code> manage them.
+      </p>
+<p>
+	To override the built-in version of a <code class="literal">Veil2</code>
+	view, you simply need to define a new view, in the
+	<code class="literal">veil2</code> schema, with the prefix
+	<code class="literal">my_</code>.  So, to define new functionality for
+	the view <code class="literal">veil2.superior_scopes</code>, you would
+	create a new view
+	<code class="literal">veil2.my_superior_scopes</code>.
+      </p>
+<p>
+	As an example, here is the definition for
+	<code class="literal">veil2.my_superior_scopes</code> from the demo:
+	</p>
+<pre class="programlisting">
+create or replace
+view veil2.my_superior_scopes (
+  scope_type_id, scope_id,
+  superior_scope_type_id, superior_scope_id
+) as
+select 4, party_id,  -- Promote org to corp scope
+       3, corp_id
+  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+ where party_type_id = 2
+union all
+select 4, party_id,  -- Promote root orgs within corps to corp scope
+       3, party_id
+  from demo.parties_tbl
+ where party_type_id = 2
+   and org_id = 100
+   and party_id != 100
+union all
+select 4, party_id,  -- Promotion of org to higher org
+       4, org_id
+  from demo.parties_tbl
+ where party_type_id = 2
+   and party_id != org_id
+union all
+select 5, s.scope_id,   -- Project to corp promotions
+       3, p.corp_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id
+union all
+select 5, s.scope_id,   -- Project to org promotions
+       4, p.org_id
+  from demo.projects p
+ inner join veil2.scopes s
+    on s.project_id = p.project_id;
+	</pre>
+<p>
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1447"></a>21.1.4. Managing User-Provided Functionality</h3></div></div></div>
+<p>
+	To make user-provided functions and views take effect, they
+	must be installed to replace the original system-provided
+	version.  <code class="literal">Veil2</code> provides 5 functions for
+	low-level management of user-provided functions and views:
+	</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#func_install_user_functions" title="C.2.4. install_user_functions()"><code class="literal">veil2.install_user_functions()</code></a><p>
+	      This function copies all user-provided functions over
+	      their corresponding system-provided counterparts.  Before
+	      doing this, it ensures that a backup copy of the original
+	      system-provided function exists.  Any function defined
+	      in the <code class="literal">veil2</code> schema with a name
+	      beginning with <code class="literal">my_</code> that matches a
+	      function without that prefix will be copied.
+	    </p>
+<p>
+	      This function should be called after any modification of
+	      your user-provided functions.  It is safe to call this
+	      function any number of times.
+	    </p>
+</li>
+<li class="listitem">
+<a class="link" href="apc.html#func_restore_system_functions" title="C.2.3. restore_system_functions()"><code class="literal">veil2.restore_system_functions()</code></a><p>
+	      Should you need to restore original functions from their
+	      backup copies you should call this function.  This
+	      function exists primarily for use when upgrading the
+	      <code class="literal">Veil2</code> extension, but if you have
+	      mistakenly overwritten system-provided functionality
+	      with a buggy <code class="literal">my_xxxx()</code> function you
+	      should use this to restore the original functionality
+	      before dropping or fixing your version.
+	    </p>
+</li>
+<li class="listitem">
+<a class="link" href="apc.html#func_install_user_views" title="C.2.9. install_user_views()"><code class="literal">veil2.install_user_views()</code></a><p>
+	      This installs user-provided views in the same way that
+	      <code class="literal">veil2.install_user_functions()</code>
+	      installs user-provided functions.
+	    </p>
+<p>
+	      This function should be called after any modification of
+	      your user-provided views.  It is safe to call this
+	      function any number of times.
+	    </p>
+</li>
+<li class="listitem">
+<a class="link" href="apc.html#func_restore_system_views" title="C.2.8. restore_system_views()"><code class="literal">veil2.restore_system_views()</code></a><p>
+	      Restores the original system-provided views from backups
+	      made by <code class="literal">veil2.install_user_views()</code>.
+	    </p>
+</li>
+<li class="listitem">
+<a name="use_func_init"></a><a class="link" href="apc.html#func_init" title="C.2.10. init()"><code class="literal">veil2.init()</code></a><p>
+	      This installs all user-provided views and functions and
+	      also refreshes all materialized views.  Call this
+	      function any time that you modify one of your
+	      user-provided views or functions.  This will install
+	      your latest versions and ensure that everything is ready
+	      to go.  This function can safely be called any time that
+	      you may doubt whether you have the latest versions of
+	      your views and functions in use.
+	    </p>
+</li>
+</ul></div>
+<p>
+      </p>
+<p>
+	In addition to the manual mechanisms described above, all
+	user-defined functions and views will be automatically 
+	installed by <code class="literal">Veil2</code> when the system-provided
+	<a class="link" href="apc.html#func_get_accessor" title="C.4.4. get_accessor()"><code class="literal">veil2.get_accessor()</code></a>
+	function is first run.
+      </p>
+<p>
+	This is provided primarily for the case when we restore from a
+	<code class="literal">pg_dump</code>-based backup.  In such a case, the
+	first attempt by a user to log in will call the
+	system-provided version of this function.  The system-provided
+	version of the function will only be in place during this
+	initial call, and will have been replaced by the
+	user-provided version on subsequent calls.
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="authentication"></a>21.2. Authentication</h2></div></div></div>
+<p>
+      <code class="literal">Veil2</code> provides barely adequate password-based
+      authentication using <code class="literal">bcrypt</code>, and the means to
+      create your own better authentication methods.
+    </p>
+<p>
+      Authentication is performed by the <a class="link" href="apc.html#func_authenticate" title="C.3.4. authenticate()"><code class="literal">veil2.authenticate()</code></a>
+      function which is called from <a class="link" href="apc.html#func_open_connection" title="C.4.27. open_connection()"><code class="literal">veil2.open_connection()</code></a>,
+      one of the functions used in <a class="link" href="ape.html#shared_session_management" title="E.1. Shared Session Authentication">Shared Session
+      Authentication</a>.
+    </p>
+<p>
+      <code class="literal">Veil2</code> allows for new authentication methods
+      to be defined by creating authentication functions that match
+      the call signature of <a class="link" href="apc.html#func_authenticate_bcrypt" title="C.3.3. authenticate_bcrypt()"><code class="literal">veil2.authenticate_bcrypt()</code></a>
+      and recording them in <a class="link" href="apa.html#entity_authentication_type" title="A.1.12. Authentication Types Table"><code class="literal">veil2.authentication_types</code></a>.
+    </p>
+<p>
+      If your custom authentication mechanism requires 2 round-trips,
+      you can send supplemental data to the client from <a class="link" href="apc.html#func_create_session" title="C.4.8. create_session()"><code class="literal">veil2.create_session()</code></a>
+      by recording a value for <code class="literal">supplemental_fn</code> in
+      the <code class="literal">veil2.authentication_types</code> entry.  This
+      will be the name of a function which takes an
+      <code class="literal">accessor_id</code> and
+      <code class="literal">session_token</code> as parameters and returns
+      another token which will be returned as the
+      <code class="literal">session_supplemental</code> value from
+      <code class="literal">veil2.create_session()</code>.
+    </p>
+<p>
+      It should be possible to implement most authentication methods
+      using these 2 functions.  If you need anything more complex than
+      this, you will have to create your own versions of the session
+      management functions.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="privileges_implementation"></a>21.3. Privileges</h2></div></div></div>
+<p>
+      <code class="literal">Veil2</code> is supplied with a base set of <a class="link" href="ch04.html#privileges" title="4.1. Privileges">privileges</a>.  These are to manage
+      access to core functionality, and to the built-in
+      <code class="literal">Veil2</code> tables (which are themselves secured by
+      <code class="literal">Veil2</code>).
+    </p>
+<p>
+      To allow for expansion of <code class="literal">Veil2</code>'s core set of
+      privileges in future releases, you should start numbering your
+      own privileges from 20.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="connect_privilege"></a>21.3.1. Connect Privilege</h3></div></div></div>
+<p>
+	<code class="literal">Connect</code> is a special built-in privilege
+	with an important meaning.  This privilege allows a user to
+	create a database session (either <a class="link" href="ape.html#dedicated_session_management" title="E.2. Dedicated Database Sessions">dedicated</a> or
+	<a class="link" href="ape.html#shared_session_management" title="E.1. Shared Session Authentication">shared</a>) and
+	load other privileges into the session tables.  Without this
+	privilege, a user will be able to load no other privileges and
+	will therefore have no access rights at all.
+      </p>
+<p>
+	The <code class="literal">connect</code> privilege is not intended to be
+	provided by any roles other than the
+	<a class="link" href="ch21.html#connect_role" title="21.4.1. The Connect Role"><code class="literal">connect</code></a>
+	role, and is the only privilege not provided by the <a class="link" href="ch21.html#superuser_role" title="21.4.2. The Superuser Role"><code class="literal">superuser</code></a>
+	role. 
+      </p>
+<p>
+	Restricting the use of the <code class="literal">connect</code>
+	privilege in this way means that you can disable a user by
+	simply revoking their <code class="literal">connect</code> role, and
+	that you can re-allow it by re-assigning that role: you don't
+	need to revoke <span class="bold"><strong>all</strong></span> of a
+	user's roles in order to disable their access.  This is
+	intended to make user and role management easier.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="become_user_privilege"></a>21.3.2. Become User Privilege</h3></div></div></div>
+<p>
+	This privilege allows an already authenticated user to
+	effectively become another user, with that user's access
+	rights.
+      </p>
+<p>
+	This is primarily intended for testing and verifying
+	functionality.  If a user complains that they cannot access
+	something, or that something does not work properly, then by
+	becoming that user you can investigate the problem in a
+	realistic manner without having to ask them to lend you their
+	session or, worse, their authentication credentials.
+      </p>
+<p>
+	To become a different user you use the function <a class="link" href="apc.html#func_become_user" title="C.4.33. become_user()"><code class="literal">veil2.become_user()</code></a>,
+	which will only succeed if you have the <code class="literal">become
+	user</code> privilege in the scope of, or a superior scope
+	to, their authentication context.
+      </p>
+<p>
+	Note that you cannot use
+	<code class="literal">veil2.become_user()</code> to gain access rights
+	that you do not already have: your session's privileges will
+	become those of the user that you become, minus any privileges
+	that they have and you do not (this is the mathematical
+	intersection of the sets of your privileges and theirs). 
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="roles_implementation"></a>21.4. Roles</h2></div></div></div>
+<p>
+      <code class="literal">Veil2</code> is supplied with a small set of
+      built-in <a class="link" href="ch04.html#roles" title="4.3. Roles">roles</a>.  To allow for
+      expansion of <code class="literal">Veil2</code>'s built-in roles in future
+      releases, you should start numbering your own roles from 5.
+    </p>
+<p>
+      Roles have 2 attributes that require some explanation:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+	    <code class="literal">implicit</code>;
+	  </p>
+<p>
+	    Roles marked as implicit are intended to not be assigned
+	    to accessors and do not appear in the set of roles
+	    implicitly mapped to the <code class="literal">superuser</code> role.
+	  </p>
+</li>
+<li class="listitem">
+<p>
+	    <code class="literal">immutable</code>;
+	  </p>
+<p>
+	    Immutable roles are intended to be function-level roles
+	    only.  They should not have other roles assigned to them.
+	  </p>
+</li>
+</ul></div>
+<p>
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="connect_role"></a>21.4.1. The Connect Role</h3></div></div></div>
+<p>
+	The <code class="literal">connect</code> role is provided by
+	<code class="literal">Veil2</code> and is intended to be the only role
+	that provides the <a class="link" href="ch21.html#connect_privilege" title="21.3.1. Connect Privilege"><code class="literal">connect</code></a>
+	privilege.  Users need this role in both their authentication
+	and session contexts (or a superior one such as global
+	context) in order to establish a session.
+      </p>
+<p>
+	This role has no other privileges, as supplied, and should
+	not be assigned any.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="superuser_role"></a>21.4.2. The Superuser Role</h3></div></div></div>
+<p>
+	The <code class="literal">superuser</code> role is system-provided, and
+	unmodifiable.  It provides every non-implicit role and every
+	privilege except <code class="literal">connect</code>.  This is built in
+	to the implementation (in <code class="literal"><a class="link" href="apb.html#view_all_role_roles" title="B.1.3.1. All Role Roles View">veil2.all_role_roles</a></code>)
+	and are not modifiable through <code class="literal"><a class="link" href="apa.html#entity_role_privilege" title="A.1.8. Role Privileges Table">veil2.role_privileges</a></code>
+	and <code class="literal"><a class="link" href="apa.html#entity_role_role" title="A.1.13. Role Roles Table">veil2.role_roles</a></code>.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="personal_context_role"></a>21.4.3. The Personal Context Role</h3></div></div></div>
+<p>
+	This role is implicitly assigned to each accessor (via
+	<code class="literal"><a class="link" href="apb.html#view_all_accessor_roles_plus" title="B.1.3.3. All Accessor Roles Plus View">veil2.all_accessor_roles_plus</a></code>)
+	when their session is established.  As supplied it has no
+	privileges.
+      </p>
+<p>
+	It may initially seem odd that there is a <a class="link" href="ch04.html#roles" title="4.3. Roles">role</a> with the same name as a <a class="link" href="ch04.html#security-contexts" title="4.5. Security Contexts">security context</a> but here
+	is the reasoning.  The only privileges that apply in your
+	<code class="literal">personal scope</code> are those that are assigned
+	in <code class="literal">personal context</code> and this is done
+	through a single, implied, role assignment.  We could have
+	named that role <span class="quote">“<span class="quote"><code class="literal">role that is assigned only in
+	personal context</code></span>”</span> but it isn't really a
+	better name so <span class="quote">“<span class="quote"><code class="literal">personal
+	context</code></span>”</span> it is.
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1598"></a>21.5. Authentication Contexts</h2></div></div></div>
+<p>
+      As described in the concepts section, having distinct <a class="link" href="ch04.html#authentication_context" title="4.7. Authentication Contexts">authentication contexts</a>
+      means that you can have distinct sets of usernames for different
+      groupings of users.  Typically this would be for different
+      organizations based on some sort of organization context type.
+    </p>
+<p>
+      If you don't need this functionality you can skip this section
+      and create the simplest possible
+      <code class="literal"><a class="link" href="apc.html#func_get_accessor" title="C.4.4. get_accessor()">my_get_accessor()</a></code>
+      function, something like this:
+      </p>
+<pre class="programlisting">
+create or replace
+function veil2.my_get_accessor(
+    username in text,
+    context_type_id in integer,
+    context_id in integer)
+  returns integer as
+$$
+declare
+  _result integer;
+begin
+  select user_id
+    into _result
+    from my_users
+   where user_name = username;
+   -- We could choose to ensure that context_type_id = 1 and
+   -- context_id = 0, but instead we just ignore those parameters.
+  return _result;
+end;
+$$
+language plpgsql security definer stable leakproof;
+	  
+      </pre>
+<p>
+    </p>
+<p>
+      If your application serves a number of distinct customers, each
+      effectively having their own web site, then the authentication
+      context will be provided by the login page for that web site.
+      For example, if your customers are:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; ">
+<li class="listitem">Alicecorp;</li>
+<li class="listitem">Bobcorp;</li>
+<li class="listitem">Carolcorp.</li>
+</ul></div>
+<p>
+      And the login pages are:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; ">
+<li class="listitem"><code class="literal">
+	  https://myveilprotectedsite/Alicecorp/login;
+	</code></li>
+<li class="listitem"><code class="literal">
+	  https://myveilprotectedsite/Bobcorp/login;
+	</code></li>
+<li class="listitem"><code class="literal">
+	  https://myveilprotectedsite/Carolcorp/login.
+	</code></li>
+</ul></div>
+<p>
+      Then each login page will provide different context data for the
+      authentication calls.  Assuming that we have defined a corp
+      context with a <code class="literal">context_type_id</code> of 3, and
+      that the <code class="literal">accessor_ids</code> for AliceCorp, BobCorp,
+      and CarolCorp are 42, 43, and 44 respectively, then our
+      <code class="literal">veil2.create_session()</code> calls for each of the
+      login pages will be as follows:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; ">
+<li class="listitem">
+<code class="literal">
+	    https://myveilprotectedsite/Alicecorp/login;
+	  </code><pre class="programlisting">
+select * from veil2.create_session(&lt;username&gt;, 4, 42);	    
+	  </pre>
+</li>
+<li class="listitem">
+<code class="literal">
+	    https://myveilprotectedsite/Bobcorp/login;
+	  </code><pre class="programlisting">
+select * from veil2.create_session(&lt;username&gt;, 4, 43);	    
+	  </pre>
+</li>
+<li class="listitem">
+<code class="literal">
+	    https://myveilprotectedsite/Carolcorp/login;
+	  </code><pre class="programlisting">
+select * from veil2.create_session(&lt;username&gt;, 4, 44);	    
+	  </pre>
+</li>
+</ul></div>
+<p>
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1631"></a>21.5.1. Associating Accessors With Their Authentication Context</h3></div></div></div>
+<p>
+	The association between an accessor and their authentication
+	context is entirely user-defined.  <code class="literal">Veil2</code>
+	relies on the <code class="literal">veil2.my_get_accessor()</code>
+	function to return an accessor_id for a given combination of
+	username and authentication context.  For an example of this,
+	you should look at the <code class="literal">veil2_demo</code>
+	(following the text <span class="quote">“<span class="quote"><code class="literal">STEP 3</code></span>”</span>
+	in the file <code class="literal">veil2_demo--&lt;version&gt;.sql</code>.
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="role_assignment_contexts"></a>21.6. Role Assignment and Contexts</h2></div></div></div>
+<p>
+      Each role assignment in <code class="literal">Veil2</code> happens within
+      a specific assignment context.  The assignment may be explicit,
+      as it is when roles are assigned to accessors in <a class="link" href="apa.html#entity_accessor_role" title="A.1.10. Accessor Roles Table"><code class="literal">veil2.accessor_roles</code></a>
+      or implicit as is the case for the <a class="link" href="ch21.html#personal_context_role" title="21.4.3. The Personal Context Role"><code class="literal">personal
+      context</code></a> role.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="new_role_assignment_types"></a>21.6.1. Creating New Role Assignment Mechanisms</h3></div></div></div>
+<p>
+	One of the coolest things about <code class="literal">Veil2</code> is
+	that you can create your own role assignment mechanisms.  You
+	do this by redefining <a class="link" href="apb.html#view_all_accessor_roles" title="B.1.1.3. All Accessor Roles View"><code class="literal">veil2.all_accessor_roles</code></a>.
+	This view returns all role assignments in all contexts other
+	than personal context which is handled by <code class="literal"><a class="link" href="apb.html#view_all_accessor_roles_plus" title="B.1.3.3. All Accessor Roles Plus View">veil2.all_accessor_roles_plus</a></code>).
+	You add new mechanisms by adding extra unions to the base
+	query against the <code class="literal">veil2.accessor_roles</code>
+	table.
+      </p>
+<p>
+	For instance, to add an implicit global context role
+	assignment of role <code class="literal">67</code> to all accessors
+	whose username begins with <code class="literal">M</code> (for reasons
+	that make no sense whatsoever, but nicely illustrate the
+	flexibility this provides) you would define your version of
+	the view like this:
+	</p>
+<pre class="programlisting">
+create or replace
+view veil2.my_all_accessor_roles (
+  accessor_id, role_id, context_type_id, context_id
+) as
+select accessor_id, role_id,
+       context_type_id, context_id
+  from veil2.accessor_roles
+ union all
+select accessor_id, role_id, 1, 0
+  from veil2.accessors
+ where lower(username) like 'm%';
+	</pre>
+<p>
+      </p>
+<p>
+	As a more realistic example let's add, additionally, the
+	<code class="literal">project member</code> role (which we'll give
+	role_id 68) in the project context to all accessors who are
+	recorded as team members in the
+	<code class="literal">project_members</code> table:
+	</p>
+<pre class="programlisting">
+create or replace
+view veil2.my_all_accessor_roles (
+  accessor_id, role_id, context_type_id, context_id
+) as
+select accessor_id, role_id,
+       context_type_id, context_id
+  from veil2.accessor_roles
+ union all
+select accessor_id, 67, 1, 0
+  from veil2.accessors
+ where lower(username) like 'm%'
+ union all
+select accessor_id, 68, 5, project_id -- project context type is 5
+  from project_members; 
+	</pre>
+<p>
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="physical_session_context"></a>21.7. Session Contexts</h2></div></div></div>
+<p>
+      As described in <a class="link" href="ch04.html#session_context" title="4.8. Session Contexts">session
+      contexts</a> in the concepts section, a user's session
+      context need not be the same as their authentication context.
+      The user-provided function <code class="literal"><a class="link" href="apc.html#func_get_accessor" title="C.4.4. get_accessor()">my_get_accessor()</a></code>
+      is used to determine the accessor_id for a user based on a
+      username and a context.  This context, ordinarily - see
+      Separating Login and Session Contexts below), will be the
+      session context.  Your <code class="literal">my_get_accessor()</code>
+      function may use the context parameters as it sees fit: if you
+      require a global authentication context, the parameters can be
+      ignored; or it can require the supplied context to be the
+      authentication context; or it can require that the supplied
+      context is related to the authentication context (eg a child
+      context of the authentication context).  What it chooses to do is
+      entirely up to your implementation.
+    </p>
+<p>
+      Note that in order to successfully authenticate, the user must
+      have <code class="literal"><a class="link" href="ch21.html#connect_privilege" title="21.3.1. Connect Privilege">connect</a></code> privilege in
+      a scope equal or superior to the session context.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="login_context"></a>21.7.1. Separating Login and Session Contexts</h3></div></div></div>
+<p>
+	In order to let privileged users work in session contexts that
+	are unrelated to their authentication contexts,
+	<code class="literal">Veil2</code> optionally allows the session context
+	for a session to be provided explicitly to the <code class="literal"><a class="link" href="apc.html#func_create_session" title="C.4.8. create_session()">veil2.create_session()</a></code>
+	and <code class="literal"><a class="link" href="apc.html#func_create_session" title="C.4.8. create_session()">veil2.hello()</a></code>
+	functions.
+      </p>
+<p>
+	The user must have <code class="literal">connect</code> privilege in the
+	scope of both the accessor's authentication context and the
+	chosen session context.
+      </p>
+<p>
+	This is described in more detail in the <a class="link" href="ape.html" title="Appendix E. Veil2 Authentication Protocols">Authentication Protocols</a>
+	appendix.
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="physical_role_mapping"></a>21.8. Role Mappings and Mapping Contexts</h2></div></div></div>
+<p>
+      As described in <a class="link" href="ch04.html#role_mapping" title="4.3.1. Contextual Role Mapping">the concepts
+      section</a>, <code class="literal">Veil2</code> allows roles to be
+      mapped to other roles, and for those role mappings to be
+      different for different users.
+    </p>
+<p>
+      The purpose of this is to allow different groups of users to be
+      able to separately manage their own role-&gt;role mappings.  For
+      instance, if one company allows Customer Service Reps to provide
+      financial incentives to their customers and another does not,
+      the first company might assign the <code class="literal">Manage
+      Discounts</code> role to the <code class="literal">Customer Service
+      Rep</code> role, while the other would not.
+    </p>
+<p>
+      If your <code class="literal">Veil2</code> protected system is providing
+      distinct virtual databases for a number of independent clients,
+      this is an important feature.
+    </p>
+<p>
+      <code class="literal">Veil2</code> allows this by providing different
+      mapping contexts to apply to different groups of users.  The
+      mapping context that applies for a given role assignment depends
+      on:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+	    the <code class="literal">mapping context target scope type</code>
+	    system parameter;
+	  </p>
+<p>
+	    This parameter (recorded in
+	    <code class="literal">veil2.system_parameters</code>) specifies
+	    scope type that will apply to mapping contexts.  By
+	    default this is <code class="literal">global scope</code> which
+	    means that <span class="emphasis"><em>all</em></span> accessors will see
+	    the same role-&gt;role mappings.  If you don't need different
+	    mapping contexts, you should leave this setting alone.
+	  </p>
+</li>
+<li class="listitem">
+<p>
+	    the context of the role assignment;
+	  </p>
+<p>
+	    Each role is assigned in a specific context.  The mapping
+	    context that applies to a role in a given assignment
+	    context will be the context of the first superior scope
+	    that matches our <code class="literal">mapping context target scope
+	    type</code>.
+	  </p>
+<p>
+	    For example, imagine a scope hierarchy that goes from
+	    corporation, to division, to department, to project.  If
+	    our mapping context is at the division level, then the
+	    <code class="literal">Project Manager</code> role assigned for a
+	    project within department S, division South, would have
+	    a mapping context of department S.  This would mean that
+	    the Project Manager role in department S might have
+	    different sub-roles from the same Project Manager role in
+	    Department Y.
+	  </p>
+</li>
+<li class="listitem"><p>
+	    the user's <a class="link" href="ch21.html#physical_session_context" title="21.7. Session Contexts">session
+	    context</a>.
+	  </p></li>
+</ul></div>
+<p>
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch20.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch22.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 20. Exploring The <code class="literal">Veil2</code> Demos </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 22. For Developers</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

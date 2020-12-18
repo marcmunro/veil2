@@ -2,93 +2,3431 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>C. Veil2 Changes History</title>
+<title>Appendix C. Veil2 Functions and Triggers</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
-<link rel="prev" href="apbs02.html" title="B.2. Dedicated Database Sessions">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="prev" href="apb.html" title="Appendix B. Veil2 Views, Materialized Views and Caches">
+<link rel="next" href="apd.html" title="Appendix D. Veil2 C Implementation">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="apbs02.html">Prev</a> </td>
+<a accesskey="p" href="apb.html">Prev</a> </td>
 <td width="20%" align="center"> </td>
-<td width="40%" align="right"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="apd.html">Next</a>
+</td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">B.2. Dedicated Database Sessions </td>
+<td width="40%" align="left" valign="top">Appendix B. <code class="literal">Veil2</code> Views, Materialized Views and Caches </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> </td>
+<td width="40%" align="right" valign="top"> Appendix D. <code class="literal">Veil2</code> C Implementation</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="appendix">
-<div class="titlepage"><div><div><h2 class="title">
-<a name="change_history"></a>C. <code class="literal">Veil2</code> Changes History</h2></div></div></div>
-<div class="table">
-<a name="idm1980"></a><p class="title"><b>Table C.1. </b></p>
-<div class="table-contents">
-    Change History
-    <table class="table" border="1">
-<colgroup>
-<col align="center" class="version">
-<col align="center" class="tag">
-<col align="center" class="date">
-<col class="notes">
-</colgroup>
-<thead><tr>
-<th align="center">Version</th>
-<th align="center">git tag</th>
-<th align="center">Release Date</th>
-<th>Notes</th>
-</tr></thead>
-<tbody>
-<tr>
-<td align="center">0.5 (alpha)</td>
-<td align="center">n/a</td>
-<td align="center">n/a</td>
-<td>
-	    <p>
-	      This was the version number used for original
-	      development.  There was no release of this version.
-	    </p>
-	  </td>
-</tr>
-<tr>
-<td align="center">0.9 (beta)</td>
-<td align="center">v0.9</td>
-<td align="center">202005020</td>
-<td>
-	    <p>
-	      The first public release.  Announced to pgsql-announce
-	      20200521.
-	    </p>
-	  </td>
-</tr>
-</tbody>
-</table>
+<div class="titlepage"><div><div><h1 class="title">
+<a name="idm2354"></a>Appendix C. Veil2 Functions and Triggers</h1></div></div></div>
+<p>
+    The following functions, defined in
+    <code class="literal">sql/veil2--0.9.1.sql</code>, are for
+    managing Referential Integrity:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<a class="link" href="apc.html#func_context_exists_chk" title="C.1.1. context_exists_chk()">context_exists_chk()</a>;
+      </li></ul></div>
+<p>
+  </p>
+<p>
+    These functions are for managing user-provided database objects
+    (functions and views):  
+
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#func_function_definition" title="C.2.1. function_definition()">function_definition()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_replace_function" title="C.2.2. replace_function()">replace_function()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_restore_system_functions" title="C.2.3. restore_system_functions()">restore_system_functions()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_install_user_functions" title="C.2.4. install_user_functions()">install_user_functions()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_function_exists" title="C.2.5. function_exists()">function_exists()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_view_exists" title="C.2.6. view_exists()">view_exists()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_replace_view" title="C.2.7. replace_view()">replace_view()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_restore_system_views" title="C.2.8. restore_system_views()">restore_system_views()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_install_user_views" title="C.2.9. install_user_views()">install_user_views()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_init" title="C.2.10. init()">init()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_deferred_install_fn" title="C.2.11. deferred_install_fn()">deferred_install_fn()</a>.
+      </li>
+</ul></div>
+<p>
+  </p>
+<p>
+    These functions are for authentication handling:
+    
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#func_authenticate_false" title="C.3.1. authenticate_false()">authenticate_false()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_authenticate_plaintext" title="C.3.2. authenticate_plaintext()">authenticate_plaintext()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_authenticate_bcrypt" title="C.3.3. authenticate_bcrypt()">authenticate_bcrypt()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_authenticate" title="C.3.4. authenticate()">authenticate()</a>.
+      </li>
+</ul></div>
+<p>
+  </p>
+<p>
+    These functions are for session handling:
+
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#func_session_ready" title="C.4.1. session_ready()">session_ready()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_reset_session" title="C.4.2. reset_session()">reset_session()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_reset_session_privs" title="C.4.3. reset_session_privs()">reset_session_privs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_get_accessor" title="C.4.4. get_accessor()">get_accessor()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_new_session_context" title="C.4.5. new_session_context()">new_session_context()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_have_accessor_context" title="C.4.6. have_accessor_context()">have_accessor_context()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_create_accessor_session" title="C.4.7. create_accessor_session()">create_accessor_session()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_create_session" title="C.4.8. create_session()">create_session()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_check_nonce" title="C.4.9. check_nonce()">check_nonce()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_update_nonces" title="C.4.10. update_nonces()">update_nonces()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_filter_privs" title="C.4.11. filter_privs()">filter_privs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_load_ancestor_privs" title="C.4.12. load_ancestor_privs()">load_ancestor_privs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_filter_session_privs" title="C.4.13. filter_session_privs()">filter_session_privs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_save_privs_as_orig" title="C.4.14. save_privs_as_orig()">save_privs_as_orig()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_all_accessor_roles" title="C.4.15. all_accessor_roles()">all_accessor_roles()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_base_accessor_roleprivs" title="C.4.16. base_accessor_roleprivs()">base_accessor_roleprivs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_session_context" title="C.4.17. session_context()">session_context()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_session_privileges" title="C.4.18. session_privileges()">session_privileges()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_load_session_privs" title="C.4.19. load_session_privs()">load_session_privs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_save_session_privs" title="C.4.20. save_session_privs()">save_session_privs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_load_cached_privs" title="C.4.21. load_cached_privs()">load_cached_privs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_update_session" title="C.4.22. update_session()">update_session()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_load_connection_privs" title="C.4.23. load_connection_privs()">load_connection_privs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_reload_session_context" title="C.4.24. reload_session_context()">reload_session_context()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_reload_connection_privs" title="C.4.25. reload_connection_privs()">reload_connection_privs()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_check_continuation" title="C.4.26. check_continuation()">check_continuation()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_open_connection" title="C.4.27. open_connection()">open_connection()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_close_connection" title="C.4.28. close_connection()">close_connection()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_hello" title="C.4.29. hello()">hello()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_check_become_user_priv" title="C.4.30. check_become_user_priv()">check_become_user_priv()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_check_accessor_context" title="C.4.31. check_accessor_context()">check_accessor_context()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_become_accessor" title="C.4.32. become_accessor()">become_accessor()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_become_user" title="C.4.33. become_user()">become_user()</a>.
+      </li>
+</ul></div>
+<p>
+  </p>
+<p>
+    These functions are for testing session privileges:
+
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#func_always_true" title="C.5.1. always_true()">always_true()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_i_have_global_priv" title="C.5.2. i_have_global_priv()">i_have_global_priv()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_i_have_personal_priv" title="C.5.3. i_have_personal_priv()">i_have_personal_priv()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_i_have_priv_in_scope" title="C.5.4. i_have_priv_in_scope()">i_have_priv_in_scope()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_i_have_priv_in_scope_or_global" title="C.5.5. i_have_priv_in_scope_or_global()">i_have_priv_in_scope_or_global()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_i_have_priv_in_superior_scope" title="C.5.6. i_have_priv_in_superior_scope()">i_have_priv_in_superior_scope()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_i_have_priv_in_scope_or_superior" title="C.5.7. i_have_priv_in_scope_or_superior()">i_have_priv_in_scope_or_superior()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_i_have_priv_in_scope_or_superior_or_global" title="C.5.8. i_have_priv_in_scope_or_superior_or_global()">i_have_priv_in_scope_orsuperior_or_global()</a>.
+      </li>
+</ul></div>
+<p>
+  </p>
+<p>
+    Utility and administration functions:
+
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#func_result_counts" title="C.6.1. result_counts()">result_counts()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_delete_expired_sessions" title="C.6.2. delete_expired_sessions()">delete_expired_sessions()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_docpath" title="C.6.3. func_docpath()">docpath()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_datapath" title="C.6.4. func_datapath()">datapath()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_bcrypt" title="C.6.5. func_bcrypt()">bcrypt()</a>.
+      </li>
+</ul></div>
+<p>
+  </p>
+<p>
+      Functions for refreshing materialized views:
+
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#func_refresh_all_matviews" title="C.7.1. Refresh All Matviews Function">refresh_all_matviews()</a>;
+	</li>
+<li class="listitem">
+<a class="link" href="apc.html#func_refresh_scopes_matviews" title="C.7.2. Refresh Scopes Matviews Function">refresh_scopes_matviews()</a>;
+	</li>
+<li class="listitem">
+<a class="link" href="apc.html#func_refresh_privs_matviews" title="C.7.4. Refresh Privs Matviews Function">refresh_privs_matviews()</a>;
+	</li>
+<li class="listitem">
+<a class="link" href="apc.html#func_refresh_roles_matviews" title="C.7.3. Refresh Roles Matviews Function">refresh_roles_matviews()</a>;
+	</li>
+<li class="listitem">
+<a class="link" href="apc.html#func_clear_accessor_privs_cache" title="C.7.5. Clear Accessor Privs Cache Function">clear_accessor_privs_cache()</a>;
+	</li>
+<li class="listitem">
+<a class="link" href="apc.html#func_clear_accessor_privs_cache_entry" title="C.7.6. Clear Accessor Privs Cache Entry Function">clear_accessor_privs_cache_entry()</a>;
+	</li>
+</ul></div>
+<p>
+  </p>
+<p>
+    Functions for checking the status of your <code class="literal">Veil2</code>
+    secured database implementation:
+
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#func_have_user_scope_types" title="C.8.1. func_have_user_scope_types()">have_user_scope_types()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_have_user_privileges" title="C.8.2. have_user_privileges()">have_user_privileges()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_have_user_roles" title="C.8.3. have_user_roles()">have_user_roles()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_have_role_privileges" title="C.8.4. have_role_privileges()">have_role_privileges()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_have_role_roles" title="C.8.5. have_role_roles()">have_role_roles()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_have_accessors" title="C.8.6. have_accessors()">have_accessors()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_have_user_scopes" title="C.8.7. have_user_scopes()">have_user_scopes()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_check_table_security" title="C.8.8. check_table_security()">check_table_security()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_implementation_status" title="C.8.9. implementation_status()">implementation_status()</a>.
+      </li>
+</ul></div>
+<p>
+  </p>
+<p>
+    Other trigger functions:
+
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#func_system_parameters_check" title="C.9.1. system_parameters_check()">system_parameters_check()</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#func_make_user_defined" title="C.9.2. make_user_defined()">make_user_defined()</a>.
+      </li>
+</ul></div>
+<p>
+  </p>
+<p>
+    And these triggers exist:
+
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<a class="link" href="apc.html#trig_context_role__context_fk" title="C.10.1. context_role__context_fk">context_role__context_fk</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#trig_role_role__context_fk" title="C.10.2. role_role__context_fk">role_role__context_fk</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#trig_accessor_role__context_fk" title="C.10.3. accessor_role__context_fk">accessor_role__context_fk</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#trig_scopes__aiudt" title="C.10.4. scopes__aiudt">scopes__aiudt</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#trig_deferred_install_trg" title="C.10.5. deferred_install_trg">deferred_install_trg</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#trig_system_parameters_biu" title="C.10.6. system_parameters_biu">system_parameters_biu</a>;
+      </li>
+<li class="listitem">
+<a class="link" href="apc.html#trig_authentication_types_biu" title="C.10.7. authentication_types_biu">authentication_types_biu</a>.
+      </li>
+</ul></div>
+<p>
+  </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="ri_functions"></a>C.1. Functions for managing Referential Integrity </h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_context_exists_chk"></a>C.1.1. <code class="literal">context_exists_chk()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.context_exists_chk()
+  returns trigger as
+$$
+begin
+  if not exists (
+      select null
+        from veil2.scopes a
+       where a.scope_type_id = new.context_type_id
+         and a.scope_id = new.context_id)
+  then
+    -- Pseudo Integrity Constraint Violation
+    raise exception using
+            message = TG_OP || ' on table "' ||
+	    	      TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME ||
+		      '" violates foreign key constraint "' ||
+		      coalesce(TG_ARGV[0], 'null') || '"',
+		detail = 'Key (scope_type_id, scope_id)=(' ||
+		         coalesce(new.context_type_id::text, 'null') || ', ' ||
+			 coalesce(new.context_id::text, 'null') || 
+			 ') is not present in table "veil2.scopes"',
+		errcode = '23503';
+  end if;
+  return new;
+end;
+$$
+language plpgsql security definer stable;
+
+</pre>
+<p>
+Trigger to be used instead of FK-constraints against the scopes
+table.  This is because we expect to use inheritence to extend the
+scopes table to contain references to user-provided tables, and
+inheritence does not work well with foreign-key constraints.
+</p>
 </div>
 </div>
-<br class="table-break">
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="base_functions"></a>C.2. Functions for Management of User-Provided Database Objects</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_function_definition"></a>C.2.1. <code class="literal">function_definition()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.function_definition(fn_name text, fn_oid oid)
+  returns text as
+$$
+declare
+  rec record;
+  _result text;
+begin
+  -- Query (modified) from \df+ in psql
+  select 
+    pg_catalog.pg_get_function_arguments(p.oid) as arg_types,
+    pg_catalog.pg_get_function_result(p.oid) as result_type,
+    p.prosrc as source,
+    l.lanname as language,
+    case when prosecdef then 'definer' else 'invoker' end as security,
+    case
+      when p.provolatile = 'i' then 'immutable'
+      when p.provolatile = 's' then 'stable'
+      when p.provolatile = 'v' then 'volatile'
+    end as volatility,
+    case
+      when p.proparallel = 'r' then 'restricted'
+      when p.proparallel = 's' then 'safe'
+      when p.proparallel = 'u' then 'unsafe'
+    end as parallel
+  into rec
+  from pg_catalog.pg_proc p
+       left join pg_catalog.pg_language l on l.oid = p.prolang
+  where p.oid = fn_oid;
+  if found then
+    _result := 'create or replace function veil2.' || fn_name ||
+              '(' || rec.arg_types || ') returns ' ||
+	      rec.result_type || ' as $xyzzy$' ||
+	      rec.source || '$xyzzy$ language ''' ||
+	      rec.language || ''' security ' ||
+	      rec.security || ' ' || rec.volatility ||
+	      ' parallel ' || rec.parallel;
+  end if;
+  return _result;
+end;
+$$
+language plpgsql security definer stable;
+
+</pre>
+<p>
+Returns the text to create a function named
+<code class="literal">fn_name</code>, based on the function definition provided
+by <code class="literal">fn_oid</code>.  This is used by
+veil2.install_user_functions() and veil2.restore_system_functions()
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_replace_function"></a>C.2.2. <code class="literal">replace_function()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.replace_function(fn_name text, from_fn oid)
+  returns void as
+$$
+declare
+  fn_defn text;
+begin
+  fn_defn := veil2.function_definition(fn_name, from_fn);
+  --raise warning '%', fn_defn;
+  execute fn_defn;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Create or replace the function named <code class="literal">fn_name</code> based
+on the definition given in <code class="literal">fn_oid</code>.  Used for
+installing user-provided functions in place of the veil2
+system-provided ones.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_restore_system_functions"></a>C.2.3. <code class="literal">restore_system_functions()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.restore_system_functions()
+  returns void as
+$$
+declare
+  rec record;
+begin
+  for rec in
+    select po.proname, pb.oid backup_oid, po.oid as old_oid
+      from pg_catalog.pg_namespace n
+     inner join pg_catalog.pg_proc pb -- backup proc
+        on pb.pronamespace = n.oid
+       and pb.proname like 'backup_%'
+      inner join pg_catalog.pg_proc po -- original proc
+        on po.pronamespace = n.oid
+       and pb.proname = 'backup_' || po.proname
+     where n.nspname = 'veil2'
+  loop
+    perform veil2.replace_function(rec.proname, rec.backup_oid);
+  end loop;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Restore system-provided functions that have been replaced by
+user-provided ones.  The originals for the system-provided functions
+will have been saved as backups by veil2.install_user_functions()
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_install_user_functions"></a>C.2.4. <code class="literal">install_user_functions()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.install_user_functions()
+  returns void as
+$$
+declare
+  rec record;
+begin
+  for rec in
+    select po.proname, p.oid new_oid, po.oid as old_oid,
+    	   case when pb.proname is null then false
+	   else true end as have_backup
+      from pg_catalog.pg_namespace n
+     inner join pg_catalog.pg_proc p -- replacement proc
+        on p.pronamespace = n.oid
+       and p.proname like 'my%'
+      inner join pg_catalog.pg_proc po -- original proc
+        on po.pronamespace = n.oid
+       and p.proname = 'my_' || po.proname
+      left outer join pg_catalog.pg_proc pb -- backup of original proc
+        on pb.pronamespace = n.oid
+       and pb.proname = 'backup_' || po.proname
+     where n.nspname = 'veil2'
+  loop
+    if not rec.have_backup then
+      perform veil2.replace_function('backup_' || rec.proname,
+	     			     rec.old_oid);
+    end if;
+    perform veil2.replace_function(rec.proname, rec.new_oid);
+  end loop;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Install any user-provided functions that are to replace
+system-provided ones.  The original versions of the system-provided
+functions will be saved as backups.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_function_exists"></a>C.2.5. <code class="literal">function_exists()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.function_exists(fn_name text)
+  returns boolean as
+$$
+declare
+  _result boolean;
+begin
+  select true
+    into _result
+     from pg_catalog.pg_namespace n
+    inner join pg_catalog.pg_proc pn -- new proc
+       on pn.pronamespace = n.oid
+      and pn.proname = fn_name
+     where n.nspname = 'veil2';
+  return found;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Predicate returning true if a function named
+<code class="literal">fn_name</code> exists in the veil2 schema.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_view_exists"></a>C.2.6. <code class="literal">view_exists()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.view_exists(vw_name text)
+  returns boolean as
+$$
+declare
+  _result boolean;
+begin
+  select true
+    into _result
+     from pg_catalog.pg_namespace n
+    inner join pg_catalog.pg_class rn -- new reln
+       on rn.relnamespace = n.oid
+      and rn.relname = vw_name
+      and rn.relkind = 'v'
+     where n.nspname = 'veil2';
+  return found;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Predicate returning true if a view named
+<code class="literal">vw_name</code> exists in the veil2 schema.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_replace_view"></a>C.2.7. <code class="literal">replace_view()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.replace_view(view_name text, from_view oid)
+  returns void as
+$$
+declare
+  view_defn text;
+begin
+  view_defn := 'create or replace view veil2.' ||
+  	       view_name || ' as ' ||
+  	       pg_catalog.pg_get_viewdef(from_view, true);
+  --raise warning '%', view_defn;
+  execute view_defn;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Create or replace the view named <code class="literal">view_name</code> based
+on the definition given in <code class="literal">view_oid</code>.  Used for
+installing user-provided views in place of the veil2
+system-provided ones.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_restore_system_views"></a>C.2.8. <code class="literal">restore_system_views()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.restore_system_views()
+  returns void as
+$$
+declare
+  rec record;
+begin
+  for rec in
+    select vo.relname, vb.oid backup_oid, vo.oid as old_oid
+      from pg_catalog.pg_namespace n
+     inner join pg_catalog.pg_class vb -- backup view
+        on vb.relnamespace = n.oid
+       and vb.relkind = 'v'
+       and vb.relname like 'backup_%'
+     inner join pg_catalog.pg_class vo -- original view
+        on vo.relnamespace = n.oid
+       and vo.relkind = 'v'
+       and vb.relname = 'backup_' || vo.relname
+     where n.nspname = 'veil2'
+  loop
+    perform veil2.replace_view(rec.relname, rec.backup_oid);
+  end loop;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Restore system-provided views that have been replaced by
+user-provided ones.  The originals for the system-provided view
+will have been saved as backups by veil2.install_user_views()
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_install_user_views"></a>C.2.9. <code class="literal">install_user_views()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.install_user_views()
+  returns void as
+$$
+declare
+  rec record;
+begin
+  for rec in
+    select vo.relname, v.oid new_oid, vo.oid as old_oid,
+           case when vb.relname is null then false
+           else true end as have_backup
+      from pg_catalog.pg_namespace n
+     inner join pg_catalog.pg_class v -- Replacement view
+        on v.relnamespace = n.oid
+       and v.relkind = 'v'
+     inner join pg_catalog.pg_class vo -- original view
+        on vo.relnamespace = n.oid
+       and vo.relkind = 'v'
+       and v.relname = 'my_' || vo.relname
+      left outer join pg_catalog.pg_class vb -- backup of original view
+        on vb.relnamespace = n.oid
+       and vb.relkind = 'v'
+       and vb.relname = 'backup_' || vo.relname
+     where n.nspname = 'veil2'
+  loop
+    if not rec.have_backup then
+      perform veil2.replace_view('backup_' || rec.relname,
+	     			 rec.old_oid);
+    end if;
+    perform veil2.replace_view(rec.relname, rec.new_oid);
+  end loop;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Install any user-provided views that are to replace
+system-provided ones.  The original versions of the system-provided
+views will be saved as backups.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_init"></a>C.2.10. <code class="literal">init()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.init() returns void as
+$$
+begin
+  perform veil2.install_user_functions();
+  perform veil2.install_user_views();
+  refresh materialized view veil2.all_superior_scopes;
+  refresh materialized view veil2.all_role_privileges;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Perform some basic setup and reset tasks.  This creates
+user-modifiable views that are not already defined and refreshes all
+materialized views.  You should call it any time you have unexpected
+results.  If it fixes your problem then you have a problem with the
+automatic refresh of one of the materialized views.  If not, no harm
+will have been done.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_deferred_install_fn"></a>C.2.11. <code class="literal">deferred_install_fn()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.deferred_install_fn() returns trigger as
+$$
+begin
+  perform veil2.init();
+  return new;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Install user-provided functions and views.  This is called from an
+after statement trigger so that we do not install the new versions of
+functions until the current versions, which we may be replacing, have
+completed.  This may be overly prudent but it does no harm.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="authentication_functions"></a>C.3. Authentication Functions</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_authenticate_false"></a>C.3.1. <code class="literal">authenticate_false()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.authenticate_false(
+    accessor_id integer,
+    token text)
+  returns boolean as
+$$
+select false;
+$$
+language sql security definer stable;
+
+</pre>
+<p>
+Authentication predicate for unimplemented or disabled authentication
+types.  This function always returns false, causing authentication to
+fail.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_authenticate_plaintext"></a>C.3.2. <code class="literal">authenticate_plaintext()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.authenticate_plaintext(
+    accessor_id integer,
+    token text)
+  returns boolean as
+$$
+select coalesce(
+    (select authent_token = authenticate_plaintext.token
+       from veil2.authentication_details
+      where accessor_id = authenticate_plaintext.accessor_id
+        and authentication_type = 'plaintext'),
+    false);
+$$
+language sql security definer stable;
+
+</pre>
+<p>
+Authentication predicate for plaintext authentication.  Return true if
+the supplied token matches the stored authentication token for the
+accessor.  This authentication mechanism exists primarily for demo
+purposes.  DO NOT USE IT IN A REAL APPLICATION!
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_authenticate_bcrypt"></a>C.3.3. <code class="literal">authenticate_bcrypt()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.authenticate_bcrypt(
+    accessor_id integer,
+    token text)
+  returns boolean as
+$$
+select coalesce(
+    (select authent_token = crypt(token, authent_token)
+       from veil2.authentication_details
+      where accessor_id = authenticate_bcrypt.accessor_id
+        and authentication_type = 'bcrypt'),
+    false);
+$$
+language sql security definer stable;
+
+</pre>
+<p>
+Authentication predicate for bcrypt authentication.  Return true if
+running bcrypt on the supplied token, using the salt from the
+stored authentication token for the accessor, matches that stored
+authentication token.
+</p>
+<p>
+Bcrypt is generally considered a step up from traditional hash-based
+password authentication, though it is essentially the same thing.  In
+a hash-based authentication system, a user's password is stored as a,
+possibly salted, hash on the plaintext.  Since hashes are one-way
+algorithms it is impossible to retrieve the original password from the
+hash.  However, as computers have become more powerful, brute-force
+approaches have become more feasible.  With a simple hash, it is is
+now possible to try every possible password until one matches the
+hash, whether salted or not in a matter of hours.  Bcrypt makes
+brute-forcing difficult by using a compuatationally inefficient hash
+algorithm, which makes brute force attacks a very expensive
+proposition.  Note that in attacks on hash-based passwords it is
+assumed that the hashed password has been compromised.  Whether this
+is likely in database protected by Veil2 is moot, however there may be
+more likely avenues for attack as the hashed passwords can be pretty
+well locked down.
+</p>
+<p>
+The current bcrypt implementation's biggest down-side, in common with
+traditional hash-based approaches, is that the user's password is
+sent to the server in plaintext before it is tested by bcrypting it.
+A better authentication method would avoid this.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_authenticate"></a>C.3.4. <code class="literal">authenticate()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.authenticate(
+    accessor_id integer,
+    authent_type text,
+    token text)
+  returns boolean as
+$$
+declare
+  success boolean;
+  authent_fn text;
+  enabled boolean;
+begin
+  select t.enabled, t.authent_fn
+    into enabled, authent_fn
+    from veil2.authentication_types t
+   where t.shortname = authent_type;
+  if found and enabled then
+    execute format('select * from %s(%s, %L)',
+                   authent_fn, accessor_id, token)
+       into success;
+    return success;
+  end if;
+  return false;
+end;
+$$
+language plpgsql security definer stable;
+
+</pre>
+<p>
+For the given accessor_id and authentication_type check whether token
+is an appropriate authentication.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="session_functions"></a>C.4. Session Functions</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_session_ready"></a>C.4.1. <code class="literal">session_ready()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.session_ready() returns boolean
+     as '$libdir/veil2', 'veil2_session_ready'
+     language C stable strict;
+</pre>
+<p>
+Predicate to indicate whether veil2.reset_session() has been
+successfully called for this session.  If not, none of the
+C language i_have_privilege functions will return true.  
+</p>
+<p>
+This exists as a stand-alone function so that it may be used by
+user-defined functions.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#ab1c1816e2ef1b38fdfc3abf503d3fc50">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_reset_session"></a>C.4.2. <code class="literal">reset_session()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.reset_session() returns void
+     as '$libdir/veil2', 'veil2_reset_session'
+     language C volatile strict security definer;
+</pre>
+<p>
+Ensure our temp tables exist, are of the expected type (temporary
+tables); that the session user has no unexpected access rights on
+them; and clear them.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#aa978d6e0212eb0edf5436a07a4bec88d">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_reset_session_privs"></a>C.4.3. <code class="literal">reset_session_privs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.reset_session_privs() returns void
+     as '$libdir/veil2', 'veil2_reset_session_privs'
+     language C volatile strict security definer;
+</pre>
+<p>
+Safely clear the contents of the veil2_session_privileges temporary
+table.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#ab9a3b057ba1dea0f0db728f321fb768d">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_get_accessor"></a>C.4.4. <code class="literal">get_accessor()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.get_accessor(
+    username in text,
+    context_type_id in integer,
+    context_id in integer)
+  returns integer as
+$$
+begin
+  -- Cause any user-provided versions of veil2 functions to be
+  -- installed before the current statement completes.
+  insert into veil2.deferred_install values (now());
+  
+  if veil2.function_exists('my_get_accessor') then
+    -- If we have a user-provided version of this function, we call it
+    -- now.  The next time we are called, this, the system-provided
+    -- version of the function, will have been replaced by the
+    -- user-provided copy.  This version can be restored by calling
+    -- veil2.restore_base_system().
+    return veil2.my_get_accessor(username, context_type_id, context_id);
+  end if;
+  
+  return 0;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Retrieve accessor_id based on username and context.  A user-provided
+version of this, named my_get_accessor() should be created
+specifically for your application.  It will be automatically installed
+when it is first needed.  If you modify your version, you can update
+the system version by calling veil2.init().
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_new_session_context"></a>C.4.5. <code class="literal">new_session_context()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.new_session_context(
+    accessor_id in integer,
+    login_context_type_id in integer,
+    login_context_id in integer,
+    session_context_type_id in integer,
+    session_context_id in integer,
+    parent_session_id in integer default null,
+    session_id out integer,
+    mapping_context_type_id out integer,
+    mapping_context_id out integer)
+  returns record as
+$$
+  insert
+    into veil2_session_context
+        (accessor_id, session_id,
+	 login_context_type_id, login_context_id,
+	 session_context_type_id, session_context_id,
+	 mapping_context_type_id, mapping_context_id,
+	 parent_session_id)
+  select new_session_context.accessor_id,  nextval('veil2.session_id_seq'),
+	 new_session_context.login_context_type_id,
+	   new_session_context.login_context_id,
+	 new_session_context.session_context_type_id,
+	   new_session_context.session_context_id,
+         case when sp.parameter_value = '1' then 1
+         else coalesce(asp.superior_scope_type_id,
+	               new_session_context.session_context_type_id) end,
+           case when sp.parameter_value = '1' then 0
+           else coalesce(asp.superior_scope_id,
+	                 new_session_context.session_context_id) end,
+	 new_session_context.parent_session_id
+    from veil2.system_parameters sp
+    left outer join veil2.all_superior_scopes asp
+      on asp.scope_type_id = new_session_context.session_context_type_id
+     and asp.scope_id = new_session_context.session_context_id
+     and asp.superior_scope_type_id = sp.parameter_value::integer
+     and asp.is_type_promotion
+   where sp.parameter_name = 'mapping context target scope type'
+  returning veil2_session_context.session_id,
+            veil2_session_context.mapping_context_type_id,
+            veil2_session_context.mapping_context_id;
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+Create a veil2_session_context record for the given parameters,
+returning session_id and mapping context.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_have_accessor_context"></a>C.4.6. <code class="literal">have_accessor_context()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.have_accessor_context(
+    _accessor_id integer,
+    _context_type_id integer,
+    _context_id integer)
+  returns boolean as
+$$
+declare
+  result boolean;
+begin
+    -- Whether the combination of accessor_id and context is valid.
+    -- Generate session_supplemental if authentication method supports it.
+  select exists (
+    into result
+    select null
+      from veil2.accessor_contexts ac
+     where ac.accessor_id = _accessor_id
+       and ac.context_type_id = _context_type_id
+       and ac.context_id = _context_id);
+  
+  return result;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Predicate to determine whether an accessor has the right to use the
+given session context.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_create_accessor_session"></a>C.4.7. <code class="literal">create_accessor_session()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.create_accessor_session(
+    accessor_id in integer,
+    authent_type in text,
+    login_context_type_id in integer,
+    login_context_id in integer,
+    session_context_type_id in integer,
+    session_context_id in integer,
+    session_id out integer,
+    session_token out text,
+    session_supplemental out text)
+  returns record as
+$$
+declare
+  _mapping_context_type_id integer;
+  _mapping_context_id integer;
+  supplemental_fn text;
+begin
+  execute veil2.reset_session();
+
+  -- Regardless of validity of accessor_id, we create a
+  -- veil2_session_context record.  This is to prevent fishing for
+  -- valid accessor_ids.
+  select *
+    into session_id, _mapping_context_type_id,
+	 _mapping_context_id
+     from veil2.new_session_context(
+  	     accessor_id,
+	     login_context_type_id, login_context_id,
+	     session_context_type_id, session_context_id) x;
+
+  -- Figure out the session tokens.  This must succeed regardless of
+  -- the validity of our parameters.
+  select t.supplemental_fn
+    into supplemental_fn
+    from veil2.authentication_types t
+   where shortname = authent_type;
+
+  if supplemental_fn is not null then
+    execute format('select * from %s(%s, %L)',
+                   supplemental_fn, _accessor_id, session_token)
+       into session_token, session_supplemental;
+  else
+    session_token := encode(digest(random()::text || now()::text, 'sha256'),
+		            'base64');
+  end if;
+
+  if veil2.have_accessor_context(accessor_id, login_context_type_id,
+     				 login_context_id)
+  then
+    insert
+      into veil2.sessions
+          (accessor_id, session_id,
+	   login_context_type_id, login_context_id,
+	   session_context_type_id, session_context_id,
+	   mapping_context_type_id, mapping_context_id,
+	   authent_type, has_authenticated,
+	   session_supplemental, expires,
+	   token)
+    select create_accessor_session.accessor_id,
+	     create_accessor_session.session_id, 
+    	   create_accessor_session.login_context_type_id,
+	     create_accessor_session.login_context_id,
+	   create_accessor_session.session_context_type_id,
+	     create_accessor_session.session_context_id,
+    	   _mapping_context_type_id, _mapping_context_id,
+	   authent_type, false,
+	   session_supplemental, now() + sp.parameter_value::interval,
+	   session_token
+      from veil2.system_parameters sp
+     where sp.parameter_name = 'shared session timeout';
+  end if;
+end;
+$$
+language plpgsql security definer volatile
+set client_min_messages = 'error';
+
+</pre>
+<p>
+Create a new session based on an accessor_id rather than username.
+This is an internal function to veil2.  It does the hard work for
+create_session().
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_create_session"></a>C.4.8. <code class="literal">create_session()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.create_session(
+    username in text,
+    authent_type in text,
+    context_type_id in integer default 1,
+    context_id in integer default 0,
+    session_context_type_id in integer default null,
+    session_context_id in integer default null,
+    session_id out integer,
+    session_token out text,
+    session_supplemental out text)
+  returns record as
+$$
+declare
+  _accessor_id integer;
+begin
+  -- Generate session_id and session_token and establish whether
+  -- username was valid.
+  _accessor_id := veil2.get_accessor(username, context_type_id, context_id);
+
+  select cas.session_id, cas.session_token,
+         cas.session_supplemental
+    into create_session.session_id, create_session.session_token,
+         create_session.session_supplemental
+    from veil2.create_accessor_session(
+             _accessor_id, authent_type,
+	     context_type_id, context_id,
+	     coalesce(session_context_type_id, context_type_id),
+	     coalesce(session_context_id, context_id)) cas;
+end;
+$$
+language plpgsql security definer volatile
+set client_min_messages = 'error';
+
+</pre>
+<p>
+Get session credentials for a new session.  
+</p>
+<p>
+Returns session_id, authent_token and session_supplemental.
+</p>
+<p>
+session_id is used to uniquely identify this user's session.  It will
+be needed for subsequent open_connection() calls.
+</p>
+<p>
+session_token is randomly generated.  Depending on the authentication
+method chosen, the client may need to use this when generating their
+authentication token for the subsequent open_connection() call.
+session_supplemental is an authentication method specific set of
+data.  Depending upon the authentication method, the client may need
+to use this in generating subsequent authentication tokens,
+</p>
+<p>
+If username is not valid the function will appear to work but
+subsequent attempts to open the session will fail and no privileges
+will be loaded.  This makes it harder to fish for valid usernames.
+</p>
+<p>
+The authent_type parameter identifies what type of authentication will
+be used, and therefore determines the authentication protocol.  All
+authentication types will make use of a session_id and session_token,
+some may also require additional fields.  These will be provided in
+session_supplemental.  For example, if we were to define a
+Diffie-Hellman key exchange protocol, the session_supplemental field
+would provide modulus, base and public transport values.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_check_nonce"></a>C.4.9. <code class="literal">check_nonce()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.check_nonce(
+    nonce integer,
+    nonces bitmap)
+  returns boolean as
+$$
+  select case
+         when nonces is null then true
+         when (nonces ? nonce) then false
+	 when nonce &lt; bitmin(nonces) then false
+	 when nonce &gt; (bitmax(nonces) + 64) then false
+	 else true end;
+$$
+language sql security definer stable;
+
+</pre>
+<p>
+Check that nonce has not already been used and is within the range of
+acceptable values, returning true if all is well.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_update_nonces"></a>C.4.10. <code class="literal">update_nonces()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.update_nonces(
+    nonce integer,
+    nonces bitmap)
+  returns bitmap as
+$$
+declare
+  reslt bitmap;
+  i integer;
+  target_bitmin integer;
+begin
+  reslt := coalesce(nonces, bitmap()) + nonce;
+  if (bitmax(reslt) - bitmin(reslt)) &gt; 192 then
+    -- If there are 3 64-bit groups in the bitmap, let's lose the
+    -- lowest one.  We keep 2 groups active, allowing for some slop in
+    -- the arrival of consecutive integers without allowing the bitmaps
+    -- to become unreasonably large.  I don't see any attack vector
+    -- here as it should be impossible to get past the checks in
+    -- check_nonce() by attempting to re-use (in a replay attack) a
+    -- nonce from a group that we have dropped.
+    target_bitmin = (bitmin(reslt) + 64) &amp; ~63;
+    reslt := bitmap_setmin(reslt, target_bitmin);
+  end if;
+  return reslt;
+end;
+$$
+language plpgsql security definer stable;
+
+</pre>
+<p>
+Add nonce to the list of used nonces, slimming the bitmap down when it
+gets too large.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_filter_privs"></a>C.4.11. <code class="literal">filter_privs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.filter_privs()
+  returns void as
+$$
+begin
+  -- We are going to update veil2_session_privileges to remove any
+  -- roles and privileges that do not exist in
+  -- veil2_ancestor_privileges.  This is part of the become user
+  -- process, to ensure that become user cannot lead to privilege
+  -- escalation.
+  with updatable_privs as
+    (
+      select sp.scope_type_id, sp.scope_id
+        from veil2_session_privileges sp
+       where scope_type_id != 2
+    ),
+  superior_scopes as
+    (
+      -- For each scope, other than personal, in
+      -- veil2_session_privileges, identify all scopes that could give
+      -- us equivalent privileges.
+      select up.scope_type_id, up.scope_id,
+      	     asp.scope_type_id as test_scope_type_id,
+	       asp.scope_id as test_scope_id
+        from updatable_privs up
+       inner join veil2.all_superior_scopes asp
+          on asp.scope_type_id = up.scope_type_id
+         and asp.scope_id = up.scope_id
+       union all
+      select scope_type_id, scope_id, scope_type_id, scope_id
+        from updatable_privs
+       union all
+      select scope_type_id, scope_id, 1, 0  -- global scope is superior
+        from updatable_privs
+    ),
+  effective_ancestor_privs as
+    (
+      -- The set of privileges our ancestor effectively has at each
+      -- scope level.  These privileges may be from global or other
+      -- superior scopes.
+      select ss.scope_type_id, ss.scope_id,
+      	     union_of(coalesce(vap.roles, bitmap())) as roles,
+	       union_of(coalesce(vap.privs, bitmap())) as privs
+        from superior_scopes ss
+        left outer join veil2_ancestor_privileges vap
+          on vap.scope_type_id = ss.test_scope_type_id
+	 and vap.scope_id = ss.test_scope_id
+       group by ss.scope_type_id, ss.scope_id
+    ),
+  final_privs as
+    (
+      -- What the become-user session's roles and privs should be
+      -- after filtering any that the ancestor session did not
+      -- effectively have.
+      select sp.scope_type_id, sp.scope_id,
+             sp.roles * eap.roles as roles,
+             sp.privs * eap.privs as privs
+        from veil2_session_privileges sp
+       inner join effective_ancestor_privs eap
+          on eap.scope_type_id = sp.scope_type_id
+         and eap.scope_id = sp.scope_id
+    )
+  update veil2_session_privileges sp
+     set roles = fp.roles,
+         privs = fp.privs
+    from final_privs fp
+   where sp.scope_type_id = fp.scope_type_id
+     and sp.scope_id = fp.scope_id;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Remove any privileges from veil2_session_privileges that would not be
+provided by veil2_ancestor_privileges.  This is part of the become user
+functionality.  We perform this filtering in order to ensure that a
+user cannot increase their privileges using become user.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_load_ancestor_privs"></a>C.4.12. <code class="literal">load_ancestor_privs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.load_ancestor_privs(parent_session_id integer)
+  returns void as
+$$
+begin
+  with recursive ancestors as
+    (
+      select *
+        from veil2.sessions
+       where session_id = load_ancestor_privs.parent_session_id
+       union all
+      select s.*
+        from ancestors a
+       inner join veil2.sessions s
+          on s.session_id = a.parent_session_id
+    ),
+   base_accessor_privs as
+    (
+      select barp.accessor_id, barp.role_id,
+      	     barp.assignment_context_type_id,
+                 barp.assignment_context_id,
+             barp.mapping_context_type_id, barp.mapping_context_id,
+	     barp.roles, barp.privileges
+        from ancestors a
+       -- Making the following an inner join (rather than cross-join)
+       -- even though the condition is redundant improves performance
+       -- (Postgres 12.5).
+       inner join veil2.base_accessor_roleprivs(
+       	     	            a.accessor_id, a.session_context_type_id,
+			    a.session_context_id, a.mapping_context_type_id,
+			    a.mapping_context_id) barp
+          on barp.accessor_id = a.accessor_id
+       where assignment_context_type_id != 2 -- ignore personal context
+    ),
+  promoted_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, ss.superior_scope_id as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id != 1
+       inner join veil2.all_superior_scopes ss
+          on ss.scope_type_id = bap.assignment_context_type_id
+         and ss.scope_id = bap.assignment_context_id
+         and ss.superior_scope_type_id = pp.scope_type_id
+	 and ss.is_type_promotion
+    ),
+  global_privs as
+    (
+      select bap.accessor_id, bap.role_id,
+      	     bap.mapping_context_type_id, bap.mapping_context_id,
+	     pp.scope_type_id, 0 as scope_id,
+  	     bap.privileges * pp.privilege_ids as privileges
+        from base_accessor_privs bap
+       inner join veil2.promotable_privileges pp
+          on not is_empty(bap.privileges * pp.privilege_ids)
+         and pp.scope_type_id = 1
+    ),  
+  all_role_privs as
+    (
+      select accessor_id, 
+      	     mapping_context_type_id, mapping_context_id,
+  	     assignment_context_type_id as scope_type_id,
+             assignment_context_id as scope_id,
+             roles + role_id as roles,  privileges
+        from base_accessor_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from promoted_privs
+       union all
+      select accessor_id, 
+             mapping_context_type_id, mapping_context_id,
+  	     scope_type_id, scope_id,
+             bitmap() as roles, privileges
+        from global_privs
+    ),
+  grouped_role_privs as
+    (
+      select scope_type_id, scope_id,
+             union_of(roles) as roles, union_of(privileges) as privs
+        from all_role_privs
+       group by scope_type_id, scope_id
+    )
+  insert
+    into veil2_ancestor_privileges
+        (scope_type_id, scope_id, roles, privs)
+  select scope_type_id, scope_id, roles, privs
+    from grouped_role_privs;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Load the privileges for all ancestor sessions into
+veil2_ancestor_privileges.  We will use this to ensure that a
+become_user() session does not gain privileges that the parent session
+did not have (ie we aim to stop it from being used as a mechanism for
+privilege escalation).
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_filter_session_privs"></a>C.4.13. <code class="literal">filter_session_privs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.filter_session_privs(parent_session_id integer)
+  returns void as
+$$
+begin
+  perform veil2.load_ancestor_privs(parent_session_id);
+  perform veil2.filter_privs();
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Remove from veil2_session_privileges any roles and privileges not
+held by the ancestor session(s).
+</p>
+</div>
+<div class="sect3"><div class="titlepage"><div><div><h4 class="title">
+<a name="func_save_privs_as_orig"></a>C.4.14. <code class="literal">save_privs_as_orig()</code>
+</h4></div></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_all_accessor_roles"></a>C.4.15. <code class="literal">all_accessor_roles()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.all_accessor_roles(
+   accessor_id in out integer,
+   session_context_type_id in integer,
+   session_context_id in integer,
+   role_id out integer,
+   context_type_id out integer,
+   context_id out integer)
+  returns setof record as
+$$
+  select -- All roles without filtering if our session context is global
+         -- context.
+         aar.accessor_id, aar.role_id,
+	 aar.context_type_id, aar.context_id
+    from veil2.all_accessor_roles_plus aar
+   where aar.accessor_id = all_accessor_roles.accessor_id
+     and all_accessor_roles.session_context_type_id = 1
+   union all
+  select -- Globally assigned roles, if our session context is non-global
+         -- context.
+         aar.accessor_id, aar.role_id,
+	 aar.context_type_id, aar.context_id
+    from veil2.all_accessor_roles_plus aar
+   inner join veil2.session_assignment_contexts sac
+      on -- Matching login context and assignment context
+         -- Also session_context and assignment context
+         aar.context_type_id = 1
+      or (    sac.context_type_id = aar.context_type_id
+          and sac.context_id = aar.context_id
+ 	  and aar.context_type_id != 1)
+   where aar.accessor_id = all_accessor_roles.accessor_id
+     and all_accessor_roles.session_context_type_id != 1
+   union all
+  select accessor_id, 2, 2, accessor_id;
+$$
+language sql security definer stable;
+
+</pre>
+<p>
+Return all roles for the given accessor in the given session context.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_base_accessor_roleprivs"></a>C.4.16. <code class="literal">base_accessor_roleprivs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.base_accessor_roleprivs(
+    accessor_id in out integer,
+    session_context_type_id in integer,
+    session_context_id in integer,
+    mapping_context_type_id in out integer,
+    mapping_context_id in out integer,
+    assignment_context_type_id out integer,
+    assignment_context_id out integer,
+    role_id out integer,
+    roles out bitmap,
+    privileges out bitmap)
+  returns setof record as
+$$
+  select aar.accessor_id, arp.mapping_context_type_id,
+         arp.mapping_context_id,  aar.context_type_id,
+         aar.context_id, aar.role_id,
+	 coalesce(arp.roles, bitmap(aar.role_id)),
+	 coalesce(arp.privileges, bitmap())
+    from veil2.all_accessor_roles(
+                        base_accessor_roleprivs.accessor_id,
+			base_accessor_roleprivs.session_context_type_id,
+			base_accessor_roleprivs.session_context_id) aar
+    left outer join veil2.all_role_privileges arp
+      on arp.role_id = aar.role_id
+     and (   (    arp.mapping_context_type_id =
+     	              base_accessor_roleprivs.mapping_context_type_id
+              and arp.mapping_context_id =
+	      	      base_accessor_roleprivs.mapping_context_id)
+          or (    arp.mapping_context_type_id = 1
+              and arp.mapping_context_id = 0)
+          or (    arp.mapping_context_type_id is null
+              and arp.mapping_context_id is null));
+$$
+language sql security definer stable;
+
+</pre>
+<p>
+Give the set of base (ignoring privilege promotion) roles and
+privileges that apply to a given accessor in given mapping and session
+contexts.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_session_context"></a>C.4.17. <code class="literal">session_context()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.session_context(
+    accessor_id out integer,
+    session_id out integer,
+    login_context_type_id out integer,
+    login_context_id out integer,
+    session_context_type_id out integer,
+    session_context_id out integer,
+    mapping_context_type_id out integer,
+    mapping_context_id out integer
+    )
+  returns record as
+$$
+begin
+  select sc.accessor_id, sc.session_id,
+         sc.login_context_type_id, sc.login_context_id,
+         sc.session_context_type_id, sc.session_context_id,
+         sc.mapping_context_type_id, sc.mapping_context_id
+    into session_context.accessor_id, session_context.session_id,
+         session_context.login_context_type_id,
+	   session_context.login_context_id,
+         session_context.session_context_type_id,
+	   session_context.session_context_id,
+         session_context.mapping_context_type_id,
+	   session_context.mapping_context_id
+    from veil2_session_context sc;
+exception
+  when sqlstate '42P01' then
+    -- Temp table does not exist
+    return;
+  when others then
+    raise;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Column <code class="literal">accessor_id</code>: The id of the accessor whose session this is.
+</p>
+<p>
+Column <code class="literal">accessor_id</code>: The id of the accessor whose access rights (mostly) are being used by
+this session.  If this is not the same as the accessor_id, then the
+session_user has assumed the access rights of this accessor using the
+become_user() function.
+</p>
+<p>
+Column <code class="literal">login_context_type_id</code>: This is the context_type_id for the context within which our accessor
+has authenticated.  This will have been the context_type_id provided
+to the create_session() or hello() function that began this session.
+</p>
+<p>
+Column <code class="literal">login_context_id</code>: This is the context_id for the context within which our accessor
+has authenticated.  This will have been the context_id provided
+to the create_session() or hello() function that began this session.
+</p>
+<p>
+Column <code class="literal">session_context_type_id</code>: This is the context_type_id to be used for limiting our session's
+assigned roles and from which is determined our
+mapping_context_type_id.  Ordinarily, this will be the same as our
+login_context_type_id, but if create_session() has been provided with
+session_context parameters, this will be different.  Note that for an
+accessor to create such a session they must have connect privilege in
+both their login context and their requested session context.
+</p>
+<p>
+Safe function to return the context of the current session.  If no
+session exists, returns nulls.  We use a function in this context
+because we cannot create a view on the veil2_session_context table as it
+is a temporary table and does not always exist.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_session_privileges"></a>C.4.18. <code class="literal">session_privileges()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.session_privileges(
+    scope_type_id out integer,
+    scope_id out integer,
+    roles out integer[],
+    privs out integer[]
+    )
+  returns setof record as
+$$
+begin
+  for session_privileges.scope_type_id,
+      session_privileges.scope_id,
+      session_privileges.roles,
+      session_privileges.privs
+  in select sp.scope_type_id, sp.scope_id,
+     	    to_array(sp.roles), to_array(sp.privs)
+       from veil2_session_privileges sp
+  loop
+    return next;
+  end loop;
+exception
+  when sqlstate '42P01' then
+    return;
+  when others then
+    raise;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Safe function to return a user-readable version of the privileges for
+the current session.  If no session exists, returns nulls.  We use a
+function in this context because we cannot create a view on the
+veil2_session_privileges table as it is a temporary table and does not
+always exist.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_load_session_privs"></a>C.4.19. <code class="literal">load_session_privs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.load_session_privs()
+  returns boolean as
+$$
+begin
+  insert
+    into veil2_session_privileges
+        (scope_type_id, scope_id,
+  	 roles, privs)
+  select scope_type_id, scope_id,
+         roles, privileges
+    from veil2.session_privileges_v;
+
+  if found then
+    perform veil2.save_session_privs();
+    return true;
+  else
+    return false;
+  end if;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Load the temporary table veil2_session_privileges for session_id, with the
+privileges for the current session.  The temporary table is queried by
+security functions in order to determine what access rights the
+connected user has.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_save_session_privs"></a>C.4.20. <code class="literal">save_session_privs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.save_session_privs()
+  returns void as
+$$
+delete
+  from veil2.accessor_privileges_cache
+ where (accessor_id, login_context_type_id,
+        login_context_id) = (
+    select accessor_id, login_context_type_id,
+        login_context_id
+      from veil2_session_context);
+insert
+  into veil2.accessor_privileges_cache
+      (accessor_id, login_context_type_id,
+       login_context_id, session_context_type_id,
+       session_context_id, mapping_context_type_id,
+       mapping_context_id, scope_type_id,
+       scope_id, roles,
+       privs)
+select sc.accessor_id, sc.login_context_type_id,
+       sc.login_context_id, sc.session_context_type_id,
+       sc.session_context_id, sc.mapping_context_type_id,
+       sc.mapping_context_id, sp.scope_type_id,
+       sp.scope_id, sp.roles,
+       sp.privs
+  from veil2_session_context sc
+ cross join veil2_session_privileges sp;
+$$
+language 'sql' security definer volatile;
+
+</pre>
+<p>
+Save the current contents of the veil2_session_privileges temporary
+table into veil2.session_privileges after ensuring that there is no
+existing data present for the session.  This saves our
+session_privileges data for future use in the session.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_load_cached_privs"></a>C.4.21. <code class="literal">load_cached_privs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.load_cached_privs()
+  returns boolean as
+$$
+begin
+  insert
+    into veil2_session_privileges
+        (scope_type_id,	 scope_id,
+	 roles, privs)
+  select apc.scope_type_id, apc.scope_id,
+  	 apc.roles, apc.privs
+    from veil2_session_context sc
+   inner join veil2.accessor_privileges_cache apc
+      on apc.accessor_id = sc.accessor_id
+     and apc.login_context_type_id = sc.login_context_type_id
+     and apc.login_context_id = sc.login_context_id
+     and apc.session_context_type_id = sc.session_context_type_id
+     and apc.session_context_id = sc.session_context_id
+     and apc.mapping_context_type_id = sc.mapping_context_type_id
+     and apc.mapping_context_id = sc.mapping_context_id;
+  return found;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+</pre>
+<p>
+Reload cached session privileges for the session's accessor into our
+current session.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_update_session"></a>C.4.22. <code class="literal">update_session()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.update_session(
+    _session_id integer,
+    _nonces bitmap,
+    _authenticated boolean)
+  returns void as
+$$
+  with recursive sessions as
+    (
+      select parent_session_id
+        from upd_cur_session
+       union all
+      select s2.parent_session_id
+        from sessions s1
+       inner join veil2.sessions s2
+          on s1.parent_session_id is not null
+	 and s2.session_id = s1.parent_session_id
+	 and s2.parent_session_id is not null
+    ),
+  timeout as
+    (
+      select parameter_value::interval as increment
+        from veil2.system_parameters
+       where parameter_name = 'shared session timeout'
+    ),
+  upd_cur_session as
+    (
+      update veil2.sessions s
+	 set expires =
+	     case when _authenticated
+	       then now() + t.increment
+	       else s.expires
+	       end,
+	     nonces = coalesce(_nonces, nonces),
+	     has_authenticated = has_authenticated or _authenticated
+        from timeout t
+       where s.session_id = _session_id
+      returning parent_session_id
+    )
+  update veil2.sessions s
+     set expires =
+	   case when _authenticated
+	     then now() + t.increment
+	     else s.expires
+	     end
+   from timeout t
+  where s.session_id in (select parent_session_id from sessions);
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+Update the veil2.sessions records associated with the current session
+to show a new expiry date, record new nonces, and ongoing session
+validity.  This updates the identified sessions record with nonces,
+validity and expiry, and also updates any ancestor sessions with
+expiry.   Although this might be more clearly expressed in plpgsql,
+being able to do it in pure sql is cool and has the potential to be
+faster as it requires only a single statement.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_load_connection_privs"></a>C.4.23. <code class="literal">load_connection_privs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.load_connection_privs(
+    parent_session_id integer)
+  returns boolean as
+$$
+begin
+  if not veil2.load_cached_privs() then
+    if not veil2.load_session_privs() then
+      return false;
+    end if;
+  end if;
+
+  if parent_session_id is not null then
+    perform veil2.filter_session_privs(parent_session_id);
+  end if;
+  return true;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Load veil_session_privileges temp table for a session, filtering the
+privileges if neccesary for a become_user() session.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_reload_session_context"></a>C.4.24. <code class="literal">reload_session_context()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.reload_session_context(_session_id integer)
+  returns integer as
+$$
+    insert
+      into veil2_session_context
+          (accessor_id, session_id,
+           login_context_type_id, login_context_id,
+           session_context_type_id, session_context_id,
+  	   mapping_context_type_id, mapping_context_id,
+	   parent_session_id)
+    select s.accessor_id, s.session_id,
+           s.login_context_type_id, s.login_context_id,
+           s.session_context_type_id, s.session_context_id,
+           s.mapping_context_type_id, s.mapping_context_id,
+	   s.parent_session_id
+      from veil2.sessions s
+     where s.session_id = _session_id
+    returning parent_session_id;
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+(Re)load veil2_session_context for a given session_id.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_reload_connection_privs"></a>C.4.25. <code class="literal">reload_connection_privs()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.reload_connection_privs()
+  returns boolean as
+$$
+declare
+  _parent_session_id integer;
+begin
+  perform veil2.reset_session_privs();
+  select parent_session_id
+    into _parent_session_id
+    from veil2_session_context;
+  return veil2.load_connection_privs(_parent_session_id);
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Reload a session's privileges.  This would be done in the event that
+cached privileges need to be reloaded.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_check_continuation"></a>C.4.26. <code class="literal">check_continuation()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.check_continuation(
+    nonce integer,
+    session_token text,
+    authent_token text)
+  returns boolean as
+$$
+select encode(digest(session_token || to_hex(nonce), 'sha1'),
+              'base64') = authent_token;
+$$
+language sql security definer stable;
+
+</pre>
+<p>
+Checks whether the combination of nonce, session_token and
+authent_token is valid.  This is used to continue sessions that have
+already been authenticated.  It ensures that new tokens are used on
+each call, and that the caller has access to the session_token
+returned from the original (subsequently authenticated) create
+session() call.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_open_connection"></a>C.4.27. <code class="literal">open_connection()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.open_connection(
+    session_id in integer,
+    nonce in integer,
+    authent_token in text,
+    success out boolean,
+    errmsg out text)
+  returns record as
+$$
+declare
+  _accessor_id integer;
+  _nonces bitmap;
+  nonce_ok boolean;
+  _has_authenticated boolean;
+  _session_token text;
+  _context_type_id integer;
+  authent_type text;
+  expired boolean;
+  parent_session_id integer;
+begin
+  success := false;
+  select s.accessor_id, s.expires &lt; now(),
+         veil2.check_nonce(nonce, s.nonces), s.nonces,
+	 s.authent_type,
+	 ac.context_type_id, s.has_authenticated,
+	 s.token
+    into _accessor_id, expired,
+         nonce_ok, _nonces,
+	 authent_type, _context_type_id, 
+	 _has_authenticated, _session_token
+    from veil2.sessions s
+    left outer join veil2.accessor_contexts ac
+      on ac.accessor_id = s.accessor_id
+     and ac.context_type_id = s.login_context_type_id
+     and ac.context_id = s.login_context_id
+   where s.session_id = open_connection.session_id;
+
+  if not found then
+    raise warning 'SECURITY: Connection attempt with no session: %',
+        session_id;
+    errmsg := 'AUTHFAIL';
+  elsif _context_type_id is null then
+    raise warning 'SECURITY: Connection attempt for invalid context';
+    errmsg := 'AUTHFAIL';
+  elsif expired then
+    errmsg := 'EXPIRED';
+  elsif not nonce_ok then
+    -- Since this could be the result of an attempt to replay a past
+    -- authentication token, we log this failure
+    raise warning 'SECURITY: Nonce failure.  Nonce %, Nonces %',
+                   nonce, to_array(_nonces);
+    errmsg := 'NONCEFAIL';
+  else
+    success := true;
+      
+    if _has_authenticated then
+      -- The session has already been opened.  From here on we 
+      -- use different authentication tokens for each open_connection()
+      -- call in order to avoid replay attacks.
+      if not veil2.check_continuation(nonce, _session_token,
+	       			      authent_token) then
+        raise warning 'SECURITY: incorrect continuation token for %, %',
+                     _accessor_id, session_id;
+        errmsg := 'AUTHFAIL';
+	success := false;
+      end if;
+    else 
+      if not veil2.authenticate(_accessor_id, authent_type,
+				authent_token) then
+        raise warning 'SECURITY: incorrect % authentication token for %, %',
+                      authent_type, _accessor_id, session_id;
+        errmsg := 'AUTHFAIL';
+	success := false;
+      end if;
+    end if;
+  end if;
+  
+  if success then
+    perform veil2.reset_session();
+    -- Reload session context
+    parent_session_id := veil2.reload_session_context(session_id);
+
+    if not veil2.load_connection_privs(parent_session_id) then
+      raise warning 'SECURITY: Accessor % has no connect privilege.',
+                    _accessor_id;
+      errmsg := 'AUTHFAIL';
+      success := false;
+    end if;
+  end if;
+
+  if not success then
+    perform veil2.reset_session();
+  end if;
+  
+  -- Regardless of the success of the preceding checks we record the
+  -- use of the latest nonce.  If all validations succeeded, we
+  -- extend the expiry time of the session.
+  perform veil2.update_session(session_id,
+			       veil2.update_nonces(nonce, _nonces),
+			       success);
+end;
+$$
+language plpgsql security definer volatile
+set client_min_messages = 'error';
+
+</pre>
+<p>
+Attempt to open or re-open a session.  This is used to authenticate
+or re-authenticate a connection, and until this is done a session
+cannot be used.  
+</p>
+<p>
+Failures may be for several reasons with errmsg as described below:
+</p>
+<p>
+ - non-existence of session [errmsg: 'AUTHFAIL'];
+</p>
+<p>
+ - expiry of session (while session record still exists - has not been 
+   cleaned away) [errmsg: 'EXPIRED'];
+</p>
+<p>
+ - incorrect credentials being used [errmsg: 'AUTHFAIL'];
+</p>
+<p>
+ - invalid nonce being provided [errmsg: 'NONCEFAIL'];
+</p>
+<p>
+ - the user has no connect privilege [errmsg: 'AUTHFAIL'].
+</p>
+<p>
+The _nonce is a number that may only be used once per session, and is
+used to prevent replay attacks.  Each open_connection() call should
+provide a new nonce ascending in value from the last.  As connections
+may be asynchronous, we do not require a strictly ascending order but
+nonces may not be out of sequence by a value of more than 64.  This
+allows us to keep track of used nonces without excess overhead while
+still allowing an application to have multiple database connections
+per user session.
+</p>
+<p>
+The value of _authent_token depends upon the authentication method
+chosen.  See the authentication function for your session's
+authentication method (identified in table veil2.authentication_types)
+for details.
+</p>
+<p>
+Note that warning messages will be sent to the log but not to the
+client, even if client_min_messages is modified for the session.  This
+is deliberate, for security reasons.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_close_connection"></a>C.4.28. <code class="literal">close_connection()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.close_connection() returns boolean as
+$$
+begin
+  perform veil2.reset_session();
+  delete from veil2_session_privileges;
+  return true;
+end;
+$$
+language 'plpgsql' security definer volatile;
+
+</pre>
+<p>
+Close the current session.  We use this to ensure that a shared
+database connection cannot be used with our privileges once we have
+finished with it.  There is no authentication or verification done to
+ensure that the session owner is the one doing this, because there is
+no perceived need.  If this is a problem then, given that you can
+achieve the same thing by deliberately failing a veil2.open() call,
+there are other, more complex areas of the session management protocol
+that will need to be reconsidered.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_hello"></a>C.4.29. <code class="literal">hello()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.hello(
+    context_type_id in integer default 1,
+    context_id in integer default 0)
+  returns boolean as
+$$
+declare
+  _accessor_id integer;
+  _session_id integer;
+  success boolean;
+begin
+  success := false;
+  execute veil2.reset_session();
+  
+  select accessor_id
+    into _accessor_id
+    from veil2.accessors
+   where username = session_user;
+  if found then
+
+    select cas.session_id
+      into _session_id
+    from veil2.create_accessor_session(
+             _accessor_id, 'dedicated',
+	     context_type_id, context_id,
+	     context_type_id, context_id) cas;
+
+    -- TODO: CHECK IF REFACTORING IS NEEDED HERE - MAYBE UNUSED VARS?
+    success := veil2.load_session_privs();
+
+    if not success then
+      raise exception 'SECURITY: user % has no connect privilege.',
+      	    	      session_user;
+    else
+      -- Update the permanent session record to show that we have
+      -- authenticated and give a reasonable expiry time.
+      update veil2.sessions
+         set expires = now() + '1 day'::interval,
+ 	    has_authenticated = true
+       where session_id = _session_id;
+    end if;
+  end if;
+  return success;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+This is used to begin a veil2 session for a database user, ie someone
+who can directly access the database.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_check_become_user_priv"></a>C.4.30. <code class="literal">check_become_user_priv()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.check_become_user_priv(
+    label text,
+    accessor_id integer,
+    context_type_id integer,
+    context_id integer)
+  returns text as
+$$
+begin
+  if veil2.i_have_priv_in_scope_or_superior_or_global(
+  	       1, context_type_id, context_id)
+  then
+    return null;
+  else
+    raise warning 'SECURITY: become_user() (%): no privilege for % in '
+    	          'context %,%', label, accessor_id,
+		  context_type_id, context_id;
+    return 'NOPRIV';
+  end if;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Determine whether the accessor has become_user privilege for the
+supplied context (including superior and global).  Return 'NOPRIV'
+to the caller if not.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_check_accessor_context"></a>C.4.31. <code class="literal">check_accessor_context()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.check_accessor_context(
+    label text,
+    accessor_id integer,
+    context_type_id integer,
+    context_id integer)
+  returns text as
+$$
+begin
+  if veil2.have_accessor_context(accessor_id, context_type_id,
+		         	 context_id) 
+  then
+    return null;
+  else
+    raise warning 'SECURITY: become_user() (%): invalid context for %'
+    	          ' - %,%', label, accessor_id, context_type_id, context_id;
+    return 'AUTHFAIL';
+  end if;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Determine whether the geven accessor has rights to the given session
+context.  Return 'AUTHFAIL' if not.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_become_accessor"></a>C.4.32. <code class="literal">become_accessor()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.become_accessor(
+    accessor_id in integer,
+    login_context_type_id in integer,
+    login_context_id in integer,
+    session_context_type_id in integer,
+    session_context_id in integer,
+    session_id out integer,
+    session_token out text,
+    success out boolean,
+    errmsg out text)
+  returns record as
+$$
+declare
+  orig_session_id integer;
+  orig_accessor_id integer;
+  _mapping_context_type_id integer;
+  _mapping_context_id integer;
+begin
+  select sc.session_id, sc.accessor_id
+    into orig_session_id, orig_accessor_id
+    from veil2_session_context sc;
+
+  -- We must check that login context is valid for both the current
+  -- and target accessors.
+  errmsg := veil2.check_become_user_priv('AAA', orig_accessor_id, 
+  	        login_context_type_id, login_context_id);
+
+  if errmsg is null then
+    errmsg := veil2.check_accessor_context('BBB', orig_accessor_id, 
+  	          login_context_type_id, login_context_id);
+  end if;
+
+  if errmsg is null then
+    errmsg := veil2.check_accessor_context('CCC', accessor_id, 
+  	          login_context_type_id, login_context_id);
+  end if;
+  
+  if errmsg is null then
+    -- Create new session_context record
+    perform veil2.reset_session();
+
+    select *
+      into session_id, _mapping_context_type_id,
+	   _mapping_context_id
+      from veil2.new_session_context(accessor_id,
+		     login_context_type_id, login_context_id,
+	             session_context_type_id, session_context_id,
+		     orig_session_id) x;
+
+    -- Create new session record.
+    insert
+      into veil2.sessions
+          (accessor_id, session_id,
+	   login_context_type_id, login_context_id,
+	   session_context_type_id, session_context_id,
+	   mapping_context_type_id, mapping_context_id,
+	   authent_type, has_authenticated,
+	   session_supplemental, expires,
+	   token, parent_session_id)
+    select become_accessor.accessor_id, become_accessor.session_id,
+	   become_accessor.login_context_type_id,
+	     become_accessor.login_context_id,
+	   become_accessor.session_context_type_id,
+	     become_accessor.session_context_id,
+    	   _mapping_context_type_id,
+	     _mapping_context_id,
+	   'become', true,
+	   null, now() + sp.parameter_value::interval,
+	   encode(digest(random()::text || now()::text, 'sha256'),
+		  'base64'),
+	     orig_session_id
+      from veil2.system_parameters sp
+     where sp.parameter_name = 'shared session timeout'
+    returning token into session_token;
+
+    -- Update expiry of parent session.
+    perform veil2.update_session(orig_session_id, null::bitmap, true);
+
+    if not veil2.load_session_privs() then
+      raise warning 'SECURITY: Accessor % has no connect privilege.',
+                     _accessor_id;
+      errmsg := 'AUTHFAIL';
+    else
+      raise warning 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+      perform veil2.filter_session_privs(orig_session_id);
+    end if;
+  end if;
+
+  if errmsg is null then
+     success := true;
+  else
+     success := false;
+  end if;
+end;
+$$
+language plpgsql security definer volatile
+set client_min_messages = 'error';
+
+</pre>
+<p>
+Create a new opened session for the given accessor_id and context.
+This allows a suitably privileged accessor to emulate another user.
+The intended use-case for this is in testing and debugging access
+rights.  Note that the new session will not give the connected user
+more privileges than they already have, so the usage of this should
+probably be confined to superusers.  Any other user is likely to get a
+set of privileges that may be less than the user they have become
+would normally get.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_become_user"></a>C.4.33. <code class="literal">become_user()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.become_user(
+    username in text,
+    login_context_type_id in integer,
+    login_context_id in integer,
+    session_context_type_id in integer default null,
+    session_context_id in integer default null,
+    session_id out integer,
+    session_token out text,
+    success out boolean,
+    errmsg out text)
+  returns record as
+$$
+declare
+  _accessor_id integer;
+begin
+  _accessor_id := veil2.get_accessor(username, login_context_type_id,
+				     login_context_id);
+
+  select ba.session_id, ba.session_token,
+  	 ba.success, ba.errmsg
+    into become_user.session_id, become_user.session_token,
+         become_user.success, become_user.errmsg
+    from veil2.become_accessor(
+             _accessor_id,
+	     login_context_type_id, login_context_id,
+	     coalesce(session_context_type_id, login_context_type_id), 
+	     coalesce(session_context_id, login_context_id)) ba;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+See comments for become_accessor().  This is the same but takes a
+username rather than accessor_id.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="privilege_functions"></a>C.5. Privilege Testing Functions</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_always_true"></a>C.5.1. <code class="literal">always_true()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.always_true(integer) returns boolean
+     as '$libdir/veil2', 'veil2_true'
+     language C security definer stable leakproof;
+</pre>
+<p>
+Performance testing function - always returns true.  Used to
+establish the minimum overhead of security policies for tables.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#a7eabb8210c058af3c045a215ee77b425">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_i_have_global_priv"></a>C.5.2. <code class="literal">i_have_global_priv()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.i_have_global_priv(integer) returns boolean
+     as '$libdir/veil2', 'veil2_i_have_global_priv'
+     language C security definer stable leakproof;
+</pre>
+<p>
+Predicate to determine whether the connected user has the given
+privilege in the global scope.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#a0f03a4c32bbac407d040e66fcb807e48">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_i_have_personal_priv"></a>C.5.3. <code class="literal">i_have_personal_priv()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.i_have_personal_priv(integer, integer) returns boolean
+     as '$libdir/veil2', 'veil2_i_have_personal_priv'
+     language C security definer stable leakproof;
+</pre>
+<p>
+Predicate to determine whether the connected user has the given
+privilege in the personal scope.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#abdf7a99cee51319e393a9d0d3a1e79ef">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_i_have_priv_in_scope"></a>C.5.4. <code class="literal">i_have_priv_in_scope()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.i_have_priv_in_scope(integer, integer, integer) returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_scope'
+     language C security definer stable leakproof;
+</pre>
+<p>
+Predicate to determine whether the connected user has the given
+privilege in the given scope.
+</p>
+<p>
+Predicate to determine whether the connected user has the given
+privilege in the given scope, or in global scope.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#a1f3226ae495eaf76f2f1165026a7f0eb">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_i_have_priv_in_scope_or_global"></a>C.5.5. <code class="literal">i_have_priv_in_scope_or_global()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.i_have_priv_in_scope_or_global(
+	     integer, integer, integer) returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_scope_or_global'
+     language C security definer stable leakproof;
+</pre>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#af94dca10e6f14dc3fb20bbb288415fca">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_i_have_priv_in_superior_scope"></a>C.5.6. <code class="literal">i_have_priv_in_superior_scope()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.i_have_priv_in_superior_scope(integer, integer, integer) 
+     returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_superior_scope'
+     language C security definer stable leakproof;
+</pre>
+<p>
+Predicate to determine whether the connected user has the given
+privilege in a scope that is superior to the given scope.  This does not
+check for the privilege in a global scope as it is assumed that such a
+test will have already been performed.  Note that due to the join on
+all_superior_scopes this function may incur some small measurable
+overhead.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#ab26e0230a290a97425e5fd7c420737b6">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_i_have_priv_in_scope_or_superior"></a>C.5.7. <code class="literal">i_have_priv_in_scope_or_superior()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.i_have_priv_in_scope_or_superior(integer, integer, integer) 
+     returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_scope_or_superior'
+     language C security definer stable leakproof;
+</pre>
+<p>
+Predicate to determine whether the connected user has the given
+privilege in a scope that is, or is superior to the given scope.  This
+does not check for the privilege in a global scope as it is assumed
+that such a test will have already been performed.  Note that due to
+the join on all_superior_scopes this function may incur some small
+measurable overhead.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#a4b25cd404b6882e64e0d484222ee8f93">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_i_have_priv_in_scope_or_superior_or_global"></a>C.5.8. <code class="literal">i_have_priv_in_scope_or_superior_or_global()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.i_have_priv_in_scope_or_superior_or_global(
+	     integer, integer, integer) 
+     returns boolean
+     as '$libdir/veil2', 'veil2_i_have_priv_in_scope_or_superior_or_global'
+     language C security definer stable leakproof;
+</pre>
+<p>
+Predicate to determine whether the connected user has the given
+privilege in a scope that is, or is superior to the given scope, or in
+the global scope.  This does not check for the privilege in a global
+scope as it is assumed that such a test will have already been
+performed.  Note that due to the join on all_superior_scopes this
+function may incur some small measurable overhead.
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#a1648915ba36e9f03b3ace8c43ad2fb9f">here</a>.
+      </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="utility_admin_functions"></a>C.6. Utility and Administration Functions</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_result_counts"></a>C.6.1. <code class="literal">result_counts()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.result_counts(false_count out integer, true_count out integer)
+     returns record
+     as '$libdir/veil2', 'veil2_result_counts'
+     language C security definer stable leakproof;
+</pre>
+<p>
+Return record of how many false and how many true results have been
+returned by the i_have_privi_xxx() functions in this session
+</p>
+<p>
+	The Doxygen documentation for this can be found
+	<a class="ulink" target="_top" href="doxygen/html/veil2_8c.html#a6abf74250aa0970432b45b8146643e66">here</a>.
+      </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_delete_expired_sessions"></a>C.6.2. <code class="literal">delete_expired_sessions()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.delete_expired_sessions() returns void as
+$$
+delete
+  from veil2.sessions s
+     where expires &lt;= now();
+$$
+language 'sql' security definer volatile;
+
+</pre>
+<p>
+Utility function to clean-up  session data.  This should be
+run periodically from a batch job.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_docpath"></a>C.6.3. <code class="literal">func_docpath()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.docpath() returns text
+     as '$libdir/veil2', 'veil2_docpath'
+     language C stable strict;
+</pre>
+<p>
+Return the path to the directory under which Veil2 documents will be
+installed.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_datapath"></a>C.6.4. <code class="literal">func_datapath()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.datapath() returns text
+     as '$libdir/veil2', 'veil2_datapath'
+     language C stable strict;
+</pre>
+<p>
+Return the path to the directory under which Veil2 scripts will be
+installed.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_bcrypt"></a>C.6.5. <code class="literal">func_bcrypt()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.bcrypt(passwd text) returns text as
+$$
+select crypt(passwd, gen_salt('bf'));
+$$
+language 'sql' security definer volatile;
+
+</pre>
+<p>
+Create a bcrypted password from plaintext.  It creates a value that can
+be stored in veil2.authentication_details for use by the
+authenticate_bcrypt() function.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="matview_functions"></a>C.7. Materialized View Functions</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_refresh_all_matviews"></a>C.7.1. Refresh All Matviews Function</h4></div></div></div>
+<pre class="programlisting">
+function veil2.refresh_all_matviews()
+    returns void as
+$$
+  refresh materialized view veil2.all_superior_scopes;
+  refresh materialized view veil2.all_role_privileges;
+  truncate table veil2.accessor_privileges_cache;
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+Clear all matviews and caches unconditionally.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_refresh_scopes_matviews"></a>C.7.2. Refresh Scopes Matviews Function</h4></div></div></div>
+<pre class="programlisting">
+function veil2.refresh_scopes_matviews()
+  returns trigger
+as
+$$
+begin
+  perform veil2.refresh_all_matviews();
+  return new;
+end;
+$$
+language plpgsql security definer;
+
+</pre>
+<p>
+Trigger function to refresh all  materialized views and caches that 
+depend on the scopes hierarchy.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_refresh_roles_matviews"></a>C.7.3. Refresh Roles Matviews Function</h4></div></div></div>
+<pre class="programlisting">
+function veil2.refresh_roles_matviews()
+  returns trigger
+as
+$$
+begin
+  refresh materialized view veil2.all_role_privileges;
+  truncate table veil2.accessor_privileges_cache;
+  return new;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Trigger function to refresh all materialized views and caches that
+depend on roles.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_refresh_privs_matviews"></a>C.7.4. Refresh Privs Matviews Function</h4></div></div></div>
+<pre class="programlisting">
+function veil2.refresh_privs_matviews()
+  returns trigger
+as
+$$
+begin
+  refresh materialized view veil2.all_role_privileges;
+  truncate table veil2.accessor_privileges_cache;
+  return new;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Trigger function to refresh all materialized views and caches that
+depend on privileges.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_clear_accessor_privs_cache"></a>C.7.5. Clear Accessor Privs Cache Function</h4></div></div></div>
+<pre class="programlisting">
+function veil2.clear_accessor_privs_cache()
+  returns trigger as
+$$
+begin
+  truncate table veil2.accessor_privileges_cache;
+  return new;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Clear  cached role and privileges information for all accessors.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_clear_accessor_privs_cache_entry"></a>C.7.6. Clear Accessor Privs Cache Entry Function</h4></div></div></div>
+<pre class="programlisting">
+function veil2.clear_accessor_privs_cache_entry()
+  returns trigger as
+$$
+begin
+  if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+    delete
+      from veil2.accessor_privileges_cache
+     where accessor_id = new.accessor_id;
+    if (tg_op = 'UPDATE') and
+       (old.accessor_id != new.accessor_id) then
+      delete
+        from veil2.accessor_privileges_cache
+       where accessor_id = old.accessor_id;
+    end if;
+    return new;
+  elsif tg_op = 'DELETE' then
+    delete
+      from veil2.accessor_privileges_cache
+     where accessor_id = old.accessor_id;
+    return old;
+  end if;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Clear the cached role and privileges information for the affected
+accessor.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="implementation_check_functions"></a>C.8. Functions For Checking Your Implementation</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_have_user_scope_types"></a>C.8.1. <code class="literal">func_have_user_scope_types()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.have_user_scope_types()
+  returns boolean as
+$$
+-- Have we defined new scope_types:
+select exists (
+  select null
+    from veil2.scope_types
+   where scope_type_id not in (1, 2));
+$$
+language sql security definer stable;
+
+</pre>
+<p>
+Predicate used to determine whether user-defined scope_types have been
+added to the implementation.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_have_user_privileges"></a>C.8.2. <code class="literal">have_user_privileges()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.have_user_privileges()
+  returns boolean as
+$$
+select exists (
+  select null
+    from veil2.privileges
+   where privilege_id &gt; 15
+      or privilege_id &lt; 0);
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+Predicate used to determine whether any user-defined privileges have
+been created.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_have_user_roles"></a>C.8.3. <code class="literal">have_user_roles()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.have_user_roles()
+  returns boolean as
+$$
+select exists (
+  select null
+    from veil2.roles
+   where role_id &gt; 4
+      or role_id &lt; 0);
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+Predicate used to determine whether any user-defined roles have
+been created.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_have_role_privileges"></a>C.8.4. <code class="literal">have_role_privileges()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.have_role_privileges()
+  returns boolean as
+$$
+select exists (
+  select null
+    from veil2.role_privileges
+   where role_id &lt; 0
+      or role_id &gt; 4);
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+Predicate used to determine whether any user-defined role_privileges
+have been created.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_have_role_roles"></a>C.8.5. <code class="literal">have_role_roles()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.have_role_roles()
+  returns boolean as
+$$
+select exists (
+  select null
+    from veil2.role_roles);
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+Predicate used to determine whether any user-defined role_roles (role
+to role mappings) have been created.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_have_accessors"></a>C.8.6. <code class="literal">have_accessors()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.have_accessors()
+  returns boolean as
+$$
+select exists (
+  select null
+    from veil2.accessors);
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+Predicate used to determine whether any accessors have been defined.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_have_user_scopes"></a>C.8.7. <code class="literal">have_user_scopes()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.have_user_scopes ()
+  returns boolean as
+$$
+select exists (
+  select null
+    from veil2.scopes
+   where scope_type_id != 1
+     and scope_id != 0);
+$$
+language sql security definer volatile;
+
+</pre>
+<p>
+Predicate used to determine whether any user-defined scopes have been
+created.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_check_table_security"></a>C.8.8. <code class="literal">check_table_security()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.check_table_security()
+  returns setof text as
+$$
+declare
+  tbl text;
+  header_returned boolean := false;
+begin
+  for tbl in
+    select n.nspname || '.' || c.relname
+      from pg_catalog.pg_class c
+     inner join pg_catalog.pg_namespace n
+        on n.oid = c.relnamespace
+     where c.relkind = 'r'
+       and n.nspname not in ('pg_catalog', 'information_schema')
+       and c.relpersistence = 'p'
+       and not relrowsecurity
+  loop
+    if not header_returned then
+      header_returned := true;
+      return next 'The following tables have no security policies:';
+    end if;
+    return next '    - ' || tbl;
+  end loop;
+  if not header_returned then
+    return next 'All tables appear to have security policies.';
+  end if;  
+end;
+$$
+language plpgsql security definer stable;
+
+</pre>
+<p>
+Predicate used to determine whether all user-defined tables have
+security policies in place.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_implementation_status"></a>C.8.9. <code class="literal">implementation_status()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.implementation_status()
+  returns setof text as
+$$
+declare
+  ok boolean := true;
+  line text;
+begin
+  perform veil2.init();
+  if not veil2.have_user_scope_types() then
+    ok := false;
+    return next 'You need to define some scope types (step 2)';
+  end if;
+  if not veil2.view_exists('my_accessor_contexts') then
+    ok := false;
+    return next 'You need to redefine the accessor_contexts view (step 3)';
+  end if;
+  if not veil2.function_exists('my_get_accessor') then
+    ok := false;
+    return next 'You need to define a get_accessor() function (step 3)';
+  end if;
+  if not veil2.have_accessors() then
+    ok := false;
+    return next 'You need to create accessors (and maybe FK links) (step 4)';
+  end if;
+  if not veil2.have_user_scopes() then
+    ok := false;
+    return next 'You need to create user scopes (step 5)';
+  end if;
+  if not veil2.view_exists('my_superior_scopes') then
+    ok := false;
+    return next 'You need to redefine the superior_scopes view (step 6)';
+  else
+    execute('refresh materialized view veil2.all_superior_scopes');
+  end if;
+  if not veil2.have_user_privileges() then
+    ok := false;
+    return next 'You need to define some privileges (step 7)';
+  end if;
+  if not veil2.have_user_roles() then
+    ok := false;
+    return next 'You need to define some roles (step 8)';
+  end if;
+  if not veil2.have_role_privileges() then
+    ok := false;
+    return next 'You need to create entries in role_privileges (step 8)';
+  end if;
+  if not veil2.have_role_roles() then
+    ok := false;
+    return next 'You need to create entries in role_roles (step 8)';
+  end if;
+  if ok then
+    return next 'Your Veil2 basic implemementation seems to be complete.';
+  end if;
+  for line in select * from veil2.check_table_security()
+  loop
+    return next line;
+  end loop;
+  if ok then
+    return next 'Have you secured your views (I have no way of knowing)?';
+  end if;
+end;
+$$
+language plpgsql security definer volatile;
+
+</pre>
+<p>
+Set returning function that identifies incomplete
+user-implementations.
+</p>
+<p>
+Call this using select * from veil2.implementation_status();
+</p>
+<p>
+and it will return a list of things to implement or consider implementing.
+</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="other_trigger_fns"></a>C.9. Other Trigger Functions</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_system_parameters_check"></a>C.9.1. <code class="literal">system_parameters_check()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.system_parameters_check()
+  returns trigger
+as
+$$
+begin
+  if tg_op = 'INSERT' then
+    -- Check that the insert will not result in a key collision.  If
+    -- it will, do an update instead.  The insert may come from a
+    -- backup from pg_dump which is why we have to handle it like
+    -- this.
+    if exists (
+        select null
+	  from veil2.system_parameters
+	 where parameter_name = new.parameter_name)
+    then
+      update veil2.system_parameters
+         set parameter_value = new.parameter_value
+       where parameter_name = new.parameter_name;
+      return null;
+    end if;
+  end if;
+  new.user_defined := true;
+  return new;
+end;
+$$
+language 'plpgsql' security definer volatile leakproof;
+
+</pre>
+<p>
+Trigger function to allow pg_dump to dump and restore user-defined
+system parameters, and to ensure all inserted and updated rows are
+identfied as user_defined.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="func_make_user_defined"></a>C.9.2. <code class="literal">make_user_defined()</code>
+</h4></div></div></div>
+<pre class="programlisting">
+function veil2.make_user_defined()
+  returns trigger
+as
+$$
+begin
+  if tg_op = 'INSERT' then
+    -- Check that the insert will not result in a key collision.  If
+    -- it will, do an update instead.  The insert may come from a
+    -- backup from pg_dump which is why we have to handle it like
+    -- this.
+    if exists (
+        select null
+	  from veil2.authentication_types
+	 where shortname = new.shortname)
+    then
+      update veil2.authentication_types
+         set enabled = new.enabled,
+	     description = new.description,
+	     authent_fn = new.authent_fn,
+	     supplemental_fn = new.supplemental_fn
+       where shortname = new.shortname;
+      return null;
+    end if;
+  end if;
+  new.user_defined := true;
+  return new;
+end;
+$$
+language 'plpgsql' security definer volatile leakproof;
+
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="triggers"></a>C.10. Built-in Triggers</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="trig_context_role__context_fk"></a>C.10.1. <code class="literal">context_role__context_fk</code>
+</h4></div></div></div>
+<pre class="programlisting">
+create trigger context_role__context_fk
+  before insert or update on veil2.context_roles
+  for each row execute function
+    veil2.context_exists_chk('context_role__context_fk');
+
+</pre>
+<p>
+This trigger is in place of a foreign-key constraint against the
+scopes table.  We use this rather than the FK as we expect the scopes
+table to be extended through inheritence which does not play nicely
+with FK-constraints.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="trig_role_role__context_fk"></a>C.10.2. <code class="literal">role_role__context_fk</code>
+</h4></div></div></div>
+<pre class="programlisting">
+create trigger role_role__context_fk
+  before insert or update on veil2.role_roles
+  for each row execute function
+    veil2.context_exists_chk('role_role__context_fk');
+
+</pre>
+<p>
+This trigger is in place of a foreign-key constraint against the
+scopes table.  We use this rather than the FK as we expect the scopes
+table to be extended through inheritence which does not play nicely
+with FK-constraints.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="trig_accessor_role__context_fk"></a>C.10.3. <code class="literal">accessor_role__context_fk</code>
+</h4></div></div></div>
+<pre class="programlisting">
+create trigger accessor_role__context_fk
+  before insert or update on veil2.accessor_roles
+  for each row execute function
+    veil2.context_exists_chk('accessor_role__context_fk');
+
+</pre>
+<p>
+This trigger is in place of a foreign-key constraint against the
+scopes table.  We use this rather than the FK as we expect the scopes
+table to be extended through inheritence which does not play nicely
+with FK-constraints.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="trig_scopes__aiudt"></a>C.10.4. <code class="literal">scopes__aiudt</code>
+</h4></div></div></div>
+<pre class="programlisting">
+create trigger scopes__aiudt
+  after insert or update or delete or truncate
+  on veil2.scopes
+  for each statement
+  execute procedure veil2.refresh_scopes_matviews();
+
+</pre>
+<p>
+Refresh materialized views and clear caches that are constructed from
+the scopes table.
+</p>
+<p>
+VPD Implementation Notes:
+Although we expect that scopes will be modified relatively
+infrequently, this may not be the case in your application.  If the
+overhead of this trigger proves to be too significant it should be
+dropped, and other mechanisms used to refresh the affected materialized
+views.  Note that this will mean that the materialized views will not
+always be up to date, so this is a trade-off that must be evaluated.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="trig_deferred_install_trg"></a>C.10.5. <code class="literal">deferred_install_trg</code>
+</h4></div></div></div>
+<pre class="programlisting">
+create trigger deferred_install_trg
+  after insert
+  on veil2.deferred_install
+  for each statement
+  execute function veil2.deferred_install_fn();
+
+</pre>
+<p>
+This trigger exists to allow inserts into the deferred install table
+to cause user-provided functions and views to be installed after the
+current system-provided functions have completed running.  This is to
+prevent the function that inserts into the table from being
+overwritten while it is still running.  PostgreSQL may handle this
+well, I don't know - but I see no reason to stress the implementation
+any further than I must.
+</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="trig_system_parameters_biu"></a>C.10.6. <code class="literal">system_parameters_biu</code>
+</h4></div></div></div>
+<pre class="programlisting">
+create trigger system_parameters_biu before insert or update
+  on veil2.system_parameters
+  for each row execute function veil2.system_parameters_check();
+
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="trig_authentication_types_biu"></a>C.10.7. <code class="literal">authentication_types_biu</code>
+</h4></div></div></div>
+<pre class="programlisting">
+create trigger authentication_types_biu before insert or update
+  on veil2.authentication_types
+  for each row execute function veil2.make_user_defined();
+
+</pre>
+</div>
+</div>
 </div>
 <div class="navfooter">
 <hr>
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="apbs02.html">Prev</a> </td>
+<a accesskey="p" href="apb.html">Prev</a> </td>
 <td width="20%" align="center"> </td>
-<td width="40%" align="right"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="apd.html">Next</a>
+</td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">B.2. Dedicated Database Sessions </td>
+<td width="40%" align="left" valign="top">Appendix B. <code class="literal">Veil2</code> Views, Materialized Views and Caches </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> </td>
+<td width="40%" align="right" valign="top"> Appendix D. <code class="literal">Veil2</code> C Implementation</td>
 </tr>
 </table>
 </div>

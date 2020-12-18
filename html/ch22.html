@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 22. For Developers</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt03.html" title="Part III. Implementation Details">
+<link rel="prev" href="ch21.html" title="Chapter 21. The Veil2 Implementation: What You Need To Know">
+<link rel="next" href="ch23.html" title="Chapter 23. How Veil2 Relates to the Original Veil">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch21.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch23.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 21. The Veil2 Implementation: What You Need To Know </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 23. How <code class="literal">Veil2</code> Relates to the Original <code class="literal">Veil</code>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="for_developers"></a>Chapter 22. For Developers</h2></div></div></div>
+<p>
+    If you want to get into the details of the
+    <code class="literal">Veil2</code> implementation, this section is for you.
+  </p>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1720"></a>22.1. Performing Local Builds</h2></div></div></div>
+<p>
+      For most users there will never be any need to build
+      <code class="literal">Veil2</code> locally using anything except the
+      <code class="literal">pgxn</code> client as described in the <a class="link" href="ch08.html#installation" title="8.1. Installing Veil2">Installation section</a>. 
+    </p>
+<p>
+      If, however, you wish to hack on the <code class="literal">Veil2</code>
+      internals or documentation, or are just curious you can clone
+      <code class="literal">Veil2</code> from <a class="ulink" href="https://github.com/marcmunro/veil2" target="_top">the Veil2 github
+      page</a>, or get a zipped copy from Marc's <a class="ulink" href="https://pgxn.org/user/marcmunro" target="_top">PGXN pages</a>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1731"></a>22.1.1. Directory Tree</h3></div></div></div>
+<p>
+	The <code class="literal">Veil2</code> directory structure is pretty
+	flat and very simple:
+	</p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="literal">bin</code></span></dt>
+<dd><p>
+		Home to a small number of helper scripts for the
+		documentation build.
+	      </p></dd>
+<dt><span class="term"><code class="literal">demo</code></span></dt>
+<dd><p>
+		Contains files associated with the demo extensions.
+	      </p></dd>
+<dt><span class="term"><code class="literal">diagrams</code></span></dt>
+<dd><p>
+		Contains diagrams created by <a class="ulink" href="https://wiki.gnome.org/Apps/Dia" target="_top">dia</a>. 
+	      </p></dd>
+<dt><span class="term"><code class="literal">docs</code></span></dt>
+<dd><p>
+		Contains, mostly, xml source files for the
+		documentation system.  Is also used for some
+		intermediate files for the documentation build,
+		including the <code class="literal">anchors</code> and
+		<code class="literal">extracts</code> directories.
+	      </p></dd>
+<dt><span class="term"><code class="literal">html</code></span></dt>
+<dd><p>
+		Created by the <code class="literal">docs</code> target from
+		make.  Contains generated html documentation.  Point
+		your browser to <code class="literal">index.html</code> in here
+		to see your latest updated docs.
+	      </p></dd>
+<dt><span class="term"><code class="literal">sql</code></span></dt>
+<dd><p>
+		Contains the SQL sources for
+		<code class="literal">Veil2</code>.
+	      </p></dd>
+<dt><span class="term"><code class="literal">src</code></span></dt>
+<dd><p>
+		Contains the C source files for the
+		<code class="literal">Veil2</code> shared library.
+	      </p></dd>
+<dt><span class="term"><code class="literal">test</code></span></dt>
+<dd><p>
+		Scripts for running unit tests on the
+		<code class="literal">Veil2</code> extension.
+	      </p></dd>
+</dl></div>
+<p>
+      </p>
+<p>
+	You may notice makefiles in many sub-directories.  These simply
+	change directory to their parent directory before re-running
+	<code class="literal">make</code> there.  This enables
+	<code class="literal">make</code> to be run from any directory in the
+	tree, making builds from tools like <code class="literal">emacs</code>
+	much easier.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1788"></a>22.1.2. Operating System Environment</h3></div></div></div>
+<p>
+	 You should be able to install Veil2 on any operating system,
+	 though something Unix-like is recommended, as we use
+	 <code class="literal">gnu make</code> for a lot of tasks.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1792"></a>22.1.3. Software Requirements</h3></div></div></div>
+<p>
+	Your requirements will depend on what you are trying to do.
+      </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1795"></a>22.1.3.1. To Build <code class="literal">Veil2</code> From Sources</h4></div></div></div>
+<p>
+	  You'll need:
+	  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+	      make;
+	    </li>
+<li class="listitem">
+	      a C build environment (gcc, llvm, or some such);
+	    </li>
+<li class="listitem">
+	      a currently supported version of Postgres.
+	    </li>
+</ul></div>
+<p>
+	</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1803"></a>22.1.3.2. To Build <code class="literal">Veil2</code> Documentation</h4></div></div></div>
+<p>
+	  You'll need:
+	  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+	      xsltproc;
+	    </li>
+<li class="listitem">
+	      libxslt1.1;
+	    </li>
+<li class="listitem">
+	      libxml2;
+	    </li>
+<li class="listitem">
+	      dia;
+	    </li>
+<li class="listitem">
+	      p2toimg;
+	    </li>
+<li class="listitem">
+	      gawk;
+	    </li>
+<li class="listitem">
+	      a Unix-like shell;
+	    </li>
+<li class="listitem">
+	      make;
+	    </li>
+<li class="listitem">
+	      docbook 4.5 stylesheets.
+	    </li>
+</ul></div>
+<p>
+	</p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1817"></a>22.1.4. The Build System</h3></div></div></div>
+<p>
+	<code class="literal">Veil2</code> uses a pretty standard
+	<code class="literal">autotools</code>-based build system, though the
+	<code class="literal">GNUmakefile</code> is largely hand-crafted.
+      </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1823"></a>22.1.4.1. <code class="literal">autoconf</code>
+</h4></div></div></div>
+<p>
+	  There should be no need to re-run
+	  <code class="literal">autoconf</code> unless new dependencies for
+	  documentation builds, etc need to be discovered.  In this
+	  case you would
+	  </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+	      Manually update the <code class="literal">configure.ac</code> file.
+	    </li>
+<li class="listitem">
+	      Run autoconf.
+	    </li>
+</ul></div>
+<p>
+	  This would update the <code class="literal">configure</code> file,
+	  which you would then re-run as shown below.
+	</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1833"></a>22.1.4.2. <code class="literal">./configure</code>
+</h4></div></div></div>
+<p>
+	  The <code class="literal">./configure</code> script should be run any
+	  time that you need to bump the <code class="literal">Veil2</code>
+	  version.  You will update the <code class="literal">VERSION</code>
+	  file, and then run <code class="literal">./configure</code>.  This
+	  will update <code class="literal">Makefile.global</code>, which is
+	  included from <code class="literal">GNUmakefile</code>.
+	</p>
+<p>
+	  You would also run the <code class="literal">./configure</code> script
+	  after any updates to <code class="literal">Makefile.global.in</code>
+	  which you might make if you need to change compilation flags
+	  or some such.
+	</p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="idm1846"></a>22.1.4.3. <code class="literal">make</code>
+</h4></div></div></div>
+<p>
+	  The makefile, <code class="literal">GNUmakefile</code> manages all
+	  aspects of the build and installation processes.  It uses
+	  the postgres <code class="literal">pgxs</code> build mechanisms to
+	  build the shared library and manage the installation of our
+	  postgres extensions.
+	</p>
+<p>
+	  The default target (run <code class="literal">make</code> with no
+	  parameters) is the C shared library veil2.so.  Other targets
+	  include:
+	</p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="literal">help</code></span></dt>
+<dd><p>
+		Provides a list of the makefile's major targets.
+	      </p></dd>
+<dt><span class="term"><code class="literal">db</code></span></dt>
+<dd><p>
+		Creates a new clean vpd database into which we can
+		install <code class="literal">Veil2</code>.
+	      </p></dd>
+<dt><span class="term"><code class="literal">docs</code></span></dt>
+<dd><p>
+		Creates an html documentation tree including Doxygen
+		documentation.
+	      </p></dd>
+<dt><span class="term"><code class="literal">install</code></span></dt>
+<dd><p>
+		Installs our extensions into the active Postgres
+		environment.  This target does not imply a docs
+		build.  If you want docs installed you should build
+		them first and then this target will ensure they are
+		installed.
+	      </p></dd>
+<dt><span class="term"><code class="literal">clean</code></span></dt>
+<dd><p>
+		Remove target, intermediate and junk files.
+	      </p></dd>
+</dl></div>
+<p>
+	</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1881"></a>22.2. Running Unit Tests</h2></div></div></div>
+<p>
+      The <code class="literal">Veil2</code> unit tests can be run from
+      <code class="literal">make</code> using the <code class="literal">unit</code>
+      target.  They require the postgres unit testing extension
+      <code class="literal">pgtap</code>.
+    </p>
+<p>
+      The tests leave no residue in the test database, so can be run
+      on any clean database.  By default the <code class="literal">vpd</code>
+      database will be used, but this can be changed by providing
+      <code class="literal">make</code> with a value for
+      <code class="literal">TESTDB</code>, eg:
+      </p>
+<pre class="programlisting">
+marc:veil2$ make unit TESTDB=veil_unit_test_db
+Creating database veil_unit_test_db...
+CREATE DATABASE
+Performing unit tests...
+Running Veil2 unit tests...
+. . . 
+      </pre>
+<p>
+      This test database can be dropped using:
+      </p>
+<pre class="programlisting">
+marc:veil2$ make drop TESTDB=veil_unit_test_db
+Dropping database veil_unit_test_db...
+Pager usage is off.
+DROP DATABASE
+marc:veil2$ 
+      </pre>
+<p>
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1894"></a>22.3. The Documentation Build</h2></div></div></div>
+<p>
+      The <code class="literal">Veil2</code> documentation is built using
+      docbook.  It is a relatively complex beast though, as there is
+      automated extraction of SQL code, automated creation of diagram
+      images and maps, and linkage with Doxygen documentation.  This
+      is what you need to know:
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1898"></a>22.3.1. General</h3></div></div></div>
+<p>
+	There is a lot of nasty shell scripting involved.  Trying to do
+	this in a non-Unix environment is probably not an option.  
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1901"></a>22.3.2. Images</h3></div></div></div>
+<p>
+	Images are converted into <code class="literal">.png</code> files from
+	their <code class="literal">.dia</code> sources using
+	<code class="literal">pstoimg</code>, which on Debian comes from the
+	<code class="literal">latex2html</code> package.  This is done by a
+	general <code class="literal">%.png: %.dia</code> rule in the makefile.
+      </p>
+<p>
+	The ERD and Views diagrams in the html documentation provide
+	clickable links.  The maps for these are generated via
+	intermediate <code class="literal">.xml</code> and
+	<code class="literal">.coords</code> targets, again created by rules in
+	the makefile.
+      </p>
+<p>
+	The process for generating the map files is best discovered,
+	if you need it, by exploring the code, starting from the makefile.  
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1913"></a>22.3.3. SQL Extracts</h3></div></div></div>
+<p>
+	The Appendices A, B and C contain documentation that is
+	largely automatically generated from the main veil SQL
+	script.  The extracts are created from the makefile by some
+	fairly ugly shell scripts.  Look for targets containing the
+	word extract in the makefile.
+      </p>
+<p>
+	The individual extract files are processed into the docbook
+	sources by <code class="literal">sql-definition</code> xsl processing
+	instruction directives in the xml sources.  These are handled
+	by an xsl template defined in the
+	<code class="literal">docs/html_stylesheet.xsl</code> stylesheet.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm1919"></a>22.3.4. Linkage To Doxygen docs</h3></div></div></div>
+<p>
+	These are handled by targets containing the word anchor in the
+	makefile, and by <code class="literal">doxygen-ulink</code> xsl
+	processing-instructions handled by the
+	<code class="literal">docs/html_stylesheet.xsl</code> stylesheet.
+      </p>
+</div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="idm1924"></a>22.4. Releases</h2></div></div></div>
+<p>
+      Releasing a new version of <code class="literal">Veil2</code> to the world
+      involves a number of steps.  The makefile provides various
+      targets to help in this process, primarily the
+      <code class="literal">zipfile</code> target which creates a zipfile for
+      release to <code class="literal">PGXN</code> once <code class="literal">make</code>
+      is satisfied that all necesary steps have been taken.
+    </p>
+<p>
+      Specifically, before creating the zipfile,
+      <code class="literal">make</code> insists on the following:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+	    that the <code class="literal">PGXN</code> metadata file,
+	    <code class="literal">META.json</code> contains correct filename and
+	    version information;
+	  </p>
+<p>
+	    Specifically, that the version numbers match what is
+	    defined in the <code class="literal">VERSION</code> file.
+	  </p>
+</li>
+<li class="listitem"><p>
+	    that there are no uncommitted changes;
+	  </p></li>
+<li class="listitem">
+<p>
+	    that the current <code class="literal">git</code> branch is
+	    <code class="literal">master</code>;
+	  </p>
+<p>
+	    This is particularly necessary as other branches have to
+	    be used when uploading documentation to
+	    <code class="literal">github</code>.
+	  </p>
+</li>
+<li class="listitem"><p>
+	    that the <code class="literal">HEAD</code> branch in
+	    <code class="literal">git</code> has been tagged;
+	  </p></li>
+<li class="listitem"><p>
+	    that github and other upstream repositories are up to date
+	    with respect to the local <code class="literal">git</code> repository;
+	  </p></li>
+<li class="listitem"><p>
+	    that the latest version of documentation has been published
+	    to github pages.
+	  </p></li>
+</ul></div>
+<p>
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch21.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch23.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 21. The Veil2 Implementation: What You Need To Know </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 23. How <code class="literal">Veil2</code> Relates to the Original <code class="literal">Veil</code>
+</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

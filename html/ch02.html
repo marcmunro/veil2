@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 2. How Is Relational Security Different?</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="pt01.html" title="Part I. Understanding Veil2 And Relational Security">
+<link rel="prev" href="ch01.html" title="Chapter 1. What Is A Relational Security System?">
+<link rel="next" href="ch03.html" title="Chapter 3. Why Use Veil2">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch01.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt01.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch03.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 1. What Is A Relational Security System? </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 3. Why Use <code class="literal">Veil2</code>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="how-is-relational-security-different"></a>Chapter 2. How Is Relational Security Different?</h2></div></div></div>
+<p>
+    A relational security implementation differs from the typical access
+    controls built into an application in a number of ways:
+  </p>
+<div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; ">
+<li class="listitem"><p>
+        how access rights are
+        <a class="link" href="ch02.html#How-Assign" title="2.2. The Relational Security Approach">assigned</a>;
+      </p></li>
+<li class="listitem"><p>
+        where the controls are
+        <a class="link" href="ch02.html#Where-Implemented" title="2.3. Where Are Access Controls Implemented In A Relational Security System?">implemented</a>;
+      </p></li>
+<li class="listitem"><p>
+        how access is <a class="link" href="ch02.html#How-Restricted" title="2.4. How Is Access Restricted In A Relational Security System?">restricted</a>;
+      </p></li>
+<li class="listitem"><p>
+        the ease of being able to <a class="link" href="ch02.html#ease_of_reasoning" title="2.5. Ease of Reasoning">reason
+        about</a> the access restrictions;
+      </p></li>
+<li class="listitem"><p>
+        the <a class="link" href="ch02.html#comprehensiveness" title="2.6. Comprehensiveness">comprehensiveness</a> of the
+	access restrictions.
+      </p></li>
+</ul></div>
+<div class="sect1">
+<div class="titlepage"><div>
+<div><h2 class="title" style="clear: both">
+<a name="Traditional"></a>2.1. The <span class="emphasis"><em>Traditional</em></span> Approach</h2></div>
+<div><h3 class="subtitle">(What Is Relational Security Different From?)</h3></div>
+</div></div>
+<p>
+      For the purpose of subsequent discussion, we are going to define
+      a <span class="emphasis"><em>Traditional Application Security</em></span> approach
+      below.  The terminology in this section is necessarily somewhat
+      vague as it is a fairly gross generalization of typical
+      practices.  Many existing systems will do better than is
+      suggested below, but the underlying mechanisms described should
+      be easily recognizable and familiar.
+    </p>
+<p>
+      In traditionally implemented database systems:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+          The security implementation is entirely in the application
+	  layer.
+        </p>
+<p>
+          Since all access to the database is through the application
+          this is the obvious place to put all access controls.
+	  Application servers provide functionally-rich environments
+	  which would seem to make this the obviously correct, and
+	  possibly the only viable approach.
+        </p>
+</li>
+<li class="listitem">
+<p><a name="conditionality"></a>
+          Access controls are applied to functionality.
+        </p>
+<p>
+          Most of the access limitations in a typical system are managed
+          by simply preventing access to certain functions. Often menu
+          entries will be greyed-out when you don’t have access rights.
+        </p>
+<p>
+          Some access controls <span class="emphasis"><em>will</em></span> be contextual:
+          there will be explicit checks to determine whether in the
+          context of this team/department/organization/customer/whatever
+          you have the right to perform a specific action.
+        </p>
+<p>
+          This is typically still a functional rather than a relational
+          access control as there is the implied function
+          <code class="literal">do-x-if-I-am-a-member-of-something</code>, rather
+          than the more general <code class="literal">do-x</code>. Often the
+	  general <code class="literal">do-x</code> function will be reserved for
+	  administrator use only.
+        </p>
+<p>
+          Sometimes such functions will do some moderately sophisticated
+          relational testing to see whether the user should be allowed
+          to continue, and this should be considered a relational access
+          control. That said, this is often an ad-hoc thing, and each
+          function may have its own rules and its own implementation.
+        </p>
+</li>
+<li class="listitem">
+<p>
+          Most access rights are assigned to users explicitly, through
+	  the assignment of roles.
+        </p>
+<p>
+	  Roles are collections of low-level access rights
+	  (privileges), and each role will typically allow a user to
+	  perform a number of distinct tasks.
+        </p>
+<p>
+          Users will typically be explicitly assigned roles, such as
+          Customer Service Rep (CSR), Product
+          Manager, Senior CSR, Administrator, etc.
+        </p>
+<p>
+          Sometimes these are called rights or privileges but they are
+          essentially roles.
+        </p>
+<p>
+	  A user gains access to functionality by being assigned the
+	  appropriate roles.
+        </p>
+</li>
+<li class="listitem">
+<p><a name="implicit_rights"></a>
+          Implicit access rights are often managed by a lack of
+          implementation.
+        </p>
+<p>
+          There may be some implicit access rights that
+          <span class="emphasis"><em>all</em></span> users get, but this default
+          position is often achieved by simply
+          <span class="emphasis"><em>not</em></span> implementing any controls at all in
+          certain parts of the application.  For instance if every
+          user is expected to be able to see all lookup tables, then
+          the traditional system will simply not apply
+          <span class="emphasis"><em>any</em></span> checks on lookup table access.
+        </p>
+</li>
+</ul></div>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="How-Assign"></a>2.2. The Relational Security Approach</h2></div></div></div>
+<p>
+      In our
+      <span class="emphasis"><em><a class="link" href="ch02.html#Traditional" title="2.1. The Traditional Approach">traditional</a></em></span>
+      system, almost all access is determined from explicit assignments
+      of roles.  With a relational security approach we will still
+      use explicit role assignments, but these will only be part of
+      the story.
+    </p>
+<p>
+      In a relational security model, access rights are managed in
+      multiple ways:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+          default role assignments;
+        </p>
+<p>
+          Users can be given default roles. This is a little like the
+          default access rights in our traditional system, but:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: circle; ">
+<li class="listitem">
+            they are implemented as explicit access controls, rather
+            than the more usual lack of access controls;
+          </li>
+<li class="listitem">
+            the set of rights given through default roles can be
+            changed with time and experience without having to modify
+            the application.
+          </li>
+</ul></div>
+</li>
+<li class="listitem">
+<p>
+          implicit role assignments;
+        </p>
+<p>
+          It may be that we wish to record a user’s membership of a team
+          as part of our application. We can choose to make that
+          membership the source of a role assignment. This means that we
+          do not need to explicitly assign roles to a user: they can
+          instead be inferred from existing relationships in the data.
+        </p>
+</li>
+<li class="listitem">
+<p>
+          explicit role assignments;
+        </p>
+<p>
+          This is similar to the <code class="literal">traditional</code> system,
+          but more sophisticated as assignments may be in specific
+          contexts. What this means is that you may be given the
+          <code class="literal">CSR</code> role in the context of one client, but
+          not in the context of others, or you may be given that role in
+          a <code class="literal">department context</code> which might give you
+          access to all clients managed by your department.
+        </p>
+</li>
+<li class="listitem">
+<p>
+          inherited role assignments;
+        </p>
+<p>
+	  If a hierarchy of scopes can be defined, roles assigned in a
+	  given context can also apply in inferior contexts.  For
+	  example, if you have been assigned the
+	  <code class="literal">Administrator</code> role in the context of a
+	  division within your company, that role may be inherited to
+	  apply at the department level of all departments within the
+	  division.
+        </p>
+</li>
+</ul></div>
+<p>
+      These mechanisms can be as sophisticated/complex as you need them
+      to be, but from the user’s perspective they will be unsurprising
+      and they should therefore be simple to administer.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="Where-Implemented"></a>2.3. Where Are Access Controls Implemented In A Relational
+    Security System?</h2></div></div></div>
+<p><a name="external_factors"></a>
+      In our <span class="emphasis"><em><a class="link" href="ch02.html#Traditional" title="2.1. The Traditional Approach">traditional</a></em></span> system, all
+      access controls are managed by the application.  Although this
+      may be a data-driven process, the decision to allow access or
+      not will often involve factors that are
+      <span class="emphasis"><em>external</em></span> to the database: the application
+      will have to make decisions based upon rules, and those rules
+      may be, at least partly, hard-coded into the application.
+    </p>
+<p>
+      With a relational security mechanism <span class="emphasis"><em>all</em></span> of
+      the decision making is made within the database.  There will be
+      no <span class="emphasis"><em>external factors</em></span> such as hard-coded
+      access-control rules.  There are two distinct types of access
+      controls that we implement:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; ">
+<li class="listitem">
+          on relations (tables and views);
+	</li>
+<li class="listitem">
+          on functions.
+	</li>
+</ul></div>
+<p>
+    </p>
+<p>
+      Access controls on functions are similar to the access controls
+      of the traditional system.  The difference is that the database
+      directly provides a decision to the application, rather than
+      providing some of the base data for the application to make that
+      decision based on whatever rules were implemented for the
+      specific case in the specific application.
+    </p>
+<p>
+      An application using a relational security system could
+      determine which menu entries should be greyed-out for a 
+      user in the <code class="literal">Project Management</code> menu of
+      <code class="literal">Project X</code>, by executing a query something
+      like:
+      </p>
+<pre class="programlisting">
+	select i_have_priv_in_scope('exec pm-menu-item1', 'Project X'),
+	       i_have_priv_in_scope('exec pm-menu-item2', 'Project X'),
+	       i_have_priv_in_scope('exec pm-menu-item3', 'Project X'),
+	       i_have_priv_in_scope('exec pm-menu-item4', 'Project X'),
+	       i_have_priv_in_scope('exec pm-menu-item5', 'Project X'),
+	       i_have_priv_in_scope('exec pm-menu-item6', 'Project X');
+      </pre>
+<p>
+    </p>
+<p>
+      This would return <code class="literal">true</code> or
+      <code class="literal">false</code> for each menu entry that we are
+      interested in.  Note that the permission tests are contextual:
+      whether you have permission to execute some project management
+      function depends on which project you want to apply it to.  You
+      may be able to access different functions in different
+      projects.
+    </p>
+<p>
+      Access controls on relations (tables and views) limit the data
+      that you may see or manipulate.  Just as with access to
+      functions, this is contextual so that you may see data for some
+      projects and not for others.  What this means is that even if
+      the application fails to properly limit your access, the
+      database will act as a backstop.  If you have not been given
+      access to a record, then no matter how you try you will not be
+      able to see or manipulate it.  The fact that different users
+      may see different data from the same query is why this is
+      sometimes called a <a class="ulink" href="https://en.wikipedia.org/wiki/Virtual_private_database" target="_top">Virtual
+      Private Database</a> (VPD) implementation. 
+    </p>
+<p>
+      The application is not off the hook though.  The application
+      should not allow the user to try to do things that will not be
+      allowed by the database.  It should limit the records it tries
+      to retrieve for the user using well-crafted queries with
+      where-clauses that request only the data that the user should be
+      able to see.  But if it gets it wrong, little harm will be done.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="How-Restricted"></a>2.4. How Is Access Restricted In A Relational Security
+    System?</h2></div></div></div>
+<p>
+      In our <span class="emphasis"><em><a class="link" href="ch02.html#Traditional" title="2.1. The Traditional Approach">traditional</a></em></span> system, 
+      access controls are primarily managed by limiting the user’s
+      access to specific functions, and the restrictions are primarily
+      implemented in code that runs on the application server.  Where
+      privileges are required for access to specific data,
+      <code class="literal">where-clauses</code> may be dynamically added to
+      queries based on those privileges or on flags whose values are
+      based on those privileges.
+    </p>
+<p>
+      With a relational security model, access to data is limited
+      primarily by the database server itself.  No application code is
+      required to limit a user's access to data, the database just
+      does it.  Furthermore the application does not need the
+      <span class="emphasis"><em>smarts</em></span> to determine what a user can do.  It
+      can simply ask the database what is allowed.  No complex
+      application code; no surprising access control rules; and no
+      <a class="link" href="ch02.html#external_factors">external factors</a>.
+    </p>
+<p>
+      What this means is that <span class="emphasis"><em>all</em></span> of the access
+      control rules are built from a common framework using a single
+      set of guiding principles.  Although it is possible to implement
+      special cases there is rarely any need.  This is because the
+      access control mechanisms are based on the highly flexible
+      mechanism of privileges with scope.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="ease_of_reasoning"></a>2.5. Ease of Reasoning</h2></div></div></div>
+<p>
+      Traditional access control systems are often built piecemeal, or
+      as an afterthought.  Even when there are guiding principles
+      behind the implementation there are often corner cases that
+      require special treatment.  This means that the security
+      mechanisms of traditional applications are often difficult to
+      completely describe.  Furthermore since privileges in the
+      traditional system often imply conditionality, a simple
+      understanding of privileges is not enough.
+    </p>
+<p>
+      By placing all of your access control definitions into a
+      relational security model, it becomes much easier to describe
+      and reason about your security implementation.  And your
+      implementation, by virtue of its consistency, is much more
+      likely to match what your designer intended and your customer
+      wanted.
+    </p>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="comprehensiveness"></a>2.6. Comprehensiveness</h2></div></div></div>
+<p>
+      Earlier we stated that <a class="link" href="ch02.html#implicit_rights">implicit
+      access rights</a>, in traditional applications, are often
+      managed by simply not implementing them.  In a relational
+      security system, every piece of data is protected by the same
+      underlying mechanism of privilege and scope, which means is that
+      if something which once was viewed as public data subsequently
+      needs to be secured, it is simply a matter of changing some
+      privilege assignments.  No code needs to be touched and once the
+      change has been tested we can be sure that it will apply
+      throughout the application: there will not be some obscure
+      screen somewhere that someone created by copy and paste that
+      gets forgotten and that does not get updated to implement the
+      new access control.
+    </p>
+<p>
+      By having only one fundamental security mechanism, and by
+      linking it with the data that it is intended to protect, a
+      relational security system will be more complete and more
+      robust, and by building this into the database we can ensure
+      that the same security model applies to all applications
+      including reports.
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch01.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="pt01.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ch03.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 1. What Is A Relational Security System? </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 3. Why Use <code class="literal">Veil2</code>
+</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

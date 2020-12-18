@@ -1,0 +1,20 @@
+<map id="veil2_i_have_priv_in_scope_or_global" name="veil2_i_have_priv_in_scope_or_global">
+<area shape="rect" id="node2" href="$veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="204,81,355,108"/>
+<area shape="rect" id="node11" href="$veil2_8c.html#ad03876d90cc6f64b46b87bdbe6dc7289" title="load_privs" alt="" coords="236,157,323,184"/>
+<area shape="rect" id="node18" href="$veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="225,208,333,235"/>
+<area shape="rect" id="node3" href="$veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="412,81,560,108"/>
+<area shape="rect" id="node4" href="$query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="632,56,767,83"/>
+<area shape="rect" id="node5" href="$query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="617,5,781,32"/>
+<area shape="rect" id="node10" href="$query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="640,107,759,133"/>
+<area shape="rect" id="node6" href="$query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="847,107,942,133"/>
+<area shape="rect" id="node9" href="$query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="835,5,954,32"/>
+<area shape="rect" id="node7" href="$query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="1021,107,1141,133"/>
+<area shape="rect" id="node8" href="$query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1203,107,1317,133"/>
+<area shape="rect" id="node12" href="$veil2_8c.html#ad0227b91fd8a98d84dc03bff37ea89f1" title="do_load_session_privs" alt="" coords="403,157,569,184"/>
+<area shape="rect" id="node13" href="$veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="626,208,773,235"/>
+<area shape="rect" id="node15" href="$veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="1008,284,1155,311"/>
+<area shape="rect" id="node16" href="$veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2" title="fetch_scope_privs" alt="" coords="631,259,768,285"/>
+<area shape="rect" id="node14" href="$veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="831,208,958,235"/>
+<area shape="rect" id="node17" href="$veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="829,259,960,285"/>
+<area shape="rect" id="node19" href="$veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="439,208,533,235"/>
+</map>

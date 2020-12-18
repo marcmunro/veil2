@@ -1,0 +1,10 @@
+<map id="checkSessionReady" name="checkSessionReady">
+<area shape="rect" id="node2" href="$veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="204,56,352,83"/>
+<area shape="rect" id="node3" href="$query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="415,5,549,32"/>
+<area shape="rect" id="node4" href="$query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="400,56,564,83"/>
+<area shape="rect" id="node9" href="$query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="423,107,541,133"/>
+<area shape="rect" id="node5" href="$query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="624,31,719,57"/>
+<area shape="rect" id="node8" href="$query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="612,81,731,108"/>
+<area shape="rect" id="node6" href="$query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="779,31,899,57"/>
+<area shape="rect" id="node7" href="$query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="947,31,1061,57"/>
+</map>

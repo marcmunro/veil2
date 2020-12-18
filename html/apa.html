@@ -2,36 +2,36 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A. Veil2 ERD and Database Objects</title>
+<title>Appendix A. Veil2 ERD and Database Objects</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.9 (beta) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.9 (beta) Documentation">
-<link rel="prev" href="ar01s23.html" title="23. Tips and Guidelines">
-<link rel="next" href="apas02.html" title="A.2. Veil2 Views">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="prev" href="ch27.html" title="Chapter 27. Contact Links">
+<link rel="next" href="apb.html" title="Appendix B. Veil2 Views, Materialized Views and Caches">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s23.html">Prev</a> </td>
+<a accesskey="p" href="ch27.html">Prev</a> </td>
 <td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="apas02.html">Next</a>
+<td width="40%" align="right"> <a accesskey="n" href="apb.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">23. Tips and Guidelines </td>
+<td width="40%" align="left" valign="top">Chapter 27. Contact Links </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> A.2. Veil2 Views</td>
+<td width="40%" align="right" valign="top"> Appendix B. <code class="literal">Veil2</code> Views, Materialized Views and Caches</td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="appendix">
-<div class="titlepage"><div><div><h2 class="title">
-<a name="idm1287"></a>A. <code class="literal">Veil2</code> ERD and Database Objects</h2></div></div></div>
+<div class="titlepage"><div><div><h1 class="title">
+<a name="idm2214"></a>Appendix A. <code class="literal">Veil2</code> ERD and Database Objects</h1></div></div></div>
+<p></p>
 <div class="mediaobject"><div id="veil2_erd_div">
   <map name="veil2_erd_map">
     <area alt="scope_type entity" title="scope_types table"
@@ -68,7 +68,7 @@
       href="apa.html#entity_session">
     <area alt="authentication_detail entity" title="authentication_details table"
       target="_self" shape="rect"
-      coords="469,635,649,670"
+      coords="421,635,601,670"
       href="apa.html#entity_authentication_detail">
     <area alt="accessor_role entity" title="accessor_roles table"
       target="_self" shape="rect"
@@ -76,16 +76,12 @@
       href="apa.html#entity_accessor_role">
     <area alt="scope entity" title="scopes table"
       target="_self" shape="rect"
-      coords="469,146,779,181"
+      coords="470,146,779,181"
       href="apa.html#entity_scope">
     <area alt="context_role entity" title="context_roles table"
       target="_self" shape="rect"
       coords="291,260,455,295"
       href="apa.html#entity_context_role">
-    <area alt="session_privilege entity" title="session_privileges table"
-      target="_self" shape="rect"
-      coords="664,570,827,604"
-      href="apa.html#entity_session_privilege">
     <area alt="role_type entity" title="role_types table"
       target="_self" shape="rect"
       coords="291,81,455,115"
@@ -94,13 +90,17 @@
       target="_self" shape="rect"
       coords="32,32,212,66"
       href="apa.html#entity_system_parameter">
+    <area alt="session_context entity" title="session_contexts table"
+      target="_self" shape="rect"
+      coords="615,538,779,572"
+      href="apa.html#entity_session_context">
   </map>
   <img src="veil2_erd.png" usemap="#veil2_erd_map">
 </div>
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm1293"></a>A.1. Veil2 Tables</h2></div></div></div>
+<a name="idm2221"></a>A.1. Veil2 Tables</h2></div></div></div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="entity_scope_type"></a>A.1.1. Scope Types Table</h3></div></div></div>
@@ -111,6 +111,8 @@ create table veil2.scope_types (
   description			text not null
 );
 
+alter table veil2.scope_types enable row level security;
+
 </pre>
 <p>
 Identifies the types of security scope for your VPD.  This can be
@@ -119,11 +121,8 @@ thought of as the 'level' of a scope.
 <p>
 Insert one record into this table for each type of scope that you wish
 to implement.  Veil2 comes with 2 built-in scope types: for global and
-personal contexts.
+personal scopes.
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -131,19 +130,23 @@ personal contexts.
 <pre class="programlisting">
 create table veil2.system_parameters (
     parameter_name		text not null,
-    parameter_value		text not null
+    parameter_value		text not null,
+    user_defined		boolean
 );
 
 alter table veil2.system_parameters add constraint system_parameter__pk
   primary key(parameter_name);
+
+alter table veil2.system_parameters enable row level security;
 
 </pre>
 <p>
 Provides values for various parameters.
 </p>
 <p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
+Column <code class="literal">user_defined</code>: Whether this parameter value was modified by the user.  This is
+needed for exports using pg_dump.
+</p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -161,6 +164,8 @@ alter table veil2.role_types add constraint role_type__pk
 alter table veil2.role_types add constraint role_type__name_uk
   unique(role_type_name);
 
+alter table veil2.role_types enable row level security;
+
 </pre>
 <p>
 A role type is used to classify roles so that they may be shown and
@@ -172,9 +177,6 @@ function-level roles so that you can prevent role assignments to
 user-level roles.  In such a case you might add columns to this table
 to identify specific properties of specific role_types.
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -193,6 +195,8 @@ alter table veil2.privileges add constraint privilege__pk
 alter table veil2.privileges add constraint privilege__promotion_scope_type_fk
   foreign key(promotion_scope_type_id)
   references veil2.scope_types(scope_type_id);
+
+alter table veil2.privileges enable row level security;
 
 </pre>
 <p>
@@ -252,9 +256,6 @@ privilege promotion and on the use of the terms scope and context.
 Column <code class="literal">description</code>: For any privilege whose purpose cannot easily be determined from the
 name, a description of the privilege should appear here.
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -264,6 +265,8 @@ create table veil2.scopes (
   scope_type_id	       		integer not null,
   scope_id			integer not null
 );
+
+alter table veil2.scopes enable row level security;
 
 </pre>
 <p>
@@ -277,10 +280,16 @@ is incomplete.  It needs additional columns to link itself with the
 scopes it is protecting.
 </p>
 <p>
-For each relational scope type that you create, you should create
-foreign key relationships from this table back to your protected
-database.  There are a number of ways to do this.  Probably the
-simplest is to add nullable columns to this table for each type of
+Your implementation must link this scopes table to the tables in your
+database that provide your scopes.  For instance a users table or a
+projects table.
+</p>
+<p>
+The approved method for linking your tables to the veil2 scopes table
+is by defining your own veil2 table that inherits from scopes.  Your
+inherited table will provide foreign key relationships back to your
+protected database.  There are a number of ways to do this.  Probably
+the simplest is to add nullable columns to this table for each type of
 relational context key and then add appropriate foreign key and check
 constraints.
 </p>
@@ -291,18 +300,21 @@ corporations table:
 <p>
 </p>
 <pre class="programlisting">
-alter table veil2.scopes 
-  add column corp_id integer;
+create table veil2.scope_corps (
+  column corp_id integer
+) inherits (veil2.scopes);
 
-alter table veil2.scopes 
-  add constraint scope__corp_fk
+-- create pk and fks for the new table based on those for veil2.scopes
+
+alter table veil2.scope_corps_link
+  add constraint scope_corps__corp_fk
   foreign key (corp_id)
   references my_schema.corporations(corp_id);
 
 -- Ensure that for corp context types we have a corp_id
 -- (assume corp_context has scope_type_id = 3)
-alter table veil2.scopes 
-  add constraint scope__corp_chk
+alter table veil2.scope_corps 
+  add constraint scope_corp__corp_chk
   check ((scope_type_id != 3) 
       or ((scope_type_id = 3) and (corp_id is not null)));
 
@@ -331,9 +343,6 @@ The scope_id provides a link back to the database we are protecting,
 and will usually be the key to some entity that can be said to 'own'
 data.  This might be a party, or a project, or a department.
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -358,6 +367,8 @@ alter table veil2.roles add constraint role__type_fk
   foreign key(role_type_id)
   references veil2.role_types(role_type_id);
 
+alter table veil2.roles enable row level security;
+
 </pre>
 <p>
 A role is a way of collecting privileges (and other roles) into groups
@@ -376,15 +387,13 @@ may not be explicitly assigned.
 </p>
 <p>
 Column <code class="literal">immutable</code>: Whether this role is considered unmodifiable.  Such roles may not be
-the primary role in a role_role assignment.
+the primary role in a role_role assignment, ie you cannot assign other
+roles to them.
 </p>
 <p>
 Column <code class="literal">description</code>: For any role whose purpose cannot easily be determined from the
 name, a description of the role should appear here.
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -407,10 +416,7 @@ alter table veil2.context_roles add constraint context_role__role_fk
   foreign key(role_id)
   references veil2.roles(role_id);
 
-alter table veil2.context_roles add constraint context_role__context_fk
-  foreign key(context_type_id, context_id)
-  references veil2.scopes(scope_type_id, scope_id)
-  on delete cascade on update cascade;
+alter table veil2.context_roles enable row level security;
 
 </pre>
 <p>
@@ -429,9 +435,6 @@ If this makes no sense to you, you probably have no need for it, so
 don't use it.  If do choose to use, do so sparingly as it could lead to
 great confusion.
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -444,6 +447,8 @@ create table veil2.role_privileges (
 
 alter table veil2.role_privileges add constraint role_privilege__pk
   primary key(role_id, privilege_id);
+
+alter table veil2.role_privileges enable row level security;
 
 </pre>
 <p>
@@ -469,14 +474,6 @@ role-&gt;role assignment may therefore need to be specific to those groups
 (eg a customer liaison role in one company may need different privileges
 from a similar role in another company).
 </p>
-<p>
-You should not normally query this table directly; instead use the
-direct_role_privilges view which deals with implied assignments for the
-superuser role.
-</p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -493,6 +490,8 @@ alter table veil2.accessors add constraint accessor__pk
 
 alter table veil2.accessors add constraint accessor__username_uk
   unique (username);
+
+alter table veil2.accessors enable row level security;
 
 </pre>
 <p>
@@ -535,9 +534,6 @@ Column <code class="literal">accessor_id</code>: The id of the database accessor
 for determining access rights.  Ideally this will be the id of the user
 from the protected database
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -553,39 +549,79 @@ create table veil2.accessor_roles (
 alter table veil2.accessor_roles add constraint accessor_role__pk
   primary key(accessor_id, role_id, context_type_id, context_id);
 
+alter table veil2.accessor_roles enable row level security;
+
 </pre>
 <p>
 This records the assignment of roles to accessors in various contexts.
 A role assigned to a party here, grants that accessor all of the privileges
 that that role has been assigned, whether directly or indirectly.
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="entity_session"></a>A.1.11. Sessions Table</h3></div></div></div>
 <pre class="programlisting">
-create table veil2.scope_types (
-  scope_type_id	       		integer not null,
-  scope_type_name		text not null,
-  description			text not null
+create unlogged table veil2.sessions (
+  session_id			integer not null
+  				  default nextval('veil2.session_id_seq'),
+  accessor_id			integer not null,
+  login_context_type_id		integer not null,
+  login_context_id		integer not null,
+  session_context_type_id	integer not null,
+  session_context_id		integer not null,
+  mapping_context_type_id	integer not null,
+  mapping_context_id		integer not null,
+  authent_type			text not null,
+  expires			timestamp with time zone,
+  token				text not null,
+  has_authenticated		boolean not null,
+  session_supplemental		text,
+  nonces			bitmap,
+  parent_session_id		integer
 );
+
+alter table veil2.sessions add constraint session__pk
+  primary key(session_id);
+
+alter table veil2.sessions add constraint session__accessor_fk
+  foreign key(accessor_id)
+  references veil2.accessors(accessor_id);
+
+alter table veil2.sessions enable row level security;
 
 </pre>
 <p>
-Identifies the types of security scope for your VPD.  This can be
-thought of as the 'level' of a scope.
+Records active sessions.  There should be a background task to delete
+expired sessions and keep this table vacuumed.  Note that for
+performance reasons we may want to disable any foreign key constraints
+on this table.
 </p>
 <p>
-Insert one record into this table for each type of scope that you wish
-to implement.  Veil2 comes with 2 built-in scope types: for global and
-personal contexts.
+Note that access to this table should not be granted to normal users.
+This table can be used to determine whether a create_session() call
+successfully created a session, and so can aid in username fishing.
 </p>
 <p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
+Column <code class="literal">login_context_type_id</code>: This, along with the login_context_id column describes the context
+used for authentication of this session.  This allows users to log in
+in specific contexts (eg for dept a, rather than dept b), within which
+role mappings may differ.  This context information allows the session
+to determine which role mappings to apply.
+</p>
+<p>
+Column <code class="literal">login_context_id</code>: See comment on veil2.sessions.login_context_type_id
+</p>
+<p>
+Column <code class="literal">mapping_context_type_id</code>: This, along with the mapping_context_id column describes the context
+used for role-&gt;role mapping by this session.
+</p>
+<p>
+Column <code class="literal">mapping_context_id</code>: See comment on veil2.sessions.mapping_context_type_id
+</p>
+<p>
+Column <code class="literal">parent_session_id</code>: Used by become-user sessions to record their parent session_id
+</p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -596,11 +632,14 @@ create table veil2.authentication_types (
   enabled			boolean not null,
   description			text not null,
   authent_fn			text not null,
-  supplemental_fn		text
+  supplemental_fn		text,
+  user_defined			boolean
 );
 
 alter table veil2.authentication_types add constraint authentication_type__pk
   primary key(shortname);
+
+alter table veil2.authentication_types enable row level security;
 
 </pre>
 <p>
@@ -625,7 +664,7 @@ authentication token is correct.
 The signature for this function is:
 </p>
 <pre class="programlisting">
-  fn(accessor_id integer, token text) returns bool;
+  fn(accessor_id integer, token text) returns boolean;
 </pre>
 <p>
 It will return true if the supplied token is what is expected.
@@ -652,8 +691,9 @@ you might return the base and modulus selection for a Diffie-Hellman
 exchange, should you wish to implement such a thing.
 </p>
 <p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
+Column <code class="literal">user_defined</code>: Whether this parameter value was modified by the user.  This is
+needed for exports using pg_dump.
+</p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -669,6 +709,8 @@ create table veil2.role_roles (
 alter table veil2.role_roles add constraint role_role__pk
   primary key(primary_role_id, assigned_role_id, context_type_id, context_id);
 
+alter table veil2.role_roles enable row level security;
+
 </pre>
 <p>
 This table shows the mapping of roles to roles in various contexts.
@@ -681,16 +723,63 @@ Each corporation can have their own role mappings, unaffected and unseen
 by other corporations.  This means that a CSR role at one corporation
 may have different privileges from a CSR at another.
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_session_privilege"></a>A.1.14. Session Privileges Type and Table</h3></div></div></div>
+<a name="entity_session_context"></a>A.1.14. Session Context Type and Temp Table</h3></div></div></div>
+<pre class="programlisting">
+create type veil2.session_context_t as (
+  accessor_id			integer,
+  session_id                    integer,
+  login_context_type_id		integer,
+  login_context_id		integer,
+  session_context_type_id       integer,
+  session_context_id		integer,
+  mapping_context_type_id	integer,
+  mapping_context_id		integer,
+  parent_session_id		integer
+);
+
+</pre>
+<p>
+Records context for the current session.  This type is used for the
+generation of a veil2_session_context temporary table which is
+populated by Veil2's session management functions.
+</p>
+<p>
+Column <code class="literal">accessor_id</code>: The id of the accessor whose session this is.
+</p>
+<p>
+Column <code class="literal">accessor_id</code>: The id of the accessor whose access rights (mostly) are being used by
+this session.  If this is not the same as the accessor_id, then the
+session_user has assumed the access rights of this accessor using the
+become_user() function.
+</p>
+<p>
+Column <code class="literal">login_context_type_id</code>: This is the context_type_id for the context within which our accessor
+has authenticated.  This will have been the context_type_id provided
+to the create_session() or hello() function that began this session.
+</p>
+<p>
+Column <code class="literal">login_context_id</code>: This is the context_id for the context within which our accessor
+has authenticated.  This will have been the context_id provided
+to the create_session() or hello() function that began this session.
+</p>
+<p>
+Column <code class="literal">session_context_type_id</code>: This is the context_type_id to be used for limiting our session's
+assigned roles and from which is determined our
+mapping_context_type_id.  Ordinarily, this will be the same as our
+login_context_type_id, but if create_session() has been provided with
+session_context parameters, this will be different.  Note that for an
+accessor to create such a session they must have connect privilege in
+both their login context and their requested session context.
+</p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="entity_session_privilege"></a>A.1.15. Session Privileges Type and Temp Table</h3></div></div></div>
 <pre class="programlisting">
 create type veil2.session_privileges_t as (
-  session_id			integer,
   scope_type_id			integer,
   scope_id			integer,
   roles                         bitmap,
@@ -702,16 +791,14 @@ create type veil2.session_privileges_t as (
 Records the privileges for active sessions in each assigned context.
 </p>
 <p>
-This type is used for the generation of a session_privileges temporary
-table which is populated by Veil2's session management functions.
+This type is used for the generation of a veil2_session_privileges
+temporary table which is populated by Veil2's session management
+functions.
 </p>
-<p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="entity_authentication_detail"></a>A.1.15. Authentication Details Table</h3></div></div></div>
+<a name="entity_authentication_detail"></a>A.1.16. Authentication Details Table</h3></div></div></div>
 <pre class="programlisting">
 create table veil2.authentication_details (
   accessor_id			integer not null,
@@ -719,12 +806,14 @@ create table veil2.authentication_details (
   authent_token			text not null
 );
 
+alter table veil2.authentication_details enable row level security;
+
 </pre>
 <p>
-Types of auhentication available for individual parties, along with
+Types of authentication available for individual parties, along with
 whatever authentication tokens are needed for that form of
-authentication.  Because this table stores authentication tables, access
-to it must be as thoroughly locked down as possible.
+authentication.  Because this table stores authentication tables,
+access to it must be as thoroughly locked down as possible.
 </p>
 <p>
 Column <code class="literal">authentication_type</code>: Identifies a specific authentication type.  More than 1 authentication
@@ -735,9 +824,47 @@ Column <code class="literal">authent_token</code>: An authentication token for t
 type.  If we were using plaintext passwords (do not do this), this would
 be where the password would be stored.
 </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="table_deferred_install"></a>A.1.17. Deferred Install Table</h3></div></div></div>
+<pre class="programlisting">
+create table veil2.deferred_install (
+  install_time timestamp with time zone not null);
+
+alter table veil2.deferred_install enable row level security;
+
+</pre>
 <p>
-      <a class="link" href="apa.html#veil2_erd_div">back to ERD</a>.
-    </p>
+This table is used solely to provide a hook for a trigger.  By
+inserting into this table, a trigger is fired which will cause any
+user-provided veil2 objects to replace their equivalent
+system-provided ones.
+</p>
+<p>
+        The trigger on this table is:
+      </p>
+<pre class="programlisting">
+create trigger deferred_install_trg
+  after insert
+  on veil2.deferred_install
+  for each statement
+  execute function veil2.deferred_install_fn();
+
+</pre>
+<p>
+This trigger exists to allow inserts into the deferred install table
+to cause user-provided functions and views to be installed after the
+current system-provided functions have completed running.  This is to
+prevent the function that inserts into the table from being
+overwritten while it is still running.  PostgreSQL may handle this
+well, I don't know - but I see no reason to stress the implementation
+any further than I must.
+</p>
+<p>
+        See <a class="link" href="apc.html#func_get_accessor" title="C.4.4. get_accessor()"> function
+        get_accessor()</a> for an example of the use of this table.
+      </p>
 </div>
 </div>
 </div>
@@ -746,15 +873,15 @@ be where the password would be stored.
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="ar01s23.html">Prev</a> </td>
+<a accesskey="p" href="ch27.html">Prev</a> </td>
 <td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="apas02.html">Next</a>
+<td width="40%" align="right"> <a accesskey="n" href="apb.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">23. Tips and Guidelines </td>
+<td width="40%" align="left" valign="top">Chapter 27. Contact Links </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> A.2. Veil2 Views</td>
+<td width="40%" align="right" valign="top"> Appendix B. <code class="literal">Veil2</code> Views, Materialized Views and Caches</td>
 </tr>
 </table>
 </div>

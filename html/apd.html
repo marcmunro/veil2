@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Appendix D. Veil2 C Implementation</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="prev" href="apc.html" title="Appendix C. Veil2 Functions and Triggers">
+<link rel="next" href="ape.html" title="Appendix E. Veil2 Authentication Protocols">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="apc.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ape.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Appendix C. Veil2 Functions and Triggers </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Appendix E. <code class="literal">Veil2</code> Authentication Protocols</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="appendix">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="idm2834"></a>Appendix D. <code class="literal">Veil2</code> C Implementation</h1></div></div></div>
+<p>
+      A small core of <code class="literal">Veil2</code> functionality is
+      implemented in C for security and performance.
+    </p>
+<p>
+      Improved security is achieved by ensuring that our session
+      privileges data structures cannot be tampered with (unless you
+      have superuser rights in which case you can't be stopped
+      anyway).
+    </p>
+<p>
+      Our privilege testing functions achieve high performance by
+      being implemented in C using an in-memory cache of privileges.
+    </p>
+<p>
+      The C implementation is documented internally using
+      <a class="ulink" href="https://www.doxygen.nl/index.html" target="_top">Doxygen</a>.
+      You can access that documentation <a class="ulink" href="doxygen/html/index.html" target="_top">here</a>.
+    </p>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="apc.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ape.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Appendix C. Veil2 Functions and Triggers </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Appendix E. <code class="literal">Veil2</code> Authentication Protocols</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

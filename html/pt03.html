@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Part III. Implementation Details</title>
+<link rel="stylesheet" type="text/css" href="veil2.css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="up" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="prev" href="ch19.html" title="Chapter 19. Setup Housekeeping Tasks STEP 12">
+<link rel="next" href="ch20.html" title="Chapter 20. Exploring The Veil2 Demos">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch19.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ch20.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 19. Setup Housekeeping Tasks STEP 12 </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 20. Exploring The <code class="literal">Veil2</code> Demos</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="part">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="idm1163"></a>Part III. Implementation Details</h1></div></div></div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl class="toc">
+<dt><span class="chapter"><a href="ch20.html">20. Exploring The <code class="literal">Veil2</code> Demos</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="ch20.html#veil_demo">20.1. The <code class="literal">veil2_demo</code> Extension</a></span></dt>
+<dt><span class="sect1"><a href="ch20.html#veil_minimal_demo">20.2. The <code class="literal">veil2_minimal_demo</code> Extension</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="ch21.html">21. The Veil2 Implementation: What You Need To Know</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="ch21.html#user_customizations">21.1. User Customizations</a></span></dt>
+<dt><span class="sect1"><a href="ch21.html#authentication">21.2. Authentication</a></span></dt>
+<dt><span class="sect1"><a href="ch21.html#privileges_implementation">21.3. Privileges</a></span></dt>
+<dt><span class="sect1"><a href="ch21.html#roles_implementation">21.4. Roles</a></span></dt>
+<dt><span class="sect1"><a href="ch21.html#idm1598">21.5. Authentication Contexts</a></span></dt>
+<dt><span class="sect1"><a href="ch21.html#role_assignment_contexts">21.6. Role Assignment and Contexts</a></span></dt>
+<dt><span class="sect1"><a href="ch21.html#physical_session_context">21.7. Session Contexts</a></span></dt>
+<dt><span class="sect1"><a href="ch21.html#physical_role_mapping">21.8. Role Mappings and Mapping Contexts</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="ch22.html">22. For Developers</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="ch22.html#idm1720">22.1. Performing Local Builds</a></span></dt>
+<dt><span class="sect1"><a href="ch22.html#idm1881">22.2. Running Unit Tests</a></span></dt>
+<dt><span class="sect1"><a href="ch22.html#idm1894">22.3. The Documentation Build</a></span></dt>
+<dt><span class="sect1"><a href="ch22.html#idm1924">22.4. Releases</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="ch23.html">23. How <code class="literal">Veil2</code> Relates to the Original <code class="literal">Veil</code></a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="ch23.html#idm1965">23.1. What is <code class="literal">Veil</code>?</a></span></dt>
+<dt><span class="sect1"><a href="ch23.html#idm1982">23.2. Where Did <code class="literal">Veil2</code> Come From?</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="ch24.html">24. Tips and Guidelines</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="ch24.html#idm2007">24.1. Write Queries That Work Without <code class="literal">Veil2</code></a></span></dt>
+<dt><span class="sect1"><a href="ch24.html#report_breaches">24.2. Consider Reporting Blocked Accesses</a></span></dt>
+<dt><span class="sect1"><a href="ch24.html#idm2035">24.3. Consider Testing With and Without Security</a></span></dt>
+<dt><span class="sect1"><a href="ch24.html#denormalize">24.4. Denormalize Around Your Scopes</a></span></dt>
+<dt><span class="sect1"><a href="ch24.html#idm2041">24.5. Use Secured Views To Implement Complex Queries</a></span></dt>
+<dt><span class="sect1"><a href="ch24.html#idm2045">24.6. Avoid Drop...Cascade</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="ch25.html">25. Performance</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="ch25.html#load_perf_data">25.1. Data For Evaluating Performance</a></span></dt>
+<dt><span class="sect1"><a href="ch25.html#idm2076">25.2. Session Management Overhead</a></span></dt>
+<dt><span class="sect1"><a href="ch25.html#idm2093">25.3. Privilege Testing Overhead</a></span></dt>
+<dt><span class="sect1"><a href="ch25.html#idm2126">25.4. In Conclusion</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="ch26.html">26. Security</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="ch26.html#idm2135">26.1. Fundamental Security Weaknesses</a></span></dt>
+<dt><span class="sect1"><a href="ch26.html#idm2150">26.2. So, What Is It Good For?</a></span></dt>
+<dt><span class="sect1"><a href="ch26.html#idm2156">26.3. Compromised Application Server, Really?</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="ch27.html">27. Contact Links</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="ch27.html#reporting_bugs">27.1. Reporting Bugs</a></span></dt>
+<dt><span class="sect1"><a href="ch27.html#contributing">27.2. Contributing</a></span></dt>
+<dt><span class="sect1"><a href="ch27.html#chatting">27.3. IRC</a></span></dt>
+<dt><span class="sect1"><a href="ch27.html#email">27.4. Email</a></span></dt>
+<dt><span class="sect1"><a href="ch27.html#availability">27.5. Availability</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ch19.html">Prev</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="ch20.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 19. Setup Housekeeping Tasks STEP 12 </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 20. Exploring The <code class="literal">Veil2</code> Demos</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

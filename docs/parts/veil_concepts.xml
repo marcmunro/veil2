@@ -1,8 +1,8 @@
-<sect1 id="veil2-concepts">
+<chapter id="veil2-concepts">
   <title><literal>Veil2</literal> Concepts</title>
   <para>
-    The following concepts are crucial to understanding
-    <literal>Veil2</literal>.
+    The following concepts are crucial to a full understanding of
+    <literal>Veil2</literal>:
   </para>
   <itemizedlist>
     <listitem><link linkend="privileges">privileges</link>;</listitem>
@@ -11,12 +11,19 @@
     <listitem><link linkend="assignments">role assignments</link>;</listitem>
     <listitem><link linkend="security-contexts">security
     contexts</link>;</listitem> 
-    <listitem><link linkend="privilege-promotion">privilege
-    promotion</link>;</listitem> 
-    <listitem><link linkend="authentication_context">authentication
-    contexts</link>.</listitem>
+    <listitem><link linkend="scope-promotion">scope/context
+    promotion</link>.</listitem> 
   </itemizedlist>
-  <sect2 id="privileges">
+  <para>
+    This looks like a lot to understand, but you don't need to grasp
+    it all at once.  Once you fully understand <link
+    linkend="privileges">privileges</link> and <link
+    linkend="scopes">scopes</link>, the rest can be dealt with as the
+    need arises.  Few applications will need all of the features
+    provided by <literal>Veil2</literal>, and you can probably ignore
+    the stuff you don't think you need.
+  </para>
+  <sect1 id="privileges">
     <title>Privileges</title>
     <para>
       Privileges are the atomic units of access control, limiting
@@ -45,14 +52,17 @@
       which we could assume would allow select access to the
       <literal>parties</literal> table.  Note that every privilege
       assigned in <literal>Veil2</literal> is assigned with a specific
-      <link linkend="scopes">scope</link>.
+      <link linkend="scopes">scope</link>, which is based on the <link
+      linkend="security-contexts">context</link> of the <link
+      linkend="assignments">role assignment</link> of the <link
+      linkend="roles">role</link> providing that privilege.
     </para>
     <para>
       A <literal>Veil2</literal>-based security system is likely to
       have tens or hundreds of distinct privileges.
     </para>
-  </sect2>
-  <sect2 id="scopes">
+  </sect1>
+  <sect1 id="scopes">
     <title>Scopes</title>
     <para>
       A scope describes the applicability of a <link
@@ -60,11 +70,22 @@
       upon existing relationships in your data.
     </para>
     <para>
+      Note that for every scope, there is an equivalent <link
+      linkend="security-contexts">security context</link>.
+    </para>
+    <para>
+      A scope may apply to an organization, a department, a project,
+      or whatever you wish.  Having a privilege in the scope of one
+      department would presumably give you access rights to data for
+      that department.  It would not give you access to equivalent
+      data for other departments.
+    </para>
+    <para>
       Some scopes will allow access to large subsets of data, and some
       to very small subsets.  We refer to this as the scope level.  A
       scope that is very restrictive is considered a low-level scope,
       and one that is not, is a high-level scope.  When we talk about
-      <link linkend="privilege-promotion">promotion</link> of scope,
+      <link linkend="scope-promotion">scope promotion</link>,
       this is always from a lower level to a higher level, which is to
       say that the scope becomes less restrictive, and likely to
       return a larger set of data.
@@ -77,11 +98,11 @@
       scope, they will be able to see their own
       <literal>users</literal> record.  Whether they can see other
       <literal>users</literal> records will depend on whether they
-      have been assigned <literal>select users</literal> in any other
+      have the <literal>select users</literal> privilege in any other
       scopes.
     </para>
-  </sect2>
-  <sect2 id="roles">
+  </sect1>
+  <sect1 id="roles">
     <title>Roles</title>
     <para>
       Roles exist to manage collections of <link
@@ -92,22 +113,22 @@
       roles are assigned to users.  See <link
       linkend="assignments">role assignments</link>; <link
       linkend="security-contexts">security contexts</link>; and <link
-      linkend="privilege-promotion">privilege promotion</link>, for
+      linkend="scope-promotion">scope promotion</link>, for
       information on how each privilege's <link
       linkend="scopes">scope</link> is managed.
     </para>
     <para>
       To make roles more flexible, we allow roles to be assigned to
-      other roles.  We often call this role-mapping.  This allows us
-      to create low-level <emphasis>functional</emphasis> roles that
-      have the privileges necessary to perform a specific task, and we
-      assign these roles to higher-level <emphasis>user</emphasis>
-      roles which can then be assigned to users.  By doing this, we
-      minimize the number of different roles that we need to be able
-      to assign to users.
+      other roles.  We call this role-mapping.  This allows us to
+      create low-level <emphasis>functional</emphasis> roles that have
+      the privileges necessary to perform a specific low-level task,
+      and we assign these roles to higher-level
+      <emphasis>user</emphasis> roles which can then be assigned to
+      users.  By doing this, we minimize the number of different roles
+      that we need to be able to assign to users.
     </para>
     <para>
-      Typical functional roles might include <literal>view
+      Typical functional roles might include: <literal>view
       order</literal>, <literal>create order</literal>,
       <literal>approve order</literal>, etc.  These function level
       roles might then be assigned to user roles such as
@@ -131,47 +152,49 @@
       equivalent - which is hardly useful.  You may want to implement
       some policies around this for your own system.
     </para>
-    <sect3 id="role_mapping">
+    <sect2 id="role_mapping">
       <title>Contextual Role Mapping</title>
       <para>
-	One of the possible use-cases for <literal>Veil2</literal>, is
-	to provide virtual private databases in a
-	<ulink
-	    url="https://en.wikipedia.org/wiki/Software_as_a_service">SaaS</ulink> 
+	One of the possible use-cases for <literal>Veil2</literal> is
+	to provide <ulink
+	url="https://en.wikipedia.org/wiki/Virtual_private_database">Virtual
+	Private Databases</ulink> in a <ulink
+	url="https://en.wikipedia.org/wiki/Software_as_a_service">SaaS</ulink>
 	environment.  As such, it is possible that different clients
 	of such a service might want different user-level roles, and
 	different mappings between them and the base function-level
 	roles.
       </para>
       <para>
-	<literal>Veil2</literal> provides the means to do this, by
-	making each role->role mapping depend on a scope, which
-	describes the context in which the role->role mapping applies.
-	As described below in <link
-	linkend="authentication_context">Authentication
-	Contexts</link> each user is authenticated within a specific
-	context.  The user's authentication context will determine
-	which set of (scope-based) role->role mappings apply.  The
-	actual mapping context that will be used may be the
-	authentication context itself, or a higher level context to
-	which it can be promoted.  This concept of promotion is
-	similar to privilege promotion as described <link
-	linkend="privilege-promotion">below</link>.  The target scope
-	level for this promotion is identified in the
-	<literal>system_parameter</literal> named
-	<quote><literal>mapping context target scope
-	type</literal></quote>.
+	If you don't need this, you can skip ahead.  Although
+	<literal>Veil2</literal> provides this as a feature, you don't
+	have to use it and it is not enabled by default.
       </para>
-    </sect3>
-  </sect2>
-  <sect2 id="assignments">
+      <para>
+	In <literal>Veil2</literal>, each role to role mapping is done
+	within a specific <literal>mapping context</literal>.  The
+	default <literal>mapping context</literal> is global, which
+	means that that role mapping applies to all users.  By
+	changing this value we can make role mappings apply at
+	different context levels.  Typically, we would set this to
+	operate at the context of a specific SaaS client, so that
+	users for each client would be able to define their own roles
+	and role to role mappings.
+      </para>
+      <para>
+	More on the implementation of this can be found <link
+	linkend="physical_role_mapping">here</link>.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="assignments">
     <title>Role Assignments</title>
     <para>
       Users are assigned <link linkend="roles">roles</link> in a
-      number of ways, and <literal>Veil2</literal> attempts to place
-      no limits on the mechanisms that an implementation may choose to
-      use.  Assignments may be explicit, implicit or even a
-      combination of the two.
+      number of ways, and <literal>Veil2</literal> places no limits on
+      the mechanisms that an implementation may choose to use.
+      Assignments may be explicit, implicit or even a combination of
+      the two.
     </para>
     <para>
       An explicit role assignment would consist of a record
@@ -183,10 +206,12 @@
     <para>
       Implicit role assignments can be made in a number of ways.  In
       <literal>Veil2</literal> each user, by default, is assigned the
-      <literal>personal context</literal> role.  This is done by
-      <literal>Veil2</literal> itself, and is not the result of any
-      record relating the role to the user.  Note that although the
-      role is assigned by default, it has no <link
+      <link linkend="personal_context_role"><literal>personal
+      context</literal></link> role, in their own personal context
+      <link linkend="personal-context">as described below</link>.
+      This is done by <literal>Veil2</literal> itself, and is not the
+      result of any record relating the role to the user.  Note that
+      although the role is assigned by default, it has no <link
       linkend="privileges">privileges</link>.  What <literal>personal
       context</literal> allows is up to your implementation.
     </para>
@@ -200,36 +225,89 @@
       equally possible that <quote>membership</quote> is implied
       simply by the existence of a <literal>team_member</literal>
       record linking the user and the project.  In such a case we
-      would create a <literal>team member</literal> role, and assume
-      that team members have this role.
+      would create a <literal>team member</literal> role, and the
+      assignment of this role to team members would be implicit.
     </para>
-  </sect2>
-  <sect2 id="security-contexts">
+    <para>
+      More details on this can be found <link
+      linkend="role_assignment_contexts">here.</link> 
+    </para>
+  </sect1>
+  <sect1 id="security-contexts">
     <title>Security Contexts</title>
     <para>
-      A security context (or just <literal>context</literal>) applies
-      to a <link linkend="assignments">role assignment</link>.  It is
-      similar to a <link linkend="scopes">scope</link>, but where the
-      scope applies to a <link linkend="privileges">privilege</link>,
-      a context applies to a <link linkend="roles">role</link>.  It is
-      the context within which the role was assigned.  Another way to
-      look at it, is that a security context is user-facing and
-      relates to the underlying data model of your database, and a
-      scope is an internal detail and relates primarily to the
-      <literal>Veil2</literal>-based security model.
+      A security context (or more usually just
+      <literal>context</literal>) is the user-facing equivalent to a
+      <link linkend="scopes">scope</link>.  Where scopes apply
+      at the level of individual privileges, contexts apply to the user
+      and the user experience.  Specifically, we talk about contexts
+      as they apply to:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    role assignments;
+	  </para>
+	  <para>
+	    Each role that is assigned to a user, whether implicitly
+	    or explicitly, is assigned within a given context.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    authentication;
+	  </para>
+	  <para>
+	    Different users of a <literal>Veil2</literal>-based system
+	    may authenticate using different web pages or apps.  There
+	    may be completely distinct sets of users in the context of
+	    different corporate clients, with usernames only having to
+	    be unique within the context of each corporation.
+	  </para>
+	</listitem>
+	<listitem id="mapping-context">
+	  <para>
+	    mapping;
+	  </para>
+	  <para>
+	    As described in <link linkend="role_mapping">contextual
+	    role mapping</link>, your role to role mappings may be
+	    different for different users.  The context that is used
+	    for a given session's role mappings is known as the
+	    mapping context.
+	  </para>
+	</listitem>
+	<listitem id="session-context">
+	  <para>
+	    sessions;
+	  </para>
+	  <para>
+	    It may be that although a user authenticates in the
+	    context of a corporation, their session exists within the
+	    context of a specific subdivision of that corporation.
+	    The access rights for the user will be determined from
+	    this session context.  If they are allowed to create
+	    sessions in multiple contexts, their access rights may be
+	    different in each one.
+	  </para>
+	</listitem>
+      </itemizedlist>
     </para>
     <para>
-      The distinction between scope and context becomes more clear
-      when we consider that a role may be assigned in a context that
+      In <literal>Veil2</literal> there is a scope for every context,
+      and vice versa.
+    </para>
+    <para>
+      The distinction between scope and context may become clear
+      when we consider that a role can be assigned in a context that
       has no meaning for that role's privileges.  Consider a
-      hypothetical <literal>team-member</literal> role assigned in the
-      context of a specific project that contains the <literal>select
+      <literal>team-member</literal> role assigned in the context of a
+      specific project that contains the <literal>select
       lookups</literal> privilege.  This privilege allows the accessor
       select-access to lookup data which is not project-specific.
-      This privilege *needs* to operate in a different scope from the
+      This privilege must operate in a different scope from the
       context of its assignment, and so its operating scope will need
-      to be promoted (see <link linkend="privilege-promotion">privilege
-      promotion</link> below).
+      to be promoted (see <link
+      linkend="scope-promotion">scope promotion</link> below).
     </para>
     <para>
       It is largely because privileges may apply in different scopes
@@ -241,17 +319,10 @@
       hours back.
     </para>
     <para>
-      The key to a good relational security implementation is an
-      understanding of your relational security contexts.  In
-      particular, how you may need to perform some data
-      <link linkend="denormalize">denormalizations</link> in order to
-      get good performance.
-    </para>
-    <para>
-      <literal>Veil2</literal> provides 2 built-in security security
+      <literal>Veil2</literal> provides 2 built-in security 
       contexts:
     </para>
-    <sect3 id="global-context">
+    <sect2 id="global-context">
       <title>Global Context</title>
       <para>
 	This is a non-relational context.  Privileges assigned in
@@ -268,106 +339,128 @@
         linkend="Traditional">traditional</link> security systems and
         it should be used with great care.
       </para>
-    </sect3>
-    <sect3 id="personal-context">
+    </sect2>
+    <sect2 id="personal-context">
       <title>Personal Context</title>
       <para>
 	Personal context is an implied context.  Each user has an
 	implicit assignment of the <literal>personal context</literal>
-	role in this context. 
+	role in this context.
       </para>
       <para>
         The personal context is all about the application user, ie the
         person that is using your application. It applies to data that
         is about that person.  This would include their authentication
         credentials, contact information, etc. The purpose of the
-        personal context is to give you access to your data, and no-one
-        else’s.
+        personal context is to give users access to their own data,
+        and no-one else’s.  Each user has their own personal context.
       </para>
-    </sect3>
-  </sect2>
-  <sect2 id="privilege-promotion">
-    <title>Privilege Promotion</title>
+    </sect2>
+  </sect1>
+  <sect1 id="scope-promotion">
+    <title>Scope (and Context) Promotion</title>
     <para>
-      <link linkend="privileges">Privileges</link> may give access to
-      rows in a table, or to specific functionality. Often, a
-      privilege that is needed for a particular <link
-      linkend="roles">role</link>, will apply to an object that exists
-      outside of the <link linkend="security-contexts">context</link>
-      of the <link linkend="assignments">role assignment</link>.  In
-      such cases, the privilege must be promoted from the context of
-      its assignment to apply in a higher-level <link
-      linkend="scopes">scope</link>.
+      Sometimes the context of a role assignment or a session is not
+      entirely appropriate for all of its purposes.  In these cases,
+      promotion is necessary.
     </para>
     <para>
-      Consider a <link linkend="roles">role</link>,
-      <literal>CSR</literal>, that has been assigned to a user in
-      <literal>customer context</literal> for <literal>customer
-      Z</literal>.  This hypothetical role assignment is supposed to
-      give the user the ability to manage <literal>customer
-      Z</literal> and no other customer.  Among the hypothetical
-      privileges for this role are:
+      There are 2 distinct situations where promotion occurs:
+      <itemizedlist>
+	<listitem>
+	  promotion of scope for privileges;
+	</listitem>
+	<listitem>
+	  promotion of session context for mapping context.
+	</listitem>
+      </itemizedlist>
     </para>
-    <itemizedlist spacing="compact">
-      <listitem>
-        <literal>select customer</literal>;
-      </listitem>
-      <listitem>
-        <literal>update customer</literal>;
-      </listitem>
-      <listitem>
-        <literal>...</literal>
-      </listitem>
-      <listitem>
-        <literal>select lookups</literal>;
-      </listitem>
-      <listitem>
-        <literal>connect</literal>.
-      </listitem>
-    </itemizedlist>
-    <para>
-      If we assume that <literal>select lookups</literal> gives the
-      user the ability to view all lookup data, and
-      <literal>connect</literal> gives them the ability to actually
-      connect to the system and authenticate, we can see that they
-      don’t really apply to the <literal>customer
-      context</literal>.  They are not related to customer-specific
-      data.  In fact they should apply the same regardless of who we
-      might be a <literal>CSR</literal> for.  These privileges should
-      be applied in the global scope, but they have been assigned in
-      the <literal>customer context</literal> for <literal>customer
-      Z</literal>.
-    </para>
-    <para>
-      The context for the role assignment makes no sense for these
-      privileges, so they must be promoted to a higher-level scope.
-      In this case, the scope would be that of the <literal>global
-      context</literal>.
-    </para>
-    <para>
-      As another example consider that a role that has been assigned
-      in <literal>project context</literal> provides the
-      <literal>select department</literal> privilege to view the
-      department details of the department that owns the project.  The
-      department details cannot be viewed in project scope, because
-      projects are lower-level things: the department owns the project
-      and not the other way around.  The solution is to promote the
-      <literal>select department</literal> privilege to operate in
-      department scope.  Note that if the <literal>select
-      project</literal> privilege were promoted in the same way, it
-      would allow the user to view all projects for the department.
-    </para>
-    <para>
-      The level of promotion required for each privilege is specific
-      to the object that the privilege exists to protect.  So, each
-      privilege identifies its target scope level.  If the privilege
-      is being assigned, via a role assignment, in a lower-level
-      context, then promotion to the higher target scope level will
-      automatically be performed when the user's privileges are first
-      loaded.
-    </para>
-  </sect2>
-  <sect2 id="authentication_context">
+    <sect2>
+      <title>Promotion Of Scope For Privileges</title>
+      <para>
+	<link linkend="privileges">Privileges</link> may give access
+	to rows in a table, or to specific functionality. Often, a
+	privilege that is needed for a particular <link
+	linkend="roles">role</link>, will apply to an object that
+	exists outside of the <link
+	linkend="security-contexts">context</link> of the <link
+	linkend="assignments">role assignment</link>.  In such cases,
+	the privilege must be promoted from the context of its
+	assignment to apply in a higher-level <link
+	linkend="scopes">scope</link>.
+      </para>
+      <para>
+	Consider a <link linkend="roles">role</link>,
+	<literal>CSR</literal>, that has been assigned to a user in
+	<literal>customer context</literal> for <literal>customer
+	Z</literal>.  This hypothetical role assignment is supposed to
+	give the user the ability to manage <literal>customer
+	Z</literal> and no other customer.  Among the hypothetical
+	privileges for this role are:
+      </para>
+      <itemizedlist spacing="compact">
+	<listitem><literal>select customer</literal>;</listitem>
+	<listitem><literal>update customer</literal>; </listitem>
+	<listitem><literal>...</literal>;</listitem>
+	<listitem><literal>select lookups</literal>.</listitem>
+      </itemizedlist>
+      <para>
+	If we assume that <literal>select lookups</literal> gives the
+	user the ability to view all lookup data, we can see that it
+	doesn’t really apply to the <literal>customer
+	context</literal>.  It is not related to customer-specific
+	data.  In fact it should apply the same regardless of who we
+	might be a <literal>CSR</literal> for.  This privilege should
+	be applied in the global scope, but it has been assigned in
+	the <literal>customer context</literal> for <literal>customer
+	Z</literal>.
+      </para>
+      <para>
+	The context for the role assignment makes no sense for this
+	privilege, so it must be promoted to a higher-level scope.  In
+	this case, the scope would be that of the <literal>global
+	context</literal>.
+      </para>
+      <para>
+	As another example consider that a role that has been assigned
+	in <literal>project context</literal> provides the
+	<literal>select department</literal> privilege to view the
+	department details of the department that owns the project.
+	The department details cannot be viewed in project scope,
+	because projects are lower-level things: the department owns
+	the project and not the other way around.  The solution is to
+	promote the <literal>select department</literal> privilege to
+	operate in department scope.  Note that if the <literal>select
+	project</literal> privilege were promoted in the same way, it
+	would allow the user to view all projects for the department.
+      </para>
+      <para>
+	The level of promotion required for each privilege is specific
+	to the object that the privilege exists to protect.  So, each
+	privilege identifies its target scope level.  If the privilege
+	is being assigned, via a role assignment, in a lower-level
+	context, then promotion to the higher target scope level will
+	automatically be performed when the user's privileges are
+	first loaded.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Promotion Of Session Context For Mapping Context</title>
+      <para>
+	The <link linkend="mapping-context">mapping context</link>
+	that we use for <link linkend="role_mapping">contextual role
+	mapping</link> is determined from our <link
+	linkend="session-context">session context</link> by promotion. 
+      </para>
+      <para>
+	If the session context is not at the scope level of our target
+	mapping context scope, a superior scope will be used based on
+	the scope hierarchy.  Note that global scope is considered the
+	highest level/most superior scope.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="authentication_context">
     <title>Authentication Contexts</title>
     <para>
       Each accessor (database user) is associated with a specific
@@ -382,15 +475,41 @@
       context.
     </para>
     <para>
-      You can choose to allow all accessors to authenticate within the
-      same context if you wish.  This would usually be the global
-      context.
+      If you don't need this, you can choose to allow all accessors to
+      authenticate within the same context, usually the global context.
     </para>
     <para>
       As described in <link linkend="role_mapping">Contextual Role
-      Mapping</link> above, the role names and role->role mappings
+      Mapping</link> above, the role names and role to role mappings
       that an accessor sees may depend on their authentication context.
     </para>
-  </sect2>
-</sect1>
+    <para>
+      More information on this, with examples, can be found <link
+      linkend="physical_authentication_context">here</link>.
+    </para>
+  </sect1>
+  <sect1 id="session_context">
+    <title>Session Contexts</title>
+    <para>
+      When a user authenticates, they begin a session, and this session
+      has a context.  The session context determines what data the
+      user can see, as though the user is logged in to that context.
+      Often the session context will be the same as the authentication
+      context, but <literal>Veil2</literal> does not require this.
+    </para>
+    <para>
+      For example, consider that our authentication context is at the
+      level of a corporation (so usernames must be unique within the
+      entire corporation), but that we log in to the web-site for a
+      subdivision.  Our authentication context would be the
+      corporation context, and the session context would be the
+      subdivision context.
+    </para>
+    <para>
+      The context of a user's session will determine the access rights
+      for that session.  Role assignments in contexts that are
+      unrelated to the session context will be ignored.
+    </para>
+  </sect1>
+</chapter>
 

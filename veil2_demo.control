@@ -1,0 +1,15 @@
+# veil2_demo.control
+#
+#      Postgres extension control file for veil2_demo
+#
+#      Copyright (c) 2020 Marc Munro
+#      Author:  Marc Munro
+#      License: GPL V3
+#
+
+directory       = 'veil2'
+default_version = '0.9.1'
+requires        = 'veil2'
+superuser       = true
+
+comment = 'Provides a demo database for the veil2 extension.'

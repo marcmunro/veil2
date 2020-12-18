@@ -38,7 +38,40 @@
 	    </para>
 	  </entry>
 	</row>
+	<row>
+	  <entry>0.9.1 (beta)</entry>
+	  <entry>v0.9.1</entry>
+	  <entry>20201218</entry>
+	  <entry>
+	    <para>
+	      Major update to:
+	      <itemizedlist>
+		<listitem>
+		  make <literal>Veil2</literal> a Postgres
+		  extension;
+		</listitem>
+		<listitem>
+		  test and improve performance;
+		</listitem>
+		<listitem>
+		  improve testing, and fix bugs;
+		</listitem>
+		<listitem>
+		  add the minimal demo;
+		</listitem>
+		<listitem>
+		  improve documentation.
+		</listitem>
+	      </itemizedlist>
+	    </para>
+	  </entry>
+	</row>
       </tbody>
     </tgroup>
   </table>
+  <para>
+    <literal>Veil2</literal> will be upgraded to production status
+    once it has proved to be effective and free of serious
+    deficiencies.
+  </para>
 </appendix>

@@ -1,0 +1,448 @@
+<chapter id="for_developers">
+  <title>For Developers</title>
+  <para>
+    If you want to get into the details of the
+    <literal>Veil2</literal> implementation, this section is for you.
+  </para>
+  <sect1>
+    <title>Performing Local Builds</title>
+    <para>
+      For most users there will never be any need to build
+      <literal>Veil2</literal> locally using anything except the
+      <literal>pgxn</literal> client as described in the <link
+      linkend="installation">Installation section</link>. 
+    </para>
+    <para>
+      If, however, you wish to hack on the <literal>Veil2</literal>
+      internals or documentation, or are just curious you can clone
+      <literal>Veil2</literal> from <ulink
+      url="https://github.com/marcmunro/veil2">the Veil2 github
+      page</ulink>, or get a zipped copy from Marc's <ulink
+      url="https://pgxn.org/user/marcmunro">PGXN pages</ulink>.
+    </para>
+    <sect2>
+      <title>Directory Tree</title>
+      <para>
+	The <literal>Veil2</literal> directory structure is pretty
+	flat and very simple:
+	<variablelist>
+	  <varlistentry>
+	    <term><literal>bin</literal></term>
+	    <listitem>
+	      <para>
+		Home to a small number of helper scripts for the
+		documentation build.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>demo</literal></term>
+	    <listitem>
+	      <para>
+		Contains files associated with the demo extensions.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>diagrams</literal></term>
+	    <listitem>
+	      <para>
+		Contains diagrams created by <ulink
+		url="https://wiki.gnome.org/Apps/Dia">dia</ulink>. 
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>docs</literal></term>
+	    <listitem>
+	      <para>
+		Contains, mostly, xml source files for the
+		documentation system.  Is also used for some
+		intermediate files for the documentation build,
+		including the <literal>anchors</literal> and
+		<literal>extracts</literal> directories.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>html</literal></term>
+	    <listitem>
+	      <para>
+		Created by the <literal>docs</literal> target from
+		make.  Contains generated html documentation.  Point
+		your browser to <literal>index.html</literal> in here
+		to see your latest updated docs.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>sql</literal></term>
+	    <listitem>
+	      <para>
+		Contains the SQL sources for
+		<literal>Veil2</literal>.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>src</literal></term>
+	    <listitem>
+	      <para>
+		Contains the C source files for the
+		<literal>Veil2</literal> shared library.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>test</literal></term>
+	    <listitem>
+	      <para>
+		Scripts for running unit tests on the
+		<literal>Veil2</literal> extension.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </para>
+      <para>
+	You may notice makefiles in many sub-directories.  These simply
+	change directory to their parent directory before re-running
+	<literal>make</literal> there.  This enables
+	<literal>make</literal> to be run from any directory in the
+	tree, making builds from tools like <literal>emacs</literal>
+	much easier.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Operating System Environment</title>
+      <para>
+	 You should be able to install Veil2 on any operating system,
+	 though something Unix-like is recommended, as we use
+	 <literal>gnu make</literal> for a lot of tasks.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Software Requirements</title>
+      <para>
+	Your requirements will depend on what you are trying to do.
+      </para>
+      <sect3>
+	<title>To Build <literal>Veil2</literal> From Sources</title>
+	<para>
+	  You'll need:
+	  <itemizedlist>
+	    <listitem>
+	      make;
+	    </listitem>
+	    <listitem>
+	      a C build environment (gcc, llvm, or some such);
+	    </listitem>
+	    <listitem>
+	      a currently supported version of Postgres.
+	    </listitem>
+	  </itemizedlist>
+	</para>
+      </sect3>
+      <sect3>
+	<title>To Build <literal>Veil2</literal> Documentation</title>
+	<para>
+	  You'll need:
+	  <itemizedlist>
+	    <listitem>
+	      xsltproc;
+	    </listitem>
+	    <listitem>
+	      libxslt1.1;
+	    </listitem>
+	    <listitem>
+	      libxml2;
+	    </listitem>
+	    <listitem>
+	      dia;
+	    </listitem>
+	    <listitem>
+	      p2toimg;
+	    </listitem>
+	    <listitem>
+	      gawk;
+	    </listitem>
+	    <listitem>
+	      a Unix-like shell;
+	    </listitem>
+	    <listitem>
+	      make;
+	    </listitem>
+	    <listitem>
+	      docbook 4.5 stylesheets.
+	    </listitem>
+	  </itemizedlist>
+	</para>
+      </sect3>
+    </sect2>
+    <sect2>
+      <title>The Build System</title>
+      <para>
+	<literal>Veil2</literal> uses a pretty standard
+	<literal>autotools</literal>-based build system, though the
+	<literal>GNUmakefile</literal> is largely hand-crafted.
+      </para>
+      <sect3>
+	<title><literal>autoconf</literal></title>
+	<para>
+	  There should be no need to re-run
+	  <literal>autoconf</literal> unless new dependencies for
+	  documentation builds, etc need to be discovered.  In this
+	  case you would
+	  <itemizedlist>
+	    <listitem>
+	      Manually update the <literal>configure.ac</literal> file.
+	    </listitem>
+	    <listitem>
+	      Run autoconf.
+	    </listitem>
+	  </itemizedlist>
+	  This would update the <literal>configure</literal> file,
+	  which you would then re-run as shown below.
+	</para>
+      </sect3>
+      <sect3>
+	<title><literal>./configure</literal></title>
+	<para>
+	  The <literal>./configure</literal> script should be run any
+	  time that you need to bump the <literal>Veil2</literal>
+	  version.  You will update the <literal>VERSION</literal>
+	  file, and then run <literal>./configure</literal>.  This
+	  will update <literal>Makefile.global</literal>, which is
+	  included from <literal>GNUmakefile</literal>.
+	</para>
+	<para>
+	  You would also run the <literal>./configure</literal> script
+	  after any updates to <literal>Makefile.global.in</literal>
+	  which you might make if you need to change compilation flags
+	  or some such.
+	</para>
+      </sect3>
+      <sect3>
+	<title><literal>make</literal></title>
+	<para>
+	  The makefile, <literal>GNUmakefile</literal> manages all
+	  aspects of the build and installation processes.  It uses
+	  the postgres <literal>pgxs</literal> build mechanisms to
+	  build the shared library and manage the installation of our
+	  postgres extensions.
+	</para>
+	<para>
+	  The default target (run <literal>make</literal> with no
+	  parameters) is the C shared library veil2.so.  Other targets
+	  include:
+	<variablelist>
+	  <varlistentry>
+	    <term><literal>help</literal></term>
+	    <listitem>
+	      <para>
+		Provides a list of the makefile's major targets.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>db</literal></term>
+	    <listitem>
+	      <para>
+		Creates a new clean vpd database into which we can
+		install <literal>Veil2</literal>.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>docs</literal></term>
+	    <listitem>
+	      <para>
+		Creates an html documentation tree including Doxygen
+		documentation.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>install</literal></term>
+	    <listitem>
+	      <para>
+		Installs our extensions into the active Postgres
+		environment.  This target does not imply a docs
+		build.  If you want docs installed you should build
+		them first and then this target will ensure they are
+		installed.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><literal>clean</literal></term>
+	    <listitem>
+	      <para>
+		Remove target, intermediate and junk files.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+	</para>
+      </sect3>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Running Unit Tests</title>
+    <para>
+      The <literal>Veil2</literal> unit tests can be run from
+      <literal>make</literal> using the <literal>unit</literal>
+      target.  They require the postgres unit testing extension
+      <literal>pgtap</literal>.
+    </para>
+    <para>
+      The tests leave no residue in the test database, so can be run
+      on any clean database.  By default the <literal>vpd</literal>
+      database will be used, but this can be changed by providing
+      <literal>make</literal> with a value for
+      <literal>TESTDB</literal>, eg:
+      <programlisting>
+marc:veil2$ make unit TESTDB=veil_unit_test_db
+Creating database veil_unit_test_db...
+CREATE DATABASE
+Performing unit tests...
+Running Veil2 unit tests...
+. . . 
+      </programlisting>
+      This test database can be dropped using:
+      <programlisting>
+marc:veil2$ make drop TESTDB=veil_unit_test_db
+Dropping database veil_unit_test_db...
+Pager usage is off.
+DROP DATABASE
+marc:veil2$ 
+      </programlisting>
+    </para>
+  </sect1>
+  <sect1>
+    <title>The Documentation Build</title>
+    <para>
+      The <literal>Veil2</literal> documentation is built using
+      docbook.  It is a relatively complex beast though, as there is
+      automated extraction of SQL code, automated creation of diagram
+      images and maps, and linkage with Doxygen documentation.  This
+      is what you need to know:
+    </para>
+    <sect2>
+      <title>General</title>
+      <para>
+	There is a lot of nasty shell scripting involved.  Trying to do
+	this in a non-Unix environment is probably not an option.  
+      </para>
+    </sect2>
+    <sect2>
+      <title>Images</title>
+      <para>
+	Images are converted into <literal>.png</literal> files from
+	their <literal>.dia</literal> sources using
+	<literal>pstoimg</literal>, which on Debian comes from the
+	<literal>latex2html</literal> package.  This is done by a
+	general <literal>%.png: %.dia</literal> rule in the makefile.
+      </para>
+      <para>
+	The ERD and Views diagrams in the html documentation provide
+	clickable links.  The maps for these are generated via
+	intermediate <literal>.xml</literal> and
+	<literal>.coords</literal> targets, again created by rules in
+	the makefile.
+      </para>
+      <para>
+	The process for generating the map files is best discovered,
+	if you need it, by exploring the code, starting from the makefile.  
+      </para>
+    </sect2>
+    <sect2>
+      <title>SQL Extracts</title>
+      <para>
+	The Appendices A, B and C contain documentation that is
+	largely automatically generated from the main veil SQL
+	script.  The extracts are created from the makefile by some
+	fairly ugly shell scripts.  Look for targets containing the
+	word extract in the makefile.
+      </para>
+      <para>
+	The individual extract files are processed into the docbook
+	sources by <literal>sql-definition</literal> xsl processing
+	instruction directives in the xml sources.  These are handled
+	by an xsl template defined in the
+	<literal>docs/html_stylesheet.xsl</literal> stylesheet.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Linkage To Doxygen docs</title>
+      <para>
+	These are handled by targets containing the word anchor in the
+	makefile, and by <literal>doxygen-ulink</literal> xsl
+	processing-instructions handled by the
+	<literal>docs/html_stylesheet.xsl</literal> stylesheet.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Releases</title>
+    <para>
+      Releasing a new version of <literal>Veil2</literal> to the world
+      involves a number of steps.  The makefile provides various
+      targets to help in this process, primarily the
+      <literal>zipfile</literal> target which creates a zipfile for
+      release to <literal>PGXN</literal> once <literal>make</literal>
+      is satisfied that all necesary steps have been taken.
+    </para>
+    <para>
+      Specifically, before creating the zipfile,
+      <literal>make</literal> insists on the following:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    that the <literal>PGXN</literal> metadata file,
+	    <literal>META.json</literal> contains correct filename and
+	    version information;
+	  </para>
+	  <para>
+	    Specifically, that the version numbers match what is
+	    defined in the <literal>VERSION</literal> file.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that there are no uncommitted changes;
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that the current <literal>git</literal> branch is
+	    <literal>master</literal>;
+	  </para>
+	  <para>
+	    This is particularly necessary as other branches have to
+	    be used when uploading documentation to
+	    <literal>github</literal>.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that the <literal>HEAD</literal> branch in
+	    <literal>git</literal> has been tagged;
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that github and other upstream repositories are up to date
+	    with respect to the local <literal>git</literal> repository;
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    that the latest version of documentation has been published
+	    to github pages.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+  </sect1>
+</chapter>

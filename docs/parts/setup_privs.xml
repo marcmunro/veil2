@@ -1,11 +1,16 @@
-<sect1 id="setup_privs">
-  <title>Create Initial Privileges</title>
+<chapter id="setup_privs">
+  <title>Create Initial Privileges (STEP 7)</title>
   <para>
-    This is a pretty simple step.  As a starting point, we should
-    create data access privileges for each table and view in our
+    This is a pretty simple step.  As a starting point, you should
+    create data access privileges for each table and view in your
     application.  As a minimum you should provide select and modify
     privileges but we recommend the full set of select, insert, update
     and delete privileges for each.
+  </para>
+  <para>
+    In order to allow for future <literal>Veil2</literal> system
+    privileges to be added, it is recommended that you begin
+    numbering your privileges from 20.
   </para>
   <para>
     You should aim to keep the range of privilege_ids that are in use
@@ -15,30 +20,22 @@
     manually (do not use a sequence), and if you need to delete some
     privileges, try to subsequently re-use the original ids.  Note
     that <literal>Veil2</literal> defines a number of its own
-    privileges.  They should generally be left alone.
+    privileges.  They should be left alone.
   </para>
   <para>
-    At this point you need to make the decision for each relation
-    (table or view) what the appropriate scope is for its privileges.
-    You may, at this point, discover scopes that you hadn't previously
-    considered.  You can go back to the previous step if so.
+    At this point you need to determine the appropriate scope for
+    privileges on each relation (table or view).  You may, at this
+    point, discover scopes that you hadn't previously considered.  You
+    can go back to earlier steps if needed.
   </para>
   <para>
     You may find that you are unable to determine a suitable scope for
     some relations.  If so, leave it as null.  When you test your
-    system, with an unprivileged use, you will probably have no access
-    to this relation, and the scope that it needs will become
-    apparent.
+    system with an unprivileged user, you will have no access to this
+    relation, and the scope that it needs will become apparent.
   </para>
   <para>
-    The demo sets a (very) minimal set of privileges.  Look for STEP 4
-    in the file <literal>demo/demo.sql</literal>.
+    The demo sets a (very) minimal set of privileges.  Look for STEP 7
+    in the file <literal>demo/veil2_demo--&version;.sql</literal>.
   </para>
-  <sect2>
-    <title>In Summary</title>
-    <para>
-      Create records in <link
-      linkend="entity_privilege"><literal>veil2.privileges</literal></link>.
-    </para>
-  </sect2>
-</sect1>
+</chapter>

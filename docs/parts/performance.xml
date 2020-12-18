@@ -1,0 +1,236 @@
+<chapter id="performance">
+  <title>Performance</title>
+  <para>
+    Adding <literal>Veil2</literal> to your database introduces 2
+    specific overheads to  your database performance.
+    <orderedlist>
+      <listitem>
+	the overhead of session management;
+      </listitem>
+      <listitem>
+	the overhead of privilege testing in your relations.
+      </listitem>
+    </orderedlist>
+  </para>
+  <sect1 id="load_perf_data">
+    <title>Data For Evaluating Performance</title>
+    <para>
+      In order to get a feel for the overheads associated with
+      <literal>Veil2</literal>, we need some realistic volumes of
+      data for roles, privileges, and accessors with their associated
+      mappings.  The script, <literal>demo_bulk_data.sql</literal>,
+      which can be found as described <link
+      linkend="next_steps">here</link> provides a good starting point
+      for this.
+    </para>
+    <para>
+      After creating a demo database (as <link
+      linkend="veil_demo">described here</link>) you can install this
+      data using psql, eg:
+      <programlisting>
+marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo_bulk_data.sql 
+      </programlisting>
+    </para>
+    <para>
+      This will create around 8000 accessors, around 300 roles, and
+      around 2000 privileges, which should be enough to exercise
+      the privilege testing and session management functionality.
+    </para>
+  </sect1>
+  <sect1>
+    <title>Session Management Overhead</title>
+    <para>
+      The two biggest overheads in session management are the use of
+      <literal>bcrypt()</literal> for authentication (which is
+      CPU-intensive by intent), and the loading of session
+      privileges.  In the following evaluation,
+      <literal>bcrypt()</literal> is avoided. 
+    </para>
+    <para>
+      Session privileges once loaded (from <link
+      linkend="view_session_privileges_v"><literal>veil2.session_privileges_v</literal></link>
+      are cached (in <link
+      linkend="entity_accessor_privileges_cache"><literal>veil2.accessor_privileges_cache</literal></link>).
+      This means that subsequent loading of privileges should be
+      considerably faster than the initial one for each accessor.
+    </para>
+    <para>
+      A simple performance checking script <literal>perf.sql</literal>
+      is provided in the same directory as the bulk data loading
+      script.  Assuming the same directory as the example above you
+      would run it as follows:
+      <programlisting>
+marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/perf.sql 
+Creating sessions: elapsed = 21 milliseconds.
+Opening sessions: elapsed = 51 milliseconds.
+Re-opening sessions: elapsed = 60 milliseconds.
+marc:veil2$ 
+      </programlisting>
+      The script creates 6 sessions, opens each of them, and then
+      re-opens them.  The elapsed times shown are cumulative, in this
+      case giving the time to open and initialize the sessions as
+      being approximately 30 milliseconds (5 milliseconds each), with
+      the session reloads taking about 9 milliseconds (1.5
+      milliseconds each).  
+    </para>
+    <para>
+      This is on an aging desktop PC with the following CPU spec:
+      <programlisting>
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i5-3570K CPU @ 3.40GHz
+stepping	: 9
+microcode	: 0xc
+cpu MHz		: 3411.376
+cache size	: 6144 KB
+      </programlisting>
+    </para>
+    <para>
+      It may be possible to further improve the performance by
+      re-implementing the session management functions in C, though
+      initial experiments yielded only minor gains which, given the
+      loss in flexibility resulting from a C implementation, were not
+      felt to be worthwhile.
+    </para>
+    <para>
+      Until anyone claims otherwise, the author is going to claim that
+      this is fast enough.
+    </para>
+  </sect1>
+  <sect1>
+    <title>Privilege Testing Overhead</title>
+    <para>
+      For testing the overhead of running privilege tests, you should
+      load the performance evaluation data as described <link linkend="load_perf_data">above</link>.
+    </para>
+    <para>
+      The script <literal>perf2.sql</literal> sets up 3 identical
+      tables for performance testing, and runs some simple queries.
+      The tables are:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    x;
+	  </para>
+	  <para>
+	    This table has no security policy.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    y;
+	  </para>
+	  <para>
+	    This table has a minimal security policy, calling <link
+	    linkend="func_always_true"><literal>veil2.always_true()</literal></link>.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    z.
+	  </para>
+	  <para>
+	    This table has a security policy using <link
+	    linkend="func_i_have_global_priv"><literal>veil2.i_have_global_priv()</literal></link>.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      Here is the transcript of a performance testing run:
+      <programlisting>
+marc:veil2$ psql -d vpd -f  /usr/share/postgresql/12/veil2/perf2.sql
+Setting up tables...
+connecting as Alice...
+31|7argrXo++w024hrMnrRwUAnZwvb4i/DN8ZFbF0MMjcg=||t|
+Time: 24.037 ms
+running tests...
+...on x (3 times)...
+1995
+Time: 0.581 ms
+1995
+Time: 0.274 ms
+1995
+Time: 0.261 ms
+...on y (3 times)...
+1995
+Time: 0.576 ms
+1995
+Time: 0.316 ms
+1995
+Time: 0.291 ms
+result_counts (to keep us honest):
+0|0
+Time: 0.117 ms
+...on z (3 times)...
+1995
+Time: 0.826 ms
+1995
+Time: 0.383 ms
+1995
+Time: 0.365 ms
+result_counts again:
+0|5985
+Time: 0.140 ms
+marc:veil2$ 
+      </programlisting>
+    </para>
+    <para>
+      What this shows, for table z, is that the first query
+      experiences some small overhead (approx 0.5 millisecs), and that
+      subsequent queries have little more overhead than table y, which
+      has the smallest possible overhead for a table with a security
+      policy.  Based on all of this, the author is going to claim that
+      this is pretty damn fast.
+    </para>
+    <para>
+      The reason for the small initial overhead on the first test
+      against table Z is that on the first call to a privilege testing
+      function, the session's privileges must be loaded into session
+      memory.
+    </para>
+    <para>
+      Since these results look too good to be true, we perform a query
+      of <literal>veil2.result_counts()</literal> which shows the
+      number of false and true results from the privilege testing
+      functions.  This should be seen as proof that the privilege
+      tests were actually performed.  Obviously, you can repeat this
+      yourself.
+    </para>
+    <sect2>
+      <title>Other Privilege Test Functions</title>
+      <para>
+	The tests above only test
+	<literal>veil2.i_have_global_priv()</literal>, which is the
+	simplest of the privilege testing functions.  While this may
+	seem to be a cheat, testing privileges in other scopes is
+	just as fast as testing in the global scope.
+      </para>
+      <para>
+	That said, those functions that check for privileges in
+	superior scopes, run a query to discover the appropriate
+	superior scopes, and so incur more overhead.  Experience
+	suggests that this will still be easily dwarfed by any fetches
+	from uncached rows.
+      </para>
+      <para>
+	If your application uses a lot of superior scope tests, or
+	those queries are used on large numbers of records, you should
+	run your own tests to ensure that performance is adequate.  If
+	not you may need to perform some denormalizations to record
+	the appropriate superior scope in each row.
+      </para>
+      <para>
+	Even with this caveat though, the author is still going to
+	claim that it's fast.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>In Conclusion</title>
+    <para>
+      Oh my, it's fast!
+    </para>
+  </sect1>
+</chapter>

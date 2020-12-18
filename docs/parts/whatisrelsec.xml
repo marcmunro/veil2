@@ -1,32 +1,40 @@
-<sect1 id="what-is-relational-security">
+<chapter id="what-is-relational-security">
   <title>What Is A Relational Security System?</title>
   <para>
-    A Relational Security System is one in which each assigned
-    privilege has a scope, which limits the extent to which the
-    privilege applies.
+    A Relational Security System is one in which access to each piece
+    of data and functionality is limited according to the user's
+    relationships to that data or functionality.  Access is managed by
+    privileges assigned in contexts which limit the extent to
+    which that privilege applies.
   </para>
   <para>
-    The scope of an assigned privilege is related to a specific subset
-    of data, so that each privilege assignment will give access to
-    that specific subset.  The scope may be all-encompassing or very
-    specific.  It may give access to thousands of records; to just a
-    few; or even to none.  And privileges may be assigned multiple
-    times, in different scopes.
+    Users acquire their privileges in various ways: all users may get a
+    basic set of privileges; some users may be members of teams or
+    departments and their roles in those things may give them implied
+    privilege assignments; and some users may be granted specific
+    roles explicitly.  Even with explicit role assignments, those
+    assignments may occur in different contexts giving the user access
+    to greater or smaller subsets of data: you might be a given the
+    manager role for a project, or for a department, or for a
+    division, or company-wide.  The same privileges would apply in
+    each case, but their scope would apply to larger or smaller sets
+    of data.
   </para>
   <para>
     Scopes may be created from almost any definable subset of your
     data.  Mostly they are based on the relationships of your users
     with their data, though they need not be.  Typically, scopes are
-    defined in terms of parties and their relationships either to
-    other parties, or to specific artifacts described by your
-    database.  For example, a person's relationship to the company
-    they work for, or their membership of a project team.
+    defined in terms of users and their relationships to specific
+    artifacts described by your database.  For example, a person's
+    relationship to the company they work for, or their membership of
+    a department or project team.
   </para>
   <para>
-    Having scopes associated with privileges means that the
-    granularity of access controls can be as coarse or as fine as the
-    data demands, and it means that there is rarely the need for more
-    complex access checks than "do I have privilege X in scope Y?".
+    Having scopes associated with each assigned privilege means that
+    the granularity of access controls can be as coarse or as fine as
+    the data demands, and it means that there is rarely the need for
+    more complex access checks than "do I have privilege X in scope
+    Y?".
   </para>
   <para>
     Instead of having privileges which imply conditional rule checks,
@@ -35,4 +43,126 @@
     privileges can effectively contain their conditionality through
     their scope. 
   </para>
-</sect1>
+  <sect1>
+    <title>What This Means - Some Examples</title>
+    <para>
+      The description above is rather abstract.  To help make it more
+      concrete, here are some examples of how a relational security
+      system can work.
+    </para>
+    <sect2>
+      <title>Separate Corporate Clients</title>
+      <para>
+	Imagine that you provide a
+	<ulink url="https://en.wikipedia.org/wiki/Software_as_a_service">
+	Software As A Service</ulink> solution to multiple corporate
+	clients. 
+      </para>
+      <para>
+	Data for each client would be stored with a <quote>corp
+	id</quote> identifying the corporate client that it belongs
+	to.  Users associated with one client would only have access
+	to data for that individual client.  That is, their access to
+	data would depend on their relationship with the specific
+	client.  If they are an employee of Corp X, they would have
+	access to only Corp X data.
+      </para>
+      <para>
+	As a refinement, data within each client could be further
+	segregated into data for subdivisions within the corporation's
+	own organizational hierarchy.  Users associated with a single
+	division might see data only for that division, while users at
+	the corporate level would see data for all divisions.  No
+	special application-level code is needed to do this: it is
+	just a matter of assigning privileges in different contexts:
+	those of the corporation (corp context), or those of the
+	subdivision (which we'll call org context).
+      </para>
+      <para>
+	We can take it even further and have data that is protected at
+	the level of individual projects (project context).  If you
+	are a team member of a project, you would automatically get to
+	access that project's data.
+      </para>
+      <para>
+	In all of these cases, your access to data is determined by
+	your relationships with that data:
+	<itemizedlist>
+	  <listitem>
+	    <para>
+	      if you are an employee of a specific corporation, you
+	      will have access to data (only) for that corporation.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      if you are an employee of a specific subdivision, your
+	      access can be limited to data specific to that subdivision.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      if you are a member of a project team, you can have
+	      access to data for that project.
+	    </para>
+	  </listitem>
+	</itemizedlist>
+	You can also be granted access to data, more directly through
+	the assignment of roles.  But those roles will be limited to
+	specific contexts.  You could be assigned the project manager
+	role in the context of a single project, or in the context of
+	a subdivision, and this would give you rights either to a
+	single project, or to all projects for that subdivision.
+      </para>
+      <para>
+	This is all demonstrated in the <link
+	linkend="veil_demo">Veil2 demo</link>.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Social Media</title>
+      <para>
+	Imagine that you run a social media site that allows users to
+	post messages which can be of 3 different types:
+	<itemizedlist>
+	  <listitem>
+	    <para>
+	      private;
+	    </para>
+	    <para>
+	      These messages can only be seen by the poster.
+	      Typically, we might label these as draft.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      public;
+	    </para>
+	    <para>
+	      Anyone can see these messages.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      group;
+	    </para>
+	    <para>
+	      Only users who are our <quote>friends</quote> can see these.
+	    </para>
+	  </listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	In this scheme, you have access to group postings only if you
+	are a member of the poster's group of friends.  Your access to
+	those posts is determined solely through your relationship, as
+	a friend, to the poster so your access rights are implied
+	rather than explicitly granted.
+      </para>
+      <para>
+	This is demonstrated in the <link
+	linkend="veil_minimal_demo">Veil2 minimal demo</link>.
+      </para>
+    </sect2>
+  </sect1>
+</chapter>

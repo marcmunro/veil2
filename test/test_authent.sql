@@ -1,101 +1,78 @@
+--  test_authent.sql
+--
+--     Unit tests for authentication mechanisms.
+--
+--     Copyright (c) 2020 Marc Munro
+--     Author:  Marc Munro
+--     License: GPL V3
+--
+-- Usage:  Called from test_veil2.sql
+--
 
-\echo ...authentication functions...
-\echo ......checking plaintext authentication...
+begin;
+select '...test authentication functions...';
 
-update veil2.authentication_types
-   set enabled = false
- where shortname = 'plaintext';
+select plan(8);
+
 
 -- Plaintext authentication is not enabled
-select null
- where test.expect(
-    'select 1 from veil2.authentication_types
-     where shortname = ''plaintext'' and not enabled', 1,
-    'Expecting disabled plaintext authentication');
+select is((select 1 from veil2.authentication_types
+            where shortname = 'plaintext' and not enabled),
+       1, 'Expecting disabled plaintext authentication');
 
 -- Authentication fails when authent_type is not enabled.
-select null
- where test.expect(
-    'select 
-     case veil2.authenticate(-1, ''plaintext'', ''password'')
-     when true then 1 else 0 end',
-     0, 'AUTHENTICATION SHOULD HAVE FAILED(1)');
+select is((select 
+             case veil2.authenticate(-1, 'plaintext', 'password')
+             when true then 1 else 0 end),
+          0, 'Disabled plaintext authentication should have failed');
 
+-- Allow plaintext authentication.
 update veil2.authentication_types
    set enabled = true
  where shortname = 'plaintext';
 
-
--- Authentication succeeds when authent_type is enabled.
-select null
- where test.expect(
-    'select 
-     case veil2.authenticate(-1, ''plaintext'', ''password'')
-     when true then 1 else 0 end',
-     1, 'AUTHENTICATION SHOULD HAVE FAILED(2)');
+select is((select 
+             case veil2.authenticate(-1, 'plaintext', 'password')
+             when true then 1 else 0 end),
+          1, 'Plaintext authentication succeeds when enabled');
 
 -- Authentication fails when password is incorrect
-select null
- where test.expect(
-    'select 
-     case veil2.authenticate(-1, ''plaintext'', ''password3'')
-     when true then 1 else 0 end',
-     0, 'AUTHENTICATION SHOULD HAVE FAILED(3)');
+select is((select 
+             case veil2.authenticate(-1, 'plaintext', 'password3')
+	     when true then 1 else 0 end),
+          0, 'Authentication fails with incorrect password');
 
--- Authentication fails when auth type is incorrect
-select null
- where test.expect(
-    'select 
-     case veil2.authenticate(-1, ''unimplemented-authentication-type'', 
-                             ''password'')
-     when true then 1 else 0 end',
-     0, 'AUTHENTICATION SHOULD HAVE FAILED(4)');
+select is((select 
+             case veil2.authenticate(-1, 'unimplemented-authentication-type', 
+                             	     'password')
+	     when true then 1 else 0 end),
+	  0, 'Authentication fails with invalid authentication type');
 
--- Authentication fails when auth type does not exist
-select null
- where test.expect(
-    'select 
-     case veil2.authenticate(-1, ''wibble'', ''password'')
-     when true then 1 else 0 end',
-     0, 'AUTHENTICATION SHOULD HAVE FAILED(5)');
-
--- Authentication fails when party does not exist
-select null
- where test.expect(
-    'select 
-     case veil2.authenticate(-99, ''plaintext'', ''password'')
-     when true then 1 else 0 end',
-     0, 'AUTHENTICATION SHOULD HAVE FAILED(6)');
-
-\echo ......checking bcrypt authentication...
--- Test bcrypt authentication - incorrect password
-select null
- where test.expect(
-    'select 
-     case veil2.authenticate(-1, ''bcrypt'', ''password'')
-     when true then 1 else 0 end',
-     0, 'AUTHENTICATION SHOULD HAVE FAILED(7)');
+select is((select 
+             case veil2.authenticate(-99, 'plaintext', 'password')
+	     when true then 1 else 0 end),
+          0, 'Authentication fails with invalid party');
 
 -- Test bcrypt authentication - incorrect password
-select null where test.expect(
-    'select 
-     case veil2.authenticate(-1, ''bcrypt'', ''bassword2'')
-     when true then 1 else 0 end',
-     0, 'AUTHENTICATION SHOULD HAVE FAILED(8)');
--- Test bcrypt authentication - correct password
-select null where test.expect(
-    'select 
-     case veil2.authenticate(-1, ''bcrypt'', ''bassword'')
-     when true then 1 else 0 end',
-     1, 'BCRYPT AUTHENTICATION SHOULD HAVE PASSED');
+select is((select 
+             case veil2.authenticate(-1, 'bcrypt', 'password')
+	     when true then 1 else 0 end),
+	  0, 'Bcrypt authentication fails with incorrect password'); 
 
--- Test bcrypt authentication - correct password again
-select null where test.expect(
-    'select 
-     case veil2.authenticate(-2, ''bcrypt'', ''bassword2'')
-     when true then 1 else 0 end',
-     1, 'BCRYPT AUTHENTICATION SHOULD HAVE PASSED(2)');
+select is((select 
+             case veil2.authenticate(-1, 'bcrypt', 'bassword')
+	     when true then 1 else 0 end),
+	  1, 'Bcrypt authentication passes');
+
+select * from finish();
 
 
+/*
+\set QUIET 0
+\pset format aligned
+\pset tuples_only false
+*/
 
+
+rollback;
 

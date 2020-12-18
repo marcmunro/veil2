@@ -17,16 +17,17 @@
 <!ENTITY whyuse_veil 	       	SYSTEM "parts/whyuse_veil.xml">
 <!ENTITY veil_concepts 	       	SYSTEM "parts/veil_concepts.xml">
 <!ENTITY whatis_veil 	       	SYSTEM "parts/whatis_veil.xml">
+<!ENTITY built_in        	SYSTEM "parts/built_in.xml">
 <!ENTITY how_difficult 	       	SYSTEM "parts/how_difficult.xml">
 <!ENTITY get_started 	       	SYSTEM "parts/get_started.xml">
-<!ENTITY veil_demo 	       	SYSTEM "parts/veil_demo.xml">
+<!ENTITY veil_demo	       	SYSTEM "parts/veil_demo.xml">
 <!ENTITY veil_setup 	       	SYSTEM "parts/veil_setup.xml">
 <!ENTITY setup_authent         	SYSTEM "parts/setup_authent.xml">
 <!ENTITY setup_contexts        	SYSTEM "parts/setup_contexts.xml">
-<!ENTITY setup_privs           	SYSTEM "parts/setup_privs.xml">
-<!ENTITY setup_roles           	SYSTEM "parts/setup_roles.xml">
 <!ENTITY setup_accessors       	SYSTEM "parts/setup_accessors.xml">
 <!ENTITY setup_context_links   	SYSTEM "parts/setup_context_links.xml">
+<!ENTITY setup_privs           	SYSTEM "parts/setup_privs.xml">
+<!ENTITY setup_roles           	SYSTEM "parts/setup_roles.xml">
 <!ENTITY setup_scope_promotions SYSTEM "parts/setup_scope_promotions.xml">
 <!ENTITY secure_tables          SYSTEM "parts/secure_tables.xml">
 <!ENTITY secure_views           SYSTEM "parts/secure_views.xml">
@@ -34,29 +35,32 @@
 <!ENTITY housekeeping           SYSTEM "parts/housekeeping.xml">
 <!ENTITY contact                SYSTEM "parts/contact.xml">
 <!ENTITY tips                   SYSTEM "parts/tips.xml">
+<!ENTITY performance            SYSTEM "parts/performance.xml">
+<!ENTITY security               SYSTEM "parts/security.xml">
+<!ENTITY for_developers         SYSTEM "parts/for_developers.xml">
+<!ENTITY original_veil          SYSTEM "parts/original_veil.xml">
 <!ENTITY veil_dbtables          SYSTEM "parts/veil_dbtables.xml">
 <!ENTITY veil_dbviews           SYSTEM "parts/veil_dbviews.xml">
-<!ENTITY veil_dbfuncs           SYSTEM "parts/veil_dbfuncs.xml">
 <!ENTITY veil_dbfuncs           SYSTEM "parts/veil_dbfuncs.xml">
 <!ENTITY authent_protocols      SYSTEM "parts/authent_protocols.xml">
 <!ENTITY change_history         SYSTEM "parts/change_history.xml">
          
 ]>
 
-<article id="Veil2">
+<book id="Veil2">
   <title>Veil2 &version; Documentation</title>
-  <sect1 id="introduction">
-    <title>Introduction</title>
+  <preface id="introduction">
+    <title>Introduction to Veil2</title>
     <para>
-      <literal>Veil2</literal> is a Postgres add-on for implementing
-      relational security systems.
+      <literal>Veil2</literal> is a Postgres <ulink
+      url="https://pgxn.org/dist/veil2/">extension</ulink> for
+      implementing relational security systems.
     </para>
     <para>
       A <link linkend="what-is-relational-security">relational
-      security system</link> Is one in which access to data is
-      determined, at least partly, by a user’s relationships to that
-      data.  Many access controls may therefore be implicit rather
-      than explicit.
+      security system</link> Is one in which access rights are
+      determined by the user’s relationships to the objects being
+      accessed.
     </para>
     <para>
       The primary aims of a relational security system are to make the
@@ -72,7 +76,7 @@
       database in a matter of hours.
     </para>
     <para>
-      With <literal>Veil2</literal> we secure the database itself and
+      With <literal>Veil2</literal> you secure the database itself and
       not just applications that use it.  This means that even if your
       application server is compromised, an attacker's ability to
       access data will be limited to the data for which they can steal
@@ -90,44 +94,83 @@
       <literal>Veil2</literal> the implementation of access control
       rules becomes trivial.
     </para>
-  </sect1>
+    <para>
+      <literal>Veil2</literal> is mostly implemented in SQL and
+      PL/pgSQL, with a small amount of security and
+      performance-critical code written in C.  It is designed to be
+      fast, flexible and customizable, and aims to make the security
+      of your system better, faster, more complete and easier to
+      understand.
+    </para>
+    <para>
+      If you would like to see what <literal>Veil2</literal> can do,
+      you can install and explore the <link
+      linkend="veil_demos"><literal>Veil2</literal> demos</link>. 
+    </para>
+  </preface>
 
-  &whatisrelsec;
-  &relsecdiff;
-  &whyuse_veil;
-  &veil_concepts;
-  &whatis_veil;
-  &how_difficult;
-  &get_started;
-  &veil_demo;
-  &veil_setup;
-  &setup_contexts;
-  &setup_authent;
-  &setup_privs;
-  &setup_roles;
-  &setup_accessors;
-  &setup_context_links;
-  &setup_scope_promotions;
-  &secure_tables;
-  &secure_views;
-  &assign_roles;
-  &housekeeping;
-  &contact;
-  &tips;
+  <part>
+    <title>Understanding Veil2 And Relational Security</title>
+    &whatisrelsec;
+    &relsecdiff;
+    &whyuse_veil;
+    &veil_concepts;
+    &whatis_veil;
+    &how_difficult;
+  </part>
+  <part>
+    <title>Creating Your Veil2-based VPD Step By Step</title>
+    &veil_setup;
+    &get_started;
+    &setup_contexts;
+    &setup_authent;
+    &setup_accessors;
+    &setup_context_links;
+    &setup_scope_promotions;
+    &setup_privs;
+    &setup_roles;
+    &secure_tables;
+    &secure_views;
+    &assign_roles;
+    &housekeeping;
+  </part>
+  <part>
+    <title>Implementation Details</title>
+    &veil_demo;
+    &built_in;
+    &for_developers;
+    &original_veil;
+    &tips;
+    &performance;
+    &security;
+    &contact;
+  </part>
+  &veil_dbtables;
+  &veil_dbviews;
+  &veil_dbfuncs;
   <appendix>
-    <title><literal>Veil2</literal> ERD and Database Objects</title>
-    <mediaobject>
-      <imageobject>
-	<imagedata
-	    id="veil2_erd_div"
-	    fileref="veil2_erd.png"
-	    format="PNG"/>
-      </imageobject>
-    </mediaobject>
-    &veil_dbtables;
-    &veil_dbviews;
-    &veil_dbfuncs;
+    <title><literal>Veil2</literal> C Implementation</title>
+    <para>
+      A small core of <literal>Veil2</literal> functionality is
+      implemented in C for security and performance.
+    </para>
+    <para>
+      Improved security is achieved by ensuring that our session
+      privileges data structures cannot be tampered with (unless you
+      have superuser rights in which case you can't be stopped
+      anyway).
+    </para>
+    <para>
+      Our privilege testing functions achieve high performance by
+      being implemented in C using an in-memory cache of privileges.
+    </para>
+    <para>
+      The C implementation is documented internally using
+      <ulink url="https://www.doxygen.nl/index.html">Doxygen</ulink>.
+      You can access that documentation <ulink
+      url="doxygen/html/index.html">here</ulink>.
+    </para>
   </appendix>
   &authent_protocols;
   &change_history;
-</article>
+</book>

@@ -1,0 +1,107 @@
+<chapter id="original_veil">
+  <title>How <literal>Veil2</literal> Relates to the Original <literal>Veil</literal></title>
+  <para>
+    Before <literal>Veil2</literal> there was
+    <ulink url="https://github.com/marcmunro/veil"><literal>Veil</literal></ulink>.
+  </para>
+  <sect1>
+    <title>What is <literal>Veil</literal>?</title>
+    <para>
+      <literal>Veil</literal> is a data security add-on for
+      Postgres.  It provides an API allowing you to control access to
+      data at the row, or even column, level.  Different users will be
+      able to run the same query and see different results
+    </para>
+    <para>
+      <literal>Veil</literal> provides a set of components for dealing
+      with bitmaps as variables, and for maintaining these variables
+      in shared or session state.
+    </para>
+    <para>
+      It provides the necessary tools for you to build a secured
+      database system, but:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    the <literal>Veil</literal> variables cannot be stored in
+	    the database;
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    the <literal>Veil</literal> variables do not share in the
+	    transaction management of the underlying database;
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    session and connection management is not provided.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+  </sect1>
+  <sect1>
+    <title>Where Did <literal>Veil2</literal> Come From?</title>
+    <para>
+      Although it was clear to the author that <literal>Veil</literal>
+      had a serious deficiency in its lack of integration with
+      Postgres' transaction management, it wasn't obvious how to
+      resolve it.
+    </para>
+    <para>
+      The original <literal>Veil</literal> release was in 2011.  One
+      of the most useful datatypes that it provided was a hash of
+      bitmaps.  That is a set of bitmaps keyed by text strings.
+    </para>
+    <para>
+      The author could see no way to create a native Postgres datatype
+      that could do the same thing, and so the original
+      <literal>Veil</literal> continued as it was.
+    </para>
+    <para>
+      Eventually the author realized that the hstore module was just
+      what was needed, and so set out to create a Postgres native
+      bitmap type.  This was <ulink
+      url="https://github.com/marcmunro/pgbitmap"><literal>pgbitmap</literal></ulink>.
+      It worked pretty well and was simple and elegant. All of
+      <literal>Veil</literal> could be replaced with pgbitmap, hstore
+      and arrays, with all session objects being storable in temporary
+      tables and shared objects in normal tables.
+    </para>
+    <para>
+      On further reflection, the author realized that some proper
+      integration was needed, along with a decent framework for
+      building VPDs using pgbitmap.  It wouldn't be much work, and
+      didn't need to contain much code.
+    </para>
+    <para>
+      As he tackled the problem of <literal>Veil2</literal>, he
+      realized that much of what the user had to implement in a
+      <literal>Veil</literal>-based system was going to be common to
+      all users.  And he had a SaaS project that he'd worked on as a
+      guide to what was needed.  So the project grew.
+    </para>
+    <para>
+      Ironically, as the implementation proceeded, the need for hstore
+      never materialized.
+    </para>
+    <para>
+      And although it never became simple, the core concepts slowly
+      crystallized, and the concept of a <link
+      linkend="what-is-relational-security">Relational Security
+      System</link> dropped out.
+    </para>
+    <para>
+      With a small number of relatively simple concepts that many
+      developers, and even some PHBs could understand, it became clear
+      that the underlying model was sound but that each implementation
+      would be tricky and a lot of work.  This was not something that
+      most developers would be given the opportunity to build for
+      themselves from a set of components.  And given that the
+      fundamental requirements were likely to be the same for many
+      classes of problem, the direction for <literal>Veil2</literal>
+      was set.
+    </para>
+  </sect1>
+</chapter>

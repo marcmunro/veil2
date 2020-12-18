@@ -126,8 +126,10 @@ pre[class="programlisting"], div[class="footnote"] {
 }
 
 pre[class="programlisting"] {
+        overflow: auto;
+	max-height: 240px;
+	max-width: 90%;
 	padding-top: 15px;
-	padding-bottom: 15px;
 	font-family: monospace; 
 }
 div[class="footnote"] {
@@ -152,4 +154,10 @@ div[class="releaseinfo"] {
 	font-size: 0.8em;
 	background: #F0F0F0;
 }
+
+div[class="mediaobject"] {
+        overflow: auto;
+	padding-top: 15px;
+}
 </style>
+

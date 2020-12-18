@@ -1,239 +1,104 @@
-<sect1 id="starting">
-  <title>Getting Started With <literal>Veil2</literal></title>
+<chapter id="starting">
+  <title>Getting Started With <literal>Veil2</literal> (STEP 1)</title>
   <para>
-    This section aims to get you started.
+    This section aims to help you get <literal>Veil2</literal>
+    installed on your database server, and into your database.
   </para>
-  <sect2 id="installation">
+  <sect1 id="installation">
     <title>Installing <literal>Veil2</literal></title>
-    <sect3 id="pre-requisites">
-      <title>Pre-Requisites</title>
-      <sect4>
-	<title>RDBMS</title>
-	<para>
-	  Any currently-supported version of <ulink
-	  url="https://postgresql.org/">Postgres</ulink> will be adequate.
-	</para>
-      </sect4>
-      <sect4>
-	<title>Postgres Extensions</title>
-	<para>
-	  You will need to be able to install the
-	  <itemizedlist>
-	    <listitem><literal>pgbitmap</literal>; and</listitem>
-	    <listitem><literal>pgcrypto</literal>.</listitem>
-	  </itemizedlist>
-	  extensions in your database.  For
-	  <literal>pgbitmap</literal>, this means that you will
-	  probably need a full build environment unless you can find
-	  someone you trust who has a pre-built library you can use.
-	  See the <ulink
-	  url="https://github.com/marcmunro/pgbitmap">pgbitmap</ulink>
-	  web page for build instructions.
-	</para>
-      </sect4>
-      <sect4>
-	<title>Operating System Environment</title>
-	<para>
-	  You should be able to install <literal>Veil2</literal> on
-	  any operating system, though something Unix-like is
-	  recommended, as we use <literal>make</literal> for a lot of
-	  tasks.  If you don't have <literal>make</literal> available,
-	  you can still install <literal>Veil2</literal> but you will
-	  be doing it directly from the SQL scripts.
-	</para>
-      </sect4>
-      <sect4>
-	<title>Software Required</title>
-	<para>
-	  If you want to install from git and build the documentation
-	  from source, you will need the following:
-	  <itemizedlist>
-	    <listitem><literal>xsltproc;</literal></listitem>
-	    <listitem><literal>libxslt1.1;</literal></listitem>
-	    <listitem><literal>libxml2;</literal></listitem>
-	    <listitem><literal>dia;</literal></listitem>
-	    <listitem><literal>gawk;</literal></listitem>
-	    <listitem><literal>make;</literal></listitem>
-	    <listitem><literal>docbook</literal> V4.5 stylesheets.</listitem>
-	  </itemizedlist>
-	  The last is available on debian through the packages
-	  <literal>docbook-xsl</literal> and
-	  <literal>docbook-xsl</literal>. 
-	</para>
-      </sect4>
-    </sect3>
-    <sect3 id="install">
-      <para>
-	Installation is, for now, available only from the git
-	repository at github.
-      </para>
-      <sect4>
-	<title>Installation From Git Repository</title>
-	<para>
-	  <programlisting>
-$ git clone https://github.com/marcmunro/veil2.git
-$ cd veil2*
-	  </programlisting>
-	</para>
-      </sect4>
-      <sect4>
-	<title>Building The HTML Documentation</title>
-	<para>
-	  You probably don't need to do this, but if you want to:
-	  <programlisting>
-$ cd &lt;to the veil2 directory&gt;
-$ ./configure
-$ make html
-	  </programlisting>
-	  The documentation will be created in the
-	  <literal>html</literal> directory.  Open the
-	  <literal>index.html</literal> file with your browser to view it.
-	</para>
-      </sect4>
-      <sect4>
-	<title>Getting <literal>html</literal> Docs From <literal>git</literal></title>
-	<para>
-	  The <literal>Veil2</literal> online documentation is hosted
-	  using <ulink url="https://pages.github.com/">github
-	  pages</ulink>, with the html files kept in the
-	  <literal>gh-pages</literal> branch of the
-	  <literal>Veil2</literal> repository.
-	</para>
-	<para>
-	  If you need a local copy of the <literal>html</literal>
-	  documentation and are unable to build them using make, you
-	  can simply switch to the <literal>gh-pages</literal> branch
-	  of your local <literal>git</literal> repository:
-	  <programlisting>
-$ cd veil2	    
-$ git checkout gh-pages
-$ cd html
-	  </programlisting>
-	</para>
-	<para>
-	  The <literal>html</literal> directory contains all of the
-	  documentation files including css and images.  The start
-	  page is <literal>index.html</literal>.
-	</para>
-	<para>
-	  If you are going to use the git repository to keep track of
-	  your local changes, be sure to switch back to the
-	  <literal>master</literal> branch before you start coding.
-	</para>
-      </sect4>
-    </sect3>
-    <sect3 id="test">
-      <title>Testing</title>
-      <para>
-	Before running any of the <literal>Veil2</literal> SQL
-	scripts, you should satisfy yourself that they will do no harm
-	to any of your existing databases.  Obviously you will not run
-	them in your production environment.  The scripts are mostly
-	safe but they do create and drop users and roles.  These are
-	all named <literal>veil_&lt;something&gt;</literal> so they
-	should not conflict with anything you are already using BUT
-	YOU HAVE BEEN WARNED.
-      </para>
-      <para>
-	If you'd like to test the <literal>Veil2</literal>
-	installation, you should run the command:
-	<programlisting>
-$ make unit TESTDB=whateverdbnameyoulike
-	</programlisting>
-	The name you give <literal>TESTDB</literal> is the name of the
-	database that will be created for testing.  This should
-	<emphasis role="bold">not</emphasis> be the name of an
-	existing database!  If you don't provide
-	<literal>TESTDB</literal>, the database name will be
-	<literal>vpd</literal>.
-      </para>
-      <para>
-	If all is well, you'll see something like this:
-	<programlisting>
-...
-VPD database created successfully
-
-Performing unit tests...
-RUNNING SETUP
-...creating test users...
-...creating test schema...
-......creating test functions...
-......creating corp context type...
-......creating test corp...
-......creating test corp...
-......creating test corp...
-......creating test corp...
-...creating test parties...
-......creating test roles...
-......creating test context_roles...
-...creating test privileges...
-...setting access rights for parties...
-RUNNING TESTS
-...views...
-......checking direct_role_privileges...
-.........connect role and privilege...
-.........superuser role...
-.........test roles...
-......checking assigned_role_info...
-...authentication functions...
-......checking plaintext authentication...
-......checking bcrypt authentication...
-...checking basic veil2 session handling...
-.....reset_session()...
-.....create_session()...
-.....open_connection()...
-.....open_connection(checking nonce handling)...
-...close_connection()...
-...checking dbuser-based session handling...
-......checking visibility of veil2 objects...
-"user=marc host=/var/run/postgresql port=5432 dbname=whateverdbnameyoulike"
-...context in session handling...
-.....create and open session(invalid context)...
-TESTS COMPLETE
-RUNNING TEARDOWN
-	</programlisting>
-	If you see any mention of ERROR, then your installation has a
-	problem.  This will either mean that your extensions are not
-	properly installed, or that you have found a bug.  Start by
-	carefully reading the output and see if you can figure it out
-	for yourself.  If not, see <link
-	linkend="reporting_bugs">reporting bugs</link>.
-      </para>
-      <para>
-	When you wish to remove the databse you can do:
-	<programlisting>
-$ make drop TESTDB=whateverdbnameyoulike
-	</programlisting>
-      </para>
-      <para>
-	If you are in an environment without <literal>make</literal>
-	you have our sympathy.  In this case, you can run the scripts
-	manually.  Take a look in <literal>GNUmakefile</literal> for
-	the <literal>db</literal> and <literal>unit</literal>
-	targets.  You will see <literal>psql</literal> commands
-	there.  You can run these directly.
-      </para>
-    </sect3>
-  </sect2>
-  <sect2 id="demo-install">
-    <title>Installing The Demo</title>
     <para>
-      We start by creating a database and installing the 
-      <literal>Veil2</literal> database objects.  We can do this using
-      <literal>make</literal>:
-      	<programlisting>
-$ make db TESTDB=whateverdbnameyoulike
-	</programlisting>
+      Since version 0.9.1, <literal>Veil2</literal> can and
+      should be installed as a PostgreSQL extension.  It is available
+      from <ulink url="https://pgxn.org/">PGXN</ulink> the PostgreSQL
+      Extension Network.
     </para>
     <para>
-      Next, we run the demo creation script against the newly created
-      database:
-      	<programlisting>
-$ psql -d whateverdbnameyoulike -f demo/demo.sql
-	</programlisting>
-      This installs the demo database, and links it to the
-      <literal>Veil2</literal> database objects.  The demo database is
-      now ready to use.
+      Alternatively it can be downloaded from github and built
+      locally.  For more on this see the <link
+      linkend="for_developers">developers section</link>.
     </para>
-  </sect2>
-</sect1>
+    <sect2 id="pgxn_install_with_client">
+      <title>Installing To Your Server Using The <literal>pgxn</literal> Client</title>
+      <para>
+	If you have the <literal>pgxn</literal> client available on
+	your database server you can simply do this:
+	<programlisting>
+# pgxn install veil2
+	</programlisting>
+	If not, you can download <literal>Veil2</literal> from PGXN or
+	github, and then build and install it locally as described
+	<link linkend="for_developers">here</link>.
+      </para>
+    </sect2>
+    <sect2 id="pgxn_install_with_client">
+      <title>Per-Database Install</title>
+      <para>
+	Installing the <literal>Veil2</literal> extension in a given
+	database is done with the following command, eg from
+	<literal>psql</literal>:
+	<programlisting>
+dbname# create extension veil2 cascade;
+	</programlisting>
+	Note that <literal>cascade</literal> is used to ensure that
+	<literal>Veil2</literal>'s extension dependencies are also
+	installed.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="next_steps">
+    <title>Next Steps</title>
+    <para>
+      The following chapters describe in detail the next steps to take
+      in securing your database with <literal>Veil2</literal>.  These
+      chapters assume that you will be looking at the
+      <literal>Veil2</literal> demos for examples.  You can find the
+      demo files on your database server by executing the following
+      query:
+	<programlisting>
+dbname# select * from <link linkend="view_sql_files">veil2.sql_files</link>;
+	</programlisting>
+      This lists a number of files that you can take a look at.  There
+      are 3 files that you should take copies of:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    the <literal>Veil2</literal> demo creation script;
+	  </para>
+	  <para>
+	    This is referenced from most of the following chapters,
+	    and provides useful, though often incomplete, examples of
+	    what needs to be done at each step.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    the <literal>Veil2</literal> minimal-demo creation script;
+	  </para>
+	  <para>
+	    This provides a complete example of the simplest possible
+	    <literal>Veil2</literal> installation.  It avoids using
+	    the more sophisticated features of
+	    <literal>Veil2</literal> but by virtue of being a complete
+	    implementation may provide more helpful code examples.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    the <literal>Veil2</literal> implementation template.
+	  </para>
+	  <para>
+	    This is a template script for you to use as the basis of
+	    your <literal>Veil2</literal> implementation.  It
+	    identifies all of the steps needed and provides
+	    commented-out examples and templates for you to use.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      If you cannot access these files on your database server, you
+      can most easily access them from github or by downloading from
+      pgxn.
+    </para>
+  </sect1>
+</chapter>

@@ -1,10 +1,10 @@
-<sect1 id="assign_roles">
-  <title>Assign Initial Roles</title>
+<chapter id="assign_roles">
+  <title>Assign Initial Roles (STEP 11)</title>
   <para>
     Finally, we assign some initial roles to users.  See STEP 11 in
-    file <literal>demo/demo.sql</literal>.
+    file <literal>demo/veil2_demo--&version;.sql</literal>.
   </para>
-  <sect2>
+  <sect1>
     <title>Roles</title>
     <para>
       Firstly you will need to give the <literal>connect</literal> role
@@ -20,5 +20,5 @@
       control users.  If it works for them, then you have an access
       control problem.  If not, the bug lies elsewhere.
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

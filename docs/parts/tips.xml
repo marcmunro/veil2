@@ -1,10 +1,10 @@
-<sect1 id="tips">
+<chapter id="tips">
   <title>Tips and Guidelines</title>
   <para>
     This section provides whatever tips and guidelines have occurred
     to the author.  We can hope that the section expands over time.
   </para>
-  <sect2>
+  <sect1>
     <title>Write Queries That Work Without <literal>Veil2</literal></title>
     <para>
       Generally, with a well-behaved application and well-implemented
@@ -16,7 +16,7 @@
     </para>
     <para>
       However, if you make <literal>Veil2</literal> do your query
-      filtering for you, instead of writing properly crafted
+      filtering for you instead of writing properly crafted
       where-clauses, performance is going to suck.  Consider the
       following queries:
       <programlisting>
@@ -51,8 +51,8 @@ where party_name like '%Bob%';
       this case the security policy has only had to check records that
       the user was allowed to see anyway.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1 id="report_breaches">
     <title>Consider Reporting Blocked Accesses</title>
     <para>
       For most applications, any time that a security policy blocks
@@ -61,10 +61,14 @@ where party_name like '%Bob%';
       be done, this is an indication of one of two things:
       <itemizedlist>
 	<listitem>
-	  the application has not been properly implemented;
+	  <para>
+	    the application has not been properly implemented;
+	  </para>
 	</listitem>
 	<listitem>
-	  your security policy is over-restrictive.
+	  <para>
+	    your security policy is over-restrictive.
+	  </para>
 	</listitem>
       </itemizedlist>
     </para>
@@ -73,8 +77,33 @@ where party_name like '%Bob%';
       investigate.  Note that in a reporting environment where ad-hoc
       reports can be run, this may prove less useful.
     </para>
-  </sect2>
-  <sect2>
+    <para>
+      Adding such a check is pretty straightforward.  Consider this
+      policy:
+      <programlisting>
+create policy wibble__select
+    on wibble
+   for select
+ using (veil2.i_have_global_priv(42));
+      </programlisting>
+      To add logging on error, you can simply add a final
+      <literal>or</literal> to the policy with a function call to a
+      logging function (that always returns false), eg:
+      <programlisting>
+create policy wibble__select
+    on wibble
+   for select
+   using (veil2.i_have_global_priv(42) or
+          log_unwanted_access('wibble', &lt;concatenation of key fields&gt;));
+      </programlisting>
+      Your logging function needs to take enough parameters to
+      identify the record to which access has been attempted, must
+      return false, and should identify the accessor by querying from
+      veil2_session_context.  Performance should not be a great
+      concern as you expect the function to rarely be called.
+    </para>
+  </sect1>
+  <sect1>
     <title>Consider Testing With and Without Security</title>
     <para>
       If you have automated tests, you should run them against both
@@ -83,8 +112,8 @@ where party_name like '%Bob%';
       are in harmony, and you should be very pleased with yourselves.
       Encourage your employer to provide handsome bonuses.
     </para>
-  </sect2>
-  <sect2 id="denormalize">
+  </sect1>
+  <sect1 id="denormalize">
     <title>Denormalize Around Your Scopes</title>
     <para>
       If you find that your security policies require joins to other
@@ -94,8 +123,8 @@ where party_name like '%Bob%';
       tests.  You might also consider doing this just to simplify
       those tests.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>Use Secured Views To Implement Complex Queries</title>
     <para>
       You may find that multi-table queries encounter performance
@@ -111,6 +140,34 @@ where party_name like '%Bob%';
       intermediate rows that are discarded by subsequent joins in the
       original query.
     </para>
-  </sect2>
-</sect1>
+  </sect1>
+  <sect1>
+    <title>Avoid Drop...Cascade</title>
+    <para>
+      While you are integrating <literal>Veil2</literal> with your
+      application and continuing to develop it, you are likely to
+      create and drop your own database objects as they change.  Be
+      aware that through the <literal>veil2.accessors</literal> table
+      and <literal>veil2.superior_scopes</literal> view,
+      <literal>veil2</literal> (and possibly other objects) is tightly
+      coupled with your application schema. 
+    </para>
+    <para>
+      This may mean that it is impossible to to drop some of your
+      database objects because <literal>Veil2</literal> database
+      objects depend on them.  Using the <literal>cascade</literal>
+      option to <literal>drop</literal> will allow the drop to proceed
+      but will result in dependent <literal>Veil2</literal> objects
+      being dropped as well.  Recovering from this can be a tedious
+      and potentially error-prone process.
+    </para>
+    <para>
+      We recommend avoiding the use of
+      <literal>drop... cascade</literal> and instead scripting a
+      drop and rebuild process that will explicitly deal with each
+      dependent object.  By making each drop explicit you can ensure
+      that you correctly manage the re-building of those objects.
+    </para>
+  </sect1>
+</chapter>
 

@@ -1,0 +1,36 @@
+{
+  "name": "veil2",
+  "abstract": "An extension for implementing relational security systems.",
+  "description": "Provides a framework for implementing Virtual
+Private Databases using a relational security model.",
+  "version": "0.9.1",
+  "maintainer": ["Marc Munro <marc@bloodnok.com>"],
+  "license": {
+    "BSD": "http://www.opensource.org/licenses/bsd-license.html"
+  },
+  "prereqs": {
+    "runtime": {
+      "requires": {
+        "PostgreSQL": "10.0"
+      }
+    }
+  },
+  "provides": {
+    "pgbitmap": {
+      "file": "veil2--0.9.1.sql",
+      "version": "0.9.1",
+      "docfile": "docs/README.md"
+    }
+  },
+  "resources": {
+    "homepage": "https://github.com/marcmunro/veil2",
+    "repository": {
+      "url": "https://github.com/marcmunro/veil2.git",
+      "type": "git"
+    }
+  },
+  "meta-spec": {
+    "version": "1.0.0",
+    "url": "http://pgxn.org/meta/spec.txt"
+  }
+}

@@ -56,13 +56,14 @@ scale_factors () {
 # Get html references for entities, printing the results to stdout.
 # Usage: cat entity_list | entity_refs <html-dir> 
 #
-entity_refs ()
+find_refs ()
 {
+    export ref_object=$2
     ( cd $1
       while read line; do
-	  if files=`grep -l "entity_${line}" *html` 2>/dev/null; then
+	  if files=`grep -l "${ref_object}_${line}" *html` 2>/dev/null; then
 	      file=`echo "${files}" | head -1`
-	      echo "ENTITY $line ${file}#entity_${line}"
+	      echo "REFOBJECT $line ${file}#${ref_object}_${line}"
 	  fi
       done
     )
@@ -72,7 +73,7 @@ entity_refs ()
 # and the entities' html refs.
 #
 make_areas () {
-    (cat - $1) | gawk -v BASENAME="$2" '
+    (cat - $1) | gawk -v BASENAME="$2" -v OBJTYPE="${objtype}" '
     # Read coordinates attributes from a coords file line.
     function coords() {
         x = int(gensub(/.*x=\"([^\"]*).*/, "\\1", "g") * x_scale + x_offset)
@@ -82,6 +83,12 @@ make_areas () {
 	return x "," y
     }
     BEGIN {
+        if (OBJTYPE == "view") {
+	    obj_tail = " view"
+	}
+	else {
+	    obj_tail = "s table"
+	}
         printf("<div id=\"%s_div\">\n", BASENAME)
         printf("  <map name=\"%s_map\">\n", BASENAME)
     }
@@ -103,15 +110,15 @@ make_areas () {
         y_offset = $3 + 0
 	#print "OFFSET:", x_offset, y_offset
     }
-    # Create array (hash, really) of html_refs keyed by entities
-    /^ENTITY/ {
+    # Create array (hash, really) of html_refs keyed by refobjects
+    /^REFOBJECT/ {
         html_refs[$2] = gensub(/[^ ]* [^ ]* (.*)/, "\\1", "g")        
     }
-    # Read entity name, and get html reference for it.
-    /<entity/ {
-        entity_name = gensub(/.*value=\"([^\"]*).*/, "\\1", "g")
-	if (entity_name in html_refs) {
-	    href = html_refs[entity_name]
+    # Read refobject name, and get html reference for it.
+    /<refobject/ {
+        refobject_name = gensub(/.*value=\"([^\"]*).*/, "\\1", "g")
+	if (refobject_name in html_refs) {
+	    href = html_refs[refobject_name]
 	}
 	else {
 	    href = ""
@@ -123,8 +130,8 @@ make_areas () {
     /<bottom-right/ {
         if (href != "") {
  	   bottom_right = coords()
-	   printf("    <area alt=\"%s entity\" title=\"%ss table\"\n",
-           	  entity_name, entity_name)
+	   printf("    <area alt=\"%s entity\" title=\"%s%s\"\n",
+           	  refobject_name, refobject_name, obj_tail)
 	   printf("      target=\"_self\" shape=\"rect\"\n")
 	   printf("      coords=\"%s,%s\"\n", top_left, bottom_right)
 	   printf("      href=\"%s\">\n", href)
@@ -135,10 +142,17 @@ make_areas () {
 # Get entities from coords file
 # Usage: entities <coords_file>
 #
-entities ()
+referenced_objects ()
 {
-    gawk '/<entity/ { print gensub(/.*value=\"([^\"]*).*/, "\\1", "g") }' $1
+    gawk '/<refobject/ { print gensub(/.*value=\"([^\"]*).*/, "\\1", "g") }' $1
 }
+
+if [ "x$1" = "x-v" ]; then
+    export objtype=view
+    shift
+else
+    export objtype=table
+fi
 
 thisdir=`basename $0`
 diagram_basename=`basename $1`
@@ -146,8 +160,14 @@ diagram_basename=`basename $1`
 # Get dimensions of image.
 size=`identify -format "%[w]x%[h]" $1.png`
 
+if [ "x$3" = "x" ]; then
+    ref_prefix="entity"
+else
+    ref_prefix="$3"
+fi
+
 (
-  entities $1.coords | entity_refs $2
+  referenced_objects $1.coords | find_refs $2 ${ref_prefix}
   scale_factors ${size} $1.coords
 ) | make_areas $1.coords ${diagram_basename}
 

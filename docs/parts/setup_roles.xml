@@ -1,13 +1,14 @@
-<sect1 id="setup_roles">
-  <title>Integrate And/Or Create Roles</title>
+<chapter id="setup_roles">
+  <title>Integrate And/Or Create Roles (STEP 8)</title>
   <para>
     The demo chooses to use only <literal>Veil2</literal>'s role
     tables for its roles implementation.  This makes things very
-    simple, but may be unhelpful as an example.  The author apologises
+    simple, but may be unhelpful as an example.  The author apologizes
     but there are some things you will have to do for yourselves.
-    Look for  STEP 5 in the file <literal>demo/demo.sql</literal>.
+    Look for  STEP 8 in the file
+    <literal>demo/veil2_demo--&version;.sql</literal>.
   </para>
-  <sect2>
+  <sect1>
     <title>Integrating Existing Roles</title>
     <para>
       If your existing system has roles of some sort that you wish to
@@ -17,7 +18,7 @@
     <para>
       There are essentially three options:
     </para>
-    <sect3>
+    <sect2>
       <title>Link <literal>Veil2</literal> To Your Existing Data</title> 
       <para>
 	This is likely to be a reasonably complex process.  You are
@@ -37,21 +38,12 @@
 	      small.
 	    </para>
 	    <para>
-	      Probably the best way to do this is to add a column to
-	      <literal>veil2.roles</literal> which references your
-	      existing roles table.  Use a foreign key relationship to
-	      ensure that the <literal>Veil2</literal> table is kept
-	      in step with your existing table.  Use the <literal>on
-	      delete cascade</literal> and <literal>on update
-	      cascade</literal> clauses to the foreign key.
-	    </para>
-	    <para>
-	      You will also need an insert trigger on the existing
-	      roles table to populate <literal>veil2.roles</literal>
-	      when new roles are created.  This trigger needs to be
-	      smart enough to create contiguous
-	      <literal>role_id</literal>s and re-use any deleted ones
-	      in order to keep the role bitmaps reasonably small.
+	      You will need to create a table that maps between 
+	      <literal>veil2.roles</literal> and your database's roles
+	      table(s).  Use foreign key relationships and triggers to
+	      ensure that your mapping table is kept in step with your
+	      existing table and the <literal>veil2.roles</literal>
+	      table. 
 	    </para>
 	    <para>
 	      For some examples of how the triggers can be constructed
@@ -68,8 +60,8 @@
 	<literal>Veil2</literal>'s role semantics, this may work.  You
 	will have to do some careful thinking about this.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Make <literal>Veil2</literal>'s Roles Provide Your Role
       Data</title>
       <para>
@@ -80,9 +72,7 @@
       <para>
 	The key to this is to use views and instead-of triggers to
 	make the <literal>Veil2</literal> table function in the same
-	way as your existing table.  You will probably need to add
-	columns to <literal>veil2.roles</literal> and you will need to
-	change many existing foreign key relationships.
+	way as your existing table.
       </para>
       <para>
 	As with the previous option, this will require some serious
@@ -90,14 +80,13 @@
 	the previous option.  Roles and privileges are complex enough
 	without adding an extra level of redirection.
       </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Update Your Application To Use <literal>Veil2</literal>'s Roles</title>
       <para>
 	This is conceptually the simplest approach but the amount of
 	work will very much depend on your existing system and its
-	needs.  Remember: you can add whatever columns you need to
-	<literal>veil2.roles</literal>.
+	needs.
       </para>
       <para>
 	The demo chooses to use <literal>Veil2</literal>'s
@@ -108,12 +97,12 @@
       </para>
       <para>
 	If you are building a new system from scratch, this should be
-	your prefered approach.
+	your preferred approach.
       </para>
-    </sect3>
-  </sect2>
-  <sect2>
-    <title>Create New Roles</title>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Create New Roles and Mappings</title>
     <para>
       If your application has user-level roles (roles that are
       assigned to users), you may be able to re-use them.  You will
@@ -128,32 +117,35 @@
       <literal>veil2.role_privileges</literal>.
     </para>
     <para>
-      You will then need to create role->role mappings, making your
+      You will then need to create role to role mappings, making your
       function-level roles available to your user-level roles.  You
       will do this by creating records in
-      <literal>veil2.role_roles</literal>. 
+      <literal>veil2.role_roles</literal>.
     </para>
     <para>
       As with privileges, you should keep the range of
       <literal>role_ids</literal> as small as possible, allocating them
       contiguously and re-use ids for records that get deleted.
     </para>
-  </sect2>
-  <sect2>
-    <title>In Summary</title>
-    <itemizedlist>
-      <listitem>integrate with any existing roles;</listitem>
-      <listitem>create function-level roles in
-      <literal>
-	<link linkend="entity_role">veil2.roles</link></literal>;</listitem>  
-      <listitem>assign privileges to function-level roles (in
-      <literal>
-	<link linkend="entity_role_privilege">veil2.role_privileges</link></literal>);</listitem> 
-      <listitem>create user-level roles (in
-      <literal>veil2.roles</literal>);</listitem> 
-      <listitem>assign function-level roles to user-level roles (in
-      <literal>
-	<link linkend="entity_role_role">veil2.role_roles</link></literal>).</listitem> 
-    </itemizedlist>
-  </sect2>
-</sect1>
+    <para>
+      Note that if you have decided to use role to role mappings in
+      anything other than the global context you will need to define
+      your mappings in each of those contexts.  Your role names may
+      also need to be customized for those contexts.  This is shown in
+      the demo; look for the text STEP 8.
+    </para>
+  </sect1>
+  <sect1>
+    <title>Refreshing Materialized Views - Do Nothing</title>
+    <para>
+      Any time that role to role or role to privilege mappings are
+      updated, all <link linkend="caches">materialized views and
+      caches</link> must be updated. 
+    </para>
+    <para>
+      Since these mappings are managed exclusively from
+      <literal>Veil2</literal> tables, all the necessary triggers to
+      refresh our materialized views are already in place.
+    </para>
+  </sect1>
+</chapter>

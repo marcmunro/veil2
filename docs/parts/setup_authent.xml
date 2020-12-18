@@ -1,85 +1,61 @@
-<sect1 id="setup_authent">
-  <title>Setting Up Authentication and Session Management</title>
+<chapter id="setup_authent">
+  <title>Setting Up Authentication and Session Management (STEP 3)</title>
   <para>
     <literal>Veil2</literal> provides built-in mechanisms for
     authentication and session management.  You can choose to use
     these as they are, extend them, or replace them entirely.
   </para>
   <para>
-    This section provides an introduction to what is needed,
-    references to more detailed explanations and a final, simple, list
-    of <link linkend="authent_what">actions</link> you need to take or
-    consider.
+    Look for "STEP 3" in the file
+    <literal>veil2_demo--&lt;version&gt;.sql</literal>.
   </para>
-  <para>
-    The demo does very little in performing this step, but you may
-    find some useful hints there.  Look for "STEP 3" in the file
-    <literal>demo/demo.sql</literal>.
-  </para>
-  <sect2 id="authentication">
-    <title>Authentication</title>
+  <sect1>
+    <title>Create Your Authentication Methods</title>
     <para>
-      Authenticating users is hard.  There are many different ways to
-      do it.  <literal>Veil2</literal> provides 2 default
-      password-based mechanisms for authentication, and a mechanism
-      for extensibility.  The built-in methods are:
-      <itemizedlist>
-	<listitem>
-	  <para>
-	    plaintext;
-	  </para>
-	  <para>
-	    This is provided simply for testing.  With plaintext
-	    authorization, a password is provided which is simply
-	    checked against a copy stored in
-	    <link linkend="entity_authentication_detail"><literal>veil2.authentication_details</literal></link>.
-	  </para>
-	  <para>
-	    By default, this authentication mechanism is disabled.  It
-	    is weak and insecure.  DO NOT USE IT.
-	  </para>
-	</listitem>
-	<listitem>
-	  <para>
-	    bcrypt.
-	  </para>
-	  <para>
-	    This is a password-based scheme, but the password is
-	    stored as a bcrypted hash.  Creating this hash is slow,
-	    which means that it is very difficult to determine, by
-	    brute-force, the password that matches the hash.  This
-	    mechanism should be be considered barely adequate from a
-	    security standpoint as it still requires the plaintext
-	    password to be sent to the database for checking.
-	  </para>
-	  <para>
-	    This is good enough for most systems but a long way from
-	    ideal.
-	  </para>
-	</listitem>
-      </itemizedlist>
+      If you need an authentication method other than
+      <literal>bcrypt</literal> you will need to define it as a type
+      and then create authentication functions for it.
     </para>
     <para>
       New authentication methods should be created by creating new
       authentication functions and new records in <link
       linkend="entity_authentication_type"><literal>veil2.authentication_types</literal></link>.
     </para>
-  </sect2>
-  <sect2>
-    <title>Associate Your Users With Their Authentication
-    Contexts</title>
     <para>
-      If your users do not all authenticate in the same context you
-      will need to redefine the <literal><link
-      linkend="view_accessor_contexts">veil2.accessor_contexts</link></literal>
-      view.  This view associates accessors with <link
-      linkend="authentication_context">authentication
-      contexts</link>.  Step 3 in the demo provides a good example of
-      this.
+      New authentication functionality is created by creating new
+      functions with the same signature as <link
+      linkend="func_authenticate_bcrypt"><literal>veil2.authenticate_bcrypt()</literal></link>.
     </para>
-  </sect2>
-  <sect2>
-    <title>Define Your <literal>get_accessor()</literal> Function</title>
+    <para>
+      The <literal>Veil2</literal> demo chooses to use plaintext
+      authentication which is a really terrible idea but makes for an
+      easy implementation.  Don't do this.
+    </para>
+  </sect1>
+  <sect1>
+    <title>Associate Accessors And Authentication Contexts</title>
+    <para>
+      <literal>Veil2</literal> determines the authentication context
+      for an accessor through the <literal><link
+      linkend="view_accessor_contexts">veil2.accessor_contexts</link></literal>
+      view.  Since the actual association between them is provided by
+      your database, you must provide a custom version of this view
+      (called <literal>veil2.my_accessor_contexts</literal>). 
+    </para>
+    <para>
+      To make your version of the view take effect, as described <link
+      linkend="use_func_init">here</link>, use the <literal><link
+      linkend="func_init">veil2.init()</link></literal> function.
+    </para>
+    <para>
+      Note that <literal><link
+      linkend="func_implementation_status">veil2.implementation_status()</link></literal>
+      will also install your user-defined functions and views as it
+      itself calls <literal>veil2.init()</literal>.
+    </para>
+  </sect1>
+  <sect1>
+    <title>Define Your <literal>my_get_accessor()</literal> Function</title>
     <para>
       For user authentication purposes <literal>Veil2</literal> needs
       the <literal>accessor_id</literal> for the <literal><link
@@ -92,11 +68,24 @@
       <literal>accessor_id</literal> for a username.  The
       <literal>
 	<link linkend="func_get_accessor">get_accessor()</link></literal>
-      function is that function. 
+      function is that function.
     </para>
-  </sect2>
-  <sect2 id="session_management">
-    <title>Session Management</title>
+    <para>
+      Your version of this function will be called
+      <literal>veil2.my_get_accessor()</literal>.  As described above
+      you make it current by calling <literal><link
+      linkend="func_init">veil2.init()</link></literal>.
+    </para>
+  </sect1>
+  <sect1 id="session_management">
+    <title>Notes on Session Management</title>
+    <para>
+      If your application requires any special session management
+      functionality, this is the time to create it.  There is little
+      we can say here about what that functionality might be, as it
+      will very much depend on your needs.  This section simply tries
+      to provide some useful background information.
+    </para>
     <para>
       There are 2 distinct types of sessions provided:
       <itemizedlist>
@@ -135,7 +124,7 @@
 	</listitem>
       </itemizedlist>
     </para>
-    <sect3>
+    <sect2>
       <title>Shared-Connection Sessions</title>
       <para>
 	Within a shared connection environment, such as provided by
@@ -169,11 +158,8 @@
 	appendix, which describes the functions, their parameters, and
 	describes error handling.
       </para>
-      <para>
-	
-      </para>
-    </sect3>
-    <sect3>
+    </sect2>
+    <sect2>
       <title>Dedicated Sessions</title>
       <para>
 	If you have users that connect directly to your database,
@@ -181,13 +167,15 @@
 	up as users of dedicated sessions.
       </para>
       <para>
-	This is done by providing the database username to a
-	<literal><link linkedn="entity_accessor">veil2.accessors</link></literal>
+	This is done by recording the database username in the
+	<literal>username</literal> field of the <literal><link
+	linkend="entity_accessor">veil2.accessors</link></literal>
 	record.
       </para>
       <para>
 	To begin a dedicated session after connecting to the database,
-	the user must call <literal>veil2.hello()</literal>, which
+	the user must call <literal><link
+	linkend="func_hello">veil2.hello()</link></literal>, which
 	will return true if <literal>Veil2</literal> has successfully
 	authenticated the user. 
 	<programlisting>
@@ -210,61 +198,16 @@ view session_start as
   )
 select * from session where result = 0;
 	</programlisting>
-	<para>
-	  For an example of this, take a look at the
-	  <literal>Veil2</literal> unit tests.  The database user
-	  <literal>veil2_alice</literal> is set up as a dedicated
-	  session user (as well as a shared session user).
-	</para>
       </para>
-    </sect3>
-  </sect2>
-  <sect2 id="authent_what">
-    <title>In Summary</title>
-    <itemizedlist>
-      <listitem>
-	<para>
-	  For shared-session use, choose an authentication system.
-	  You may need to implement it.  You should disable (in
-	  <literal><link linkend="entity_authentication_type">veil2.authentication_types</link></literal>
-	  the authentication systems you do not want to use. 
-	</para>
-      </listitem>
-      <listitem>
-	<para>
-	  Redefine the <literal><link
-	  linkend="view_accessor_contexts">accessor_contexts</link></literal>
-	  view, if neccessary, to associate users with their <link
-	  linkend="authentication_context">authentication
-	  contexts</link>.
-	</para>
-      </listitem>
-      <listitem>
-	<para>
-	  Implement <literal><link
-	  linkend="func_get_accessor">get_accessor()</link></literal>
-	  to retrieve <literal>accessor_id</literal>s based on
-	  usernames or whatever.
-	</para>
-      </listitem>
-      <listitem>
-	<para>
-	  For shared-session use, figure out how to implement the
-	  shared session management protocol in your application
-	  server(s). 
-	</para>
-      </listitem>
-      <listitem>
-	<para>
-	  For dedicated sessions users, create
-	  <literal>
-	    <link linkend="entity_accessor">veil2.accessors</link></literal>
-	  records.  Maybe create a view that calls
-	  <literal><link linkend="func_hello">veil2.hello()</link></literal>. 
-	</para>
-      </listitem>
-    </itemizedlist>
-  </sect2>
-</sect1>
+      <para>
+	For an example of this, take a look at the
+	<literal>Veil2</literal> unit tests (in file
+	<literal>tests/test_session.sql</literal>).  The database
+	user <literal>veil2_alice</literal> is set up as a dedicated
+	session user (as well as a shared session user).
+      </para>
+    </sect2>
+  </sect1>
+</chapter>
 
 

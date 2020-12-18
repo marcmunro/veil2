@@ -8,12 +8,13 @@
 #
 # Usage:
 #  extract_sql.sh [-d|-D] <docs_dir> <target_dir>
-#
-# This is very tightly bound to Marc's SQL coding style.  It does the
-# job but is pretty fragile.
+#  extract_sql.sh -1 <objtype> <objname> <sourcefile>
 #
 # Extract definitions from sql files to generate inclusions for
 # docbook documentation.
+#
+# This is very tightly bound to Marc's SQL coding style.  It does the
+# job but is pretty fragile.
 #
 
 # Usage:
@@ -33,6 +34,8 @@ extract_definition ()
 	  }
 	  /^create '$1'.*'$2'$/ { start_reading() }
 	  /^create '$1'.*'$2' / { start_reading() }
+	  /^create unlogged '$1'.*'$2'$/ { start_reading() }
+	  /^create unlogged '$1'.*'$2' / { start_reading() }
           /^alter '$1'.*'$2' / { start_reading() }
           /^'$1'.*'$2'[\( ]/ { start_reading() }
           /^materialized '$1'.*'$2' / { start_reading() }
@@ -43,10 +46,14 @@ extract_definition ()
 	      gsub(/>/, "\\&gt;")
 	      print
 	  }
-	  /;/ { 
+	  /;[ \t]*$/ { 
 	      if ("'$1'" == "function") {
 	          # This is terrible code, irretrievably tied to
 		  # Marc''s sql coding style.  Oh well.
+	          if (reading && ($0 ~ / language C/)) {
+		      # The end of a C language function
+		      reading = 0
+		  }
 	          if (($0 ~ /^language/) ||
 		      ($0 ~ /^set /)) {
 	              if (reading) printf("\n")
@@ -54,7 +61,9 @@ extract_definition ()
 		  }
 	      }
 	      else {
-	         if (reading) printf("\n")
+	         if (reading) {
+		     printf("\n")
+		 }
 	      	 reading = 0
 	      }
 	  }
@@ -171,25 +180,40 @@ if [ "x$1" = "x-D" ]; then
     # dependencies file.  This helps us figure out whether the
     # dependencies list is out of date.
     shift
-    find $1 -name '*xml' | xargs grep -l '<?sql-definition' |
+    find $1 -name '*xml' | xargs grep -l '<\?sql-definition' |
 	sort -u | xargs
 elif [ "x$1" = "x-d" ]; then
     # We have been asked to generate the dependencies between our
     # extracted sql definitions and their source files.
     shift
+    version=`cut -d" " -f1 VERSION`
     find $1 -name '*xml' | xargs \
-        gawk '/<?sql-definition/ {printf("'$2'/%s.xml: %s\n", $3, $4)}' |
-	sort -u
-else
-    find $1 -name '*xml' | xargs \
-        gawk '/<?sql-definition/ {print $2, $3, $4}' | sort -u |
-        while read objtype name file; do
-    	echo Creating extract for ${name}...
+        gawk '/<\?sql-definition/ {printf("'$2'/%s.xml: %s\n", $3, $4)}' |
+	sed -e "s/&version_number;/${version}/" | sort -u
+elif [ "x$1" = "x-1" ]; then
+    # We have been asked to extract for a single database object.
+    objtype=$2
+    name=$3
+    file=$4
+    echo Creating extract for ${name}...
     	(
     	    echo "<extract>"
                 extract_definition ${objtype} ${name} ${file}
     	    extract_comments ${objtype} ${name} ${file}
     	    echo "</extract>"
-    	) >$2/${name}.xml
+    	)
+else
+    version=`cut -d" " -f1 VERSION`
+    find $1 -name '*xml' | xargs \
+        gawk '/<?sql-definition/ {print $2, $3, $4}' | 
+	sed -e "s/&version_number;/${version}/" | sort -u |
+        while read objtype name file; do
+    	    echo Creating extract for ${objtype} ${name}...
+    	    (
+    	        echo "<extract>"
+                    extract_definition ${objtype} ${name} ${file}
+    	        extract_comments ${objtype} ${name} ${file}
+    	        echo "</extract>"
+    	    ) >$2/${objtype}_${name}.xml
         done
 fi

@@ -1,4 +1,4 @@
-<sect1 id="why-use-veil2">
+<chapter id="why-use-veil2">
   <title>Why Use <literal>Veil2</literal></title>
   <para>
     A <literal>Veil2</literal> based relational security implementation
@@ -74,4 +74,4 @@
     prevent.  This is simply good practice.  You should not allow
     <literal>Veil2</literal>'s presence to make your developers lazy.
   </para>
-</sect1>
+</chapter>

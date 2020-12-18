@@ -1,5 +1,5 @@
-<sect1 id="secure_tables">
-  <title>Secure Your Tables</title>
+<chapter id="secure_tables">
+  <title>Secure Your Tables (STEP 9)</title>
   <para>
     At last we get to secure something.
   </para>
@@ -10,14 +10,15 @@
     implementation and it shows that the relation has not simply been
     forgotten.  The overhead of doing this is small.
   </para>
-  <sect2>
+  <sect1>
     <title>Doing It</title>
     <para>
       Securing a table is pretty simple.  First you enable row
       level security for that table, and then you define policies on
       the table for select, insert, update and delete.  The following
       is the definition for the select policy on projects from the
-      demo.  See STEP 9 in file <literal>demo/demo.sql</literal>.
+      <literal>veil2_demo</literal> extension.  See STEP 9 in file
+      <literal>demo/veil2_demo--&version;.sql</literal>.
       <programlisting>
 alter table demo.projects enable row level security;
 
@@ -48,10 +49,14 @@ create policy parties_tbl__select
       party that owns the project, but no other parties.
     </para>
     <para>
-      Note that the demo only implements the select policy.
+      Note that <literal>veil2_demo</literal> only implements the
+      select policy.  For more complete policy implementations you can
+      take a look at the <link
+      linkend="veil_minimal_demo"><literal>veil2_minimal_demo</literal></link>
+      extension.
     </para>
-  </sect2>
-  <sect2>
+  </sect1>
+  <sect1>
     <title>The <literal>Veil2</literal> tables</title>
     <para>
       Each <literal>Veil2</literal> table is protected with a select
@@ -66,11 +71,5 @@ create policy parties_tbl__select
       <literal>VEIL2</literal> TABLE WITHOUT FIRST ADDING SUITABLE
       PRIVILEGES AND SECURITY POLICIES.
     </para>
-  </sect2>
-  <sect2>
-    <title>In Summary</title>
-    <para>
-      Create and enable security policies for each user-facing table.
-    </para>
-  </sect2>
-</sect1>
+  </sect1>
+</chapter>

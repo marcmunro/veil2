@@ -20,22 +20,17 @@ Custom docbook stylesheet for html for Veil2 docs.
   <!-- Auto-generation of tables of contents -->
   <xsl:param name="generate.toc">
     set         toc
-    article     toc
+    book     toc,title
+    part     toc,title
   </xsl:param>
   <xsl:param name="toc.max.depth">2</xsl:param>
   <xsl:param name="toc.section.depth">2</xsl:param>
-
-  <!-- Add some sensible header stuff so that things size properly on 
-       small screens.  -->
-  <xsl:template name="system.head.content">
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  </xsl:template>
 
   <!-- Auto-numbering of sections -->
   <xsl:param name="section.autolabel" select="1"/>
   <xsl:param name="section.autolabel.max.depth" select="3"/>
   <xsl:param name="section.label.includes.component.label">1</xsl:param>
-  <xsl:param name="chunk.section.depth" select="1"/>
+  <xsl:param name="chunk.section.depth" select="0"/>
 
   <!-- Easier to read html -->
   <xsl:param name="chunker.output.indent" select="'yes'"/>
@@ -237,12 +232,41 @@ Custom docbook stylesheet for html for Veil2 docs.
   <xsl:template match="processing-instruction('sql-definition')">
     <xsl:variable name="filename">
       <xsl:value-of select="concat('extracts/',
+                                   substring-before(., ' '), 
+			           '_',
 			            substring-before(
                                         substring-after(., ' '), 
                                         ' '),
 				   '.xml')"/>
     </xsl:variable>
     <xsl:apply-templates select="document($filename)/extract/*"/>
+  </xsl:template>
+
+  <xsl:template match="processing-instruction('doxygen-ulink')">
+    <xsl:variable name="type">
+      <xsl:value-of select="substring-before(., ' ')"/>
+    </xsl:variable>
+    <xsl:variable name="name">
+      <xsl:value-of select="substring-before(
+			        substring-after(., ' '),
+				' ')"/>
+    </xsl:variable>
+    <xsl:variable name="content">
+      <xsl:value-of select="substring-after(
+			        substring-after(., ' '),
+				' ')"/>
+    </xsl:variable>
+    <xsl:variable name="anchorfile">
+      <!-- Read the anchorfile -->
+      <xsl:value-of select="document(concat('anchors/', $type, '_',
+	                                     $name, '.anchor'))"/>
+    </xsl:variable>
+    <!-- Create the link to the anchor -->
+    <a class="ulink"
+       target="_top"
+       href="{concat('doxygen/html/', $anchorfile)}">
+      <xsl:value-of select="$content"/>
+    </a>
   </xsl:template>
 
 

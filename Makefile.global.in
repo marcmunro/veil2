@@ -5,17 +5,17 @@
 # 
 #       Copyright (c) 2020 Marc Munro
 #       Author:  Marc Munro
-# 	License: GLP V3
+# 	License: GPL V3
 #  
 #  ----------
 #
 
 # Version information
 PACKAGE_NAME=		@PACKAGE_NAME@
+VEIL_VERSION=		@PACKAGE_VERSION@
 VERSION=		@PACKAGE_VERSION@
 MAJOR_VERSION=		@MAJOR_VERSION@
 MINOR_VERSION=		@MINOR_VERSION@
-TARNAME=		@PACKAGE_TARNAME@__@MAJOR_VERSION@_@MINOR_VERSION@
 
 
 XSLTPROC = @XSLTPROC@

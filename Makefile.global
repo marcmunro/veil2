@@ -5,17 +5,17 @@
 # 
 #       Copyright (c) 2020 Marc Munro
 #       Author:  Marc Munro
-# 	License: GLP V3
+# 	License: GPL V3
 #  
 #  ----------
 #
 
 # Version information
 PACKAGE_NAME=		veil2
-VERSION=		0.9 (beta)
+VEIL_VERSION=		0.9.1 (beta)
+VERSION=		0.9.1 (beta)
 MAJOR_VERSION=		0
 MINOR_VERSION=		9
-TARNAME=		veil2__0_9
 
 
 XSLTPROC = xsltproc

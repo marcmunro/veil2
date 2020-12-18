@@ -1,5 +1,5 @@
-<sect1 id="secure_views">
-  <title>Secure Your Views</title>
+<chapter id="secure_views">
+  <title>Secure Your Views (STEP 10)</title>
   <para>
     Just as with tables, user-facing views should be secured.  You can
     do this either explicitly, by adding privilege testing functions to
@@ -9,12 +9,10 @@
     which owns the tables as views are processed with the access
     rights of their owners.
   </para>
-  <sect2>
-    <title>Doing It</title>
-    <para>
-      This is best explained by example.  Here is an example from the
-      demo:
-      <programlisting>
+  <para>
+    This is best explained by example.  Here is an example from the
+    demo:
+    <programlisting>
 create or replace
 view party_roles (
     party_id,
@@ -40,28 +38,20 @@ select ar.accessor_id, r.role_name,
  where veil2.i_have_global_priv(20)
     or veil2.i_have_priv_in_scope(20, 3, context_id)
     or veil2.i_have_priv_in_scope(20, 4, context_id);
-      </programlisting>
-    </para>
-    <para>
-      Note that if the view is updatable you will also need to build
-      instead-of triggers or some equivalent, that take into account
-      update, insert and delete privileges.  One wrinkle with
-      updatable views is that they should not allow modifications of
-      rows that they would not be allowed to see, so the select
-      privilege must usually be explicitly tested in addition to the
-      select, insert or update privilege.
-    </para>
-    <para>
-      Views do provide some interesting possibilities though.  One is
-      to use the privilege testing functions on specific columns to
-      make access controls even more fine-grained.
-    </para>
-  </sect2>
-  <sect2>
-    <title>In Summary</title>
-    <para>
-      Add privilege testing functions to each user-facing view
-      definition.
-    </para>
-  </sect2>
-</sect1>
+    </programlisting>
+  </para>
+  <para>
+    Note that if the view is updatable you will also need to build
+    instead-of triggers or some equivalent, that take into account
+    update, insert and delete privileges.  One wrinkle with updatable
+    views is that they should not allow modifications of rows that
+    they would not be allowed to see, so the select privilege must
+    usually be explicitly tested in addition to the select, insert or
+    update privilege.
+  </para>
+  <para>
+    Views do provide some interesting possibilities though.  One is to
+    use the privilege testing functions on specific columns to make
+    access controls even more fine-grained.
+  </para>
+</chapter>

@@ -1,118 +1,26 @@
--- Set up a test schema
-
-\echo ...creating test users...
-create user veil2_nopriv with login;
-create user veil2_alice with login password 'xyzzy';
-create user veil2_bob with login password 'xyzzy';
+/* ----------
+ * setup.sql
+ *
+ *      Set up the unit test data for running unit tests.
+ *
+ *      Copyright (c) 2020 Marc Munro
+ *      Author:  Marc Munro
+ *	License: GPL V3
+ *
+ * ----------
+ */
 
 create role db_accessor;
+create user veil2_alice password 'xyzzy';
+create role veil2_bob;
 grant db_accessor to veil2_alice;
 grant veil_user to veil2_alice;
 grant db_accessor to veil2_bob;
 grant veil_user to veil2_bob;
 
-\echo ...creating test schema...
-create schema test;
-grant usage on schema test to public;
-
-\echo ......creating test functions...
-
-create or replace
-function test.expect(cmd text, n integer, msg text)
-  returns bool as
-$$
-declare
-  res integer;
-  rc integer;
-begin
-  execute cmd into res;
-  get diagnostics rc = row_count;
-  if rc = 1 then
-    if (res != n) or ((res is null) != (n is null)) then
-      raise exception '%  Expecting %, got %', msg, n, res;
-    end if;
-  else
-    raise exception '%  Expecting %, got no rows', msg, n;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(text, integer, text) to public;
-
-create or replace
-function test.expect(cmd text, n bool, msg text)
-  returns bool as
-$$
-declare
-  res bool;
-  rc integer;
-begin
-  execute cmd into res;
-  get diagnostics rc = row_count;
-  if rc = 1 then
-    if (res != n) or ((res is null) != (n is null)) then
-      raise exception '%  Expecting %, got %', msg, n, res;
-    end if;
-  else
-    raise exception '%  Expecting %, got no rows', msg, n;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(text, bool, text) to public;
-
-create or replace
-function test.expect(val integer, n integer, msg text)
-  returns bool as
-$$
-begin
-  if (val != n) or ((val is null) != (n is null)) then
-    raise exception '%  Expecting %, got %', msg, n, val;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(integer, integer, text) to public;
-
-create or replace
-function test.expect(val bool, n bool, msg text)
-  returns bool as
-$$
-begin
-  if (val != n) or ((val is null) != (n is null)) then
-    raise exception '%  Expecting %, got %', msg, n, val;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(bool, bool, text) to public;
-
-create or replace
-function test.expect(val text, n text, msg text)
-  returns bool as
-$$
-begin
-  if (val != n) or ((val is null) != (n is null)) then
-    raise exception '%  Expecting %, got %', msg, n, val;
-  end if;
-  return false;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-grant execute on function test.expect(text, text, text) to public;
-
 
 -- Create some context types
-\echo ......creating corp context type...
+--\echo ......creating corp context type...
 insert into veil2.scope_types
        (scope_type_id, scope_type_name, description)
 values (-3, 'corp', 'corporate context'),
@@ -121,14 +29,14 @@ values (-3, 'corp', 'corporate context'),
        (-6, 'proj', 'project context');
 
 -- and a test corp
-\echo ......creating test corp...
+--\echo ......creating test corp...
 insert into veil2.scopes
        (scope_type_id, scope_id)
 values (-3, -3),
        (-3, -31);
 
 -- and some test divisions
-\echo ......creating test corp...
+--\echo ......creating test corp...
 insert into veil2.scopes
        (scope_type_id, scope_id)
 values (-4, -41),
@@ -137,7 +45,7 @@ values (-4, -41),
        (-4, -44);
 
 -- and some test departments
-\echo ......creating test corp...
+--\echo ......creating test corp...
 insert into veil2.scopes
        (scope_type_id, scope_id)
 values (-5, -51),
@@ -146,7 +54,7 @@ values (-5, -51),
        (-5, -54);
 
 -- and some some projects
-\echo ......creating test corp...
+--\echo ......creating test corp...
 insert into veil2.scopes
        (scope_type_id, scope_id)
 values (-6, -61),
@@ -174,12 +82,12 @@ create table projects (
   project_name	  text
 );
 
--- Redefine scope_promotions view to show above org hierarchy and
+-- create my_superior_scopes view to show above org hierarchy and
 -- proj->dept mapping
 create or replace
-view veil2.scope_promotions (
+view veil2.my_superior_scopes (
   scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id
+  superior_scope_type_id, superior_scope_id
 ) as
 select s1.scope_type_id, oh.org_id,
        s2.scope_type_id, oh.superior_org_id
@@ -193,19 +101,21 @@ select -6, p.project_id,
        -5, p.dept_id
   from projects p;
 
+select veil2.install_user_views();
+
 create trigger org_hierarchy__aiudt
   after insert or update or delete or truncate
   on org_hierarchy
   for each statement
-  execute procedure veil2.refresh_scope_promotions();
+  execute procedure veil2.refresh_scopes_matviews();
 
 create trigger projects__aiudt
   after insert or update or delete or truncate
   on projects
   for each statement
-  execute procedure veil2.refresh_scope_promotions();
+  execute procedure veil2.refresh_scopes_matviews();
 
-\echo ...creating test parties...
+--\echo ...creating test parties...
 insert into veil2.accessors
        (accessor_id, username)
 values (-1, null),
@@ -227,20 +137,21 @@ values (-6, 'alice'),
        (-1, 'fred');
 
 create or replace
-function veil2.get_accessor(
+function veil2.my_get_accessor(
     username in text,
     context_type_id in integer,
     context_id in integer)
   returns integer as
 $$
 declare
-  result integer;
+  _result integer;
+  _username text := username;
 begin
   select accessor_id
-    into result
+    into _result
     from persons p
-   where p.username = get_accessor.username;
-   return result;
+   where p.username = _username;
+   return _result;
 end;
 $$
 language plpgsql security definer stable leakproof;
@@ -295,14 +206,9 @@ select accessor_id, role_id,
        -6, project_id
   from project_assignments;
 
-create trigger project_assignments__aiudt
-  after insert or update or delete or truncate
-  on project_assignments
-  for each statement
-  execute procedure veil2.refresh_accessor_privs();
 
 
-\echo ......creating test roles...
+--\echo ......creating test roles...
 -- Insert some more test roles
 insert into veil2.roles
       (role_id, role_name)
@@ -324,7 +230,7 @@ select m.id + r.role_id, r.role_name
     union
     select 7, 'test_super') r;  -- test_super will be almost superuser
 
-\echo ......creating test context_roles...
+--\echo ......creating test context_roles...
 insert into veil2.context_roles
       (role_id, role_name, context_type_id, context_id)
 select role_id, 'corp_' || role_name, -3, -3
@@ -394,7 +300,7 @@ select p.role_id, a.role_id, -3, -3
  where p.role_name = 'test_role_6'
    and a.role_name = 'test_role_5';
 
-\echo ...creating test privileges...
+--\echo ...creating test privileges...
 insert into veil2.privileges
       (privilege_id, privilege_name)
 with m(id) as (select max(privilege_id) from veil2.privileges)
@@ -463,7 +369,7 @@ select 7, p.privilege_id
      where rp.role_id = 7
        and rp.privilege_id = p.privilege_id);
 
-\echo ...setting access rights for parties...
+--\echo ...setting access rights for parties...
 -- party -1 has no rights
 -- party -2 has connect and global superuser
 -- party -3 has connect and test_role_5 in corp context -3

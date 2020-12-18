@@ -1,35 +1,51 @@
-<sect1 id="scope_promotions">
-  <title>Create Scope Promotions</title>
+<chapter id="superior_scopes">
+  <title>Define Your Scope Hierarchy (STEP 6)</title>
+  <para>
+    In your database, you are likely to have a hierarchy of <link
+    linkend="scopes">scopes</link>.  What this means is that one scope
+    is contained within another.  For instance a project scope might be
+    contained within the department scope of the department that owns
+    the project.  This hierarchy is used in 2 ways:
+    <itemizedlist>
+      <listitem>
+	for <link linkend="scope-promotion">scope
+	promotions</link>;
+      </listitem>
+      <listitem>
+	for determining access rights to data within inferior scopes.
+      </listitem>
+    </itemizedlist>
+  </para>
   <para>
     Determining which scopes may be promoted to which other scopes is
     done through the <literal><link
-    linkend="view_scope_promotions">scope_promotions</link></literal>
+    linkend="view_superior_scopes">superior_scopes</link></literal>
     view.  This identifies, for each scope, what directly superior
     scopes exist.  It does not identify global scope, and does not
     require a recursive query to identify grandparent scopes etc.
-    These are handled elsewhere.  Also, there is no need for this view
-    to be materialized for performance, as this is a base view, used
-    by <literal>Veil2</literal> to populate more sophisticated,
-    recursively defined and materialized views.
+    These are handled elsewhere.
   </para>
-  <sect2>
-    <title>Creating The View</title>
+  <sect1>
+    <title>Customizing The <literal>superior_scopes</literal>View</title>
     <para>
-      You will need to completely redefine the <literal><link
-      linkend="view_scope_promotions">scope_promotions</link></literal>
-      view.  The provided <literal>Veil2</literal> version of this
+      You will need to create a custom version of the <literal><link
+      linkend="view_superior_scopes">superior_scopes</link></literal>
+      view.  This is done (as described <link
+      linkend="custom-views">here</link>) by creating an over-riding
+      custom view named <literal>my_superior_scopes</literal>.
+      The provided <literal>Veil2</literal> base version of this
       view is simply a placeholder.
     </para>
     <para>
-      You will define this view as the union of a number of queries.
-      Each query will represent a single type of scope promotion.  The
-      following example is from the demo.  See STEP 8 in the file
-      <literal>demo/demo.sql</literal>.
+      You will define this view as the union of a number of selects.
+      Each select will represent a single type of superior scope.  The
+      following example is from the demo.  See STEP 6 in the file
+      <literal>demo/veil2_demo--&version;.sql</literal>.
       <programlisting>
 create or replace
-view veil2.scope_promotions (
+view veil2.my_superior_scopes (
   scope_type_id, scope_id,
-  promoted_scope_type_id, promoted_scope_id
+  superior_scope_type_id, superior_scope_id
 ) as
 select 4, party_id,  -- Promote org to corp scope
        3, corp_id
@@ -38,19 +54,20 @@ select 4, party_id,  -- Promote org to corp scope
 union all
 select 4, party_id,  -- Promotion of org to higher org
        4, org_id
-  from demo.parties_tbl -- No join needed to scopes as party_id == scope_id
+  from demo.parties_tbl
  where party_type_id = 2
+   and party_id != org_id  -- Cannot promote to self
 union all
 select 5, s.scope_id,   -- Project to corp promotions
        3, p.corp_id
   from demo.projects p
- inner join veil2.scopes s
+ inner join veil2.scope_links s
     on s.project_id = p.project_id
 union all
 select 5, s.scope_id,   -- Project to org promotions
        4, p.org_id
   from demo.projects p
- inner join veil2.scopes s
+ inner join veil2.scope_links s
     on s.project_id = p.project_id;
       </programlisting>
     </para>
@@ -63,37 +80,40 @@ select 5, s.scope_id,   -- Project to org promotions
       second query in the above union.
     </para>
     <para>
-      Once you have redefined the view, you should refresh the
+      Any time you redefine this view you should call 
       <literal><link
-      linkend="view_all_scope_promotions">veil2.all_scope_promotions</link></literal>
-      materialized view.  This should automatically refresh when
-      <literal>scopes</literal> records are updated, but not when
-      <literal>scope_promotions</literal>, the view on which it is
-      based, is redefined.
+      linkend="func_init">veil2.init()</link></literal> to
+      update the base definition and refresh the materialized views
+      that depend on it.
     </para>
-  </sect2>
-  <sect2>
-    <title>In Summary</title>
+  </sect1>
+  <sect1>
+    <title>Handle Refresh of Materialized Views</title>
     <para>
-      <itemizedlist>
-	<listitem>
-	  <para>
-	    For each type of context promotion that is possible,
-	    including those within a hierarchy of the same scope types
-	    (eg the org hierarchy from the demo), create a query that
-	    is part of a union that defines the <literal><link
-	    linkend="view_scope_promotions">scope_promotions</link></literal>
-	    view.
-	  </para>
-	</listitem>
-	<listitem>
-	  <para>
-	    Refresh the <literal><link
-	    linkend="view_all_scope_promotions">veil2.all_scope_promotions</link></literal>
-	    materialized view.
-	  </para>
-	</listitem>
-      </itemizedlist>
+      If your scope hierarchy changes in a way that could affect the
+      privileges that might be assigned to accessors, you should
+      refresh all <link linkend="caches">materialized views and
+      caches</link>.  Since determining what sort of updates might
+      require this is somewhat complicated, we recommend that
+      <emphasis>any</emphasis> change that would result in the <link
+      linkend="view_superior_scopes"><literal>veil2.superior_scopes</literal></link>
+      view returning different data should result in a full refresh of
+      all materialized views.  For this you should call the trigger
+      function <link
+      linkend="func_refresh_scopes_matviews"><literal>veil2.refresh_scopes_matviews()</literal></link>.
     </para>
-  </sect2>
-</sect1>
+    <para>
+      It is assumed that such changes will be rare but if this is not
+      the case, and you encounter a performance penalty from having
+      the <link
+      linkend="entity_accessor_privileges_cache"><literal>veil2.accessor_privileges_cache</literal></link>
+      cache table repeatedly cleared, you may be able to, instead of
+      truncating that table, selectively delete records based on the
+      session contexts that are affected by your changes.  Our
+      recommendation is not to tackle this until you know that you
+      have a problem.  By then you should have enough local
+      <literal>Veil2</literal> expertise that you can easily figure
+      out what to do.
+    </para>
+  </sect1>
+</chapter>

@@ -1,29 +1,29 @@
-<sect1 id="setup">
+<chapter id="setup">
   <title>Setting Up A <literal>Veil2</literal> Virtual Private
   Database - Overview</title>
   <para>
     Setting up your database to use <literal>Veil2</literal> is a
     fairly straightforward process, and can be done in the following
-    stages:
+    steps:
     <orderedlist>
-      <listitem><link linkend="installation">install</link> the
-      <literal>Veil2</literal> scripts;</listitem> 
+      <listitem><link linkend="installation">install the</link>
+      <literal> Veil2</literal> extension;</listitem> 
       <listitem>identify and define your <link
       linkend="setup_scope_types">scope types</link>;</listitem>
       <listitem>choose and implement your <link
       linkend="authentication">authentication</link> and <link
       linkend="session_management">session management</link>
       mechanisms;</listitem>
-      <listitem>create an initial set of <link
-      linkend="setup_privs">privileges;</link></listitem> 
-      <listitem>integrate and/or create <link
-      linkend="setup_roles">roles</link>;</listitem>
       <listitem>create foreign key links for <link
       linkend="setup_accessors"><literal>veil2.accessors</literal></link>;</listitem> 
       <listitem><link linkend="link_scopes">link your scopes and
       security contexts</link>;</listitem>
-      <listitem>create <link linkend="scope_promotions">scope
-      promotion</link> mechanisms;</listitem>
+      <listitem>define your <link linkend="superior_scopes">scope
+      hierarchy</link>;</listitem>
+      <listitem>create an initial set of <link
+      linkend="setup_privs">privileges;</link></listitem> 
+      <listitem>integrate and/or create <link
+      linkend="setup_roles">roles</link>;</listitem>
       <listitem><link linkend="secure_tables">secure your
       tables</link>;</listitem> 
       <listitem><link linkend="secure_views">secure your
@@ -36,9 +36,35 @@
       <listitem>test</listitem>
     </orderedlist>
   </para>
-  <para>
-    Installation is covered in <link linkend="installation">this
-    previous section</link>.  The rest follows.
-  </para>
-  
-</sect1>
+  <sect1>
+    <title>Checking The State of Your Implementation</title>
+    <para>
+      There are a significant number of steps needed to complete your
+      implementation.  To help you track your progress, and determine
+      which steps have still to be taken, you can call the function
+      <literal><link
+		   linkend="func_implementation_status">veil2.implementation_status()</link></literal>.
+      This function returns records for each step that is still to
+      be performed.  Note that it cannot tell you anything about the
+      <emphasis>correctness</emphasis> of your implementation; it just
+      helps you to identify what steps you have not yet begun.
+    </para>
+    <para>
+      Here is an example of its output, from the demo before step 7 is
+      performed:
+      <programlisting>
+	                  implementation_status                  
+---------------------------------------------------------
+ You need to create user scopes (step 7)
+ You need to redefine the superior_scopes view (step 8)
+ The following tables have no security policies:
+     - demo.projects
+     - demo.project_assignments
+     - demo.party_types
+     - demo.parties_tbl
+(8 rows)
+
+      </programlisting>
+    </para>
+  </sect1>
+</chapter>

@@ -504,11 +504,15 @@ zipfile:
 # appends the html documentation to it.
 do_zipfile: mostly_clean deps docs
 	git archive --format zip --prefix=$(ZIPFILE_BASENAME)/ \
-	    --output $(ZIPFILENAME) master \
-	git zip -rv $(ZIPFILENAME) html
+	    --output $(ZIPFILENAME) master
+	-mkdir $(ZIPFILE_BASENAME) 2>/dev/null
+	-(cd $(ZIPFILE_BASENAME); ln -s ../html .)
+	zip -rv $(ZIPFILENAME) $(ZIPFILE_BASENAME)/html
+	rm $(ZIPFILE_BASENAME)/html
+	rmdir $(ZIPFILE_BASENAME)
 
-TARGET_FILES += $(ZIPFILENAME)
-
+TARGET_FILES += $(ZIPFILENAME) $(ZIPFILE_BASENAME)/html
+TARGET_DIRS += $(ZIPFILE_BASENAME)
 
 ##
 # clean targets

@@ -15,7 +15,7 @@
     }
   },
   "provides": {
-    "pgbitmap": {
+    "veil2": {
       "file": "veil2--0.9.1.sql",
       "version": "0.9.1",
       "docfile": "docs/README.md"

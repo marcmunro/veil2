@@ -5,7 +5,7 @@
   "version": "0.9.1",
   "maintainer": ["Marc Munro <marc@bloodnok.com>"],
   "license": {
-    "BSD": "http://www.opensource.org/licenses/bsd-license.html"
+    "GPL": "https://www.gnu.org/licenses/gpl-3.0.en.html"
   },
   "prereqs": {
     "runtime": {

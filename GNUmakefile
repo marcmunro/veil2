@@ -385,6 +385,12 @@ demo: db
 	@echo "Loading demo (with test)..."
 	@psql -X -v test=$(TEST) -f demo/demo.sql \
 		-d $(TESTDB) 2>&1 | bin/pgtest_parser
+
+perf: demo
+	@psql -X -v test=$(TEST) -f demo/demo_bulk_data.sql \
+	    -d	$(TESTDB) -f demo/perf.sql -f demo/perf2.sql
+
+
 mindemo: db
 	@echo "Loading minimal demo (with test)..."
 	@psql -X -v test=$(TEST) -f demo/minimal_demo.sql \
@@ -484,7 +490,7 @@ zipfile:
 	    bin/makefilter 1>&2
 	@$(MAKE) do_zipfile
 
-do_zipfile: mostly_clean deps
+do_zipfile: mostly_clean deps docs
 	git archive --format zip --prefix=$(ZIPFILE_BASENAME)/ \
 	    --output $(ZIPFILENAME) master
 

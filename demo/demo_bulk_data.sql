@@ -1,5 +1,7 @@
 \echo Creating  dataset for performance testing...
 
+grant execute on function veil2.result_counts() to demouser;
+
 begin; 
 \echo ...parties...
 -- Close to 10,000 parties

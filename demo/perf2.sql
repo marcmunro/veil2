@@ -16,7 +16,6 @@ create policy y__select on z for select using (veil2.i_have_global_priv(4));
 grant select on x to demouser;
 grant select on y to demouser;
 grant select on z to demouser;
-grant execute on function veil2.result_counts() to demouser;
 
 \timing
 

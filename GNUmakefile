@@ -500,9 +500,12 @@ zipfile:
 	    bin/makefilter 1>&2
 	@$(MAKE) do_zipfile
 
+# This creates the zipfile using the approved pgxn method and then
+# appends the html documentation to it.
 do_zipfile: mostly_clean deps docs
 	git archive --format zip --prefix=$(ZIPFILE_BASENAME)/ \
-	    --output $(ZIPFILENAME) master
+	    --output $(ZIPFILENAME) master \
+	git zip -rv $(ZIPFILENAME) html
 
 TARGET_FILES += $(ZIPFILENAME)
 

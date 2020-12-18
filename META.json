@@ -1,8 +1,7 @@
 {
   "name": "veil2",
   "abstract": "An extension for implementing relational security systems.",
-  "description": "Provides a framework for implementing Virtual
-Private Databases using a relational security model.",
+  "description": "Provides a framework for implementing Virtual Private Databases using a relational security model.",
   "version": "0.9.1",
   "maintainer": ["Marc Munro <marc@bloodnok.com>"],
   "license": {

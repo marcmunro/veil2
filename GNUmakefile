@@ -454,6 +454,16 @@ check_origin:
 	      err=2; }; \
 	done; exit $$err
 
+# Check that we have pushed the latest changes
+check_remote:
+	@err=0; \
+	 for origin in $(GIT_UPSTREAM); do \
+	    git remote show $${origin} 2>/dev/null | \
+	    grep "^ *master.*up to date" >/dev/null || \
+	    { echo "    UNPUSHED UPDATES FOR $${origin}"; \
+	      err=2; }; \
+	done; exit $$err
+
 # Check that this version appears in the change history
 check_history:
 	@grep "<entry>$(VERSION_NUMBER)" \
@@ -485,7 +495,7 @@ check_demo_control:
 zipfile: 
 	@$(MAKE) -k --no-print-directory \
 	    check_branch check_meta check_tag check_docs \
-	    check_commit check_origin check_history \
+	    check_commit check_remote check_history \
 	    check_control check_demo_control 2>&1 | \
 	    bin/makefilter 1>&2
 	@$(MAKE) do_zipfile

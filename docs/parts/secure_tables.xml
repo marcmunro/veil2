@@ -17,7 +17,7 @@
       level security for that table, and then you define policies on
       the table for select, insert, update and delete.  The following
       is the definition for the select policy on projects from the
-      demo.  See STEP 9 in file
+      <literal>veil2_demo</literal> extension.  See STEP 9 in file
       <literal>demo/veil2_demo--&version;.sql</literal>.
       <programlisting>
 alter table demo.projects enable row level security;
@@ -49,7 +49,11 @@ create policy parties_tbl__select
       party that owns the project, but no other parties.
     </para>
     <para>
-      Note that the demo only implements the select policy.
+      Note that <literal>veil2_demo</literal> only implements the
+      select policy.  For more complete policy implementations you can
+      take a look at the <link
+      linkend="veil_minimal_demo"><literal>veil2_minimal_demo</literal></link>
+      extension.
     </para>
   </sect1>
   <sect1>

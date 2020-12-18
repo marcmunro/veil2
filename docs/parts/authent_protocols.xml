@@ -214,14 +214,14 @@
 	<title>Re-open Connection</title>
 	<para>
 	  As long as a session has not timed-out, new connections can
-	  be opened using it.  These re-opened connections do not
-	  require re-authentication using the original credentials.
-	  Instead we use a proof that the session is being used by the
-	  original authenticator.  This may be computationally cheaper
-	  than providing the original credentials, but more
-	  importantly it means that those credentials are not being
-	  continually re-transmitted.  And to prevent replay attacks we
-	  use a <ulink
+	  be opened using that session.  These re-opened connections
+	  do not require re-authentication using the original
+	  credentials.  Instead we use a proof that the session is
+	  being used by the original authenticator.  This may be
+	  computationally cheaper than providing the original
+	  credentials, but more importantly it means that those
+	  credentials are not being continually re-transmitted.  To
+	  prevent replay attacks we use a <ulink
 	  url="https://en.wikipedia.org/wiki/Cryptographic_nonce">nonce</ulink>
 	  as part of the authentication token.  Any attempt to re-use
 	  a nonce will be noticed and the connection attempt will
@@ -276,9 +276,9 @@
 	      <para>
 		This is an integer identifying the type of context
 		that the user is authenticating within.  See the <link
-		linkend="veil_demo">demo</link> for how this is used
-		to enable different users to belong to different
-		companies.
+		linkend="veil_demo"><literal>veil2_demo</literal></link>
+		for how this is used to enable different users to
+		belong to different companies.
 	      </para>
 	      <para>
 		This will match a scope_type as defined in
@@ -294,9 +294,9 @@
 		This is an integer identifying, in combination with
 		<literal>context_type_id</literal>, the context that
 		the user is authenticating within.  See the <link
-		linkend="veil_demo">demo</link> for how this is used
-		to enable different users to belong to different
-		companies.
+		linkend="veil_demo"><literal>veil2_demo</literal></link>
+		for how this is used to enable different users to
+		belong to different companies.
 	      </para>
 	    </listitem>
 	  </itemizedlist>
@@ -473,7 +473,7 @@
 		  </listitem>
 		  <listitem>
 		    <para>
-		      <literal>NONCEFAIL.</literal>;
+		      <literal>NONCEFAIL</literal>.
 		    </para>
 		    <para>
 		      This should not be possible in this, the
@@ -640,7 +640,7 @@
       linkend="shared_session_management">shared sessions</link>.
       With a dedicated database connection you are the sole user of
       the connection, and there is no need for a complex
-      create-open-close protocol dance, to prevent your credentials
+      create-open-close protocol dance to prevent your credentials
       from being used by someone else.
     </para>
     <para>
@@ -664,15 +664,29 @@ select veil2.hello();
     </para>
   </sect1>
   <sect1>
+    <title>Resetting Cached Privileges</title>
+    <para>
+      Sometimes you may need changes to a user's privileges to happen
+      immediately, rather than the next time that they connect.  In
+      this case, your session should call <link
+      linkend="func_reload_connection_privs()"><literal>veil2.reload_connection_privs()</literal></link>.
+    </para>
+    <para>
+      This will rarely be needed in a shared session environment as
+      connections are usually only held for as long as it takes to
+      perform a query, and the next connection will reload the
+      privileges anyway.
+    </para>
+    <para>
+      You would use Postgres' <literal>listen/notify</literal>
+      mechanism to inform the affected session that a reload was needed.
+    </para>
+  </sect1>
+  <sect1>
     <title>Custom Database Sessions</title>
     <para>
       If the built-in session management does not work for you, you
-      can always build your own.  The critical functions that your
-      session management functions need to call are
-      <link
-	  linkend="func_load_session_privs"><literal>veil2.load_session_privs()</literal></link>
-      and <link
-      linkend="func_reset_session"><literal>veil2.reset_session()</literal></link>.
+      can always build your own. 
     </para>
   </sect1>
 </appendix>

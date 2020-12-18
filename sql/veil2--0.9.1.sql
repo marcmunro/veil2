@@ -1273,7 +1273,7 @@ select accessor_id, role_id,
 
 comment on view veil2.all_accessor_roles is
 'Provides all of an accessor''s explicit role assignments, ie it does
-not provide the personal_scope role.
+not provide the personal context role.
 
 If you have any explicitly assigned roles that are not granted through
 the veil2.accessor_role table, you must provide your own definition of
@@ -1314,7 +1314,7 @@ select accessor_id, 2, 2, accessor_id
 
 comment on view veil2.all_accessor_roles_plus is
 'As all_accessor_roles but also providing the implicitly assigned
-personal_scope role for each accessor. ';
+personal context role for each accessor. ';
 
 revoke all on veil2.all_accessor_roles_plus from public;
 grant select on veil2.all_accessor_roles_plus to veil_user;
@@ -1482,6 +1482,7 @@ $$
 language plpgsql security definer volatile;
 
 revoke all on function veil2.session_context() from public;
+grant execute on function veil2.session_context() to veil_user;
 
 comment on function veil2.session_context() is
 'Safe function to return the context of the current session.  If no
@@ -2545,7 +2546,7 @@ is an appropriate authentication.';
 
 \echo ...creating veil2 session functions...
 
-\echo ...ok()...
+\echo ...session_ready()...
 create or replace
 function veil2.session_ready() returns boolean
      as '$libdir/veil2', 'veil2_session_ready'
@@ -3179,6 +3180,7 @@ $$
 language plpgsql security definer volatile;
 
 revoke all on function veil2.session_privileges() from public;
+grant execute on function veil2.session_privileges() to veil_user;
 
 comment on function veil2.session_privileges() is
 'Safe function to return a user-readable version of the privileges for
@@ -3363,7 +3365,6 @@ function veil2.load_connection_privs(
   returns boolean as
 $$
 begin
-  raise warning 'XXXXXXXXXXXXXXXXXX LOADING PRIVS XXXXXXXXXXXXXXXXXXXXXXX';
   if not veil2.load_cached_privs() then
     if not veil2.load_session_privs() then
       return false;
@@ -3721,7 +3722,7 @@ begin
   else
     raise warning 'SECURITY: become_user() (%): invalid context for %'
     	          ' - %,%', label, accessor_id, context_type_id, context_id;
-    return 'INCNTX';
+    return 'AUTHFAIL';
   end if;
 end;
 $$
@@ -3733,7 +3734,7 @@ revoke all on function veil2.check_accessor_context(
 comment on function veil2.check_accessor_context(
     text, integer, integer, integer) is
 'Determine whether the geven accessor has rights to the given session
-context.  Return ''INCNTX'' if not.';
+context.  Return ''AUTHFAIL'' if not.';
 
 
 \echo ......become_accessor()...
@@ -4142,7 +4143,7 @@ insert into veil2.roles
        (role_id, role_name, implicit, immutable, description)
 values (0, 'connect', false, true, 'Allow minimal access to the system.'),
        (1, 'superuser', false, true, 'An all-encompassing role.'),
-       (2, 'personal_context', true, true,
+       (2, 'personal context', true, true,
         'An implicitly assigned, to all users, role that allows ' ||
 	'access to a user''s own information');
 

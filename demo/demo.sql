@@ -13,7 +13,6 @@
 create extension if not exists veil2_demo cascade;
 
 select * from veil2.implementation_status();
-select veil2.init();
 
 \ir demo_test.sql
 

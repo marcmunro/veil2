@@ -9,7 +9,7 @@
   </para>
   <para>
     It links to your database through functions, triggers and foreign
-    keys, and provides fast tested mechanisms to identify, load and
+    keys, and provides fast, tested mechanisms to identify, load and
     test a user's privileges in various scopes.
   </para>
   <para>
@@ -39,12 +39,12 @@
       <listitem>comments in the database objects;</listitem>
       <listitem>comments in the <literal>Veil2</literal> creation
       scripts;</listitem> 
-      <listitem>the (commented) <literal>Veil2</literal> demo.</listitem>
+      <listitem>the (commented) <literal>Veil2</literal> demos.</listitem>
     </itemizedlist>
   </para>
   <para>
     You should familiarize yourself with at least this document and
-    the <link linkend="veil_demo">demo</link> before starting out on
+    the <link linkend="veil_demos">demos</link> before starting out on
     your implementation.
   </para>
   <sect1>
@@ -131,7 +131,8 @@
 	As stated above, the set of privileges in each scope is stored
 	in a bitmap, and tests for the presence of a privilege in the
 	bitmap are very fast.  The security rules for a relation will
-	typically be defined something like this (from the demo):
+	typically be defined something like this (from the
+	<literal>veil2_demo</literal> extension):
 	<programlisting id="table_security_example">
 alter table demo.projects enable row level security;
 
@@ -303,7 +304,7 @@ create policy projects__select
 	you will need to provide a link from your existing tables back
 	to <literal>Veil2</literal>.  This will be handled with
 	triggers and FK-constraints.  There are examples of how this
-	may be done in the demo.
+	may be done in the demos.
       </para>
     </sect2>
     <sect2>
@@ -313,7 +314,7 @@ create policy projects__select
 	<literal>Veil2</literal> accessors (users who access your
 	database), and any existing credentials must be migrated.
 	Again this can be handled by triggers and FK-constraints, and
-	the demo provides examples.
+	the demos provide examples.
       </para>
     </sect2>
     <sect2>

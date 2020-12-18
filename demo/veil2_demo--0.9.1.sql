@@ -1,5 +1,5 @@
 /* ----------
- * demo--0.9.1.sql
+ * veil2_demo--0.9.1.sql
  *
  *      Create the veil2 demo database,
  *

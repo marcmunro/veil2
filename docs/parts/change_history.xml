@@ -40,8 +40,8 @@
 	</row>
 	<row>
 	  <entry>0.9.1 (beta)</entry>
-	  <entry>?????</entry>
-	  <entry>202011??     ????????????????????????????????</entry>
+	  <entry>v0.9.1</entry>
+	  <entry>202012??     ????????????????????????????????</entry>
 	  <entry>
 	    <para>
 	      Major update to:
@@ -54,6 +54,12 @@
 		  test and improve performance;
 		</listitem>
 		<listitem>
+		  improve testing, and fix bugs;
+		</listitem>
+		<listitem>
+		  add the minimal demo;
+		</listitem>
+		<listitem>
 		  improve documentation.
 		</listitem>
 	      </itemizedlist>
@@ -63,4 +69,9 @@
       </tbody>
     </tgroup>
   </table>
+  <para>
+    <literal>Veil2</literal> will be upgraded to production status
+    once it has proved to be effective and free of serious
+    deficiencies.
+  </para>
 </appendix>

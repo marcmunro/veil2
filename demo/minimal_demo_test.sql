@@ -35,14 +35,14 @@ select is(cnt, 0,
           'Unconnected user sees no post_types')
   from (select count(*)::integer as cnt from post_types) x;
 
-/*
 select is(cnt, 0,
           'Unconnected user sees no posts')
   from (select count(*)::integer as cnt from posts) x;
-*/
+
 select * from finish();
 rollback;
 
+\echo
 \echo admin/superuser user tests...
 begin;
 select plan(12);
@@ -119,9 +119,10 @@ select is(cnt, 1, 'Carol can see authentication details record')
 select * from finish();
 rollback;
 
-\echo ordinary user tests...
+\echo
+\echo friends tests...
 begin;
-select plan(3);
+select plan(27);
 
 with login as
   (
@@ -133,7 +134,7 @@ select is(success, true,
           'Bob successfully logs in (with only connect role')
   from login;
 
-select is(cnt, 1,   -- Bob only sees himself
+select is(cnt, 2,   -- Bob only sees himself and his friends
           'Bob sees only himself')
   from (select count(*)::integer as cnt from users) x;
 
@@ -221,6 +222,105 @@ with ins as
 select is(cnt, 1,
           'Eve can follow Bob')
   from (select count(*)::integer as cnt from ins) x;
+
+-- Eve creates some posts
+with ins as
+  (
+    insert
+      into posts
+           (post_type_id, poster, post)
+    values (11, 5, 'Public post'),
+	   (12, 5, 'Private post'),
+    	   (13, 5, 'For friends')
+    returning post_id
+  )
+select is(cnt, 3, 'Eve successfully posts')
+  from (select count(*)::integer as cnt from ins) x;
+
+-- Eve can see all her posts
+select is(cnt, 3, 'Eve sees all her posts')
+  from (select count(*)::integer as cnt from posts where poster = 5) x;
+
+with login as
+  (
+    select *
+      from veil2.create_session('Alice', 'bcrypt') c
+     cross join veil2.open_connection(c.session_id, 1, 'passwd_alice')
+  )
+select is(success, true,
+          'Alice successfully logs in again')
+  from login;
+
+-- Alice sees all of Eve's posts
+select is(cnt, 3, 'Alice sees all Eve''s posts')
+  from (select count(*)::integer as cnt from posts where poster = 5) x;
+
+with login as
+  (
+    select *
+      from veil2.create_session('Bob', 'bcrypt') c
+     cross join veil2.open_connection(c.session_id, 1, 'wibble')
+  )
+select is(success, true,
+          'Bob logs in again')
+  from login;
+
+-- What friend stuff can Bob see?
+select is(cnt, 1, 'Bob sees all Eve''s public posts')
+  from (select count(*)::integer as cnt
+          from posts where poster = 5 and post_type_id = 11) x;
+
+select is(cnt, 1, 'Bob sees all Eve''s friend posts')
+  from (select count(*)::integer as cnt
+          from posts where poster = 5 and post_type_id = 12) x;
+
+select is(cnt, 0, 'Bob does not see Eve''s private posts')
+  from (select count(*)::integer as cnt
+          from posts where poster = 5 and post_type_id = 13) x;
+
+select is(cnt, 4, 'Bob only sees followers records about himself')
+  from (select count(*)::integer as cnt
+          from followers) x;
+
+select is(cnt, 3, 'Bob only sees himself and his friends and followers')
+  from (select count(*)::integer as cnt
+          from users) x;
+
+with login as
+  (
+    select *
+      from veil2.create_session('Carol', 'bcrypt') c
+     cross join veil2.open_connection(c.session_id, 1, 'passwd_carol')
+  )
+select is(success, true,
+          'Carol logs in')
+  from login;
+
+with login as
+  (
+    select *
+      from veil2.create_session('Carol', 'bcrypt') c
+     cross join veil2.open_connection(c.session_id, 1, 'passwd_carol')
+  )
+select is(success, true,
+          'Carol logs in')
+  from login;
+
+select is(cnt, 7, 'Carol sees everyone')
+  from (select count(*)::integer as cnt
+          from users) x;
+
+select is(cnt, 3, 'Carol sees all of Eve''s posts')
+  from (select count(*)::integer as cnt
+          from posts where poster = 5) x;
+
+select throws_like($$
+    insert
+      into posts
+           (post_type_id, poster, post)
+    values (12, 5, 'Private post spoofed by Carol')$$,
+    '%new row violates row-level sec%',
+    'Carol cannot spoof a post from someone else');
 
 
 select * from finish();

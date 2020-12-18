@@ -71,7 +71,7 @@
     </para>
     <para>
       Note that for every scope, there is an equivalent <link
-      linkend="security-contexts">context</link>.
+      linkend="security-contexts">security context</link>.
     </para>
     <para>
       A scope may apply to an organization, a department, a project,

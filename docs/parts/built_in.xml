@@ -84,9 +84,9 @@
 	<literal>my_</literal>.
       </para>
       <para>
-	The following example is from the <literal>Veil2</literal>
-	demo and redefines the <literal>veil2.get_accessor()</literal>
-	function:
+	The following example is from the
+	<literal>veil2_demo</literal> extension and redefines the
+	<literal>veil2.get_accessor()</literal> function:
 	<programlisting>
 create or replace
 function veil2.my_get_accessor(
@@ -605,7 +605,7 @@ select * from veil2.create_session(&lt;username&gt;, 4, 44);
 	relies on the <literal>veil2.my_get_accessor()</literal>
 	function to return an accessor_id for a given combination of
 	username and authentication context.  For an example of this,
-	you should look at the <literal>Veil2</literal> demo
+	you should look at the <literal>veil2_demo</literal>
 	(following the text <quote><literal>STEP 3</literal></quote>
 	in the file <literal>veil2_demo--&lt;version&gt;.sql</literal>.
       </para>

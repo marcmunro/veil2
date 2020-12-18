@@ -20,7 +20,7 @@
 <!ENTITY built_in        	SYSTEM "parts/built_in.xml">
 <!ENTITY how_difficult 	       	SYSTEM "parts/how_difficult.xml">
 <!ENTITY get_started 	       	SYSTEM "parts/get_started.xml">
-<!ENTITY veil_demo 	       	SYSTEM "parts/veil_demo.xml">
+<!ENTITY veil_demo	       	SYSTEM "parts/veil_demo.xml">
 <!ENTITY veil_setup 	       	SYSTEM "parts/veil_setup.xml">
 <!ENTITY setup_authent         	SYSTEM "parts/setup_authent.xml">
 <!ENTITY setup_contexts        	SYSTEM "parts/setup_contexts.xml">
@@ -105,7 +105,7 @@
     <para>
       If you would like to see what <literal>Veil2</literal> can do,
       you can install and explore the <link
-      linkend="veil_demo"><literal>Veil2</literal> demo</link>. 
+      linkend="veil_demos"><literal>Veil2</literal> demos</link>. 
     </para>
   </preface>
 

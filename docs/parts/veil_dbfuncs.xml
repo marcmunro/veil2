@@ -78,9 +78,6 @@
 
     <itemizedlist>
       <listitem>
-	<link linkend="func_ok">ok()</link>;
-      </listitem>
-      <listitem>
 	<link linkend="func_session_ready">session_ready()</link>;
       </listitem>
       <listitem>
@@ -422,14 +419,6 @@
 
   <sect2 id="session_functions">
     <title>Session Functions</title>
-    <sect3 id="func_ok">
-      <title><literal>session_ready()</literal></title>
-      <?sql-definition function veil2.session_ready sql/veil2--&version_number;.sql ?>
-      <para>
-	The Doxygen documentation for this can be found
-	<?doxygen-ulink function veil2_session_ready here?>.
-      </para>
-    </sect3>
     <sect3 id="func_session_ready">
       <title><literal>session_ready()</literal></title>
       <?sql-definition function veil2.session_ready sql/veil2--&version_number;.sql ?>

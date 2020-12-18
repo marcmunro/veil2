@@ -160,7 +160,8 @@
 	rather than explicitly granted.
       </para>
       <para>
-	This is demonstrated in the Veil2 minimal demo.  TODO REF!
+	This is demonstrated in the <link
+	linkend="veil_minimal_demo">Veil2 minimal demo</link>.
       </para>
     </sect2>
   </sect1>

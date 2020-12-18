@@ -118,7 +118,7 @@ include $(DEPS)
 # PGXS stuff
 #
 
-EXTENSION = veil2 veil2_demo
+EXTENSION = veil2 veil2_demo veil2_minimal_demo
 MODULE_big = veil2
 MODULEDIR = veil2
 VEIL2_LIB = $(addsuffix $(DLSUFFIX), veil2)
@@ -381,6 +381,14 @@ unit: db
 	@psql -X -v test=$(TEST) -f test/test_veil2.sql \
 		-d $(TESTDB) 2>&1 | bin/pgtest_parser
 
+demo: db
+	@echo "Loading demo (with test)..."
+	@psql -X -v test=$(TEST) -f demo/demo.sql \
+		-d $(TESTDB) 2>&1 | bin/pgtest_parser
+mindemo: db
+	@echo "Loading minimal demo (with test)..."
+	@psql -X -v test=$(TEST) -f demo/minimal_demo.sql \
+		-d $(TESTDB) 2>&1 | bin/pgtest_parser
 
 ##
 # release targets

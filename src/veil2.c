@@ -30,6 +30,7 @@ PG_MODULE_MAGIC;
 PG_FUNCTION_INFO_V1(veil2_session_ready); 
 PG_FUNCTION_INFO_V1(veil2_reset_session);
 PG_FUNCTION_INFO_V1(veil2_reset_session_privs);
+PG_FUNCTION_INFO_V1(veil2_session_context); 
 PG_FUNCTION_INFO_V1(veil2_true);
 PG_FUNCTION_INFO_V1(veil2_i_have_global_priv);
 PG_FUNCTION_INFO_V1(veil2_i_have_personal_priv);
@@ -41,6 +42,7 @@ PG_FUNCTION_INFO_V1(veil2_i_have_priv_in_scope_or_superior_or_global);
 PG_FUNCTION_INFO_V1(veil2_result_counts);
 PG_FUNCTION_INFO_V1(veil2_docpath);
 PG_FUNCTION_INFO_V1(veil2_datapath);
+PG_FUNCTION_INFO_V1(veil2_version);
 
 
 /**
@@ -90,6 +92,21 @@ typedef struct {
 } SessionPrivs;
 
 
+typedef struct {
+	bool  loaded;
+	int	  accessor_id;
+	int64 session_id;
+	int	  login_context_type_id;
+	int	  login_context_id;
+	int	  session_context_type_id;
+	int	  session_context_id;
+	int	  mapping_context_type_id;
+	int	  mapping_context_id;
+	/** parent_session_id is nullable.  To indicate null we set it to
+	 * the same value as session_id.  */
+	int64 parent_session_id;
+} SessionContext;
+
 /** 
  * The SessionPrivs object for this session. 
  */
@@ -99,6 +116,9 @@ static SessionPrivs *session_privs = NULL;
  * Whether we have loaded our session's ContextPrivs into session memory.
  */
 static bool session_privs_loaded = false;
+
+static SessionContext session_context = {false, 0, 0, 0, 0,
+										 0, 0, 0, 0};
 
 
 /**
@@ -483,22 +503,6 @@ truncate_temp_tables(bool clear_context)
 	}
 }
 
-
-/** 
- * <code>veil2_session_ready() returns bool</code>
- * Predicate to indicate whether the current session has been properly
- * initialized by veil2_reset_session().  It tests the static variable
- * ::session_ready.
- * 
- * @return <code>bool</code> true if this session has been set up.
- */
-Datum
-veil2_session_ready(PG_FUNCTION_ARGS)
-{
-    PG_RETURN_BOOL(session_ready);
-}
-
-
 /**
  * Does the database donkey-work for veil2_reset_session().
  * 
@@ -569,7 +573,24 @@ do_reset_session(bool clear_context)
 							   "VPD security!")));
 		}
 	}
+	session_context.loaded = false;
 }
+
+
+/** 
+ * <code>veil2_session_ready() returns bool</code>
+ * Predicate to indicate whether the current session has been properly
+ * initialized by veil2_reset_session().  It tests the static variable
+ * ::session_ready.
+ * 
+ * @return <code>bool</code> true if this session has been set up.
+ */
+Datum
+veil2_session_ready(PG_FUNCTION_ARGS)
+{
+    PG_RETURN_BOOL(session_ready);
+}
+
 
 /** 
  * <code>veil2.reset_session() returns void</code> 
@@ -617,6 +638,77 @@ veil2_reset_session_privs(PG_FUNCTION_ARGS)
  	PG_RETURN_VOID();
 }
 
+/** 
+ * <code>veil2.session_context(...</code> 
+ *
+ * Optionally set, and return the session context.
+ *
+ * @return record
+ */
+Datum
+veil2_session_context(PG_FUNCTION_ARGS)
+{
+	Datum results[9];
+	static bool allnulls[9] = {true, true, true, true,
+							   true, true, true, true, true};
+	static bool nonulls[9] = {false, false, false, false,
+							  false, false, false, false, false};
+	bool *nulls;
+	TupleDesc tuple_desc;
+	HeapTuple tuple;
+	if (get_call_result_type(fcinfo, NULL,
+							 &tuple_desc) != TYPEFUNC_COMPOSITE) {
+		ereport(ERROR,
+                    (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+                     errmsg("function returning record called in context "
+                            "that cannot accept type record")));
+	}
+	tuple_desc = BlessTupleDesc(tuple_desc);
+	
+	if (!PG_ARGISNULL(0)) {
+		session_context.accessor_id = PG_GETARG_INT32(0);
+		session_context.session_id = PG_GETARG_INT64(1);
+		session_context.login_context_type_id = PG_GETARG_INT32(2);
+		session_context.login_context_id = PG_GETARG_INT32(3);
+		session_context.session_context_type_id = PG_GETARG_INT32(4);
+		session_context.session_context_id = PG_GETARG_INT32(5);
+		session_context.mapping_context_type_id = PG_GETARG_INT32(6);
+		session_context.mapping_context_id = PG_GETARG_INT32(7);
+		if (!PG_ARGISNULL(8)) {
+			session_context.parent_session_id = session_context.session_id;
+		}
+		else {
+			session_context.parent_session_id = PG_GETARG_INT64(8);
+		}
+		session_context.loaded = true;
+	}
+	if (session_context.loaded) {
+		results[0] = Int32GetDatum(session_context.accessor_id);
+		results[1] = Int64GetDatum(session_context.session_id);
+		results[2] = Int32GetDatum(session_context.login_context_type_id);
+		results[3] = Int32GetDatum(session_context.login_context_id);
+		results[4] = Int32GetDatum(session_context.session_context_type_id);
+		results[5] = Int32GetDatum(session_context.session_context_id);
+		results[6] = Int32GetDatum(session_context.mapping_context_type_id);
+		results[7] = Int32GetDatum(session_context.mapping_context_id);
+		nulls = nonulls;
+		if (session_context.parent_session_id ==
+			session_context.session_id)
+		{
+			nulls[8] = true;
+		}
+		else {
+			results[8] = Int64GetDatum(session_context.parent_session_id);
+			nulls[8] = false;
+		}
+	}
+	else {
+		nulls = allnulls;
+	}
+	tuple = heap_form_tuple(tuple_desc, results, nulls);
+	return HeapTupleGetDatum(tuple);
+}
+	
 /** 
  * <code>veil2.true(params) returns bool</code> 
  *
@@ -1037,6 +1129,18 @@ Datum
 veil2_datapath(PG_FUNCTION_ARGS)
 {
 	PG_RETURN_TEXT_P(textfromstr(DATA_PATH));
+}
+
+
+/** 
+ * Provide the veil2 version as a string.
+ * 
+ * @return Text value containing the version.
+ */
+Datum
+veil2_version(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_TEXT_P(textfromstr(VEIL2_VERSION));
 }
 
 

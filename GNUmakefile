@@ -387,8 +387,9 @@ demo: db
 		-d $(TESTDB) 2>&1 | bin/pgtest_parser
 
 perf: demo
-	@psql -X -v test=$(TEST) -f demo/demo_bulk_data.sql \
-	    -d	$(TESTDB) -f demo/perf.sql -f demo/perf2.sql
+	@psql -X -v test=$(TEST) -d $(TESTDB) -f demo/demo_bulk_data.sql 
+	@psql -X -v test=$(TEST) -d $(TESTDB) -f demo/perf.sql
+	@psql -X -v test=$(TEST) -d $(TESTDB) -f demo/perf2.sql
 
 
 mindemo: db

@@ -5,6 +5,11 @@
 \pset tuples_only true
 \pset pager off
 
+-- This makes the test easier to implement.
+grant execute on function veil2.session_context(
+    integer, bigint, integer, integer,
+    integer, integer, integer, integer, bigint) to demouser;
+
 create extension if not exists pgtap;
 
 \c vpd demouser

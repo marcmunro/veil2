@@ -853,7 +853,7 @@ both their login context and their requested session context.';
 
 
 \echo ......accessor_privileges_cache
-create table veil2.accessor_privileges_cache (
+create unlogged table veil2.accessor_privileges_cache (
   accessor_id			integer not null,
   login_context_type_id		integer not null,
   login_context_id		integer not null,
@@ -1444,7 +1444,7 @@ grant select on veil2.privilege_assignments to veil_user;
 
 \echo ......session_context()...
 create or replace
-function veil2.session_context2(
+function veil2.session_context(
     accessor_id             in out integer default null,
     session_id              in out bigint  default null,
     login_context_type_id   in out integer default null,
@@ -1457,47 +1457,13 @@ function veil2.session_context2(
      as '$libdir/veil2', 'veil2_session_context'
      language C volatile;
 
+revoke all on function veil2.session_context(
+    integer, bigint, integer, integer,
+    integer, integer, integer, integer, bigint) from public;
 
-create or replace
-function veil2.session_context(
-    accessor_id out integer,
-    session_id out bigint,
-    login_context_type_id out integer,
-    login_context_id out integer,
-    session_context_type_id out integer,
-    session_context_id out integer,
-    mapping_context_type_id out integer,
-    mapping_context_id out integer
-    )
-  returns record as
-$$
-begin
-  select sc.accessor_id, sc.session_id,
-         sc.login_context_type_id, sc.login_context_id,
-         sc.session_context_type_id, sc.session_context_id,
-         sc.mapping_context_type_id, sc.mapping_context_id
-    into session_context.accessor_id, session_context.session_id,
-         session_context.login_context_type_id,
-	   session_context.login_context_id,
-         session_context.session_context_type_id,
-	   session_context.session_context_id,
-         session_context.mapping_context_type_id,
-	   session_context.mapping_context_id
-    from veil2_session_context sc;
-exception
-  when sqlstate '42P01' then
-    -- Temp table does not exist
-    return;
-  when others then
-    raise;
-end;
-$$
-language plpgsql security definer volatile;
-
-revoke all on function veil2.session_context() from public;
-grant execute on function veil2.session_context() to veil_user;
-
-comment on function veil2.session_context() is
+comment on function veil2.session_context(
+    integer, bigint, integer, integer,
+    integer, integer, integer, integer, bigint) is
 'Safe function to return the context of the current session.  If no
 session exists, returns nulls.  We use a function in this context
 because we cannot create a view on the veil2_session_context table as it
@@ -1507,17 +1473,22 @@ is a temporary table and does not always exist.';
 \echo ......session_assignment_contexts...
 create or replace
 view veil2.session_assignment_contexts as
+with session_context as
+  (
+    select *
+      from veil2.session_context()
+  )
 select login_context_type_id as context_type_id,
        login_context_id as context_id
-  from veil2.session_context() sc
+  from session_context sc
  union
 select session_context_type_id as context_type_id,
        session_context_id as context_id
-  from veil2.session_context() sc
+  from session_context sc
  union
 select ass.superior_scope_type_id,
        ass.superior_scope_id
-  from veil2.session_context() sc
+  from session_context sc
  inner join veil2.all_superior_scopes ass
     on (    ass.scope_type_id = sc.login_context_type_id
         and ass.scope_id = sc.login_context_id)
@@ -1526,7 +1497,7 @@ select ass.superior_scope_type_id,
  union
 select ass.scope_type_id,
        ass.scope_id
-  from veil2.session_context() sc
+  from session_context sc
  inner join veil2.all_superior_scopes ass
     on (    ass.superior_scope_type_id = sc.login_context_type_id
         and ass.superior_scope_id = sc.login_context_id)
@@ -1536,7 +1507,7 @@ select ass.scope_type_id,
 select 1, 0
  union
 select 2, accessor_id
-  from veil2.session_context();
+  from session_context;
 
 comment on view veil2.session_assignment_contexts is
 'Provides the set of security contexts which are valid for role
@@ -2666,35 +2637,28 @@ function veil2.new_session_context(
     mapping_context_id out integer)
   returns record as
 $$
-  insert
-    into veil2_session_context
-        (accessor_id, session_id,
-	 login_context_type_id, login_context_id,
-	 session_context_type_id, session_context_id,
-	 mapping_context_type_id, mapping_context_id,
-	 parent_session_id)
-  select new_session_context.accessor_id,  nextval('veil2.session_id_seq'),
-	 new_session_context.login_context_type_id,
-	   new_session_context.login_context_id,
-	 new_session_context.session_context_type_id,
-	   new_session_context.session_context_id,
-         case when sp.parameter_value = '1' then 1
-         else coalesce(asp.superior_scope_type_id,
-	               new_session_context.session_context_type_id) end,
-           case when sp.parameter_value = '1' then 0
-           else coalesce(asp.superior_scope_id,
-	                 new_session_context.session_context_id) end,
-	 new_session_context.parent_session_id
+  select currval('veil2.session_id_seq'), sc.mapping_context_type_id,
+  	 sc.mapping_context_id
     from veil2.system_parameters sp
     left outer join veil2.all_superior_scopes asp
       on asp.scope_type_id = new_session_context.session_context_type_id
      and asp.scope_id = new_session_context.session_context_id
      and asp.superior_scope_type_id = sp.parameter_value::integer
      and asp.is_type_promotion
-   where sp.parameter_name = 'mapping context target scope type'
-  returning veil2_session_context.session_id,
-            veil2_session_context.mapping_context_type_id,
-            veil2_session_context.mapping_context_id;
+   cross join lateral veil2.session_context(
+             accessor_id, nextval('veil2.session_id_seq'),
+   	     new_session_context.login_context_type_id,
+   	       new_session_context.login_context_id,
+   	     new_session_context.session_context_type_id,
+   	       new_session_context.session_context_id,
+	     case when sp.parameter_value = '1' then 1
+             else coalesce(asp.superior_scope_type_id,
+	                   new_session_context.session_context_type_id) end,
+               case when sp.parameter_value = '1' then 0
+               else coalesce(asp.superior_scope_id,
+	                     new_session_context.session_context_id) end,
+	      parent_session_id) sc
+   where sp.parameter_name = 'mapping context target scope type';
 $$
 language sql security definer volatile;
 
@@ -3232,6 +3196,8 @@ create or replace
 function veil2.load_session_privs()
   returns boolean as
 $$
+declare
+  rec record;
 begin
   insert
     into veil2_session_privileges
@@ -3297,7 +3263,7 @@ begin
 	 roles, privs)
   select apc.scope_type_id, apc.scope_id,
   	 apc.roles, apc.privs
-    from veil2_session_context sc
+    from veil2.session_context() sc
    inner join veil2.accessor_privileges_cache apc
       on apc.accessor_id = sc.accessor_id
      and apc.login_context_type_id = sc.login_context_type_id
@@ -3403,6 +3369,27 @@ end;
 $$
 language plpgsql security definer volatile;
 
+\echo ......load_connection_privs()...
+create or replace
+function veil2.load_connection_privs2(
+    parent_session_id bigint)
+  returns boolean as
+$$
+begin
+  if not veil2.load_cached_privs() then
+    if not veil2.load_session_privs() then
+      return false;
+    end if;
+  end if;
+
+  if parent_session_id is not null then
+    perform veil2.filter_session_privs(parent_session_id);
+  end if;
+  return true;
+end;
+$$
+language plpgsql security definer volatile;
+
 revoke all on function veil2.load_connection_privs(bigint) from public;
 
 comment on function veil2.load_connection_privs(bigint) is
@@ -3415,21 +3402,15 @@ create or replace
 function veil2.reload_session_context(_session_id bigint)
   returns bigint as
 $$
-    insert
-      into veil2_session_context
-          (accessor_id, session_id,
-           login_context_type_id, login_context_id,
-           session_context_type_id, session_context_id,
-  	   mapping_context_type_id, mapping_context_id,
-	   parent_session_id)
-    select s.accessor_id, s.session_id,
-           s.login_context_type_id, s.login_context_id,
-           s.session_context_type_id, s.session_context_id,
-           s.mapping_context_type_id, s.mapping_context_id,
-	   s.parent_session_id
-      from veil2.sessions s
-     where s.session_id = _session_id
-    returning parent_session_id;
+  select s.parent_session_id
+    from veil2.sessions s
+   cross join lateral veil2.session_context(
+              s.accessor_id, s.session_id,
+              s.login_context_type_id, s.login_context_id,
+              s.session_context_type_id, s.session_context_id,
+              s.mapping_context_type_id, s.mapping_context_id,
+              s.parent_session_id)
+   where s.session_id = _session_id;
 $$
 language sql security definer volatile;
 
@@ -3450,8 +3431,8 @@ begin
   perform veil2.reset_session_privs();
   select parent_session_id
     into _parent_session_id
-    from veil2_session_context;
-  return veil2.load_connection_privs(_parent_session_id);
+    from veil2.session_context();
+  return veil2.load_connection_privs2(_parent_session_id);
 end;
 $$
 language plpgsql security definer volatile;
@@ -3783,7 +3764,7 @@ declare
 begin
   select sc.session_id, sc.accessor_id
     into orig_session_id, orig_accessor_id
-    from veil2_session_context sc;
+    from veil2.session_context() sc;
 
   -- We must check that login context is valid for both the current
   -- and target accessors.
@@ -3846,7 +3827,6 @@ begin
                      _accessor_id;
       errmsg := 'AUTHFAIL';
     else
-      raise warning 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
       perform veil2.filter_session_privs(orig_session_id);
     end if;
   end if;
@@ -4230,7 +4210,7 @@ delete
         login_context_id) = (
     select accessor_id, login_context_type_id,
         login_context_id
-      from veil2_session_context);
+      from veil2.session_context());
 insert
   into veil2.accessor_privileges_cache
       (accessor_id, login_context_type_id,
@@ -4245,7 +4225,7 @@ select sc.accessor_id, sc.login_context_type_id,
        sc.mapping_context_id, sp.scope_type_id,
        sp.scope_id, sp.roles,
        sp.privs
-  from veil2_session_context sc
+  from veil2.session_context() sc
  cross join veil2_session_privileges sp;
 $$
 language 'sql' security definer volatile;

@@ -61,7 +61,6 @@ select * from veil2.init();
   \ir test_authent.sql
 \endif
 
-
 \if :test_sessions
   \ir test_sessions.sql
 \endif

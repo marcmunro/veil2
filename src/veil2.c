@@ -469,12 +469,6 @@ create_temp_tables()
 		0, NULL, NULL,
 		false, NULL,
 		NULL, NULL);
-	(void) veil2_query(
-		"create temporary table veil2_session_context"
-		"    of veil2.session_context_t",
-		0, NULL, NULL,
-		false, NULL,
-		NULL, NULL);
 }
 
 
@@ -495,11 +489,7 @@ truncate_temp_tables(bool clear_context)
 		false, 	NULL,
 		NULL, NULL);
 	if (clear_context) {
-		(void) veil2_query(
-			"delete from veil2_session_context",
-			0, NULL, NULL,
-			false, 	NULL,
-			NULL, NULL);
+	    session_context.loaded = false;
 	}
 }
 
@@ -520,7 +510,6 @@ do_reset_session(bool clear_context)
 		"       sum(case when c.relacl is null then 1 else 0 end)"
 		"  from pg_catalog.pg_class c"
 		" where c.relname in ('veil2_session_privileges',"
-		"                     'veil2_session_context',"
 		"                     'veil2_ancestor_privileges')"
 		"   and c.relkind = 'r'"
 		"   and c.relpersistence = 't'"
@@ -548,10 +537,10 @@ do_reset_session(bool clear_context)
 			create_temp_tables();
 			session_ready = true;
 		}
-		else if (my_tup.f1 == 3) {
+		else if (my_tup.f1 == 2) {
 			/* We have the expected temp tables - check that access
 			 * is properly limited. */
-			if (my_tup.f2 != 3) {
+			if (my_tup.f2 != 2) {
 				ereport(ERROR,
 						(errcode(ERRCODE_INTERNAL_ERROR),
 						 errmsg("Unexpected access to temp tables in "
@@ -573,7 +562,6 @@ do_reset_session(bool clear_context)
 							   "VPD security!")));
 		}
 	}
-	session_context.loaded = false;
 }
 
 
@@ -674,7 +662,7 @@ veil2_session_context(PG_FUNCTION_ARGS)
 		session_context.session_context_id = PG_GETARG_INT32(5);
 		session_context.mapping_context_type_id = PG_GETARG_INT32(6);
 		session_context.mapping_context_id = PG_GETARG_INT32(7);
-		if (!PG_ARGISNULL(8)) {
+		if (PG_ARGISNULL(8)) {
 			session_context.parent_session_id = session_context.session_id;
 		}
 		else {

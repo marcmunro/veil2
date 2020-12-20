@@ -12,10 +12,19 @@
 -- TODO:
 -- test privileges after close
 
+create view apc as select * from veil2.accessor_privileges_cache;
+grant select on veil2.accessor_privileges_cache to public;
+grant select on apc to public;
+
 
 begin;
 select '...test veil2 session handling...';
 
+create view session_context as
+select * from veil2.session_context()
+ where accessor_id is not null;
+
+grant select on session_context to public;
 
 select plan(107);
 
@@ -29,14 +38,18 @@ select null
   from reset_session
  where result != 1;
 
-select is((select count(*) from veil2_session_context)::integer,
-           0, 'Expecting empty veil2_session_context table');
+select is((select count(*) from session_context)::integer,
+           0, 'Expecting empty session_context');
 
-insert into veil2_session_context(accessor_id) values (1);
+--insert into veil2_session_context(accessor_id) values (1);
+
+select *
+  from veil2.session_context(1, 2, 3, 4, 5, 6, 7, 8)
+ where accessor_id != 1;
 
 -- Ensure that we can see the inserted session record.
-select is((select count(*) from veil2_session_context)::integer,
-          1, 'Expecting 1 veil2_session_context row');
+select is((select count(*) from session_context)::integer,
+          1, 'Expecting session_context record');
 
 -- Test that resetting session causes veil2_session_context record to be
 -- removed.
@@ -49,8 +62,8 @@ select null
  where result != 1;
 
 -- Create_session
-select is((select count(*) from veil2_session_context)::integer,
-           0, 'Expecting empty veil2_session_context table(2)');
+select is((select count(*) from session_context)::integer,
+           0, 'Expecting empty session_context table(2)');
 
 with session as (select * from veil2.create_session('gerry', 'wibble'))
 select is ((session_id is not null),
@@ -59,24 +72,17 @@ select is ((session_id is not null),
 union all
 select is((session_token is not null),
           true, 'create_session() returns session token')
-  from session;
-
--- Check that veil2_session_context are defined but there is no actual
--- session created following the above create_session() call.
-with sessions as
-  (
-    select sp.session_id as reported_session_id, s.session_id
-      from veil2_session_context sp
-     left outer join veil2.sessions s
-        on s.session_id = sp.session_id
-  )
-select is((reported_session_id is null), false,
-          'There should be a reported session_id')
-  from sessions
- union all
-select is((session_id is null), true,
-          'There should not be an actual session')
-  from sessions;
+  from session
+union all
+select is(cnt, 0, 'No session context created for invalid session')
+  from (select count(*)::integer cnt
+          from session_context) x
+union all
+select is(cnt, 0, 'No session record created for invalid session')
+  from (select count(*)::integer cnt
+          from session s
+	 inner join veil2.sessions vs
+	    on vs.session_id = s.session_id) x;
 
 -- Invalid authentication type with valid accessor yields
 -- a session that will subsequently not open
@@ -92,7 +98,7 @@ select is((session.session_token is not null),
 with sessions as
   (
     select sp.session_id as reported_session_id, s.session_id
-      from veil2_session_context sp
+      from session_context sp
      left outer join veil2.sessions s
         on s.session_id = sp.session_id
   )
@@ -108,7 +114,7 @@ select is((session_id is null), false,
 -- opening that session.  Given that the authentication method was
 -- invalid, we expect appropriate failures.
 create temporary table prev_context as
-select * from veil2_session_context;
+select * from session_context;
 
 with session as
   (
@@ -138,6 +144,7 @@ select is(errmsg, 'AUTHFAIL',
        	  'Authentication message should be AUTHFAIL(2)')
   from session;
 
+
 -- Allow plaintext authentication.
 update veil2.authentication_types
    set enabled = true
@@ -160,12 +167,13 @@ select is(errmsg is null, true,
        	  'There should be no error message')
   from session;
 
+
 -- Record the first session_id in a temp table.
 create temporary table mytest_session (
   session_id1 integer, session_id2 integer);
 
 insert into mytest_session (session_id1)
-select session_id from veil2_session_context;
+select session_id from session_context;
 
 -- Disconnect and reconnect the above session.  Since this is a
 -- continuation of an existing session, we use the continuation
@@ -209,7 +217,7 @@ select is(errmsg is null, true,
 
 -- Record the second session_id.
 update mytest_session
-   set session_id2 = (select session_id from veil2_session_context);
+   set session_id2 = (select session_id from session_context);
 
 -- Switch to the original session
 with session as
@@ -458,7 +466,9 @@ select is(cnt > 0, true, 'Expect to see rows from role_privileges')
   from (select count(*)::integer as cnt
           from veil2.role_privileges) x;
 
-select veil2.reload_connection_privs();
+select * -- call reload_xxx without returning a row.
+  from veil2.reload_connection_privs()
+ where reload_connection_privs is null;
 
 select is(cnt > 0, true, 'Expect to see rows from role_roles')
   from (select count(*)::integer as cnt
@@ -476,7 +486,9 @@ select is(cnt > 0, true, 'Expect to see rows from authentication_details')
   from (select count(*)::integer as cnt
           from veil2.authentication_details) x;
 
-select veil2.reload_connection_privs();
+select * -- call reload_xxx without returning a row.
+  from veil2.reload_connection_privs()
+ where reload_connection_privs is null;
 
 select is(cnt > 0, true, 'Expect to see rows from accessor_roles')
   from (select count(*)::integer as cnt
@@ -519,7 +531,9 @@ select accessor_id, 1, 0
  union all select -2, -3, -31  -- Give Eve two authentication contexts
  union all select -2, -3, -3;
 
-select veil2.init();
+select *
+  from veil2.init()
+ where init is null;
 
 -- Now we should have connect privilege.  Authentication should succeed.
 with session as
@@ -578,7 +592,7 @@ select is(success, true, 'Eve should be authenticated (global)')
   from session;
 
 select is(accessor_id, -2, 'Eve''s accessor_id is Eve')
-  from veil2_session_context;
+  from session_context;
 
 -- eve becomes bob
 -- Need to record the session_token for later use.
@@ -598,7 +612,7 @@ select is(success, true, 'Eve should have successully become Bob')
 
 
 select is(accessor_id, -9, 'Bob''s accessor_id is Eve')
-  from veil2_session_context
+  from session_context
  where login_context_type_id is null;
 
 -- Check Eve-as-Bob's privs: should be mostly the same but without
@@ -612,7 +626,9 @@ union all
 select is(veil2.i_have_priv_in_scope(23, -5, -51), true,
           'Bob should have priv 23 in context -5,-51 (2)');
 
-select veil2.reload_connection_privs();
+select * -- call reload_xxx without returning a row.
+  from veil2.reload_connection_privs()
+ where reload_connection_privs is null;
 	  
 select is(veil2.i_have_priv_in_scope(24, -5, -51), true,
           'Bob should have priv 24 in context -5,-51 (2)')
@@ -621,7 +637,7 @@ select is(veil2.i_have_priv_in_scope(25, -4, -41), true,
           'Bob should have priv 25 in context -4,-41 (2)');
 
 select is(accessor_id, -5, 'Eve should now have Bob''s accessor_id')
-  from veil2_session_context;
+  from session_context;
 
 -- ......continuation...
 select is(o.success, true, 'Bob''s session should have continued')
@@ -648,7 +664,7 @@ select is(veil2.i_have_priv_in_scope(25, -4, -41), true,
           'Bob should have priv 25 in context -4,-41 (2) again');
 
 select is(accessor_id, -5, 'Eve should now have Bob''s accessor_id again')
-  from veil2_session_context;
+  from session_context;
 
 
 -- ...contextual role mapppings...

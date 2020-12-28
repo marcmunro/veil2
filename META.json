@@ -38,7 +38,7 @@
     }
   },
   "no_index": {
-    "directory": [ "html" ],
+    "directory": [ "html" ]
   },
   "generated_by": "Marc Munro"
   "meta-spec": {

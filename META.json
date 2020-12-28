@@ -11,7 +11,7 @@
     "runtime": {
       "requires": {
         "PostgreSQL": "10.0.0",
-	"pgbitmap": 0
+	"pgbitmap": "0.0.0"
       }
     }
   },

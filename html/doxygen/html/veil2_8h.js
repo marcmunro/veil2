@@ -4,6 +4,7 @@ var veil2_8h =
     [ "DATA_PATH", "veil2_8h.html#ac26a668e32beeb7eae8b6e4adbe5d1e1", null ],
     [ "DOCS_PATH", "veil2_8h.html#aae31c3af59a0c656226a4160757441ee", null ],
     [ "Fetch_fn", "veil2_8h.html#a42368367f5a1eef750ff948f44890274", null ],
+    [ "veil2_add_session_privileges", "veil2_8h.html#a32badc8d209e3a35308fb445a0f1f6a9", null ],
     [ "veil2_bool_from_query", "veil2_8h.html#a7b701739e7cf328e55d3aa4b99b96632", null ],
     [ "veil2_datapath", "veil2_8h.html#a379c0a0e5ec4e3935f496438a1884537", null ],
     [ "veil2_docpath", "veil2_8h.html#a13b2eb72a23e976299bf366ff30d3277", null ],
@@ -19,8 +20,12 @@ var veil2_8h =
     [ "veil2_reset_session", "veil2_8h.html#a24024528f9349a7cfafe1e08b1f92697", null ],
     [ "veil2_reset_session_privs", "veil2_8h.html#aeb238a60d69020a855db79484047edda", null ],
     [ "veil2_result_counts", "veil2_8h.html#aa5fa872416278e2e318ad0135ab04c99", null ],
+    [ "veil2_session_context", "veil2_8h.html#a892e2ce2fda8a8ed37afa1885625cd6b", null ],
+    [ "veil2_session_privileges", "veil2_8h.html#a7c92523415a0aec8ffc353dd52d935d5", null ],
     [ "veil2_session_ready", "veil2_8h.html#a7c12b52b5e1ad8addb27eb33dd014213", null ],
     [ "veil2_spi_connect", "veil2_8h.html#a4603875664db61438ab4e9997812b0b4", null ],
     [ "veil2_spi_finish", "veil2_8h.html#aef1d49813efe3aec5c7511a84d4b723d", null ],
-    [ "veil2_true", "veil2_8h.html#a04e7d69cda94d76fb81177c955ca56e8", null ]
+    [ "veil2_true", "veil2_8h.html#a04e7d69cda94d76fb81177c955ca56e8", null ],
+    [ "veil2_update_session_privileges", "veil2_8h.html#a49b7cdaeae553935eedc5d7774005075", null ],
+    [ "veil2_version", "veil2_8h.html#a104079af4d45ff6a76a873d8f3a87a92", null ]
 ];

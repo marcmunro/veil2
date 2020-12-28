@@ -5,7 +5,7 @@
 <title>Chapter 1. What Is A Relational Security System?</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="home" href="index.html" title="Veil2 Documentation">
 <link rel="up" href="pt01.html" title="Part I. Understanding Veil2 And Relational Security">
 <link rel="prev" href="pt01.html" title="Part I. Understanding Veil2 And Relational Security">
 <link rel="next" href="ch02.html" title="Chapter 2. How Is Relational Security Different?">
@@ -33,168 +33,95 @@
 <a name="what-is-relational-security"></a>Chapter 1. What Is A Relational Security System?</h2></div></div></div>
 <p>
     A Relational Security System is one in which access to each piece
-    of data and functionality is limited according to the user's
-    relationships to that data or functionality.  Access is managed by
-    privileges assigned in contexts which limit the extent to
-    which that privilege applies.
+    of data or functionality is limited according to the user's
+    relationships to that data or functionality.  What this means is
+    that access rights are contextual, based on relationships between
+    that data and the connected user, and that each test for a
+    specific access right is a test in a specific context.
   </p>
 <p>
-    Users acquire their privileges in various ways: all users may get a
-    basic set of privileges; some users may be members of teams or
+    For example:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+	  You have access to the company accounts only for the company
+	  you work for.
+	</p>
+<p>
+	  Your access rights to company accounts data applies only in
+	  the context of the company that employs you.  You would not
+	  have access to company accounts for other companies.
+	</p>
+<p>
+	  We say that you have been given those access rights in
+	  <code class="literal">company-context</code> for your company.
+	</p>
+</li>
+<li class="listitem">
+<p>
+	  You have access to employee data only for employees of your
+	  department.
+	</p>
+<p>
+	  Your access to employee data applies only in the context of
+	  your department.  You would not have access to employee data
+	  for other departments.
+	</p>
+<p>
+	  We say you have been given those access rights in
+	  <code class="literal">department-context</code> for your department.
+	</p>
+</li>
+<li class="listitem">
+<p>
+	  You have access to see the postings of only your friends.
+	</p>
+<p>
+	  You have access to postings only in the contexts of posters
+	  who are recorded as your friends.
+	</p>
+<p>
+	  We say that you have those access rights in
+	  <code class="literal">friend-context</code> for each of your friends.
+	</p>
+</li>
+</ul></div>
+<p>
+  </p>
+<p>
+    Users acquire their access rights in various ways: all users may
+    get a basic set of rights; some users may be members of teams or
     departments and their roles in those things may give them implied
-    privilege assignments; and some users may be granted specific
-    roles explicitly.  Even with explicit role assignments, those
-    assignments may occur in different contexts giving the user access
-    to greater or smaller subsets of data: you might be a given the
-    manager role for a project, or for a department, or for a
-    division, or company-wide.  The same privileges would apply in
-    each case, but their scope would apply to larger or smaller sets
-    of data.
+    rights; and some users may be granted specific rights explicitly.
+    Even with explicit assignments, those assignments may occur in
+    different contexts giving the user access to greater or smaller
+    subsets of data: you might be a given the manager role for a
+    project, or for a department, or for a division, or company-wide.
   </p>
 <p>
-    Scopes may be created from almost any definable subset of your
+    Contexts may be created from almost any definable subset of your
     data.  Mostly they are based on the relationships of your users
-    with their data, though they need not be.  Typically, scopes are
+    with their data, though they need not be.  Typically, they are
     defined in terms of users and their relationships to specific
     artifacts described by your database.  For example, a person's
     relationship to the company they work for, or their membership of
     a department or project team.
   </p>
 <p>
-    Having scopes associated with each assigned privilege means that
-    the granularity of access controls can be as coarse or as fine as
-    the data demands, and it means that there is rarely the need for
-    more complex access checks than "do I have privilege X in scope
-    Y?".
+    Having contexts associated with each assigned access right means
+    that the granularity of access controls can be as coarse or as
+    fine as the data demands, and it means that there is rarely the
+    need for more complex access checks than "do I have privilege X in
+    context Y?".
   </p>
 <p>
-    Instead of having privileges which imply conditional rule checks,
-    such as the privilege to
+    Instead of having rights which imply conditional rule checks,
+    such as the right to
     <span class="emphasis"><em>maintain-a-project-if-the-user-is-a-member-of-the-project-team</em></span>,
-    privileges can effectively contain their conditionality through
-    their scope. 
+    rights can effectively contain their conditionality through
+    their context. 
   </p>
-<div class="sect1">
-<div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm33"></a>1.1. What This Means - Some Examples</h2></div></div></div>
-<p>
-      The description above is rather abstract.  To help make it more
-      concrete, here are some examples of how a relational security
-      system can work.
-    </p>
-<div class="sect2">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="idm36"></a>1.1.1. Separate Corporate Clients</h3></div></div></div>
-<p>
-	Imagine that you provide a
-	<a class="ulink" href="https://en.wikipedia.org/wiki/Software_as_a_service" target="_top">
-	Software As A Service</a> solution to multiple corporate
-	clients. 
-      </p>
-<p>
-	Data for each client would be stored with a <span class="quote">“<span class="quote">corp
-	id</span>”</span> identifying the corporate client that it belongs
-	to.  Users associated with one client would only have access
-	to data for that individual client.  That is, their access to
-	data would depend on their relationship with the specific
-	client.  If they are an employee of Corp X, they would have
-	access to only Corp X data.
-      </p>
-<p>
-	As a refinement, data within each client could be further
-	segregated into data for subdivisions within the corporation's
-	own organizational hierarchy.  Users associated with a single
-	division might see data only for that division, while users at
-	the corporate level would see data for all divisions.  No
-	special application-level code is needed to do this: it is
-	just a matter of assigning privileges in different contexts:
-	those of the corporation (corp context), or those of the
-	subdivision (which we'll call org context).
-      </p>
-<p>
-	We can take it even further and have data that is protected at
-	the level of individual projects (project context).  If you
-	are a team member of a project, you would automatically get to
-	access that project's data.
-      </p>
-<p>
-	In all of these cases, your access to data is determined by
-	your relationships with that data:
-	</p>
-<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
-<li class="listitem"><p>
-	      if you are an employee of a specific corporation, you
-	      will have access to data (only) for that corporation.
-	    </p></li>
-<li class="listitem"><p>
-	      if you are an employee of a specific subdivision, your
-	      access can be limited to data specific to that subdivision.
-	    </p></li>
-<li class="listitem"><p>
-	      if you are a member of a project team, you can have
-	      access to data for that project.
-	    </p></li>
-</ul></div>
-<p>
-	You can also be granted access to data, more directly through
-	the assignment of roles.  But those roles will be limited to
-	specific contexts.  You could be assigned the project manager
-	role in the context of a single project, or in the context of
-	a subdivision, and this would give you rights either to a
-	single project, or to all projects for that subdivision.
-      </p>
-<p>
-	This is all demonstrated in the <a class="link" href="ch20.html#veil_demo" title="20.1. The veil2_demo Extension">Veil2 demo</a>.
-      </p>
-</div>
-<div class="sect2">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="idm54"></a>1.1.2. Social Media</h3></div></div></div>
-<p>
-	Imagine that you run a social media site that allows users to
-	post messages which can be of 3 different types:
-	</p>
-<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
-<li class="listitem">
-<p>
-	      private;
-	    </p>
-<p>
-	      These messages can only be seen by the poster.
-	      Typically, we might label these as draft.
-	    </p>
-</li>
-<li class="listitem">
-<p>
-	      public;
-	    </p>
-<p>
-	      Anyone can see these messages.
-	    </p>
-</li>
-<li class="listitem">
-<p>
-	      group;
-	    </p>
-<p>
-	      Only users who are our <span class="quote">“<span class="quote">friends</span>”</span> can see these.
-	    </p>
-</li>
-</ul></div>
-<p>
-      </p>
-<p>
-	In this scheme, you have access to group postings only if you
-	are a member of the poster's group of friends.  Your access to
-	those posts is determined solely through your relationship, as
-	a friend, to the poster so your access rights are implied
-	rather than explicitly granted.
-      </p>
-<p>
-	This is demonstrated in the <a class="link" href="ch20.html#veil_minimal_demo" title="20.2. The veil2_minimal_demo Extension">Veil2 minimal demo</a>.
-      </p>
-</div>
-</div>
 </div>
 <div class="navfooter">
 <hr>

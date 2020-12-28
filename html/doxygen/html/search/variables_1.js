@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['context_5fprivs',['context_privs',['../structSessionPrivs.html#a9edac98e3830be1184055cb826635d9a',1,'SessionPrivs']]]
+  ['context_5froleprivs',['context_roleprivs',['../structSessionRolePrivs.html#af732395a19e3e983eedac197ac8c062a',1,'SessionRolePrivs']]]
 ];

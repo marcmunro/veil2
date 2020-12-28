@@ -105,6 +105,7 @@ Include dependency graph for veil2.c:</div>
 <div class="center"><img src="veil2_8c__incl.png" border="0" usemap="#src_2veil2_8c" alt=""/></div>
 <map name="src_2veil2_8c" id="src_2veil2_8c">
 <area shape="rect" id="node10" href="veil2_8h.html" title="Main header file for veil2. " alt="" coords="1153,95,1215,121"/>
+<area shape="rect" id="node12" href="veil2__version_8h.html" title="veil2_version.h" alt="" coords="1203,191,1319,218"/>
 </map>
 </div>
 </div>
@@ -112,17 +113,19 @@ Include dependency graph for veil2.c:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structContextPrivs.html">ContextPrivs</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structContextRolePrivs.html">ContextRolePrivs</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structSessionPrivs.html">SessionPrivs</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structSessionRolePrivs.html">SessionRolePrivs</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structSessionContext.html">SessionContext</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ad47704493016ed19bf02d100b3bd7a3d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#ad47704493016ed19bf02d100b3bd7a3d">CONTEXT_PRIVS_INCREMENT</a>&#160;&#160;&#160;16</td></tr>
-<tr class="separator:ad47704493016ed19bf02d100b3bd7a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a778fcf86d0d27dab1e71d797ae26d344"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a778fcf86d0d27dab1e71d797ae26d344">CONTEXT_PRIVS_SIZE</a>(elems)</td></tr>
-<tr class="separator:a778fcf86d0d27dab1e71d797ae26d344"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70b0583241093e12b08f1c11c6b03e68"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a70b0583241093e12b08f1c11c6b03e68">CONTEXT_ROLEPRIVS_INCREMENT</a>&#160;&#160;&#160;16</td></tr>
+<tr class="separator:a70b0583241093e12b08f1c11c6b03e68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0938115cf26600783d372e93d07b6fc9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a0938115cf26600783d372e93d07b6fc9">CONTEXT_ROLEPRIVS_SIZE</a>(elems)</td></tr>
+<tr class="separator:a0938115cf26600783d372e93d07b6fc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -130,36 +133,38 @@ Functions</h2></td></tr>
 <tr class="separator:a19c7f5d2df4527ab984de57559ba783e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ca237d772c5c3cdaf9aaa117d11fbbb"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb">checkContext</a> (int *p_idx, int scope_type, int scope, int priv)</td></tr>
 <tr class="separator:a1ca237d772c5c3cdaf9aaa117d11fbbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab6708652d0e229189e124f02a78964d3"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3">freeContextPrivs</a> (<a class="el" href="structContextPrivs.html">ContextPrivs</a> *cp)</td></tr>
-<tr class="separator:ab6708652d0e229189e124f02a78964d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cc456848a9f63f74dfe80326e3f17a2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2">clear_session_privs</a> ()</td></tr>
-<tr class="separator:a3cc456848a9f63f74dfe80326e3f17a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aabe26dc105921f8fdf5304f8cb51fccb"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structSessionPrivs.html">SessionPrivs</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb">extendSessionPrivs</a> (<a class="el" href="structSessionPrivs.html">SessionPrivs</a> *<a class="el" href="veil2_8c.html#a35e0fd1762207cf7d5bf56ca50279232">session_privs</a>)</td></tr>
-<tr class="separator:aabe26dc105921f8fdf5304f8cb51fccb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a552c63ade183ba790a1fc1105117c6b5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5">add_scope_privs</a> (int scope_type, int scope, Bitmap *privs)</td></tr>
-<tr class="separator:a552c63ade183ba790a1fc1105117c6b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8427f8ff086c0cfde8433b48faf005b2"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2">fetch_scope_privs</a> (HeapTuple tuple, TupleDesc tupdesc, void *p_result)</td></tr>
-<tr class="separator:a8427f8ff086c0cfde8433b48faf005b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad0227b91fd8a98d84dc03bff37ea89f1"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#ad0227b91fd8a98d84dc03bff37ea89f1">do_load_session_privs</a> ()</td></tr>
-<tr class="separator:ad0227b91fd8a98d84dc03bff37ea89f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad03876d90cc6f64b46b87bdbe6dc7289"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#ad03876d90cc6f64b46b87bdbe6dc7289">load_privs</a> ()</td></tr>
-<tr class="separator:ad03876d90cc6f64b46b87bdbe6dc7289"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bb26c76b5955baf572734ae5b6b5c4a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a6bb26c76b5955baf572734ae5b6b5c4a">freeContextRolePrivs</a> (<a class="el" href="structContextRolePrivs.html">ContextRolePrivs</a> *cp)</td></tr>
+<tr class="separator:a6bb26c76b5955baf572734ae5b6b5c4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3d863c7368ccb8b02f6b039611ed26e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#ac3d863c7368ccb8b02f6b039611ed26e">clear_session_roleprivs</a> ()</td></tr>
+<tr class="separator:ac3d863c7368ccb8b02f6b039611ed26e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ffb1779a47185e6b824feed5a3a8ece"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structSessionRolePrivs.html">SessionRolePrivs</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a7ffb1779a47185e6b824feed5a3a8ece">extendSessionRolePrivs</a> (<a class="el" href="structSessionRolePrivs.html">SessionRolePrivs</a> *<a class="el" href="veil2_8c.html#a3107d158c1cf2a3ed43023e7e2deb037">session_roleprivs</a>)</td></tr>
+<tr class="separator:a7ffb1779a47185e6b824feed5a3a8ece"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37546e787f645707efd4fbf7543af277"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a37546e787f645707efd4fbf7543af277">add_scope_roleprivs</a> (int scope_type, int scope, Bitmap *roles, Bitmap *privs)</td></tr>
+<tr class="separator:a37546e787f645707efd4fbf7543af277"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0816bda9c352d3b1abfe91e5ce4032fb"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a0816bda9c352d3b1abfe91e5ce4032fb">update_scope_roleprivs</a> (int scope_type, int scope, Bitmap *roles, Bitmap *privs)</td></tr>
+<tr class="separator:a0816bda9c352d3b1abfe91e5ce4032fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d6b01654a9686d26fa3f2ee2533a619"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619">error_if_no_session</a> ()</td></tr>
 <tr class="separator:a6d6b01654a9686d26fa3f2ee2533a619"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9267b3a3291b582296685bdc3dccfa1e"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a9267b3a3291b582296685bdc3dccfa1e">fetch_2ints</a> (HeapTuple tuple, TupleDesc tupdesc, void *p_result)</td></tr>
 <tr class="separator:a9267b3a3291b582296685bdc3dccfa1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45a90a5d613d0f79e8e18adfc0abdd66"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a45a90a5d613d0f79e8e18adfc0abdd66">create_temp_tables</a> ()</td></tr>
 <tr class="separator:a45a90a5d613d0f79e8e18adfc0abdd66"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a351e9c866a977deb2a28e07091adba0d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a351e9c866a977deb2a28e07091adba0d">truncate_temp_tables</a> (bool clear_context)</td></tr>
-<tr class="separator:a351e9c866a977deb2a28e07091adba0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1c1816e2ef1b38fdfc3abf503d3fc50"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#ab1c1816e2ef1b38fdfc3abf503d3fc50">veil2_session_ready</a> (FunctionCallInfo fcinfo)</td></tr>
-<tr class="separator:ab1c1816e2ef1b38fdfc3abf503d3fc50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7ae936fa571fecaac89d8adee322ae6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#af7ae936fa571fecaac89d8adee322ae6">do_reset_session</a> (bool clear_context)</td></tr>
 <tr class="separator:af7ae936fa571fecaac89d8adee322ae6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1c1816e2ef1b38fdfc3abf503d3fc50"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#ab1c1816e2ef1b38fdfc3abf503d3fc50">veil2_session_ready</a> (FunctionCallInfo fcinfo)</td></tr>
+<tr class="separator:ab1c1816e2ef1b38fdfc3abf503d3fc50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa978d6e0212eb0edf5436a07a4bec88d"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#aa978d6e0212eb0edf5436a07a4bec88d">veil2_reset_session</a> (FunctionCallInfo fcinfo)</td></tr>
 <tr class="separator:aa978d6e0212eb0edf5436a07a4bec88d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9a3b057ba1dea0f0db728f321fb768d"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#ab9a3b057ba1dea0f0db728f321fb768d">veil2_reset_session_privs</a> (FunctionCallInfo fcinfo)</td></tr>
 <tr class="separator:ab9a3b057ba1dea0f0db728f321fb768d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac488f8c8283ea0f8ef4d570c7051cfe8"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#ac488f8c8283ea0f8ef4d570c7051cfe8">veil2_session_context</a> (FunctionCallInfo fcinfo)</td></tr>
+<tr class="separator:ac488f8c8283ea0f8ef4d570c7051cfe8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a950003d33ac24802b9bdb2839b3de0a7"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a950003d33ac24802b9bdb2839b3de0a7">veil2_session_privileges</a> (FunctionCallInfo fcinfo)</td></tr>
+<tr class="separator:a950003d33ac24802b9bdb2839b3de0a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a077cedf7abdcaaca296bb6d4d164b20d"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a077cedf7abdcaaca296bb6d4d164b20d">veil2_add_session_privileges</a> (FunctionCallInfo fcinfo)</td></tr>
+<tr class="separator:a077cedf7abdcaaca296bb6d4d164b20d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10139c4202e09809de2c4f65262a3923"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a10139c4202e09809de2c4f65262a3923">veil2_update_session_privileges</a> (FunctionCallInfo fcinfo)</td></tr>
+<tr class="separator:a10139c4202e09809de2c4f65262a3923"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7eabb8210c058af3c045a215ee77b425"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a7eabb8210c058af3c045a215ee77b425">veil2_true</a> (FunctionCallInfo fcinfo)</td></tr>
 <tr class="separator:a7eabb8210c058af3c045a215ee77b425"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abdfc74e12e705f110f1f6719ee33c7ea"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea">checkSessionReady</a> ()</td></tr>
@@ -186,6 +191,8 @@ Functions</h2></td></tr>
 <tr class="separator:a66116a3513e9a99192202401cc5f394e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79c18f7c4ed4d0fc2aa31e942e3a194a"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a79c18f7c4ed4d0fc2aa31e942e3a194a">veil2_datapath</a> (FunctionCallInfo fcinfo)</td></tr>
 <tr class="separator:a79c18f7c4ed4d0fc2aa31e942e3a194a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe5b90a80701c7d22ff03c8fdf76e196"><td class="memItemLeft" align="right" valign="top">Datum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#afe5b90a80701c7d22ff03c8fdf76e196">veil2_version</a> (FunctionCallInfo fcinfo)</td></tr>
+<tr class="separator:afe5b90a80701c7d22ff03c8fdf76e196"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -193,41 +200,43 @@ Variables</h2></td></tr>
 <tr class="separator:a9206d7502b250a49f4279f788cd19c03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2997ca01e0a570ccaaf0b974b39bf7b6"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a2997ca01e0a570ccaaf0b974b39bf7b6">result_counts</a> [] = {0, 0}</td></tr>
 <tr class="separator:a2997ca01e0a570ccaaf0b974b39bf7b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35e0fd1762207cf7d5bf56ca50279232"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structSessionPrivs.html">SessionPrivs</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a35e0fd1762207cf7d5bf56ca50279232">session_privs</a> = ((void *) 0)</td></tr>
-<tr class="separator:a35e0fd1762207cf7d5bf56ca50279232"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec6a2cdc6993e99d274ad67ebc5b85dc"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#aec6a2cdc6993e99d274ad67ebc5b85dc">session_privs_loaded</a> = ((bool) 0)</td></tr>
-<tr class="separator:aec6a2cdc6993e99d274ad67ebc5b85dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3107d158c1cf2a3ed43023e7e2deb037"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structSessionRolePrivs.html">SessionRolePrivs</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a3107d158c1cf2a3ed43023e7e2deb037">session_roleprivs</a> = ((void *) 0)</td></tr>
+<tr class="separator:a3107d158c1cf2a3ed43023e7e2deb037"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5dfe0446477a1237ba5c84d63d32dd3f"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a5dfe0446477a1237ba5c84d63d32dd3f">session_roleprivs_loaded</a> = ((bool) 0)</td></tr>
+<tr class="separator:a5dfe0446477a1237ba5c84d63d32dd3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3036f6e034e902642fa98e4ef42ce25a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structSessionContext.html">SessionContext</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="veil2_8c.html#a3036f6e034e902642fa98e4ef42ce25a">session_context</a></td></tr>
+<tr class="separator:a3036f6e034e902642fa98e4ef42ce25a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Provides callable veil2 functions. These are written in C for performance and to ensure that they cannot be easily subverted. </p>
 <div class="fragment"><div class="line">Author:       Marc Munro</div><div class="line">Copyright (c) 2020 Marc Munro</div><div class="line">License:      GPL V3</div></div><!-- fragment --> 
 <p class="definition">Definition in file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
-<a id="ad47704493016ed19bf02d100b3bd7a3d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad47704493016ed19bf02d100b3bd7a3d">&#9670;&nbsp;</a></span>CONTEXT_PRIVS_INCREMENT</h2>
+<a id="a70b0583241093e12b08f1c11c6b03e68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70b0583241093e12b08f1c11c6b03e68">&#9670;&nbsp;</a></span>CONTEXT_ROLEPRIVS_INCREMENT</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define CONTEXT_PRIVS_INCREMENT&#160;&#160;&#160;16</td>
+          <td class="memname">#define CONTEXT_ROLEPRIVS_INCREMENT&#160;&#160;&#160;16</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>How many <a class="el" href="structContextPrivs.html">ContextPrivs</a> entries a <a class="el" href="structSessionPrivs.html">SessionPrivs</a> structure will be created with/extended by. </p>
+<p>How many ContextPrivs entries a SessionPrivs structure will be created with or extended by. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00228">228</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00268">268</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
-<a id="a778fcf86d0d27dab1e71d797ae26d344"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a778fcf86d0d27dab1e71d797ae26d344">&#9670;&nbsp;</a></span>CONTEXT_PRIVS_SIZE</h2>
+<a id="a0938115cf26600783d372e93d07b6fc9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0938115cf26600783d372e93d07b6fc9">&#9670;&nbsp;</a></span>CONTEXT_ROLEPRIVS_SIZE</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define CONTEXT_PRIVS_SIZE</td>
+          <td class="memname">#define CONTEXT_ROLEPRIVS_SIZE</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">elems</td><td>)</td>
@@ -235,24 +244,24 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">(                   \</div><div class="line">    sizeof(<a class="code" href="structSessionPrivs.html">SessionPrivs</a>) +                          \</div><div class="line">    (<span class="keyword">sizeof</span>(<a class="code" href="structContextPrivs.html">ContextPrivs</a>) *                         \</div><div class="line">     (elems + <a class="code" href="veil2_8c.html#ad47704493016ed19bf02d100b3bd7a3d">CONTEXT_PRIVS_INCREMENT</a>)))</div><div class="ttc" id="structSessionPrivs_html"><div class="ttname"><a href="structSessionPrivs.html">SessionPrivs</a></div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00083">veil2.c:83</a></div></div>
-<div class="ttc" id="veil2_8c_html_ad47704493016ed19bf02d100b3bd7a3d"><div class="ttname"><a href="veil2_8c.html#ad47704493016ed19bf02d100b3bd7a3d">CONTEXT_PRIVS_INCREMENT</a></div><div class="ttdeci">#define CONTEXT_PRIVS_INCREMENT</div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00228">veil2.c:228</a></div></div>
-<div class="ttc" id="structContextPrivs_html"><div class="ttname"><a href="structContextPrivs.html">ContextPrivs</a></div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00074">veil2.c:74</a></div></div>
-</div><!-- fragment --><p>Provide the size that we want our <a class="el" href="structSessionPrivs.html">SessionPrivs</a> structure to be.</p>
+<b>Value:</b><div class="fragment"><div class="line">(                   \</div><div class="line">    sizeof(<a class="code" href="structSessionRolePrivs.html">SessionRolePrivs</a>) +                          \</div><div class="line">    (<span class="keyword">sizeof</span>(<a class="code" href="structContextRolePrivs.html">ContextRolePrivs</a>) *                         \</div><div class="line">     (elems + <a class="code" href="veil2_8c.html#a70b0583241093e12b08f1c11c6b03e68">CONTEXT_ROLEPRIVS_INCREMENT</a>)))</div><div class="ttc" id="veil2_8c_html_a70b0583241093e12b08f1c11c6b03e68"><div class="ttname"><a href="veil2_8c.html#a70b0583241093e12b08f1c11c6b03e68">CONTEXT_ROLEPRIVS_INCREMENT</a></div><div class="ttdeci">#define CONTEXT_ROLEPRIVS_INCREMENT</div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00268">veil2.c:268</a></div></div>
+<div class="ttc" id="structSessionRolePrivs_html"><div class="ttname"><a href="structSessionRolePrivs.html">SessionRolePrivs</a></div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00089">veil2.c:89</a></div></div>
+<div class="ttc" id="structContextRolePrivs_html"><div class="ttname"><a href="structContextRolePrivs.html">ContextRolePrivs</a></div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00079">veil2.c:79</a></div></div>
+</div><!-- fragment --><p>Provide the size that we want our <a class="el" href="structSessionRolePrivs.html">SessionRolePrivs</a> structure to be.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">elems</td><td>the number of <a class="el" href="structContextPrivs.html">ContextPrivs</a> entries already in place. This will be increased by CONTEXT_PRIVS_INCREMENT. </td></tr>
+    <tr><td class="paramname">elems</td><td>the number of <a class="el" href="structContextRolePrivs.html">ContextRolePrivs</a> entries already in place. This will be increased by CONTEXT_ROLEPRIVS_INCREMENT. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00235">235</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00275">275</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a552c63ade183ba790a1fc1105117c6b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a552c63ade183ba790a1fc1105117c6b5">&#9670;&nbsp;</a></span>add_scope_privs()</h2>
+<a id="a37546e787f645707efd4fbf7543af277"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37546e787f645707efd4fbf7543af277">&#9670;&nbsp;</a></span>add_scope_roleprivs()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -261,7 +270,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void add_scope_privs </td>
+          <td class="memname">static void add_scope_roleprivs </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>scope_type</em>, </td>
@@ -271,6 +280,12 @@ Variables</h2></td></tr>
           <td></td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>scope</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Bitmap *&#160;</td>
+          <td class="paramname"><em>roles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -290,23 +305,24 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Add a <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry to <a class="el" href="veil2_8c.html#a35e0fd1762207cf7d5bf56ca50279232">session_privs</a>, from the parameters.</p>
+<p>Add a ContextPrivs entry to ::session_privs, from the parameters.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">scope_type</td><td>The scope_type for the new entry </td></tr>
     <tr><td class="paramname">the</td><td>scope scope for the new entry </td></tr>
+    <tr><td class="paramname">roles</td><td>The roles Bitmap for the new entry </td></tr>
     <tr><td class="paramname">privs</td><td>The privileges Bitmap for the new entry </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00283">283</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00327">327</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="veil2_8c_a552c63ade183ba790a1fc1105117c6b5_cgraph.png" border="0" usemap="#veil2_8c_a552c63ade183ba790a1fc1105117c6b5_cgraph" alt=""/></div>
-<map name="veil2_8c_a552c63ade183ba790a1fc1105117c6b5_cgraph" id="veil2_8c_a552c63ade183ba790a1fc1105117c6b5_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="184,5,331,32"/>
+<div class="center"><img src="veil2_8c_a37546e787f645707efd4fbf7543af277_cgraph.png" border="0" usemap="#veil2_8c_a37546e787f645707efd4fbf7543af277_cgraph" alt=""/></div>
+<map name="veil2_8c_a37546e787f645707efd4fbf7543af277_cgraph" id="veil2_8c_a37546e787f645707efd4fbf7543af277_cgraph">
+<area shape="rect" id="node2" href="veil2_8c.html#a7ffb1779a47185e6b824feed5a3a8ece" title="extendSessionRolePrivs" alt="" coords="208,5,383,32"/>
 </map>
 </div>
 
@@ -360,16 +376,16 @@ Here is the call graph for this function:</div>
 <p>Wrapper for <a class="el" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e">findContext()</a> that finds the context and checks for a privilege in a single operation.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">p_idx</td><td>Pointer to a cached index value for the entry in the <a class="el" href="veil2_8c.html#a35e0fd1762207cf7d5bf56ca50279232">session_privs</a>-&gt;active_contexts that the search should start from. This allows the caller to cache the last returned index in the hope that they will be looking for the same entry next time. If no cached value exists, the caller should provide -1. The index of the found <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry will be returned through this, or -1 if no context can be found. </td></tr>
-    <tr><td class="paramname">scope_type</td><td>The scope_type_id of the <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry we are looking for. </td></tr>
-    <tr><td class="paramname">scope</td><td>The scope_id of the <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry we are looking for. </td></tr>
+    <tr><td class="paramname">p_idx</td><td>Pointer to a cached index value for the entry in the <a class="el" href="veil2_8c.html#a3107d158c1cf2a3ed43023e7e2deb037">session_roleprivs</a>-&gt;active_contexts that the search should start from. This allows the caller to cache the last returned index in the hope that they will be looking for the same entry next time. If no cached value exists, the caller should provide -1. The index of the found ContextPrivs entry will be returned through this, or -1 if no context can be found. </td></tr>
+    <tr><td class="paramname">scope_type</td><td>The scope_type_id of the ContextPrivs entry we are looking for. </td></tr>
+    <tr><td class="paramname">scope</td><td>The scope_id of the ContextPrivs entry we are looking for. </td></tr>
     <tr><td class="paramname">priv</td><td>The privilege to test for.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>false if no context can be found, otherwise true if the user has priv in the supplied scope. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00183">183</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00217">217</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -406,7 +422,7 @@ Here is the call graph for this function:</div>
 <p>Check whether a session has been properly initialized. If not, and we are supposed to fail in such a situation, fail with an appropriate error message. Otherwise return true if the session is ready to go.</p>
 <dl class="section return"><dt>Returns</dt><dd>boolean True if our session has been properly initialized. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00644">644</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00808">808</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -425,8 +441,8 @@ Here is the call graph for this function:</div>
 
 </div>
 </div>
-<a id="a3cc456848a9f63f74dfe80326e3f17a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3cc456848a9f63f74dfe80326e3f17a2">&#9670;&nbsp;</a></span>clear_session_privs()</h2>
+<a id="ac3d863c7368ccb8b02f6b039611ed26e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3d863c7368ccb8b02f6b039611ed26e">&#9670;&nbsp;</a></span>clear_session_roleprivs()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -435,7 +451,7 @@ Here is the call graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void clear_session_privs </td>
+          <td class="memname">static void clear_session_roleprivs </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -447,15 +463,15 @@ Here is the call graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Clear all <a class="el" href="structContextPrivs.html">ContextPrivs</a> entries in session_privs. </p>
+<p>Clear all <a class="el" href="structContextRolePrivs.html">ContextRolePrivs</a> entries in session_roleprivs. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00212">212</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00248">248</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="veil2_8c_a3cc456848a9f63f74dfe80326e3f17a2_cgraph.png" border="0" usemap="#veil2_8c_a3cc456848a9f63f74dfe80326e3f17a2_cgraph" alt=""/></div>
-<map name="veil2_8c_a3cc456848a9f63f74dfe80326e3f17a2_cgraph" id="veil2_8c_a3cc456848a9f63f74dfe80326e3f17a2_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="200,5,327,32"/>
+<div class="center"><img src="veil2_8c_ac3d863c7368ccb8b02f6b039611ed26e_cgraph.png" border="0" usemap="#veil2_8c_ac3d863c7368ccb8b02f6b039611ed26e_cgraph" alt=""/></div>
+<map name="veil2_8c_ac3d863c7368ccb8b02f6b039611ed26e_cgraph" id="veil2_8c_ac3d863c7368ccb8b02f6b039611ed26e_cgraph">
+<area shape="rect" id="node2" href="veil2_8c.html#a6bb26c76b5955baf572734ae5b6b5c4a" title="freeContextRolePrivs" alt="" coords="224,5,380,32"/>
 </map>
 </div>
 
@@ -483,9 +499,9 @@ Here is the call graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Create the temporary tables used for recording session privileges and context. </p>
+<p>Create a temporary table used for handling privileges in become_user. Originally, more temp tables were used but these have been replaced by in memory structures for performance and security. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00438">438</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00443">443</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -494,51 +510,6 @@ Here is the call graph for this function:</div>
 <area shape="rect" id="node2" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="200,5,295,32"/>
 <area shape="rect" id="node3" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="343,5,463,32"/>
 <area shape="rect" id="node4" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="511,5,625,32"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="ad0227b91fd8a98d84dc03bff37ea89f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0227b91fd8a98d84dc03bff37ea89f1">&#9670;&nbsp;</a></span>do_load_session_privs()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void do_load_session_privs </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Does the donkey-work of loading session privileges into session memory. </p>
-
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00338">338</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="veil2_8c_ad0227b91fd8a98d84dc03bff37ea89f1_cgraph.png" border="0" usemap="#veil2_8c_ad0227b91fd8a98d84dc03bff37ea89f1_cgraph" alt=""/></div>
-<map name="veil2_8c_ad0227b91fd8a98d84dc03bff37ea89f1_cgraph" id="veil2_8c_ad0227b91fd8a98d84dc03bff37ea89f1_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="220,5,367,32"/>
-<area shape="rect" id="node4" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="593,81,740,108"/>
-<area shape="rect" id="node5" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="226,107,361,133"/>
-<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="246,208,341,235"/>
-<area shape="rect" id="node9" href="veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2" title="fetch_scope_privs" alt="" coords="225,157,362,184"/>
-<area shape="rect" id="node11" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="234,259,353,285"/>
-<area shape="rect" id="node3" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="417,5,543,32"/>
-<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="420,208,540,235"/>
-<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="609,208,724,235"/>
-<area shape="rect" id="node10" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="415,132,545,159"/>
 </map>
 </div>
 
@@ -575,18 +546,19 @@ Here is the call graph for this function:</div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00509">509</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00461">461</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c_af7ae936fa571fecaac89d8adee322ae6_cgraph.png" border="0" usemap="#veil2_8c_af7ae936fa571fecaac89d8adee322ae6_cgraph" alt=""/></div>
 <map name="veil2_8c_af7ae936fa571fecaac89d8adee322ae6_cgraph" id="veil2_8c_af7ae936fa571fecaac89d8adee322ae6_cgraph">
-<area shape="rect" id="node2" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="393,83,488,109"/>
-<area shape="rect" id="node5" href="veil2_8c.html#a9267b3a3291b582296685bdc3dccfa1e" title="fetch_2ints" alt="" coords="221,32,312,59"/>
-<area shape="rect" id="node6" href="veil2_8c.html#a45a90a5d613d0f79e8e18adfc0abdd66" title="create_temp_tables" alt="" coords="193,83,340,109"/>
-<area shape="rect" id="node7" href="veil2_8c.html#a351e9c866a977deb2a28e07091adba0d" title="truncate_temp_tables" alt="" coords="188,133,345,160"/>
-<area shape="rect" id="node3" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="536,83,656,109"/>
-<area shape="rect" id="node4" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="704,83,819,109"/>
+<area shape="rect" id="node2" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="437,26,532,52"/>
+<area shape="rect" id="node5" href="veil2_8c.html#a9267b3a3291b582296685bdc3dccfa1e" title="fetch_2ints" alt="" coords="228,26,319,52"/>
+<area shape="rect" id="node6" href="veil2_8c.html#a45a90a5d613d0f79e8e18adfc0abdd66" title="create_temp_tables" alt="" coords="200,76,347,103"/>
+<area shape="rect" id="node7" href="veil2_8c.html#ac3d863c7368ccb8b02f6b039611ed26e" title="clear_session_roleprivs" alt="" coords="188,127,359,154"/>
+<area shape="rect" id="node3" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="611,26,731,52"/>
+<area shape="rect" id="node4" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="779,26,893,52"/>
+<area shape="rect" id="node8" href="veil2_8c.html#a6bb26c76b5955baf572734ae5b6b5c4a" title="freeContextRolePrivs" alt="" coords="407,127,563,154"/>
 </map>
 </div>
 
@@ -617,7 +589,7 @@ Here is the call graph for this function:</div>
 <p>Predicate to indicate whether to raise an error if a privilege test function has been called prior to a session being established. If not, the privilege testing function should return false. The determination of whether to error or return false is based on the value of the veil2.system_parameter 'error on uninitialized session' at the time that the database session is established.</p>
 <dl class="section return"><dt>Returns</dt><dd>boolean, whether or not to raise an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00387">387</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00393">393</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -635,8 +607,8 @@ Here is the call graph for this function:</div>
 
 </div>
 </div>
-<a id="aabe26dc105921f8fdf5304f8cb51fccb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aabe26dc105921f8fdf5304f8cb51fccb">&#9670;&nbsp;</a></span>extendSessionPrivs()</h2>
+<a id="a7ffb1779a47185e6b824feed5a3a8ece"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ffb1779a47185e6b824feed5a3a8ece">&#9670;&nbsp;</a></span>extendSessionRolePrivs()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -645,10 +617,10 @@ Here is the call graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="structSessionPrivs.html">SessionPrivs</a>* extendSessionPrivs </td>
+          <td class="memname">static <a class="el" href="structSessionRolePrivs.html">SessionRolePrivs</a>* extendSessionRolePrivs </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structSessionPrivs.html">SessionPrivs</a> *&#160;</td>
-          <td class="paramname"><em>session_privs</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="structSessionRolePrivs.html">SessionRolePrivs</a> *&#160;</td>
+          <td class="paramname"><em>session_roleprivs</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -659,7 +631,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00246">246</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00288">288</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -713,70 +685,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>bool</code> false, indicating to <a class="el" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49">veil2_query()</a> that no more rows are expected. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00422">422</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
-
-</div>
-</div>
-<a id="a8427f8ff086c0cfde8433b48faf005b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8427f8ff086c0cfde8433b48faf005b2">&#9670;&nbsp;</a></span>fetch_scope_privs()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static bool fetch_scope_privs </td>
-          <td>(</td>
-          <td class="paramtype">HeapTuple&#160;</td>
-          <td class="paramname"><em>tuple</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">TupleDesc&#160;</td>
-          <td class="paramname"><em>tupdesc</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>p_result</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>A <a class="el" href="veil2_8h.html#a42368367f5a1eef750ff948f44890274">Fetch_fn</a> for <a class="el" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49">veil2_query()</a> that retrieves the details for a <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry and adds it to <a class="el" href="veil2_8c.html#a35e0fd1762207cf7d5bf56ca50279232">session_privs</a> using <a class="el" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5">add_scope_privs()</a>.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">tuple</td><td>The ::HeapTuple returned from a Postgres SPI query. This will contain a tuple of 2 integers. </td></tr>
-    <tr><td class="paramname">tupdesc</td><td>The ::TupleDesc returned from the same Postgres SPI query </td></tr>
-    <tr><td class="paramname">p_result</td><td>This should be null.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>true, to indicate to <a class="el" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49">veil2_query()</a> that there may be more records to fetch. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00318">318</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="veil2_8c_a8427f8ff086c0cfde8433b48faf005b2_cgraph.png" border="0" usemap="#veil2_8c_a8427f8ff086c0cfde8433b48faf005b2_cgraph" alt=""/></div>
-<map name="veil2_8c_a8427f8ff086c0cfde8433b48faf005b2_cgraph" id="veil2_8c_a8427f8ff086c0cfde8433b48faf005b2_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="191,5,321,32"/>
-<area shape="rect" id="node3" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="369,5,516,32"/>
-</map>
-</div>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00426">426</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -819,22 +728,22 @@ Here is the call graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Locate a particular ContextPriv entry in <a class="el" href="veil2_8c.html#a35e0fd1762207cf7d5bf56ca50279232">session_privs</a>.</p>
+<p>Locate a particular ContextPriv entry in <a class="el" href="veil2_8c.html#a3107d158c1cf2a3ed43023e7e2deb037">session_roleprivs</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">p_idx</td><td>Pointer to a cached index value for the entry in the <a class="el" href="veil2_8c.html#a35e0fd1762207cf7d5bf56ca50279232">session_privs</a>-&gt;active_contexts that the search should start from. This allows the caller to cache the last returned index in the hope that they will be looking for the same entry next time. If no cached value exists, the caller should provide -1. The index of the found <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry will be returned through this, or -1 if no context can be found. </td></tr>
-    <tr><td class="paramname">scope_type</td><td>The scope_type_id of the <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry we are looking for. </td></tr>
-    <tr><td class="paramname">scope</td><td>The scope_id of the <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry we are looking for. </td></tr>
+    <tr><td class="paramname">p_idx</td><td>Pointer to a cached index value for the entry in the <a class="el" href="veil2_8c.html#a3107d158c1cf2a3ed43023e7e2deb037">session_roleprivs</a>-&gt;active_contexts that the search should start from. This allows the caller to cache the last returned index in the hope that they will be looking for the same entry next time. If no cached value exists, the caller should provide -1. The index of the found ContextPrivs entry will be returned through this, or -1 if no context can be found. </td></tr>
+    <tr><td class="paramname">scope_type</td><td>The scope_type_id of the ContextPrivs entry we are looking for. </td></tr>
+    <tr><td class="paramname">scope</td><td>The scope_id of the ContextPrivs entry we are looking for. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00120">120</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00149">149</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
-<a id="ab6708652d0e229189e124f02a78964d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab6708652d0e229189e124f02a78964d3">&#9670;&nbsp;</a></span>freeContextPrivs()</h2>
+<a id="a6bb26c76b5955baf572734ae5b6b5c4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bb26c76b5955baf572734ae5b6b5c4a">&#9670;&nbsp;</a></span>freeContextRolePrivs()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -843,9 +752,9 @@ Here is the call graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void freeContextPrivs </td>
+          <td class="memname">static void freeContextRolePrivs </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structContextPrivs.html">ContextPrivs</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="structContextRolePrivs.html">ContextRolePrivs</a> *&#160;</td>
           <td class="paramname"><em>cp</em></td><td>)</td>
           <td></td>
         </tr>
@@ -856,61 +765,15 @@ Here is the call graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Free a <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry. This just means freeing the privileges Bitmap and zeroing the pointer for it.</p>
+<p>Free a <a class="el" href="structContextRolePrivs.html">ContextRolePrivs</a> entry. This just means freeing the privileges Bitmap and zeroing the pointer for it.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">cp</td><td>The <a class="el" href="structContextPrivs.html">ContextPrivs</a> entry to be cleared out. </td></tr>
+    <tr><td class="paramname">cp</td><td>The <a class="el" href="structContextRolePrivs.html">ContextRolePrivs</a> entry to be cleared out. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00201">201</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
-
-</div>
-</div>
-<a id="ad03876d90cc6f64b46b87bdbe6dc7289"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad03876d90cc6f64b46b87bdbe6dc7289">&#9670;&nbsp;</a></span>load_privs()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void load_privs </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Manage the conditional loading of session privileges into session memory. If the session is already loaded, it does nothing. </p>
-
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00368">368</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="veil2_8c_ad03876d90cc6f64b46b87bdbe6dc7289_cgraph.png" border="0" usemap="#veil2_8c_ad03876d90cc6f64b46b87bdbe6dc7289_cgraph" alt=""/></div>
-<map name="veil2_8c_ad03876d90cc6f64b46b87bdbe6dc7289_cgraph" id="veil2_8c_ad03876d90cc6f64b46b87bdbe6dc7289_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#ad0227b91fd8a98d84dc03bff37ea89f1" title="do_load_session_privs" alt="" coords="140,132,307,159"/>
-<area shape="rect" id="node3" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="355,5,501,32"/>
-<area shape="rect" id="node5" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="728,81,875,108"/>
-<area shape="rect" id="node6" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="361,107,495,133"/>
-<area shape="rect" id="node7" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="381,208,475,235"/>
-<area shape="rect" id="node10" href="veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2" title="fetch_scope_privs" alt="" coords="359,157,497,184"/>
-<area shape="rect" id="node12" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="369,259,487,285"/>
-<area shape="rect" id="node4" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="551,5,678,32"/>
-<area shape="rect" id="node8" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="555,208,675,235"/>
-<area shape="rect" id="node9" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="744,208,859,235"/>
-<area shape="rect" id="node11" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="549,132,680,159"/>
-</map>
-</div>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00235">235</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -946,12 +809,12 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Dynamically allocated (by palloc()) copy of in. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01009">1009</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01167">1167</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
-<a id="a351e9c866a977deb2a28e07091adba0d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a351e9c866a977deb2a28e07091adba0d">&#9670;&nbsp;</a></span>truncate_temp_tables()</h2>
+<a id="a0816bda9c352d3b1abfe91e5ce4032fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0816bda9c352d3b1abfe91e5ce4032fb">&#9670;&nbsp;</a></span>update_scope_roleprivs()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -960,11 +823,33 @@ Here is the call graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void truncate_temp_tables </td>
+          <td class="memname">static void update_scope_roleprivs </td>
           <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>clear_context</em></td><td>)</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>scope_type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>scope</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Bitmap *&#160;</td>
+          <td class="paramname"><em>roles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Bitmap *&#160;</td>
+          <td class="paramname"><em>privs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -973,23 +858,65 @@ Here is the call graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Truncate the veil2_session_privileges and veil2_session_context temporary tables (actually we use deletion rather than truncation as it seems faster.</p>
+<p>Update a ContextPrivs entry in ::session_privs with new roles and privs. If there is no matching entry, we do nothing.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">clear_context</td><td>Whether veil2_session_context should be cleared as well as the privileges temp tables. </td></tr>
+    <tr><td class="paramname">scope_type</td><td>The scope_type for the entry to be updated. </td></tr>
+    <tr><td class="paramname">the</td><td>scope scope for the entry to be updated. </td></tr>
+    <tr><td class="paramname">roles</td><td>The new roles Bitmap for the entry </td></tr>
+    <tr><td class="paramname">privs</td><td>The new privileges Bitmap for the entry </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00470">470</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00363">363</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="veil2_8c_a351e9c866a977deb2a28e07091adba0d_cgraph.png" border="0" usemap="#veil2_8c_a351e9c866a977deb2a28e07091adba0d_cgraph" alt=""/></div>
-<map name="veil2_8c_a351e9c866a977deb2a28e07091adba0d_cgraph" id="veil2_8c_a351e9c866a977deb2a28e07091adba0d_cgraph">
-<area shape="rect" id="node2" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="211,5,305,32"/>
-<area shape="rect" id="node3" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="353,5,473,32"/>
-<area shape="rect" id="node4" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="521,5,636,32"/>
+<div class="center"><img src="veil2_8c_a0816bda9c352d3b1abfe91e5ce4032fb_cgraph.png" border="0" usemap="#veil2_8c_a0816bda9c352d3b1abfe91e5ce4032fb_cgraph" alt=""/></div>
+<map name="veil2_8c_a0816bda9c352d3b1abfe91e5ce4032fb_cgraph" id="veil2_8c_a0816bda9c352d3b1abfe91e5ce4032fb_cgraph">
+<area shape="rect" id="node2" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="257,5,352,32"/>
+<area shape="rect" id="node3" href="veil2_8c.html#a6bb26c76b5955baf572734ae5b6b5c4a" title="freeContextRolePrivs" alt="" coords="227,56,383,83"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a077cedf7abdcaaca296bb6d4d164b20d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a077cedf7abdcaaca296bb6d4d164b20d">&#9670;&nbsp;</a></span>veil2_add_session_privileges()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Datum veil2_add_session_privileges </td>
+          <td>(</td>
+          <td class="paramtype">FunctionCallInfo&#160;</td>
+          <td class="paramname"><em>fcinfo</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><code>veil2.add_session_privileges(scope_type_id, scope_id, roles, privileges)</code></p>
+<p>Create a new in-memory session_privileges record. Note that this <em>must</em> be called with records ordered by scope_type_id, and scope_id. This is because we use a binary search to match the relevant scope when "querying" this structure internally. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">integer</td><td>scope_type_id The type of scope </td></tr>
+    <tr><td class="paramname">integer</td><td>scope_id The id of the actual scope </td></tr>
+    <tr><td class="paramname">Bitmap</td><td>roles The roles assigned in the context for this scope </td></tr>
+    <tr><td class="paramname">Bitmap</td><td>privs The privileges that apply in this scope </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00749">749</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="veil2_8c_a077cedf7abdcaaca296bb6d4d164b20d_cgraph.png" border="0" usemap="#veil2_8c_a077cedf7abdcaaca296bb6d4d164b20d_cgraph" alt=""/></div>
+<map name="veil2_8c_a077cedf7abdcaaca296bb6d4d164b20d_cgraph" id="veil2_8c_a077cedf7abdcaaca296bb6d4d164b20d_cgraph">
+<area shape="rect" id="node2" href="veil2_8c.html#a37546e787f645707efd4fbf7543af277" title="add_scope_roleprivs" alt="" coords="260,5,415,32"/>
+<area shape="rect" id="node3" href="veil2_8c.html#a7ffb1779a47185e6b824feed5a3a8ece" title="extendSessionRolePrivs" alt="" coords="463,5,637,32"/>
 </map>
 </div>
 
@@ -1013,7 +940,7 @@ Here is the call graph for this function:</div>
 <p>Provide the path to where veil2 sql scripts should be stored on the server.</p>
 <dl class="section return"><dt>Returns</dt><dd>Text value containing the path. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01037">1037</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01195">1195</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1043,7 +970,7 @@ Here is the call graph for this function:</div>
 <p>Provide the path to where documentation should be stored on the server.</p>
 <dl class="section return"><dt>Returns</dt><dd>Text value containing the path. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01025">1025</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01183">1183</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1080,30 +1007,23 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00669">669</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00833">833</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c_a0f03a4c32bbac407d040e66fcb807e48_cgraph.png" border="0" usemap="#veil2_8c_a0f03a4c32bbac407d040e66fcb807e48_cgraph" alt=""/></div>
 <map name="veil2_8c_a0f03a4c32bbac407d040e66fcb807e48_cgraph" id="veil2_8c_a0f03a4c32bbac407d040e66fcb807e48_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="231,81,381,108"/>
-<area shape="rect" id="node11" href="veil2_8c.html#ad03876d90cc6f64b46b87bdbe6dc7289" title="load_privs" alt="" coords="263,157,349,184"/>
-<area shape="rect" id="node18" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="252,208,360,235"/>
-<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="439,81,587,108"/>
-<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="659,56,793,83"/>
-<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="644,5,808,32"/>
-<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="667,107,785,133"/>
-<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="874,107,969,133"/>
-<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="862,5,981,32"/>
-<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="1048,107,1168,133"/>
-<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1229,107,1344,133"/>
-<area shape="rect" id="node12" href="veil2_8c.html#ad0227b91fd8a98d84dc03bff37ea89f1" title="do_load_session_privs" alt="" coords="429,157,596,184"/>
-<area shape="rect" id="node13" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="653,208,799,235"/>
-<area shape="rect" id="node15" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="1035,284,1181,311"/>
-<area shape="rect" id="node16" href="veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2" title="fetch_scope_privs" alt="" coords="657,259,795,285"/>
-<area shape="rect" id="node14" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="858,208,985,235"/>
-<area shape="rect" id="node17" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="856,259,987,285"/>
-<area shape="rect" id="node19" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="465,208,560,235"/>
+<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="231,56,381,83"/>
+<area shape="rect" id="node11" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="252,107,360,133"/>
+<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="429,56,577,83"/>
+<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="640,5,775,32"/>
+<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="625,56,789,83"/>
+<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="648,107,767,133"/>
+<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="849,31,944,57"/>
+<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="837,81,956,108"/>
+<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="1004,31,1124,57"/>
+<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1172,31,1287,57"/>
+<area shape="rect" id="node12" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="456,107,551,133"/>
 </map>
 </div>
 
@@ -1135,30 +1055,23 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege in the personal scope of the given accessor_id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00699">699</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00862">862</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c_abdf7a99cee51319e393a9d0d3a1e79ef_cgraph.png" border="0" usemap="#veil2_8c_abdf7a99cee51319e393a9d0d3a1e79ef_cgraph" alt=""/></div>
 <map name="veil2_8c_abdf7a99cee51319e393a9d0d3a1e79ef_cgraph" id="veil2_8c_abdf7a99cee51319e393a9d0d3a1e79ef_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="248,81,399,108"/>
-<area shape="rect" id="node11" href="veil2_8c.html#ad03876d90cc6f64b46b87bdbe6dc7289" title="load_privs" alt="" coords="280,157,367,184"/>
-<area shape="rect" id="node18" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="269,208,377,235"/>
-<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="456,81,604,108"/>
-<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="676,56,811,83"/>
-<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="661,5,825,32"/>
-<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="684,107,803,133"/>
-<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="891,107,986,133"/>
-<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="879,5,998,32"/>
-<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="1065,107,1185,133"/>
-<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1247,107,1361,133"/>
-<area shape="rect" id="node12" href="veil2_8c.html#ad0227b91fd8a98d84dc03bff37ea89f1" title="do_load_session_privs" alt="" coords="447,157,613,184"/>
-<area shape="rect" id="node13" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="670,208,817,235"/>
-<area shape="rect" id="node15" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="1052,284,1199,311"/>
-<area shape="rect" id="node16" href="veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2" title="fetch_scope_privs" alt="" coords="675,259,812,285"/>
-<area shape="rect" id="node14" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="875,208,1002,235"/>
-<area shape="rect" id="node17" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="873,259,1004,285"/>
-<area shape="rect" id="node19" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="483,208,577,235"/>
+<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="248,56,399,83"/>
+<area shape="rect" id="node11" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="269,107,377,133"/>
+<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="447,56,595,83"/>
+<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="657,5,792,32"/>
+<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="643,56,807,83"/>
+<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="665,107,784,133"/>
+<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="867,31,961,57"/>
+<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="855,81,973,108"/>
+<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="1021,31,1141,57"/>
+<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1189,31,1304,57"/>
+<area shape="rect" id="node12" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="473,107,568,133"/>
 </map>
 </div>
 
@@ -1191,30 +1104,23 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege for the given scope_type_id and scope_id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00731">731</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00893">893</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c_a1f3226ae495eaf76f2f1165026a7f0eb_cgraph.png" border="0" usemap="#veil2_8c_a1f3226ae495eaf76f2f1165026a7f0eb_cgraph" alt=""/></div>
 <map name="veil2_8c_a1f3226ae495eaf76f2f1165026a7f0eb_cgraph" id="veil2_8c_a1f3226ae495eaf76f2f1165026a7f0eb_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="204,81,355,108"/>
-<area shape="rect" id="node11" href="veil2_8c.html#ad03876d90cc6f64b46b87bdbe6dc7289" title="load_privs" alt="" coords="236,157,323,184"/>
-<area shape="rect" id="node18" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="225,208,333,235"/>
-<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="412,81,560,108"/>
-<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="632,56,767,83"/>
-<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="617,5,781,32"/>
-<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="640,107,759,133"/>
-<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="847,107,942,133"/>
-<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="835,5,954,32"/>
-<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="1021,107,1141,133"/>
-<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1203,107,1317,133"/>
-<area shape="rect" id="node12" href="veil2_8c.html#ad0227b91fd8a98d84dc03bff37ea89f1" title="do_load_session_privs" alt="" coords="403,157,569,184"/>
-<area shape="rect" id="node13" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="626,208,773,235"/>
-<area shape="rect" id="node15" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="1008,284,1155,311"/>
-<area shape="rect" id="node16" href="veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2" title="fetch_scope_privs" alt="" coords="631,259,768,285"/>
-<area shape="rect" id="node14" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="831,208,958,235"/>
-<area shape="rect" id="node17" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="829,259,960,285"/>
-<area shape="rect" id="node19" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="439,208,533,235"/>
+<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="204,56,355,83"/>
+<area shape="rect" id="node11" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="225,107,333,133"/>
+<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="403,56,551,83"/>
+<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="613,5,748,32"/>
+<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="599,56,763,83"/>
+<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="621,107,740,133"/>
+<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="823,31,917,57"/>
+<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="811,81,929,108"/>
+<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="977,31,1097,57"/>
+<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1145,31,1260,57"/>
+<area shape="rect" id="node12" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="429,107,524,133"/>
 </map>
 </div>
 
@@ -1247,30 +1153,23 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege for the given scope_type_id and scope_id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00764">764</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00925">925</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c_af94dca10e6f14dc3fb20bbb288415fca_cgraph.png" border="0" usemap="#veil2_8c_af94dca10e6f14dc3fb20bbb288415fca_cgraph" alt=""/></div>
 <map name="veil2_8c_af94dca10e6f14dc3fb20bbb288415fca_cgraph" id="veil2_8c_af94dca10e6f14dc3fb20bbb288415fca_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="204,81,355,108"/>
-<area shape="rect" id="node11" href="veil2_8c.html#ad03876d90cc6f64b46b87bdbe6dc7289" title="load_privs" alt="" coords="236,157,323,184"/>
-<area shape="rect" id="node18" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="225,208,333,235"/>
-<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="412,81,560,108"/>
-<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="632,56,767,83"/>
-<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="617,5,781,32"/>
-<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="640,107,759,133"/>
-<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="847,107,942,133"/>
-<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="835,5,954,32"/>
-<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="1021,107,1141,133"/>
-<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1203,107,1317,133"/>
-<area shape="rect" id="node12" href="veil2_8c.html#ad0227b91fd8a98d84dc03bff37ea89f1" title="do_load_session_privs" alt="" coords="403,157,569,184"/>
-<area shape="rect" id="node13" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="626,208,773,235"/>
-<area shape="rect" id="node15" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="1008,284,1155,311"/>
-<area shape="rect" id="node16" href="veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2" title="fetch_scope_privs" alt="" coords="631,259,768,285"/>
-<area shape="rect" id="node14" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="831,208,958,235"/>
-<area shape="rect" id="node17" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="829,259,960,285"/>
-<area shape="rect" id="node19" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="439,208,533,235"/>
+<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="204,56,355,83"/>
+<area shape="rect" id="node11" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="225,107,333,133"/>
+<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="403,56,551,83"/>
+<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="613,5,748,32"/>
+<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="599,56,763,83"/>
+<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="621,107,740,133"/>
+<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="823,31,917,57"/>
+<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="811,81,929,108"/>
+<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="977,31,1097,57"/>
+<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1145,31,1260,57"/>
+<area shape="rect" id="node12" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="429,107,524,133"/>
 </map>
 </div>
 
@@ -1303,30 +1202,23 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege in the scope given by scope_type_id and scope_id or a supeior one. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00857">857</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01017">1017</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c_a4b25cd404b6882e64e0d484222ee8f93_cgraph.png" border="0" usemap="#veil2_8c_a4b25cd404b6882e64e0d484222ee8f93_cgraph" alt=""/></div>
 <map name="veil2_8c_a4b25cd404b6882e64e0d484222ee8f93_cgraph" id="veil2_8c_a4b25cd404b6882e64e0d484222ee8f93_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="204,51,355,77"/>
-<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="632,25,767,52"/>
-<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="617,76,781,103"/>
-<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="640,127,759,153"/>
-<area shape="rect" id="node11" href="veil2_8c.html#ad03876d90cc6f64b46b87bdbe6dc7289" title="load_privs" alt="" coords="236,203,323,229"/>
-<area shape="rect" id="node18" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="225,253,333,280"/>
-<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="412,51,560,77"/>
-<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="847,152,942,179"/>
-<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="835,76,954,103"/>
-<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="1021,152,1141,179"/>
-<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1203,152,1317,179"/>
-<area shape="rect" id="node12" href="veil2_8c.html#ad0227b91fd8a98d84dc03bff37ea89f1" title="do_load_session_privs" alt="" coords="403,203,569,229"/>
-<area shape="rect" id="node13" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="626,228,773,255"/>
-<area shape="rect" id="node15" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="1008,304,1155,331"/>
-<area shape="rect" id="node16" href="veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2" title="fetch_scope_privs" alt="" coords="631,279,768,305"/>
-<area shape="rect" id="node14" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="831,228,958,255"/>
-<area shape="rect" id="node17" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="829,279,960,305"/>
-<area shape="rect" id="node19" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="439,253,533,280"/>
+<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="204,93,355,120"/>
+<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="613,5,748,32"/>
+<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="599,81,763,108"/>
+<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="621,144,740,171"/>
+<area shape="rect" id="node11" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="225,195,333,221"/>
+<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="403,93,551,120"/>
+<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="823,56,917,83"/>
+<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="811,107,929,133"/>
+<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="977,56,1097,83"/>
+<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1145,56,1260,83"/>
+<area shape="rect" id="node12" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="429,195,524,221"/>
 </map>
 </div>
 
@@ -1359,30 +1251,23 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege in the scope given by scope_type_id and scope_id or a supeior one or global scope. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00924">924</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01083">1083</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c_a1648915ba36e9f03b3ace8c43ad2fb9f_cgraph.png" border="0" usemap="#veil2_8c_a1648915ba36e9f03b3ace8c43ad2fb9f_cgraph" alt=""/></div>
 <map name="veil2_8c_a1648915ba36e9f03b3ace8c43ad2fb9f_cgraph" id="veil2_8c_a1648915ba36e9f03b3ace8c43ad2fb9f_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="223,49,373,76"/>
-<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="651,24,785,50"/>
-<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="636,74,800,101"/>
-<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="659,125,777,152"/>
-<area shape="rect" id="node11" href="veil2_8c.html#ad03876d90cc6f64b46b87bdbe6dc7289" title="load_privs" alt="" coords="255,201,341,228"/>
-<area shape="rect" id="node18" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="244,252,352,278"/>
-<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="431,49,579,76"/>
-<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="866,150,961,177"/>
-<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="854,74,973,101"/>
-<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="1040,150,1160,177"/>
-<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1221,150,1336,177"/>
-<area shape="rect" id="node12" href="veil2_8c.html#ad0227b91fd8a98d84dc03bff37ea89f1" title="do_load_session_privs" alt="" coords="421,201,588,228"/>
-<area shape="rect" id="node13" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="645,226,791,253"/>
-<area shape="rect" id="node15" href="veil2_8c.html#aabe26dc105921f8fdf5304f8cb51fccb" title="extendSessionPrivs" alt="" coords="1027,302,1173,329"/>
-<area shape="rect" id="node16" href="veil2_8c.html#a8427f8ff086c0cfde8433b48faf005b2" title="fetch_scope_privs" alt="" coords="649,277,787,304"/>
-<area shape="rect" id="node14" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="850,226,977,253"/>
-<area shape="rect" id="node17" href="veil2_8c.html#a552c63ade183ba790a1fc1105117c6b5" title="add_scope_privs" alt="" coords="848,277,979,304"/>
-<area shape="rect" id="node19" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="457,252,552,278"/>
+<area shape="rect" id="node2" href="veil2_8c.html#abdfc74e12e705f110f1f6719ee33c7ea" title="checkSessionReady" alt="" coords="223,93,373,120"/>
+<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="632,5,767,32"/>
+<area shape="rect" id="node5" href="query_8c.html#a7b701739e7cf328e55d3aa4b99b96632" title="veil2_bool_from_query" alt="" coords="617,81,781,108"/>
+<area shape="rect" id="node10" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="640,144,759,171"/>
+<area shape="rect" id="node11" href="veil2_8c.html#a1ca237d772c5c3cdaf9aaa117d11fbbb" title="checkContext" alt="" coords="244,195,352,221"/>
+<area shape="rect" id="node3" href="veil2_8c.html#a6d6b01654a9686d26fa3f2ee2533a619" title="error_if_no_session" alt="" coords="421,93,569,120"/>
+<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="841,56,936,83"/>
+<area shape="rect" id="node9" href="query_8c.html#af74e06c2774ec139f2d4b9b01cfb7409" title="fetch_one_bool" alt="" coords="829,107,948,133"/>
+<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="996,56,1116,83"/>
+<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="1164,56,1279,83"/>
+<area shape="rect" id="node12" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="448,195,543,221"/>
 </map>
 </div>
 
@@ -1415,7 +1300,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege in a scope superior to that given by scope_type_id and scope_id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00801">801</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00961">961</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1454,23 +1339,22 @@ Here is the call graph for this function:</div>
 <p>Resets a postgres session prior to the recording of session privilege information. This ensures that the Veil2 temporary tables, on which our security depends, exist and have not been tamperered with. Unless this function succeeds, the privilege testing functions <a class="el" href="veil2_8c.html#a0f03a4c32bbac407d040e66fcb807e48">veil2_i_have_global_priv()</a>, <a class="el" href="veil2_8c.html#abdf7a99cee51319e393a9d0d3a1e79ef">veil2_i_have_personal_priv()</a>, <a class="el" href="veil2_8c.html#a1f3226ae495eaf76f2f1165026a7f0eb">veil2_i_have_priv_in_scope()</a> and <a class="el" href="veil2_8c.html#ab26e0230a290a97425e5fd7c420737b6">veil2_i_have_priv_in_superior_scope()</a> will always return false.</p>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00588">588</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00557">557</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c_aa978d6e0212eb0edf5436a07a4bec88d_cgraph.png" border="0" usemap="#veil2_8c_aa978d6e0212eb0edf5436a07a4bec88d_cgraph" alt=""/></div>
 <map name="veil2_8c_aa978d6e0212eb0edf5436a07a4bec88d_cgraph" id="veil2_8c_aa978d6e0212eb0edf5436a07a4bec88d_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="200,5,347,32"/>
-<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="206,56,341,83"/>
-<area shape="rect" id="node5" href="veil2_8c.html#af7ae936fa571fecaac89d8adee322ae6" title="do_reset_session" alt="" coords="206,107,341,133"/>
-<area shape="rect" id="node12" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="214,157,333,184"/>
-<area shape="rect" id="node3" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="410,5,537,32"/>
-<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="600,157,695,184"/>
-<area shape="rect" id="node9" href="veil2_8c.html#a9267b3a3291b582296685bdc3dccfa1e" title="fetch_2ints" alt="" coords="428,107,519,133"/>
-<area shape="rect" id="node10" href="veil2_8c.html#a45a90a5d613d0f79e8e18adfc0abdd66" title="create_temp_tables" alt="" coords="400,157,547,184"/>
-<area shape="rect" id="node11" href="veil2_8c.html#a351e9c866a977deb2a28e07091adba0d" title="truncate_temp_tables" alt="" coords="395,208,552,235"/>
-<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="743,157,863,184"/>
-<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="911,157,1025,184"/>
+<area shape="rect" id="node2" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="200,5,335,32"/>
+<area shape="rect" id="node3" href="veil2_8c.html#af7ae936fa571fecaac89d8adee322ae6" title="do_reset_session" alt="" coords="200,56,335,83"/>
+<area shape="rect" id="node11" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="208,107,327,133"/>
+<area shape="rect" id="node4" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="632,31,727,57"/>
+<area shape="rect" id="node7" href="veil2_8c.html#a9267b3a3291b582296685bdc3dccfa1e" title="fetch_2ints" alt="" coords="423,31,513,57"/>
+<area shape="rect" id="node8" href="veil2_8c.html#a45a90a5d613d0f79e8e18adfc0abdd66" title="create_temp_tables" alt="" coords="395,81,541,108"/>
+<area shape="rect" id="node9" href="veil2_8c.html#ac3d863c7368ccb8b02f6b039611ed26e" title="clear_session_roleprivs" alt="" coords="383,132,553,159"/>
+<area shape="rect" id="node5" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="805,31,925,57"/>
+<area shape="rect" id="node6" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="973,31,1088,57"/>
+<area shape="rect" id="node10" href="veil2_8c.html#a6bb26c76b5955baf572734ae5b6b5c4a" title="freeContextRolePrivs" alt="" coords="601,132,757,159"/>
 </map>
 </div>
 
@@ -1495,23 +1379,22 @@ Here is the call graph for this function:</div>
 <p>Clears the temp table and cached privileges for a postgres session and reloads them.</p>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00609">609</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00577">577</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c_ab9a3b057ba1dea0f0db728f321fb768d_cgraph.png" border="0" usemap="#veil2_8c_ab9a3b057ba1dea0f0db728f321fb768d_cgraph" alt=""/></div>
 <map name="veil2_8c_ab9a3b057ba1dea0f0db728f321fb768d_cgraph" id="veil2_8c_ab9a3b057ba1dea0f0db728f321fb768d_cgraph">
-<area shape="rect" id="node2" href="veil2_8c.html#a3cc456848a9f63f74dfe80326e3f17a2" title="clear_session_privs" alt="" coords="200,5,347,32"/>
-<area shape="rect" id="node4" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="206,56,341,83"/>
-<area shape="rect" id="node5" href="veil2_8c.html#af7ae936fa571fecaac89d8adee322ae6" title="do_reset_session" alt="" coords="206,107,341,133"/>
-<area shape="rect" id="node12" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="214,157,333,184"/>
-<area shape="rect" id="node3" href="veil2_8c.html#ab6708652d0e229189e124f02a78964d3" title="freeContextPrivs" alt="" coords="410,5,537,32"/>
-<area shape="rect" id="node6" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="600,157,695,184"/>
-<area shape="rect" id="node9" href="veil2_8c.html#a9267b3a3291b582296685bdc3dccfa1e" title="fetch_2ints" alt="" coords="428,107,519,133"/>
-<area shape="rect" id="node10" href="veil2_8c.html#a45a90a5d613d0f79e8e18adfc0abdd66" title="create_temp_tables" alt="" coords="400,157,547,184"/>
-<area shape="rect" id="node11" href="veil2_8c.html#a351e9c866a977deb2a28e07091adba0d" title="truncate_temp_tables" alt="" coords="395,208,552,235"/>
-<area shape="rect" id="node7" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="743,157,863,184"/>
-<area shape="rect" id="node8" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="911,157,1025,184"/>
+<area shape="rect" id="node2" href="query_8c.html#a4603875664db61438ab4e9997812b0b4" title="veil2_spi_connect" alt="" coords="200,5,335,32"/>
+<area shape="rect" id="node3" href="veil2_8c.html#af7ae936fa571fecaac89d8adee322ae6" title="do_reset_session" alt="" coords="200,56,335,83"/>
+<area shape="rect" id="node11" href="query_8c.html#aef1d49813efe3aec5c7511a84d4b723d" title="veil2_spi_finish" alt="" coords="208,107,327,133"/>
+<area shape="rect" id="node4" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="632,31,727,57"/>
+<area shape="rect" id="node7" href="veil2_8c.html#a9267b3a3291b582296685bdc3dccfa1e" title="fetch_2ints" alt="" coords="423,31,513,57"/>
+<area shape="rect" id="node8" href="veil2_8c.html#a45a90a5d613d0f79e8e18adfc0abdd66" title="create_temp_tables" alt="" coords="395,81,541,108"/>
+<area shape="rect" id="node9" href="veil2_8c.html#ac3d863c7368ccb8b02f6b039611ed26e" title="clear_session_roleprivs" alt="" coords="383,132,553,159"/>
+<area shape="rect" id="node5" href="query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="805,31,925,57"/>
+<area shape="rect" id="node6" href="query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="973,31,1088,57"/>
+<area shape="rect" id="node10" href="veil2_8c.html#a6bb26c76b5955baf572734ae5b6b5c4a" title="freeContextRolePrivs" alt="" coords="601,132,757,159"/>
 </map>
 </div>
 
@@ -1535,7 +1418,53 @@ Here is the call graph for this function:</div>
 <p>Return the number of times one of the i_have_privilege_xxxx() functions has returned false and true.</p>
 <dl class="section return"><dt>Returns</dt><dd>Record: false_count, true_count </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00980">980</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01138">1138</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+
+</div>
+</div>
+<a id="ac488f8c8283ea0f8ef4d570c7051cfe8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac488f8c8283ea0f8ef4d570c7051cfe8">&#9670;&nbsp;</a></span>veil2_session_context()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Datum veil2_session_context </td>
+          <td>(</td>
+          <td class="paramtype">FunctionCallInfo&#160;</td>
+          <td class="paramname"><em>fcinfo</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><code>veil2.session_context(&lt;optional variables&gt;)</code></p>
+<p>Optionally set (if variables are provided), and return the session context.</p>
+<dl class="section return"><dt>Returns</dt><dd>record </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00596">596</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+
+</div>
+</div>
+<a id="a950003d33ac24802b9bdb2839b3de0a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a950003d33ac24802b9bdb2839b3de0a7">&#9670;&nbsp;</a></span>veil2_session_privileges()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Datum veil2_session_privileges </td>
+          <td>(</td>
+          <td class="paramtype">FunctionCallInfo&#160;</td>
+          <td class="paramname"><em>fcinfo</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><code>veil2.session_privileges()</code></p>
+<p>Return the current in-memory session_privileges as though they were a SQL table.</p>
+<dl class="section return"><dt>Returns</dt><dd>setof record </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00670">670</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1557,7 +1486,7 @@ Here is the call graph for this function:</div>
 <p><code><a class="el" href="veil2_8c.html#ab1c1816e2ef1b38fdfc3abf503d3fc50">veil2_session_ready()</a> returns bool</code> Predicate to indicate whether the current session has been properly initialized by <a class="el" href="veil2_8c.html#aa978d6e0212eb0edf5436a07a4bec88d">veil2_reset_session()</a>. It tests the static variable <a class="el" href="veil2_8c.html#a9206d7502b250a49f4279f788cd19c03">session_ready</a>.</p>
 <dl class="section return"><dt>Returns</dt><dd><code>bool</code> true if this session has been set up. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00496">496</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00537">537</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1580,7 +1509,78 @@ Here is the call graph for this function:</div>
 <p>Always return true, regardless of parameters. This is used to determine the minimum possible overhead for a privilege testing predicate, for performance measurements.</p>
 <dl class="section return"><dt>Returns</dt><dd>boolean true </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00630">630</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00794">794</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+
+</div>
+</div>
+<a id="a10139c4202e09809de2c4f65262a3923"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10139c4202e09809de2c4f65262a3923">&#9670;&nbsp;</a></span>veil2_update_session_privileges()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Datum veil2_update_session_privileges </td>
+          <td>(</td>
+          <td class="paramtype">FunctionCallInfo&#160;</td>
+          <td class="paramname"><em>fcinfo</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><code>veil2.update_session_privileges(scope_type_id, scope_id, roles, privileges)</code></p>
+<p>Update an in-memory session_privileges record, with new roles and prvs bitmaps. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">integer</td><td>scope_type_id The type of scope </td></tr>
+    <tr><td class="paramname">integer</td><td>scope_id The id of the actual scope </td></tr>
+    <tr><td class="paramname">Bitmap</td><td>roles The roles assigned in the context for this scope </td></tr>
+    <tr><td class="paramname">Bitmap</td><td>privs The privileges that apply in this scope </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00773">773</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="veil2_8c_a10139c4202e09809de2c4f65262a3923_cgraph.png" border="0" usemap="#veil2_8c_a10139c4202e09809de2c4f65262a3923_cgraph" alt=""/></div>
+<map name="veil2_8c_a10139c4202e09809de2c4f65262a3923_cgraph" id="veil2_8c_a10139c4202e09809de2c4f65262a3923_cgraph">
+<area shape="rect" id="node2" href="veil2_8c.html#a0816bda9c352d3b1abfe91e5ce4032fb" title="update_scope_roleprivs" alt="" coords="212,31,385,57"/>
+<area shape="rect" id="node3" href="veil2_8c.html#a19c7f5d2df4527ab984de57559ba783e" title="findContext" alt="" coords="464,5,559,32"/>
+<area shape="rect" id="node4" href="veil2_8c.html#a6bb26c76b5955baf572734ae5b6b5c4a" title="freeContextRolePrivs" alt="" coords="433,56,589,83"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="afe5b90a80701c7d22ff03c8fdf76e196"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe5b90a80701c7d22ff03c8fdf76e196">&#9670;&nbsp;</a></span>veil2_version()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Datum veil2_version </td>
+          <td>(</td>
+          <td class="paramtype">FunctionCallInfo&#160;</td>
+          <td class="paramname"><em>fcinfo</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Provide the veil2 version as a string.</p>
+<dl class="section return"><dt>Returns</dt><dd>Text value containing the version. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01207">1207</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="veil2_8c_afe5b90a80701c7d22ff03c8fdf76e196_cgraph.png" border="0" usemap="#veil2_8c_afe5b90a80701c7d22ff03c8fdf76e196_cgraph" alt=""/></div>
+<map name="veil2_8c_afe5b90a80701c7d22ff03c8fdf76e196_cgraph" id="veil2_8c_afe5b90a80701c7d22ff03c8fdf76e196_cgraph">
+<area shape="rect" id="node2" href="veil2_8c.html#a22033ed27181d9b4943f2916394a546e" title="textfromstr" alt="" coords="159,5,248,32"/>
+</map>
+</div>
 
 </div>
 </div>
@@ -1606,12 +1606,12 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 <p>Used to record counts of false and true results from the i_have_priv_xxx() functions. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00067">67</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00072">72</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
-<a id="a35e0fd1762207cf7d5bf56ca50279232"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35e0fd1762207cf7d5bf56ca50279232">&#9670;&nbsp;</a></span>session_privs</h2>
+<a id="a3036f6e034e902642fa98e4ef42ce25a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3036f6e034e902642fa98e4ef42ce25a">&#9670;&nbsp;</a></span>session_context</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1620,7 +1620,7 @@ Here is the call graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structSessionPrivs.html">SessionPrivs</a>* session_privs = ((void *) 0)</td>
+          <td class="memname"><a class="el" href="structSessionContext.html">SessionContext</a> session_context</td>
         </tr>
       </table>
   </td>
@@ -1629,34 +1629,8 @@ Here is the call graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>The <a class="el" href="structSessionPrivs.html">SessionPrivs</a> object for this session. </p>
-
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00096">96</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
-
-</div>
-</div>
-<a id="aec6a2cdc6993e99d274ad67ebc5b85dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec6a2cdc6993e99d274ad67ebc5b85dc">&#9670;&nbsp;</a></span>session_privs_loaded</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool session_privs_loaded = ((bool) 0)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Whether we have loaded our session's <a class="el" href="structContextPrivs.html">ContextPrivs</a> into session memory. </p>
-
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00101">101</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<b>Initial value:</b><div class="fragment"><div class="line">= { ((bool) 0) , 0, 0, 0, 0,</div><div class="line">                                         0, 0, 0, 0}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00129">129</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1682,7 +1656,57 @@ Here is the call graph for this function:</div>
 <p>Used to record whether the current session's temporary tables have been properly initialised using <a class="el" href="veil2_8c.html#aa978d6e0212eb0edf5436a07a4bec88d">veil2_reset_session()</a>. If not the privilege testing functions <a class="el" href="veil2_8c.html#a0f03a4c32bbac407d040e66fcb807e48">veil2_i_have_global_priv()</a>, <a class="el" href="veil2_8c.html#abdf7a99cee51319e393a9d0d3a1e79ef">veil2_i_have_personal_priv()</a>, <a class="el" href="veil2_8c.html#a1f3226ae495eaf76f2f1165026a7f0eb">veil2_i_have_priv_in_scope()</a> and <a class="el" href="veil2_8c.html#ab26e0230a290a97425e5fd7c420737b6">veil2_i_have_priv_in_superior_scope()</a> will always return false. If you need to implement your own pl/pgsql base privilege testing function, it should call veil2_session_reeady() to ensure that privileges have been correctly set up.</p>
 <p>The primary reason for this variable to exist is to ensure that a user cannot trick the privileges functions by creating their own session_privileges table. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00060">60</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00065">65</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+
+</div>
+</div>
+<a id="a3107d158c1cf2a3ed43023e7e2deb037"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3107d158c1cf2a3ed43023e7e2deb037">&#9670;&nbsp;</a></span>session_roleprivs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structSessionRolePrivs.html">SessionRolePrivs</a>* session_roleprivs = ((void *) 0)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The SessionPrivs object for this session. </p>
+
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00122">122</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+
+</div>
+</div>
+<a id="a5dfe0446477a1237ba5c84d63d32dd3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5dfe0446477a1237ba5c84d63d32dd3f">&#9670;&nbsp;</a></span>session_roleprivs_loaded</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool session_roleprivs_loaded = ((bool) 0)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Whether we have loaded our session's ContextPrivs into session memory. </p>
+
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00127">127</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>

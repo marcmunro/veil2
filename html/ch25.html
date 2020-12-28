@@ -5,7 +5,7 @@
 <title>Chapter 25. Performance</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="home" href="index.html" title="Veil2 Documentation">
 <link rel="up" href="pt03.html" title="Part III. Implementation Details">
 <link rel="prev" href="ch24.html" title="Chapter 24. Tips and Guidelines">
 <link rel="next" href="ch26.html" title="Chapter 26. Security">
@@ -73,7 +73,7 @@ marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo_bulk_data.sql
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2076"></a>25.2. Session Management Overhead</h2></div></div></div>
+<a name="idm2053"></a>25.2. Session Management Overhead</h2></div></div></div>
 <p>
       The two biggest overheads in session management are the use of
       <code class="literal">bcrypt()</code> for authentication (which is
@@ -95,17 +95,17 @@ marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo_bulk_data.sql
       </p>
 <pre class="programlisting">
 marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/perf.sql 
-Creating sessions: elapsed = 21 milliseconds.
-Opening sessions: elapsed = 51 milliseconds.
-Re-opening sessions: elapsed = 60 milliseconds.
+Creating sessions: elapsed = 16 milliseconds.
+Opening sessions: elapsed = 54 milliseconds.
+Re-opening sessions: elapsed = 61 milliseconds.
 marc:veil2$ 
       </pre>
 <p>
       The script creates 6 sessions, opens each of them, and then
       re-opens them.  The elapsed times shown are cumulative, in this
       case giving the time to open and initialize the sessions as
-      being approximately 30 milliseconds (5 milliseconds each), with
-      the session reloads taking about 9 milliseconds (1.5
+      being approximately 40 milliseconds (~7 milliseconds each), with
+      the session reloads taking about 7 milliseconds (~1.2
       milliseconds each).  
     </p>
 <p>
@@ -125,10 +125,10 @@ cache size	: 6144 KB
     </p>
 <p>
       It may be possible to further improve the performance by
-      re-implementing the session management functions in C, though
-      initial experiments yielded only minor gains which, given the
-      loss in flexibility resulting from a C implementation, were not
-      felt to be worthwhile.
+      implementing more of the session management functions in C,
+      though initial experiments yielded only minor gains which, given
+      the loss in flexibility resulting from a C implementation, were
+      not felt to be worthwhile.
     </p>
 <p>
       Until anyone claims otherwise, the author is going to claim that
@@ -137,7 +137,7 @@ cache size	: 6144 KB
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2093"></a>25.3. Privilege Testing Overhead</h2></div></div></div>
+<a name="idm2070"></a>25.3. Privilege Testing Overhead</h2></div></div></div>
 <p>
       For testing the overhead of running privilege tests, you should
       load the performance evaluation data as described <a class="link" href="ch25.html#load_perf_data" title="25.1. Data For Evaluating Performance">above</a>.
@@ -187,48 +187,40 @@ Time: 24.037 ms
 running tests...
 ...on x (3 times)...
 1995
-Time: 0.581 ms
+Time: 0.521 ms
 1995
-Time: 0.274 ms
+Time: 0.292 ms
 1995
-Time: 0.261 ms
+Time: 0.265 ms
 ...on y (3 times)...
 1995
-Time: 0.576 ms
+Time: 0.520 ms
 1995
-Time: 0.316 ms
+Time: 0.292 ms
 1995
-Time: 0.291 ms
+Time: 0.283 ms
 result_counts (to keep us honest):
 0|0
-Time: 0.117 ms
+Time: 0.131 ms
 ...on z (3 times)...
 1995
-Time: 0.826 ms
+Time: 0.499 ms
 1995
-Time: 0.383 ms
+Time: 0.341 ms
 1995
-Time: 0.365 ms
+Time: 0.302 ms
 result_counts again:
 0|5985
-Time: 0.140 ms
+Time: 0.079 ms
 marc:veil2$ 
       </pre>
 <p>
     </p>
 <p>
-      What this shows, for table z, is that the first query
-      experiences some small overhead (approx 0.5 millisecs), and that
-      subsequent queries have little more overhead than table y, which
-      has the smallest possible overhead for a table with a security
-      policy.  Based on all of this, the author is going to claim that
-      this is pretty damn fast.
-    </p>
-<p>
-      The reason for the small initial overhead on the first test
-      against table Z is that on the first call to a privilege testing
-      function, the session's privileges must be loaded into session
-      memory.
+      What this shows is that queries for table z have little more
+      overhead than table y, which has the smallest possible overhead
+      for a table with a security policy.  Based on all of this, the
+      author is going to claim that this is pretty damn fast.
     </p>
 <p>
       Since these results look too good to be true, we perform a query
@@ -240,7 +232,7 @@ marc:veil2$
     </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2119"></a>25.3.1. Other Privilege Test Functions</h3></div></div></div>
+<a name="idm2095"></a>25.3.1. Other Privilege Test Functions</h3></div></div></div>
 <p>
 	The tests above only test
 	<code class="literal">veil2.i_have_global_priv()</code>, which is the
@@ -270,7 +262,7 @@ marc:veil2$
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2126"></a>25.4. In Conclusion</h2></div></div></div>
+<a name="idm2102"></a>25.4. In Conclusion</h2></div></div></div>
 <p>
       Oh my, it's fast!
     </p>

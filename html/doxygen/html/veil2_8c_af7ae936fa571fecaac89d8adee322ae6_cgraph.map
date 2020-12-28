@@ -1,8 +1,9 @@
 <map id="do_reset_session" name="do_reset_session">
-<area shape="rect" id="node2" href="$query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="393,83,488,109"/>
-<area shape="rect" id="node5" href="$veil2_8c.html#a9267b3a3291b582296685bdc3dccfa1e" title="fetch_2ints" alt="" coords="221,32,312,59"/>
-<area shape="rect" id="node6" href="$veil2_8c.html#a45a90a5d613d0f79e8e18adfc0abdd66" title="create_temp_tables" alt="" coords="193,83,340,109"/>
-<area shape="rect" id="node7" href="$veil2_8c.html#a351e9c866a977deb2a28e07091adba0d" title="truncate_temp_tables" alt="" coords="188,133,345,160"/>
-<area shape="rect" id="node3" href="$query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="536,83,656,109"/>
-<area shape="rect" id="node4" href="$query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="704,83,819,109"/>
+<area shape="rect" id="node2" href="$query_8c.html#ac43e6b3b80193c907eb796da31304f49" title="veil2_query" alt="" coords="437,26,532,52"/>
+<area shape="rect" id="node5" href="$veil2_8c.html#a9267b3a3291b582296685bdc3dccfa1e" title="fetch_2ints" alt="" coords="228,26,319,52"/>
+<area shape="rect" id="node6" href="$veil2_8c.html#a45a90a5d613d0f79e8e18adfc0abdd66" title="create_temp_tables" alt="" coords="200,76,347,103"/>
+<area shape="rect" id="node7" href="$veil2_8c.html#ac3d863c7368ccb8b02f6b039611ed26e" title="clear_session_roleprivs" alt="" coords="188,127,359,154"/>
+<area shape="rect" id="node3" href="$query_8c.html#a4581cfcfaec084668c31d2680430da86" title="veil2_query_wn" alt="" coords="611,26,731,52"/>
+<area shape="rect" id="node4" href="$query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05" title="prepare_query" alt="" coords="779,26,893,52"/>
+<area shape="rect" id="node8" href="$veil2_8c.html#a6bb26c76b5955baf572734ae5b6b5c4a" title="freeContextRolePrivs" alt="" coords="407,127,563,154"/>
 </map>

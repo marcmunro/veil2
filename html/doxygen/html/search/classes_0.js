@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['contextprivs',['ContextPrivs',['../structContextPrivs.html',1,'']]]
+  ['contextroleprivs',['ContextRolePrivs',['../structContextRolePrivs.html',1,'']]]
 ];

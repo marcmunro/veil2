@@ -5,8 +5,8 @@
 <title>Appendix B. Veil2 Views, Materialized Views and Caches</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="home" href="index.html" title="Veil2 Documentation">
+<link rel="up" href="index.html" title="Veil2 Documentation">
 <link rel="prev" href="apa.html" title="Appendix A. Veil2 ERD and Database Objects">
 <link rel="next" href="apc.html" title="Appendix C. Veil2 Functions and Triggers">
 </head>
@@ -30,7 +30,7 @@
 </div>
 <div class="appendix">
 <div class="titlepage"><div><div><h1 class="title">
-<a name="idm2260"></a>Appendix B. <code class="literal">Veil2</code> Views, Materialized Views and Caches</h1></div></div></div>
+<a name="idm2236"></a>Appendix B. <code class="literal">Veil2</code> Views, Materialized Views and Caches</h1></div></div></div>
 <p></p>
 <div class="mediaobject"><div id="veil2_views_div">
   <map name="veil2_views_map">
@@ -112,7 +112,7 @@
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2267"></a>B.1. Veil2 Views</h2></div></div></div>
+<a name="idm2243"></a>B.1. Veil2 Views</h2></div></div></div>
 <p>
       Establishing whether an accessor has a given privilege in a
       given scope is a complex operation.  Privileges are assigned via
@@ -149,7 +149,7 @@
 <p>
       The bottom-most view in the diagram, <a class="link" href="apb.html#view_session_privileges_v" title="B.1.3.7. Session Privileges V View"><code class="literal">session_privileges_v</code></a>
       provides the data that determines an accessors privileges.  This
-      view is used directly by the function <a class="link" href="apc.html#func_load_session_privs" title="C.4.19. load_session_privs()"><code class="literal">load_session_privs</code></a>
+      view is used directly by the function <a class="link" href="apc.html#func_load_and_cache_session_privs" title="C.4.20. load_and_cache_session_privs()"><code class="literal">load_and_cache_session_privs()</code></a>
       to load the set of applicable roles and privileges, in all
       applicable contexts for an accessor's session.  The performance
       of this view is critical, and has been carefully developed and
@@ -164,13 +164,14 @@
     </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2287"></a>B.1.1. User-Supplied Views</h3></div></div></div>
+<a name="idm2263"></a>B.1.1. User-Supplied Views</h3></div></div></div>
 <p>
-	Although all of <code class="literal">Veil2</code>'s views may be
-	replaced by user-supplied versions, the following views are
-	expected to be.  These views are expected to directly query
-	user-provided tables which will be part of the set of data
-	being protected by <code class="literal">Veil2</code>.
+	Although all of <code class="literal">Veil2</code>'s views
+	<span class="emphasis"><em>may</em></span> be replaced by user-supplied
+	versions, the following views are expected to be so replaced.
+	These views are expected to directly query user-provided
+	tables which will be part of the set of data being protected
+	by <code class="literal">Veil2</code>.
       </p>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
@@ -331,7 +332,7 @@ refresh of all Veil2 materialized views and caches.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2298"></a>B.1.2. Developer Views</h3></div></div></div>
+<a name="idm2275"></a>B.1.2. Developer Views</h3></div></div></div>
 <p>
 	These views do not directly contribute to
 	<code class="literal">Veil2</code> functionality.  They exist to help
@@ -573,7 +574,7 @@ complete way.  Try it, it should immediately make sense.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2314"></a>B.1.3. <code class="literal">Veil2</code> Core Views</h3></div></div></div>
+<a name="idm2291"></a>B.1.3. <code class="literal">Veil2</code> Core Views</h3></div></div></div>
 <p>
 	These views are fundamental to the proper operation of
 	<code class="literal">Veil2</code>.  You may provide your own versions
@@ -767,17 +768,22 @@ this view is updated.
 <a name="view_session_assignment_contexts"></a>B.1.3.5. Session Assignment Contexts View</h4></div></div></div>
 <pre class="programlisting">
 view veil2.session_assignment_contexts as
+with session_context as
+  (
+    select *
+      from veil2.session_context()
+  )
 select login_context_type_id as context_type_id,
        login_context_id as context_id
-  from veil2.session_context() sc
+  from session_context sc
  union
 select session_context_type_id as context_type_id,
        session_context_id as context_id
-  from veil2.session_context() sc
+  from session_context sc
  union
 select ass.superior_scope_type_id,
        ass.superior_scope_id
-  from veil2.session_context() sc
+  from session_context sc
  inner join veil2.all_superior_scopes ass
     on (    ass.scope_type_id = sc.login_context_type_id
         and ass.scope_id = sc.login_context_id)
@@ -786,7 +792,7 @@ select ass.superior_scope_type_id,
  union
 select ass.scope_type_id,
        ass.scope_id
-  from veil2.session_context() sc
+  from session_context sc
  inner join veil2.all_superior_scopes ass
     on (    ass.superior_scope_type_id = sc.login_context_type_id
         and ass.superior_scope_id = sc.login_context_id)
@@ -796,7 +802,7 @@ select ass.scope_type_id,
 select 1, 0
  union
 select 2, accessor_id
-  from veil2.session_context();
+  from session_context;
 
 </pre>
 <p>
@@ -1032,7 +1038,7 @@ this materialized view should be refreshed.
 <div class="titlepage"><div><div><h4 class="title">
 <a name="entity_accessor_privileges_cache"></a>B.1.4.3. Accessor Privileges Cache Table</h4></div></div></div>
 <pre class="programlisting">
-create table veil2.accessor_privileges_cache (
+create unlogged table veil2.accessor_privileges_cache (
   accessor_id			integer not null,
   login_context_type_id		integer not null,
   login_context_id		integer not null,

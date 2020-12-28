@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['active_5fcontexts',['active_contexts',['../structSessionPrivs.html#a76afc15e9554f88b2969a6d282ab88f5',1,'SessionPrivs']]],
-  ['array_5flen',['array_len',['../structSessionPrivs.html#af33fc809dfcca3c5e0ea491f053a6dad',1,'SessionPrivs']]]
+  ['accessor_5fid',['accessor_id',['../structSessionContext.html#a8143c92d8c6917153f0b82c4b562e3f5',1,'SessionContext']]],
+  ['active_5fcontexts',['active_contexts',['../structSessionRolePrivs.html#a5902c3a433538de360649ecc6e4f44d1',1,'SessionRolePrivs']]],
+  ['array_5flen',['array_len',['../structSessionRolePrivs.html#a0cab097ecafd6216a691fdeb36569673',1,'SessionRolePrivs']]]
 ];

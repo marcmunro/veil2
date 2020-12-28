@@ -5,7 +5,7 @@
 <title>Chapter 9. Identify and Define Your Scope Types (STEP 2)</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="home" href="index.html" title="Veil2 Documentation">
 <link rel="up" href="pt02.html" title="Part II. Creating Your Veil2-based VPD Step By Step">
 <link rel="prev" href="ch08.html" title="Chapter 8. Getting Started With Veil2 (STEP 1)">
 <link rel="next" href="ch10.html" title="Chapter 10. Setting Up Authentication and Session Management (STEP 3)">
@@ -32,8 +32,8 @@
 <div class="titlepage"><div><div><h2 class="title">
 <a name="setup_scope_types"></a>Chapter 9. Identify and Define Your Scope Types (STEP 2)</h2></div></div></div>
 <p>
-    You need to identify the types of <a class="link" href="ch04.html#scopes" title="4.2. Scopes">scopes</a> that your privileges will have.
-    You may find it easier to think in terms of <a class="link" href="ch04.html#security-contexts" title="4.5. Security Contexts">security contexts</a> rather than
+    You need to identify the types of <a class="link" href="ch04.html#scopes" title="4.3. Scopes">scopes</a> that your privileges will have.
+    You may find it easier to think in terms of <a class="link" href="ch04.html#security-contexts" title="4.2. Security Contexts">security contexts</a> rather than
     scopes (use whichever concept works better for you).  The two
     things are very similar but contexts are more user-facing and
     scopes more implementation-facing.  Ask yourself, in what contexts
@@ -52,7 +52,7 @@
 <p><a name="role_mapping_context"></a>
     You will also need to consider whether your role mappings will
     apply globally, or whether different subsets of users are going to
-    see different <a class="link" href="ch04.html#role_mapping" title="4.3.1. Contextual Role Mapping">contextually-dependent
+    see different <a class="link" href="ch04.html#role_mapping" title="4.4.1. Contextual Role Mapping">contextually-dependent
     role-mappings</a>.  If your users have different <a class="link" href="ch04.html#authentication_context" title="4.7. Authentication Contexts">authentication contexts</a>,
     that is they log in using different web forms for different
     organizations or departments, etc, then you may need different
@@ -64,7 +64,7 @@
   </p>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm732"></a>9.1. Create Scope Type Records</h2></div></div></div>
+<a name="idm714"></a>9.1. Create Scope Type Records</h2></div></div></div>
 <p>
       You will need to insert records into
       <a class="link" href="apa.html#entity_scope_type" title="A.1.1. Scope Types Table"><code class="literal">veil2.scope_types</code></a>.
@@ -78,7 +78,7 @@
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm739"></a>9.2. Update Your Role Mapping Context (maybe)</h2></div></div></div>
+<a name="idm721"></a>9.2. Update Your Role Mapping Context (maybe)</h2></div></div></div>
 <p>
       If you need multiple role to role mapping contexts, you need to
       define <span class="quote">“<span class="quote"><code class="literal">mapping context target scope

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['prepare_5fquery',['prepare_query',['../query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05',1,'query.c']]],
-  ['privileges',['privileges',['../structContextPrivs.html#a4e419b3c0622b27865745219f26537d8',1,'ContextPrivs']]]
+  ['mapping_5fcontext_5fid',['mapping_context_id',['../structSessionContext.html#acea120031a5a81c790bbb63615c01410',1,'SessionContext']]],
+  ['mapping_5fcontext_5ftype_5fid',['mapping_context_type_id',['../structSessionContext.html#afe3fd094a0f722aceb210fcef7190aff',1,'SessionContext']]]
 ];

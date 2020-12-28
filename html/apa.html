@@ -5,8 +5,8 @@
 <title>Appendix A. Veil2 ERD and Database Objects</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="home" href="index.html" title="Veil2 Documentation">
+<link rel="up" href="index.html" title="Veil2 Documentation">
 <link rel="prev" href="ch27.html" title="Chapter 27. Contact Links">
 <link rel="next" href="apb.html" title="Appendix B. Veil2 Views, Materialized Views and Caches">
 </head>
@@ -30,69 +30,69 @@
 </div>
 <div class="appendix">
 <div class="titlepage"><div><div><h1 class="title">
-<a name="idm2214"></a>Appendix A. <code class="literal">Veil2</code> ERD and Database Objects</h1></div></div></div>
+<a name="idm2190"></a>Appendix A. <code class="literal">Veil2</code> ERD and Database Objects</h1></div></div></div>
 <p></p>
 <div class="mediaobject"><div id="veil2_erd_div">
   <map name="veil2_erd_map">
     <area alt="scope_type entity" title="scope_types table"
       target="_self" shape="rect"
-      coords="291,0,471,34"
+      coords="303,0,491,35"
       href="apa.html#entity_scope_type">
     <area alt="authentication_type entity" title="authentication_types table"
       target="_self" shape="rect"
-      coords="372,521,552,556"
+      coords="388,533,575,568"
       href="apa.html#entity_authentication_type">
     <area alt="role entity" title="roles table"
       target="_self" shape="rect"
-      coords="162,179,341,213"
+      coords="168,183,356,218"
       href="apa.html#entity_role">
     <area alt="privilege entity" title="privileges table"
       target="_self" shape="rect"
-      coords="97,130,277,164"
+      coords="101,133,288,168"
       href="apa.html#entity_privilege">
     <area alt="accessor entity" title="accessors table"
       target="_self" shape="rect"
-      coords="518,375,698,409"
+      coords="540,383,727,418"
       href="apa.html#entity_accessor">
     <area alt="role_privilege entity" title="role_privileges table"
       target="_self" shape="rect"
-      coords="0,309,179,344"
+      coords="0,316,187,351"
       href="apa.html#entity_role_privilege">
     <area alt="role_role entity" title="role_roles table"
       target="_self" shape="rect"
-      coords="162,554,341,588"
+      coords="168,566,356,601"
       href="apa.html#entity_role_role">
     <area alt="session entity" title="sessions table"
       target="_self" shape="rect"
-      coords="615,472,779,507"
+      coords="641,483,812,518"
       href="apa.html#entity_session">
     <area alt="authentication_detail entity" title="authentication_details table"
       target="_self" shape="rect"
-      coords="421,635,601,670"
+      coords="439,650,626,685"
       href="apa.html#entity_authentication_detail">
     <area alt="accessor_role entity" title="accessor_roles table"
       target="_self" shape="rect"
-      coords="372,472,552,507"
+      coords="388,483,575,518"
       href="apa.html#entity_accessor_role">
     <area alt="scope entity" title="scopes table"
       target="_self" shape="rect"
-      coords="470,146,779,181"
+      coords="489,150,812,185"
       href="apa.html#entity_scope">
     <area alt="context_role entity" title="context_roles table"
       target="_self" shape="rect"
-      coords="291,260,455,295"
+      coords="303,266,474,301"
       href="apa.html#entity_context_role">
     <area alt="role_type entity" title="role_types table"
       target="_self" shape="rect"
-      coords="291,81,455,115"
+      coords="303,83,474,118"
       href="apa.html#entity_role_type">
     <area alt="system_parameter entity" title="system_parameters table"
       target="_self" shape="rect"
-      coords="32,32,212,66"
+      coords="33,33,221,68"
       href="apa.html#entity_system_parameter">
     <area alt="session_context entity" title="session_contexts table"
       target="_self" shape="rect"
-      coords="615,538,779,572"
+      coords="641,550,812,585"
       href="apa.html#entity_session_context">
   </map>
   <img src="veil2_erd.png" usemap="#veil2_erd_map">
@@ -100,7 +100,7 @@
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2221"></a>A.1. Veil2 Tables</h2></div></div></div>
+<a name="idm2197"></a>A.1. Veil2 Tables</h2></div></div></div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="entity_scope_type"></a>A.1.1. Scope Types Table</h3></div></div></div>
@@ -563,7 +563,7 @@ that that role has been assigned, whether directly or indirectly.
 <a name="entity_session"></a>A.1.11. Sessions Table</h3></div></div></div>
 <pre class="programlisting">
 create unlogged table veil2.sessions (
-  session_id			integer not null
+  session_id			bigint not null
   				  default nextval('veil2.session_id_seq'),
   accessor_id			integer not null,
   login_context_type_id		integer not null,
@@ -578,7 +578,7 @@ create unlogged table veil2.sessions (
   has_authenticated		boolean not null,
   session_supplemental		text,
   nonces			bitmap,
-  parent_session_id		integer
+  parent_session_id		bigint
 );
 
 alter table veil2.sessions add constraint session__pk
@@ -730,14 +730,14 @@ may have different privileges from a CSR at another.
 <pre class="programlisting">
 create type veil2.session_context_t as (
   accessor_id			integer,
-  session_id                    integer,
+  session_id                    bigint,
   login_context_type_id		integer,
   login_context_id		integer,
   session_context_type_id       integer,
   session_context_id		integer,
   mapping_context_type_id	integer,
   mapping_context_id		integer,
-  parent_session_id		integer
+  parent_session_id		bigint
 );
 
 </pre>

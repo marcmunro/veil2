@@ -1,6 +1,7 @@
 var annotated_dup =
 [
-    [ "ContextPrivs", "structContextPrivs.html", "structContextPrivs" ],
-    [ "SessionPrivs", "structSessionPrivs.html", "structSessionPrivs" ],
+    [ "ContextRolePrivs", "structContextRolePrivs.html", "structContextRolePrivs" ],
+    [ "SessionContext", "structSessionContext.html", "structSessionContext" ],
+    [ "SessionRolePrivs", "structSessionRolePrivs.html", "structSessionRolePrivs" ],
     [ "tuple_2ints", "structtuple__2ints.html", "structtuple__2ints" ]
 ];

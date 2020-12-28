@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['sessionprivs',['SessionPrivs',['../structSessionPrivs.html',1,'']]]
+  ['sessioncontext',['SessionContext',['../structSessionContext.html',1,'']]],
+  ['sessionroleprivs',['SessionRolePrivs',['../structSessionRolePrivs.html',1,'']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['prepare_5fquery',['prepare_query',['../query_8c.html#a6a95977eab76e72b6af5bee4bcbcec05',1,'query.c']]]
+  ['textfromstr',['textfromstr',['../veil2_8c.html#a22033ed27181d9b4943f2916394a546e',1,'veil2.c']]]
 ];

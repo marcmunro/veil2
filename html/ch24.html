@@ -5,7 +5,7 @@
 <title>Chapter 24. Tips and Guidelines</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="home" href="index.html" title="Veil2 Documentation">
 <link rel="up" href="pt03.html" title="Part III. Implementation Details">
 <link rel="prev" href="ch23.html" title="Chapter 23. How Veil2 Relates to the Original Veil">
 <link rel="next" href="ch25.html" title="Chapter 25. Performance">
@@ -37,7 +37,7 @@
   </p>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2007"></a>24.1. Write Queries That Work Without <code class="literal">Veil2</code>
+<a name="idm1984"></a>24.1. Write Queries That Work Without <code class="literal">Veil2</code>
 </h2></div></div></div>
 <p>
       Generally, with a well-behaved application and well-implemented
@@ -143,7 +143,7 @@ create policy wibble__select
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2035"></a>24.3. Consider Testing With and Without Security</h2></div></div></div>
+<a name="idm2012"></a>24.3. Consider Testing With and Without Security</h2></div></div></div>
 <p>
       If you have automated tests, you should run them against both
       secured and unsecured databases.  If the tests pass in both
@@ -166,7 +166,7 @@ create policy wibble__select
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2041"></a>24.5. Use Secured Views To Implement Complex Queries</h2></div></div></div>
+<a name="idm2018"></a>24.5. Use Secured Views To Implement Complex Queries</h2></div></div></div>
 <p>
       You may find that multi-table queries encounter performance
       issues as the security policy has to be applied for some tables
@@ -184,7 +184,7 @@ create policy wibble__select
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2045"></a>24.6. Avoid Drop...Cascade</h2></div></div></div>
+<a name="idm2022"></a>24.6. Avoid Drop...Cascade</h2></div></div></div>
 <p>
       While you are integrating <code class="literal">Veil2</code> with your
       application and continuing to develop it, you are likely to

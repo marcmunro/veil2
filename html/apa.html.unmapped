@@ -5,8 +5,8 @@
 <title>Appendix A. Veil2 ERD and Database Objects</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
-<link rel="up" href="index.html" title="Veil2 0.9.1 (beta) Documentation">
+<link rel="home" href="index.html" title="Veil2 Documentation">
+<link rel="up" href="index.html" title="Veil2 Documentation">
 <link rel="prev" href="ch27.html" title="Chapter 27. Contact Links">
 <link rel="next" href="apb.html" title="Appendix B. Veil2 Views, Materialized Views and Caches">
 </head>
@@ -30,12 +30,12 @@
 </div>
 <div class="appendix">
 <div class="titlepage"><div><div><h1 class="title">
-<a name="idm2214"></a>Appendix A. <code class="literal">Veil2</code> ERD and Database Objects</h1></div></div></div>
+<a name="idm2190"></a>Appendix A. <code class="literal">Veil2</code> ERD and Database Objects</h1></div></div></div>
 <p></p>
 <div class="mediaobject"><img src="veil2_erd.png"></div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm2221"></a>A.1. Veil2 Tables</h2></div></div></div>
+<a name="idm2197"></a>A.1. Veil2 Tables</h2></div></div></div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="entity_scope_type"></a>A.1.1. Scope Types Table</h3></div></div></div>
@@ -498,7 +498,7 @@ that that role has been assigned, whether directly or indirectly.
 <a name="entity_session"></a>A.1.11. Sessions Table</h3></div></div></div>
 <pre class="programlisting">
 create unlogged table veil2.sessions (
-  session_id			integer not null
+  session_id			bigint not null
   				  default nextval('veil2.session_id_seq'),
   accessor_id			integer not null,
   login_context_type_id		integer not null,
@@ -513,7 +513,7 @@ create unlogged table veil2.sessions (
   has_authenticated		boolean not null,
   session_supplemental		text,
   nonces			bitmap,
-  parent_session_id		integer
+  parent_session_id		bigint
 );
 
 alter table veil2.sessions add constraint session__pk
@@ -665,14 +665,14 @@ may have different privileges from a CSR at another.
 <pre class="programlisting">
 create type veil2.session_context_t as (
   accessor_id			integer,
-  session_id                    integer,
+  session_id                    bigint,
   login_context_type_id		integer,
   login_context_id		integer,
   session_context_type_id       integer,
   session_context_id		integer,
   mapping_context_type_id	integer,
   mapping_context_id		integer,
-  parent_session_id		integer
+  parent_session_id		bigint
 );
 
 </pre>

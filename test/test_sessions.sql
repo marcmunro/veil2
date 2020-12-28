@@ -425,7 +425,7 @@ select is(veil2.i_have_global_priv(0), true,
 
 select null
   from veil2.close_connection()
- where not close_connection;  -- Ensure no rows returned
+ where close_connection is null;  -- Ensure no rows returned
 
 select is(veil2.i_have_global_priv(0), false,
        	  'Closed session should not have connect privilege');
@@ -563,6 +563,10 @@ with session as
 select is(success, true, 'Bob should be authenticated (global login)')
   from session;
 
+select * -- call reload_xxx without returning a row.
+  from veil2.reload_connection_privs()
+ where reload_connection_privs is null;
+
 select is(veil2.i_have_priv_in_scope(20, -5, -51), true,
           'Bob should have priv 20 in context -5,-51')
 union all
@@ -601,7 +605,6 @@ create temporary table session_tt (
   session_token text,
   success boolean,
   errmsg text);
-
 with session as
   (
     select * from veil2.become_user('bob', 1, 0)
@@ -609,7 +612,6 @@ with session as
 insert into session_tt select * from session;
 select is(success, true, 'Eve should have successully become Bob')
   from session_tt;
-
 
 select is(accessor_id, -9, 'Bob''s accessor_id is Eve')
   from session_context
@@ -626,10 +628,6 @@ union all
 select is(veil2.i_have_priv_in_scope(23, -5, -51), true,
           'Bob should have priv 23 in context -5,-51 (2)');
 
-select * -- call reload_xxx without returning a row.
-  from veil2.reload_connection_privs()
- where reload_connection_privs is null;
-	  
 select is(veil2.i_have_priv_in_scope(24, -5, -51), true,
           'Bob should have priv 24 in context -5,-51 (2)')
 union all
@@ -716,7 +714,7 @@ select is(success, true, 'Eve should be authenticated (login -3, -3)')
 with sess as
   (
     select *
-      from veil2_session_privileges
+      from veil2.session_privileges()
      where scope_type_id = -3
   )
 select is(1, (select count(*)::integer from sess),
@@ -743,6 +741,7 @@ select is(roles ? 9, false,
   from sess;
 
 
+
 -- connect as eve for scope -3,-31
 with session as
   (
@@ -759,16 +758,30 @@ select is(veil2.i_have_priv_in_superior_scope(4, -6, -62), true,
 select is(veil2.i_have_priv_in_scope_or_superior(4, -6, -62), true,
           'Eve should have priv 4 in a scope superior to -6, -62 (1)');
 
-select is(veil2.i_have_priv_in_scope_or_superior_or_global(4,-6, -62), true,
+select is(veil2.i_have_priv_in_scope_or_superior_or_global(4, -6, -62), true,
           'Eve should have priv 4 in a scope superior to -6, -62 (2)');
 
 select is(veil2.i_have_priv_in_superior_scope(4, -6, -61), false,
           'Eve should not have priv 4 in a scope superior to -6, -61');
+/*
+
+    \pset tuples_only false
+    \pset format aligned
+
+select *, to_array(roles), to_array(privs) from veil2.session_privileges();
+select * from veil2.superior_scopes;
+select veil2.i_have_priv_in_superior_scope(4, -6, -62);
+select veil2.i_have_priv_in_scope_or_superior(4, -6, -62);
+
+    \pset format unaligned
+    \pset tuples_only true
+
+*/
 
 with sess as
   (
     select *
-      from veil2_session_privileges
+      from veil2.session_privileges()
      where scope_type_id = -3
   )
 select is(1, (select count(*)::integer from sess),

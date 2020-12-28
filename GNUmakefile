@@ -422,7 +422,11 @@ check_meta: META.json
 	    done
 	@grep '"file"' META.json | cut -d: -f2 | tr -d '",' | \
 	    while read a; do \
-	      	[ "x$$a" = "xveil2--$(VERSION_NUMBER).sql" ] || \
+	        [ -f "$$a" ] || \
+		  (echo "    REQUIRED FILE $$a (IN META.json) NOT FOUND"; \
+	    	   exit 2); \
+	      	(echo "x$$a" | \
+                   grep ".*/veil2[^-]*--$(VERSION_NUMBER).sql" >/dev/null) || \
 		  (echo "    INCORRECT FILE NAME ($$a) IN META.json"; exit 2); \
 	    done
 

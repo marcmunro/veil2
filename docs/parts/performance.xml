@@ -61,16 +61,16 @@ marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/demo_bulk_data.sql
       would run it as follows:
       <programlisting>
 marc:veil2$ psql -d vpd -f /usr/share/postgresql/12/veil2/perf.sql 
-Creating sessions: elapsed = 21 milliseconds.
-Opening sessions: elapsed = 51 milliseconds.
-Re-opening sessions: elapsed = 60 milliseconds.
+Creating sessions: elapsed = 16 milliseconds.
+Opening sessions: elapsed = 54 milliseconds.
+Re-opening sessions: elapsed = 61 milliseconds.
 marc:veil2$ 
       </programlisting>
       The script creates 6 sessions, opens each of them, and then
       re-opens them.  The elapsed times shown are cumulative, in this
       case giving the time to open and initialize the sessions as
-      being approximately 30 milliseconds (5 milliseconds each), with
-      the session reloads taking about 9 milliseconds (1.5
+      being approximately 40 milliseconds (~7 milliseconds each), with
+      the session reloads taking about 7 milliseconds (~1.2
       milliseconds each).  
     </para>
     <para>
@@ -88,10 +88,10 @@ cache size	: 6144 KB
     </para>
     <para>
       It may be possible to further improve the performance by
-      re-implementing the session management functions in C, though
-      initial experiments yielded only minor gains which, given the
-      loss in flexibility resulting from a C implementation, were not
-      felt to be worthwhile.
+      implementing more of the session management functions in C,
+      though initial experiments yielded only minor gains which, given
+      the loss in flexibility resulting from a C implementation, were
+      not felt to be worthwhile.
     </para>
     <para>
       Until anyone claims otherwise, the author is going to claim that
@@ -148,47 +148,39 @@ Time: 24.037 ms
 running tests...
 ...on x (3 times)...
 1995
-Time: 0.581 ms
+Time: 0.521 ms
 1995
-Time: 0.274 ms
+Time: 0.292 ms
 1995
-Time: 0.261 ms
+Time: 0.265 ms
 ...on y (3 times)...
 1995
-Time: 0.576 ms
+Time: 0.520 ms
 1995
-Time: 0.316 ms
+Time: 0.292 ms
 1995
-Time: 0.291 ms
+Time: 0.283 ms
 result_counts (to keep us honest):
 0|0
-Time: 0.117 ms
+Time: 0.131 ms
 ...on z (3 times)...
 1995
-Time: 0.826 ms
+Time: 0.499 ms
 1995
-Time: 0.383 ms
+Time: 0.341 ms
 1995
-Time: 0.365 ms
+Time: 0.302 ms
 result_counts again:
 0|5985
-Time: 0.140 ms
+Time: 0.079 ms
 marc:veil2$ 
       </programlisting>
     </para>
     <para>
-      What this shows, for table z, is that the first query
-      experiences some small overhead (approx 0.5 millisecs), and that
-      subsequent queries have little more overhead than table y, which
-      has the smallest possible overhead for a table with a security
-      policy.  Based on all of this, the author is going to claim that
-      this is pretty damn fast.
-    </para>
-    <para>
-      The reason for the small initial overhead on the first test
-      against table Z is that on the first call to a privilege testing
-      function, the session's privileges must be loaded into session
-      memory.
+      What this shows is that queries for table z have little more
+      overhead than table y, which has the smallest possible overhead
+      for a table with a security policy.  Based on all of this, the
+      author is going to claim that this is pretty damn fast.
     </para>
     <para>
       Since these results look too good to be true, we perform a query

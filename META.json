@@ -26,7 +26,7 @@
       "version": "0.9.2",
     },
     "veil2_minimal_demo": {
-      "file": "sql/veil2_minimal_demo--0.9.2.sql",
+      "file": "demo/veil2_minimal_demo--0.9.2.sql",
       "version": "0.9.2",
     }
   },
@@ -36,6 +36,9 @@
       "url": "https://github.com/marcmunro/veil2.git",
       "type": "git"
     }
+  },
+  "no_index": {
+    "directory": [ "html" ],
   },
   "generated_by": "Marc Munro"
   "meta-spec": {

@@ -1470,6 +1470,71 @@ because we cannot create a view on the veil2_session_context table as it
 is a temporary table and does not always exist.';
 
 
+\echo ......session_privileges()...
+create or replace
+function veil2.session_privileges(
+    scope_type_id   out integer,
+    scope_id        out integer,
+    roles	    out bitmap,
+    privs	    out bitmap)
+  returns setof record 
+     as '$libdir/veil2', 'veil2_session_privileges'
+     language C stable;
+
+revoke all on function veil2.session_privileges() from public;
+grant execute on function veil2.session_privileges() to veil_user;
+
+comment on function veil2.session_privileges() is
+'Safe function to return a user-readable version of the privileges for
+the current session.  If no session exists, returns nulls.  We use a
+function in this context because we cannot create a view on the
+veil2_session_privileges table as it is a temporary table and does not
+always exist.';
+
+
+\echo ......add_session_privileges()...
+create or replace
+function veil2.add_session_privileges(
+    scope_type_id integer,
+    scope_id integer,
+    roles bitmap,
+    privs bitmap)
+  returns void
+     as '$libdir/veil2', 'veil2_add_session_privileges'
+     language C volatile;
+
+revoke all on
+function veil2.add_session_privileges(
+    integer, integer, bitmap, bitmap) from public;
+
+comment on function veil2.add_session_privileges(
+    integer, integer, bitmap, bitmap) is
+'Record in-memory copies of session privileges for a given scope for
+the session.  Note that it is imperative that this is called in
+scope_type_id, scope_id order so that the in-memory array can be
+bsearched.';
+
+
+\echo ......update_session_privileges()...
+create or replace
+function veil2.update_session_privileges(
+    scope_type_id integer,
+    scope_id integer,
+    roles bitmap,
+    privs bitmap)
+  returns void
+     as '$libdir/veil2', 'veil2_update_session_privileges'
+     language C volatile;
+
+revoke all on
+function veil2.update_session_privileges(
+    integer, integer, bitmap, bitmap) from public;
+
+comment on function veil2.update_session_privileges(
+    integer, integer, bitmap, bitmap) is
+'Update the in-memory roles and privileges bitmap for a given scope.';
+
+
 \echo ......session_assignment_contexts...
 create or replace
 view veil2.session_assignment_contexts as
@@ -2572,6 +2637,26 @@ tables); that the session user has no unexpected access rights on
 them; and clear them.';
 
 
+\echo ......close_connection()...
+create or replace
+function veil2.close_connection() returns void
+     as '$libdir/veil2', 'veil2_reset_session'
+     language C volatile strict security definer;
+
+revoke all on function veil2.close_connection() from public;
+grant execute on function veil2.close_connection() to veil_user;
+
+comment on function veil2.close_connection() is
+'Close the current session.  We use this to ensure that a shared
+database connection cannot be used with our privileges once we have
+finished with it.  There is no authentication or verification done to
+ensure that the session owner is the one doing this, because there is
+no perceived need.  If this is a problem then, given that you can
+achieve the same thing by deliberately failing a veil2.open() call,
+there are other, more complex areas of the session management protocol
+that will need to be reconsidered.';
+
+
 \echo ......reset_session_privs()...
 create or replace
 function veil2.reset_session_privs() returns void
@@ -2668,7 +2753,7 @@ revoke all on function veil2.new_session_context(
 
 comment on function veil2.new_session_context(
     integer, integer, integer, integer, integer, bigint) is
-'Create a veil2_session_context record for the given parameters,
+'Create an in-memory session_context record for the given parameters,
 returning session_id and mapping context.';
 
 
@@ -2932,6 +3017,8 @@ create or replace
 function veil2.filter_privs()
   returns void as
 $$
+declare
+  _count integer;
 begin
   -- We are going to update veil2_session_privileges to remove any
   -- roles and privileges that do not exist in
@@ -2941,7 +3028,7 @@ begin
   with updatable_privs as
     (
       select sp.scope_type_id, sp.scope_id
-        from veil2_session_privileges sp
+        from veil2.session_privileges() sp
        where scope_type_id != 2
     ),
   superior_scopes as
@@ -2985,17 +3072,20 @@ begin
       select sp.scope_type_id, sp.scope_id,
              sp.roles * eap.roles as roles,
              sp.privs * eap.privs as privs
-        from veil2_session_privileges sp
+        from veil2.session_privileges() sp
        inner join effective_ancestor_privs eap
           on eap.scope_type_id = sp.scope_type_id
          and eap.scope_id = sp.scope_id
+    ),
+  updates as
+    (
+      select veil2.update_session_privileges(scope_type_id, scope_id,
+					     roles, privs), 1
+        from final_privs
     )
-  update veil2_session_privileges sp
-     set roles = fp.roles,
-         privs = fp.privs
-    from final_privs fp
-   where sp.scope_type_id = fp.scope_type_id
-     and sp.scope_id = fp.scope_id;
+  select count(*)::integer
+    into _count
+    from updates;
 end;
 $$
 language plpgsql security definer volatile;
@@ -3015,6 +3105,8 @@ function veil2.load_ancestor_privs(parent_session_id bigint)
   returns void as
 $$
 begin
+  delete
+    from veil2_ancestor_privileges;
   with recursive ancestors as
     (
       select *
@@ -3137,47 +3229,6 @@ comment on function veil2.filter_session_privs(bigint) is
 held by the ancestor session(s).';
 
 
-\echo ......session_privileges()...
-create or replace
-function veil2.session_privileges(
-    scope_type_id out integer,
-    scope_id out integer,
-    roles out integer[],
-    privs out integer[]
-    )
-  returns setof record as
-$$
-begin
-  for session_privileges.scope_type_id,
-      session_privileges.scope_id,
-      session_privileges.roles,
-      session_privileges.privs
-  in select sp.scope_type_id, sp.scope_id,
-     	    to_array(sp.roles), to_array(sp.privs)
-       from veil2_session_privileges sp
-  loop
-    return next;
-  end loop;
-exception
-  when sqlstate '42P01' then
-    return;
-  when others then
-    raise;
-end;
-$$
-language plpgsql security definer volatile;
-
-revoke all on function veil2.session_privileges() from public;
-grant execute on function veil2.session_privileges() to veil_user;
-
-comment on function veil2.session_privileges() is
-'Safe function to return a user-readable version of the privileges for
-the current session.  If no session exists, returns nulls.  We use a
-function in this context because we cannot create a view on the
-veil2_session_privileges table as it is a temporary table and does not
-always exist.';
-
-
 \echo ......session_privileges_info (view)...
 create or replace
 view veil2.session_privileges_info as
@@ -3191,39 +3242,45 @@ temporary table.';
 grant select on veil2.session_privileges_info to veil_user;
 
 
-\echo ......load_session_privs()...
+\echo ......load_and_cache_session_privs()...
 create or replace
-function veil2.load_session_privs()
+function veil2.load_and_cache_session_privs()
   returns boolean as
 $$
-declare
-  rec record;
 begin
   insert
-    into veil2_session_privileges
-        (scope_type_id, scope_id,
-  	 roles, privs)
-  select scope_type_id, scope_id,
-         roles, privileges
-    from veil2.session_privileges_v;
-
-  if found then
-    perform veil2.save_session_privs();
-    return true;
-  else
-    return false;
-  end if;
+    into veil2.accessor_privileges_cache
+        (accessor_id, login_context_type_id,
+         login_context_id, session_context_type_id,
+         session_context_id, mapping_context_type_id,
+         mapping_context_id, scope_type_id,
+         scope_id, roles,
+         privs)
+  select sc.accessor_id, sc.login_context_type_id,
+         sc.login_context_id, sc.session_context_type_id,
+         sc.session_context_id, sc.mapping_context_type_id,
+         sc.mapping_context_id, p.scope_type_id,
+         p.scope_id, p.roles,
+         p.privileges
+    from veil2.session_context() sc
+   cross join (
+      select *
+        from veil2.session_privileges_v
+       order by scope_type_id, scope_id) p
+   cross join lateral (
+      select veil2.add_session_privileges(p.scope_type_id, p.scope_id,
+                                          p.roles, p.privileges)) asp;
+  return found;
 end;
 $$
 language plpgsql security definer volatile;
 
-revoke all on function veil2.load_session_privs() from public;
+revoke all on function veil2.load_and_cache_session_privs() from public;
 
-comment on function veil2.load_session_privs() is
-'Load the temporary table veil2_session_privileges for session_id, with the
-privileges for the current session.  The temporary table is queried by
-security functions in order to determine what access rights the
-connected user has.';
+comment on function veil2.load_and_cache_session_privs() is
+'Load the in-memory copy of session privileges from
+veil2.session_privileges_v and also cache them in
+veil2.accessor_privileges_cache.';
 
 
 \echo ......check_continuation()...
@@ -3256,23 +3313,33 @@ create or replace
 function veil2.load_cached_privs()
   returns boolean as
 $$
+declare
+  _count integer;
 begin
-  insert
-    into veil2_session_privileges
-        (scope_type_id,	 scope_id,
-	 roles, privs)
-  select apc.scope_type_id, apc.scope_id,
-  	 apc.roles, apc.privs
-    from veil2.session_context() sc
-   inner join veil2.accessor_privileges_cache apc
-      on apc.accessor_id = sc.accessor_id
-     and apc.login_context_type_id = sc.login_context_type_id
-     and apc.login_context_id = sc.login_context_id
-     and apc.session_context_type_id = sc.session_context_type_id
-     and apc.session_context_id = sc.session_context_id
-     and apc.mapping_context_type_id = sc.mapping_context_type_id
-     and apc.mapping_context_id = sc.mapping_context_id;
-  return found;
+  with privs as
+    (
+      select apc.scope_type_id, apc.scope_id,
+      	 apc.roles, apc.privs
+        from veil2.session_context() sc
+       inner join veil2.accessor_privileges_cache apc
+          on apc.accessor_id = sc.accessor_id
+         and apc.login_context_type_id = sc.login_context_type_id
+         and apc.login_context_id = sc.login_context_id
+         and apc.session_context_type_id = sc.session_context_type_id
+         and apc.session_context_id = sc.session_context_id
+         and apc.mapping_context_type_id = sc.mapping_context_type_id
+         and apc.mapping_context_id = sc.mapping_context_id
+    ),
+  ins as
+    (
+      select veil2.add_session_privileges(scope_type_id, scope_id,
+    	 			          roles, privs)
+        from privs
+    )
+  select count(*)::integer
+    into _count
+    from ins;
+  return _count > 0;
 end;
 $$
 language 'plpgsql' security definer volatile;
@@ -3356,28 +3423,7 @@ function veil2.load_connection_privs(
 $$
 begin
   if not veil2.load_cached_privs() then
-    if not veil2.load_session_privs() then
-      return false;
-    end if;
-  end if;
-
-  if parent_session_id is not null then
-    perform veil2.filter_session_privs(parent_session_id);
-  end if;
-  return true;
-end;
-$$
-language plpgsql security definer volatile;
-
-\echo ......load_connection_privs()...
-create or replace
-function veil2.load_connection_privs2(
-    parent_session_id bigint)
-  returns boolean as
-$$
-begin
-  if not veil2.load_cached_privs() then
-    if not veil2.load_session_privs() then
+    if not veil2.load_and_cache_session_privs() then
       return false;
     end if;
   end if;
@@ -3432,7 +3478,7 @@ begin
   select parent_session_id
     into _parent_session_id
     from veil2.session_context();
-  return veil2.load_connection_privs2(_parent_session_id);
+  return veil2.load_connection_privs(_parent_session_id);
 end;
 $$
 language plpgsql security definer volatile;
@@ -3466,6 +3512,7 @@ declare
   expired boolean;
   parent_session_id integer;
 begin
+  perform veil2.reset_session();
   success := false;
   select s.accessor_id, s.expires < now(),
          veil2.check_nonce(nonce, s.nonces), s.nonces,
@@ -3524,7 +3571,6 @@ begin
   end if;
   
   if success then
-    perform veil2.reset_session();
     -- Reload session context
     parent_session_id := veil2.reload_session_context(session_id);
 
@@ -3536,10 +3582,6 @@ begin
     end if;
   end if;
 
-  if not success then
-    perform veil2.reset_session();
-  end if;
-  
   -- Regardless of the success of the preceding checks we record the
   -- use of the latest nonce.  If all validations succeeded, we
   -- extend the expiry time of the session.
@@ -3594,32 +3636,6 @@ client, even if client_min_messages is modified for the session.  This
 is deliberate, for security reasons.';
 
 
-\echo ......close_connection()...
-create or replace
-function veil2.close_connection() returns boolean as
-$$
-begin
-  perform veil2.reset_session();
-  delete from veil2_session_privileges;
-  return true;
-end;
-$$
-language 'plpgsql' security definer volatile;
-
-revoke all on function veil2.close_connection() from public;
-grant execute on function veil2.close_connection() to veil_user;
-
-comment on function veil2.close_connection() is
-'Close the current session.  We use this to ensure that a shared
-database connection cannot be used with our privileges once we have
-finished with it.  There is no authentication or verification done to
-ensure that the session owner is the one doing this, because there is
-no perceived need.  If this is a problem then, given that you can
-achieve the same thing by deliberately failing a veil2.open() call,
-there are other, more complex areas of the session management protocol
-that will need to be reconsidered.';
-
-
 \echo ......hello()...
 create or replace
 function veil2.hello(
@@ -3648,8 +3664,11 @@ begin
 	     context_type_id, context_id,
 	     context_type_id, context_id) cas;
 
-    -- TODO: CHECK IF REFACTORING IS NEEDED HERE - MAYBE UNUSED VARS?
-    success := veil2.load_session_privs();
+    if veil2.load_cached_privs() then
+      success := true;
+    else
+      success := veil2.load_and_cache_session_privs();
+    end if;
 
     if not success then
       raise exception 'SECURITY: user % has no connect privilege.',
@@ -3822,19 +3841,20 @@ begin
     -- Update expiry of parent session.
     perform veil2.update_session(orig_session_id, null::bitmap, true);
 
-    if not veil2.load_session_privs() then
-      raise warning 'SECURITY: Accessor % has no connect privilege.',
-                     _accessor_id;
-      errmsg := 'AUTHFAIL';
-    else
-      perform veil2.filter_session_privs(orig_session_id);
+    if not veil2.load_cached_privs() then
+      if not veil2.load_and_cache_session_privs() then
+        raise warning 'SECURITY: Accessor % has no connect privilege.',
+                       _accessor_id;
+        errmsg := 'AUTHFAIL';
+      end if;
     end if;
   end if;
 
   if errmsg is null then
-     success := true;
+    perform veil2.filter_session_privs(orig_session_id);
+    success := true;
   else
-     success := false;
+    success := false;
   end if;
 end;
 $$
@@ -4195,47 +4215,6 @@ values ('shared session timeout', '20 mins'),
 -- Create security for vpd tables.
 -- This consists of enabling row-level security and only allowing
 -- select access to users with the approrpiate veil privileges.
-
-
-\echo ......save_session_privs()...
-select veil2.reset_session();
-
-create or replace
-function veil2.save_session_privs()
-  returns void as
-$$
-delete
-  from veil2.accessor_privileges_cache
- where (accessor_id, login_context_type_id,
-        login_context_id) = (
-    select accessor_id, login_context_type_id,
-        login_context_id
-      from veil2.session_context());
-insert
-  into veil2.accessor_privileges_cache
-      (accessor_id, login_context_type_id,
-       login_context_id, session_context_type_id,
-       session_context_id, mapping_context_type_id,
-       mapping_context_id, scope_type_id,
-       scope_id, roles,
-       privs)
-select sc.accessor_id, sc.login_context_type_id,
-       sc.login_context_id, sc.session_context_type_id,
-       sc.session_context_id, sc.mapping_context_type_id,
-       sc.mapping_context_id, sp.scope_type_id,
-       sp.scope_id, sp.roles,
-       sp.privs
-  from veil2.session_context() sc
- cross join veil2_session_privileges sp;
-$$
-language 'sql' security definer volatile;
-
-comment on function veil2.save_session_privs() is
-'Save the current contents of the veil2_session_privileges temporary
-table into veil2.session_privileges after ensuring that there is no
-existing data present for the session.  This saves our
-session_privileges data for future use in the session.';
-
 
 
 \echo ......scope_types...

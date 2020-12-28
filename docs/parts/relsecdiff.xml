@@ -332,7 +332,7 @@
       set of guiding principles.  Although it is possible to implement
       special cases there is rarely any need.  This is because the
       access control mechanisms are based on the highly flexible
-      mechanism of privileges with scope.
+      mechanism of privileges within contexts.
     </para>
   </sect1>
   <sect1 id="ease_of_reasoning">

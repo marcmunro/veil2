@@ -11,7 +11,7 @@ m4_define([VEIL2_VERSION],
 
 AC_INIT([veil2], VEIL2_VERSION, [marc@bloodnok.com])
 
-AC_CONFIG_FILES([Makefile.global])
+AC_CONFIG_FILES([Makefile.global src/veil2_version.h])
 
 AC_SUBST(MAJOR_VERSION, esyscmd([cat VERSION | \
             cut -d\" -f2 | cut -d. -f1 | tr -d '\n']))

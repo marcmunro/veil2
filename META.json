@@ -1,25 +1,33 @@
 {
   "name": "veil2",
   "abstract": "An extension for implementing relational security systems.",
-  "description": "Provides a framework for implementing Virtual
-Private Databases using a relational security model.",
-  "version": "0.9.1",
+  "description": "Provides a framework for implementing Virtual Private Databases using a relational security model.",
+  "version": "0.9.2",
   "maintainer": ["Marc Munro <marc@bloodnok.com>"],
   "license": {
-    "BSD": "http://www.opensource.org/licenses/bsd-license.html"
+    "gpl_3": "https://www.gnu.org/licenses/gpl-3.0.en.html"
   },
   "prereqs": {
     "runtime": {
       "requires": {
-        "PostgreSQL": "10.0"
+        "PostgreSQL": "10.0.0",
+	"bgbitmap": 0
       }
     }
   },
   "provides": {
-    "pgbitmap": {
-      "file": "veil2--0.9.1.sql",
-      "version": "0.9.1",
+    "veil2": {
+      "file": "sql/veil2--0.9.2.sql",
+      "version": "0.9.2",
       "docfile": "docs/README.md"
+    },
+    "veil2_demo": {
+      "file": "demo/veil2_demo--0.9.2.sql",
+      "version": "0.9.2",
+    },
+    "veil2_minimal_demo": {
+      "file": "demo/veil2_minimal_demo--0.9.2.sql",
+      "version": "0.9.2",
     }
   },
   "resources": {
@@ -29,8 +37,16 @@ Private Databases using a relational security model.",
       "type": "git"
     }
   },
+  "no_index": {
+    "directory": [ "html" ],
+  },
+  "generated_by": "Marc Munro"
   "meta-spec": {
     "version": "1.0.0",
     "url": "http://pgxn.org/meta/spec.txt"
   }
+  "tags": [
+      "security",
+      "virtual private database"
+   ]
 }

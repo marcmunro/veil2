@@ -175,20 +175,11 @@ local   whateverdbnameyoulike demouser                          trust
     <sect2>
       <title>Exploring It</title>
       <para>
-	You can install the demo to a database that already had
-	<literal>Veil2</literal> objects installed by running the file
-	<literal>demo/demo.sql</literal> against it.  To create a
-	clean veil2-enabled database you could use
-	<literal>make</literal>.  The following command, run from the
-	<literal>Veil2</literal> root directory would create a new
-	database called <literal>vpd</literal> with the demo
-	installed:
-	<programlisting>
-$ make db; psql -d vpd -f demo/demo.sql	
-	</programlisting>
+	You can create the demo database by simply creating the
+	extension <literal>veil2_demo</literal>.
       </para>
       <para>
-	The setup script creates an unprivileged
+	The extension creates an unprivileged
 	<literal>demouser</literal> (demo user) account, which you
 	should use to explore the demo.  Using a privileged account
 	will bypass the security which would be pointless and

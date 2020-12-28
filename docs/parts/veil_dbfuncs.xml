@@ -117,9 +117,6 @@
 	<link linkend="func_filter_session_privs">filter_session_privs()</link>;
       </listitem>
       <listitem>
-	<link linkend="func_save_privs_as_orig">save_privs_as_orig()</link>;
-      </listitem> 
-      <listitem>
 	<link linkend="func_all_accessor_roles">all_accessor_roles()</link>;
       </listitem> 
       <listitem>
@@ -132,10 +129,13 @@
 	<link linkend="func_session_privileges">session_privileges()</link>;
       </listitem> 
       <listitem>
-	<link linkend="func_load_session_privs">load_session_privs()</link>;
-      </listitem>
+	<link linkend="func_add_session_privileges">add_session_privileges()</link>;
+      </listitem> 
       <listitem>
-	<link linkend="func_save_session_privs">save_session_privs()</link>;
+	<link linkend="func_update_session_privileges">update_session_privileges()</link>;
+      </listitem> 
+      <listitem>
+	<link linkend="func_load_and_cache_session_privs">load_and_cache_session_privs()</link>;
       </listitem>
       <listitem>
 	<link linkend="func_load_cached_privs">load_cached_privs()</link>;
@@ -150,7 +150,7 @@
 	<link linkend="func_reload_session_context">reload_session_context()</link>;
       </listitem>
       <listitem>
-	<link linkend="func_reload_connection_privs">reload_connection_privs()</link>;
+        <link linkend="func_reload_connection_privs">reload_connection_privs()</link>;
       </listitem>
       <listitem>
 	<link linkend="func_check_continuation">check_continuation()</link>;
@@ -483,10 +483,6 @@
       <title><literal>filter_session_privs()</literal></title>
       <?sql-definition function veil2.filter_session_privs sql/veil2--&version_number;.sql ?>
     </sect3>
-    <sect3 id="func_save_privs_as_orig">
-      <title><literal>save_privs_as_orig()</literal></title>
-      <?sql-definition function veil2.save_privs_as_orig sql/veil2--&version_number;.sql ?>
-    </sect3>
     <sect3 id="func_all_accessor_roles">
       <title><literal>all_accessor_roles()</literal></title>
       <?sql-definition function veil2.all_accessor_roles sql/veil2--&version_number;.sql ?>
@@ -498,18 +494,38 @@
     <sect3 id="func_session_context">
       <title><literal>session_context()</literal></title>
       <?sql-definition function veil2.session_context sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_session_context here?>.
+      </para>
     </sect3>
     <sect3 id="func_session_privileges">
       <title><literal>session_privileges()</literal></title>
       <?sql-definition function veil2.session_privileges sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_session_privileges here?>.
+      </para>
     </sect3>
-    <sect3 id="func_load_session_privs">
-      <title><literal>load_session_privs()</literal></title>
-      <?sql-definition function veil2.load_session_privs sql/veil2--&version_number;.sql ?>
+    <sect3 id="func_add_session_privileges">
+      <title><literal>add_session_privileges()</literal></title>
+      <?sql-definition function veil2.add_session_privileges sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_add_session_privileges here?>.
+      </para>
     </sect3>
-    <sect3 id="func_save_session_privs">
-      <title><literal>save_session_privs()</literal></title>
-      <?sql-definition function veil2.save_session_privs sql/veil2--&version_number;.sql ?>
+    <sect3 id="func_update_session_privileges">
+      <title><literal>update_session_privileges()</literal></title>
+      <?sql-definition function veil2.update_session_privileges sql/veil2--&version_number;.sql ?>
+      <para>
+	The Doxygen documentation for this can be found
+	<?doxygen-ulink function veil2_update_session_privileges here?>.
+      </para>
+    </sect3>
+    <sect3 id="func_load_and_cache_session_privs">
+      <title><literal>load_and_cache_session_privs()</literal></title>
+      <?sql-definition function veil2.load_and_cache_session_privs sql/veil2--&version_number;.sql ?>
     </sect3>
     <sect3 id="func_load_cached_privs">
       <title><literal>load_cached_privs()</literal></title>

@@ -12,6 +12,7 @@
  */
 
 #include "extension/pgbitmap/pgbitmap.h"
+#include "veil2_version.h"
 
 /**
  * A Fetch_fn is a function that processes records, one at a time,
@@ -67,6 +68,10 @@ extern bool veil2_bool_from_query(const char *qry,
 Datum veil2_session_ready(PG_FUNCTION_ARGS);
 Datum veil2_reset_session(PG_FUNCTION_ARGS);
 Datum veil2_reset_session_privs(PG_FUNCTION_ARGS);
+Datum veil2_session_context(PG_FUNCTION_ARGS);
+Datum veil2_session_privileges(PG_FUNCTION_ARGS);
+Datum veil2_add_session_privileges(PG_FUNCTION_ARGS);
+Datum veil2_update_session_privileges(PG_FUNCTION_ARGS);
 Datum veil2_true(PG_FUNCTION_ARGS);
 Datum veil2_i_have_global_priv(PG_FUNCTION_ARGS);
 Datum veil2_i_have_personal_priv(PG_FUNCTION_ARGS);
@@ -78,6 +83,7 @@ Datum veil2_i_have_priv_in_scope_or_superior_or_global(PG_FUNCTION_ARGS);
 Datum veil2_result_counts(PG_FUNCTION_ARGS);
 Datum veil2_docpath(PG_FUNCTION_ARGS);
 Datum veil2_datapath(PG_FUNCTION_ARGS);
+Datum veil2_version(PG_FUNCTION_ARGS);
 
 
 #ifndef DOCS_PATH

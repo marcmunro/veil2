@@ -48,10 +48,15 @@
       with its name.
     </para>
     <para>
+      Privileges are not assigned directly to users.  Instead they are
+      assigned through <link linkend="roles">roles</link> which are
+      essentially collections of privileges.
+    </para>
+    <para>
       A typical privilege might be <literal>select parties</literal>
       which we could assume would allow select access to the
       <literal>parties</literal> table.  Note that every privilege
-      assigned in <literal>Veil2</literal> is assigned with a specific
+      in <literal>Veil2</literal> applies in a specific
       <link linkend="scopes">scope</link>, which is based on the <link
       linkend="security-contexts">context</link> of the <link
       linkend="assignments">role assignment</link> of the <link
@@ -62,6 +67,130 @@
       have tens or hundreds of distinct privileges.
     </para>
   </sect1>
+  <sect1 id="security-contexts">
+    <title>Security Contexts</title>
+    <para>
+      A security context (or more usually just
+      <literal>context</literal>) is the user-facing equivalent to a
+      <link linkend="scopes">scope</link>.  Where scopes apply
+      at the level of individual privileges, contexts apply to the user
+      and the user experience.  Specifically, we talk about contexts
+      as they apply to:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    role assignments;
+	  </para>
+	  <para>
+	    Each role that is assigned to a user, whether implicitly
+	    or explicitly, is assigned within a given context.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    authentication;
+	  </para>
+	  <para>
+	    Different users of a <literal>Veil2</literal>-based system
+	    may authenticate using different web pages or apps.  There
+	    may be completely distinct sets of users in the context of
+	    different corporate clients, with usernames only having to
+	    be unique within the context of each corporation.
+	  </para>
+	</listitem>
+	<listitem id="mapping-context">
+	  <para>
+	    mapping;
+	  </para>
+	  <para>
+	    As described in <link linkend="role_mapping">contextual
+	    role mapping</link>, your role to role mappings may be
+	    different for different users.  The context that is used
+	    for a given session's role mappings is known as the
+	    mapping context.
+	  </para>
+	</listitem>
+	<listitem id="session-context">
+	  <para>
+	    sessions;
+	  </para>
+	  <para>
+	    It may be that although a user authenticates in the
+	    context of a corporation, their session exists within the
+	    context of a specific subdivision of that corporation.
+	    The access rights for the user will be determined from
+	    this session context.  If they are allowed to create
+	    sessions in multiple contexts, their access rights may be
+	    different in each one.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      In <literal>Veil2</literal> there is a scope for every context,
+      and vice versa.
+    </para>
+    <para>
+      The distinction between scope and context may become clear
+      when we consider that a role can be assigned in a context that
+      has no meaning for that role's privileges.  Consider a
+      <literal>team-member</literal> role assigned in the context of a
+      specific project that contains the <literal>select
+      lookups</literal> privilege.  This privilege allows the accessor
+      select-access to lookup data which is not project-specific.
+      This privilege must operate in a different scope from the
+      context of its assignment, and so its operating scope will need
+      to be promoted (see <link
+      linkend="scope-promotion">scope promotion</link> below).
+    </para>
+    <para>
+      It is largely because privileges may apply in different scopes
+      from their role's assignment context, that contexts and scopes
+      have distinct terms.  While this may seem to be semantic
+      pedantry, the opportunities for confusion when discussing scopes
+      and contexts are such that the distinction is useful.  The
+      author has been there and resents that he will never get those
+      hours back.
+    </para>
+    <para>
+      <literal>Veil2</literal> provides 2 built-in security 
+      contexts:
+    </para>
+    <sect2 id="global-context">
+      <title>Global Context</title>
+      <para>
+	This is a non-relational context.  Privileges assigned in
+	global context apply without limitation.  If you are assigned
+	a role in global context, all of its privileges will apply in
+	global scope.  If you have been assigned the <literal>select
+	customer</literal> privilege (via a role) in global context, 
+        you will be able to see all <literal>customer</literal>
+	records.
+      </para>
+      <para>
+        Global Context is powerful and dangerous. It is the level of
+        access control provided by <link
+        linkend="Traditional">traditional</link> security systems and
+        it should be used with great care.
+      </para>
+    </sect2>
+    <sect2 id="personal-context">
+      <title>Personal Context</title>
+      <para>
+	Personal context is an implied context.  Each user has an
+	implicit assignment of the <literal>personal context</literal>
+	role in this context.
+      </para>
+      <para>
+        The personal context is all about the application user, ie the
+        person that is using your application. It applies to data that
+        is about that person.  This would include their authentication
+        credentials, contact information, etc. The purpose of the
+        personal context is to give users access to their own data,
+        and no-one else’s.  Each user has their own personal context.
+      </para>
+    </sect2>
+  </sect1>
   <sect1 id="scopes">
     <title>Scopes</title>
     <para>
@@ -71,7 +200,10 @@
     </para>
     <para>
       Note that for every scope, there is an equivalent <link
-      linkend="security-contexts">security context</link>.
+      linkend="security-contexts">security context</link>.  Where
+      contexts are user facing and are applied to the assignment of
+      <link linkend="roles">roles</link>, scopes apply at the level of
+      individual privileges and are more of an implementation detail.
     </para>
     <para>
       A scope may apply to an organization, a department, a project,
@@ -232,130 +364,6 @@
       More details on this can be found <link
       linkend="role_assignment_contexts">here.</link> 
     </para>
-  </sect1>
-  <sect1 id="security-contexts">
-    <title>Security Contexts</title>
-    <para>
-      A security context (or more usually just
-      <literal>context</literal>) is the user-facing equivalent to a
-      <link linkend="scopes">scope</link>.  Where scopes apply
-      at the level of individual privileges, contexts apply to the user
-      and the user experience.  Specifically, we talk about contexts
-      as they apply to:
-      <itemizedlist>
-	<listitem>
-	  <para>
-	    role assignments;
-	  </para>
-	  <para>
-	    Each role that is assigned to a user, whether implicitly
-	    or explicitly, is assigned within a given context.
-	  </para>
-	</listitem>
-	<listitem>
-	  <para>
-	    authentication;
-	  </para>
-	  <para>
-	    Different users of a <literal>Veil2</literal>-based system
-	    may authenticate using different web pages or apps.  There
-	    may be completely distinct sets of users in the context of
-	    different corporate clients, with usernames only having to
-	    be unique within the context of each corporation.
-	  </para>
-	</listitem>
-	<listitem id="mapping-context">
-	  <para>
-	    mapping;
-	  </para>
-	  <para>
-	    As described in <link linkend="role_mapping">contextual
-	    role mapping</link>, your role to role mappings may be
-	    different for different users.  The context that is used
-	    for a given session's role mappings is known as the
-	    mapping context.
-	  </para>
-	</listitem>
-	<listitem id="session-context">
-	  <para>
-	    sessions;
-	  </para>
-	  <para>
-	    It may be that although a user authenticates in the
-	    context of a corporation, their session exists within the
-	    context of a specific subdivision of that corporation.
-	    The access rights for the user will be determined from
-	    this session context.  If they are allowed to create
-	    sessions in multiple contexts, their access rights may be
-	    different in each one.
-	  </para>
-	</listitem>
-      </itemizedlist>
-    </para>
-    <para>
-      In <literal>Veil2</literal> there is a scope for every context,
-      and vice versa.
-    </para>
-    <para>
-      The distinction between scope and context may become clear
-      when we consider that a role can be assigned in a context that
-      has no meaning for that role's privileges.  Consider a
-      <literal>team-member</literal> role assigned in the context of a
-      specific project that contains the <literal>select
-      lookups</literal> privilege.  This privilege allows the accessor
-      select-access to lookup data which is not project-specific.
-      This privilege must operate in a different scope from the
-      context of its assignment, and so its operating scope will need
-      to be promoted (see <link
-      linkend="scope-promotion">scope promotion</link> below).
-    </para>
-    <para>
-      It is largely because privileges may apply in different scopes
-      from their role's assignment context, that contexts and scopes
-      have distinct terms.  While this may seem to be semantic
-      pedantry, the opportunities for confusion when discussing scopes
-      and contexts are such that the distinction is useful.  The
-      author has been there and resents that he will never get those
-      hours back.
-    </para>
-    <para>
-      <literal>Veil2</literal> provides 2 built-in security 
-      contexts:
-    </para>
-    <sect2 id="global-context">
-      <title>Global Context</title>
-      <para>
-	This is a non-relational context.  Privileges assigned in
-	global context apply without limitation.  If you are assigned
-	a role in global context, all of its privileges will apply in
-	global scope.  If you have been assigned the <literal>select
-	customer</literal> privilege (via a role) in global context, 
-        you will be able to see all <literal>customer</literal>
-	records.
-      </para>
-      <para>
-        Global Context is powerful and dangerous. It is the level of
-        access control provided by <link
-        linkend="Traditional">traditional</link> security systems and
-        it should be used with great care.
-      </para>
-    </sect2>
-    <sect2 id="personal-context">
-      <title>Personal Context</title>
-      <para>
-	Personal context is an implied context.  Each user has an
-	implicit assignment of the <literal>personal context</literal>
-	role in this context.
-      </para>
-      <para>
-        The personal context is all about the application user, ie the
-        person that is using your application. It applies to data that
-        is about that person.  This would include their authentication
-        credentials, contact information, etc. The purpose of the
-        personal context is to give users access to their own data,
-        and no-one else’s.  Each user has their own personal context.
-      </para>
-    </sect2>
   </sect1>
   <sect1 id="scope-promotion">
     <title>Scope (and Context) Promotion</title>

@@ -47,7 +47,7 @@
       linkend="view_session_privileges_v"><literal>session_privileges_v</literal></link>
       provides the data that determines an accessors privileges.  This
       view is used directly by the function <link
-      linkend="func_load_session_privs"><literal>load_session_privs</literal></link>
+      linkend="func_load_and_cache_session_privs"><literal>load_and_cache_session_privs()</literal></link>
       to load the set of applicable roles and privileges, in all
       applicable contexts for an accessor's session.  The performance
       of this view is critical, and has been carefully developed and
@@ -64,11 +64,12 @@
     <sect2>
       <title>User-Supplied Views</title>
       <para>
-	Although all of <literal>Veil2</literal>'s views may be
-	replaced by user-supplied versions, the following views are
-	expected to be.  These views are expected to directly query
-	user-provided tables which will be part of the set of data
-	being protected by <literal>Veil2</literal>.
+	Although all of <literal>Veil2</literal>'s views
+	<emphasis>may</emphasis> be replaced by user-supplied
+	versions, the following views are expected to be so replaced.
+	These views are expected to directly query user-provided
+	tables which will be part of the set of data being protected
+	by <literal>Veil2</literal>.
       </para>
       <sect3 id="view_accessor_contexts">
 	<title>Accessor Contexts View</title>

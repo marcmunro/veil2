@@ -387,8 +387,9 @@ demo: db
 		-d $(TESTDB) 2>&1 | bin/pgtest_parser
 
 perf: demo
-	@psql -X -v test=$(TEST) -f demo/demo_bulk_data.sql \
-	    -d	$(TESTDB) -f demo/perf.sql -f demo/perf2.sql
+	@psql -X -v test=$(TEST) -d $(TESTDB) -f demo/demo_bulk_data.sql 
+	@psql -X -v test=$(TEST) -d $(TESTDB) -f demo/perf.sql
+	@psql -X -v test=$(TEST) -d $(TESTDB) -f demo/perf2.sql
 
 
 mindemo: db
@@ -421,7 +422,11 @@ check_meta: META.json
 	    done
 	@grep '"file"' META.json | cut -d: -f2 | tr -d '",' | \
 	    while read a; do \
-	      	[ "x$$a" = "xveil2--$(VERSION_NUMBER).sql" ] || \
+	        [ -f "$$a" ] || \
+		  (echo "    REQUIRED FILE $$a (IN META.json) NOT FOUND"; \
+	    	   exit 2); \
+	      	(echo "x$$a" | \
+                   grep ".*/veil2[^-]*--$(VERSION_NUMBER).sql" >/dev/null) || \
 		  (echo "    INCORRECT FILE NAME ($$a) IN META.json"; exit 2); \
 	    done
 
@@ -450,6 +455,16 @@ check_origin:
 	@err=0; \
 	 for origin in $(GIT_UPSTREAM); do \
 	    git diff --quiet master $${origin}/master 2>/dev/null || \
+	    { echo "    UNPUSHED UPDATES FOR $${origin}"; \
+	      err=2; }; \
+	done; exit $$err
+
+# Check that we have pushed the latest changes
+check_remote:
+	@err=0; \
+	 for origin in $(GIT_UPSTREAM); do \
+	    git remote show $${origin} 2>/dev/null | \
+	    grep "^ *master.*up to date" >/dev/null || \
 	    { echo "    UNPUSHED UPDATES FOR $${origin}"; \
 	      err=2; }; \
 	done; exit $$err
@@ -485,17 +500,24 @@ check_demo_control:
 zipfile: 
 	@$(MAKE) -k --no-print-directory \
 	    check_branch check_meta check_tag check_docs \
-	    check_commit check_origin check_history \
+	    check_commit check_remote check_history \
 	    check_control check_demo_control 2>&1 | \
 	    bin/makefilter 1>&2
 	@$(MAKE) do_zipfile
 
+# This creates the zipfile using the approved pgxn method and then
+# appends the html documentation to it.
 do_zipfile: mostly_clean deps docs
 	git archive --format zip --prefix=$(ZIPFILE_BASENAME)/ \
 	    --output $(ZIPFILENAME) master
+	-mkdir $(ZIPFILE_BASENAME) 2>/dev/null
+	-(cd $(ZIPFILE_BASENAME); ln -s ../html .)
+	zip -rv $(ZIPFILENAME) $(ZIPFILE_BASENAME)/html
+	rm $(ZIPFILE_BASENAME)/html
+	rmdir $(ZIPFILE_BASENAME)
 
-TARGET_FILES += $(ZIPFILENAME)
-
+TARGET_FILES += $(ZIPFILENAME) $(ZIPFILE_BASENAME)/html
+TARGET_DIRS += $(ZIPFILE_BASENAME)
 
 ##
 # clean targets

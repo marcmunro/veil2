@@ -66,6 +66,35 @@
 	    </para>
 	  </entry>
 	</row>
+	<row>
+	  <entry>0.9.2 (beta)</entry>
+	  <entry>v0.9.2</entry>
+	  <entry>20201228</entry>
+	  <entry>
+	    <para>
+	      Update to:
+	      <itemizedlist>
+		<listitem>
+		  improve documentation;
+		</listitem>
+		<listitem>
+		  improve performance;
+		</listitem>
+		<listitem>
+		  improve testing, and fix bugs;
+		</listitem>
+		<listitem>
+		  improve the pgxn metadata and rendering of docs.
+		</listitem>
+	      </itemizedlist>
+	      It is believed that this version will be stable.  There
+	      are no planned enhancements or updates at the time of release.
+	    </para>
+	    <para>
+	      Consider this a production release candidate.
+	    </para>
+	  </entry>
+	</row>
       </tbody>
     </tgroup>
   </table>

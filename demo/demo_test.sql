@@ -18,6 +18,40 @@ language sql security definer;
 
 grant execute on function demo.insert_connect() to demouser;
 
+create or replace
+function exerciser() returns void as
+$$
+declare
+  _dummy record;
+begin
+  while true loop
+    delete from veil2.accessor_privileges_cache;
+    with login as
+      (
+        select *
+          from veil2.create_session('Alice', 'bcrypt', 4, 1000) c
+         cross join veil2.open_connection(c.session_id, 1, 'passwd1')
+      )
+    select * into _dummy
+      from login;
+with login as
+  (
+    select o2.success -- *
+      from veil2.create_session('Bob', 'plaintext', 4, 1010) c
+     cross join veil2.open_connection(c.session_id, 1, 'passwd2') o1
+     cross join veil2.open_connection(c.session_id, 2,
+                 encode(digest(c.session_token || to_hex(2), 'sha1'),
+    	     	    'base64')) o2
+  )
+select * into _dummy
+  from login;
+  end loop;
+end;
+$$
+language plpgsql volatile security definer;
+
+grant execute on function exerciser to demouser;
+
 \c vpd demouser
 
 begin;
@@ -317,3 +351,4 @@ rollback;
 \pset tuples_only false
 \pset format aligned
 
+--select * from exerciser();

@@ -626,8 +626,7 @@
       <sect3>
 	<title><literal>close_connection()</literal></title>
 	<para>
-	  This function has no parameters and always returns a boolean
-	  true.
+	  This function has no parameters returns void.
 	</para>
       </sect3>
     </sect2>

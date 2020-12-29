@@ -1,12 +1,13 @@
 <chapter id="what-is-relational-security">
   <title>What Is A Relational Security System?</title>
   <para>
-    A Relational Security System is one in which access to each piece
-    of data or functionality is limited according to the user's
-    relationships to that data or functionality.  What this means is
-    that access rights are contextual, based on relationships between
-    that data and the connected user, and that each test for a
-    specific access right is a test in a specific context.
+    A Relational Security System is one in which your security model
+    is part of your data model.  Access to each piece of data or
+    functionality is limited according to the user's relationships to
+    that data or functionality.  What this means is that access rights
+    are contextual, based on relationships between that data and the
+    connected user, and that each test for a specific access right is
+    a test in a specific context.
   </para>
   <para>
     For example:

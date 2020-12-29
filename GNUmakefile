@@ -206,7 +206,7 @@ $(VERSION_FILE): VERSION configure
 	@echo "Creating version entities for docs..."
 	@{ \
 	  echo "<!ENTITY version_number \"$(VERSION_NUMBER)\">"; \
-	  echo "<!ENTITY version \"$(VEIL_VERSION)\">"; \
+	  echo "<!ENTITY version \"$(VEIL2_VERSION)\">"; \
 	  echo "<!ENTITY majorversion \"$(MAJOR_VERSION)\">"; \
 	} > $@
 

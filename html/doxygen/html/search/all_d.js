@@ -2,7 +2,6 @@ var searchData=
 [
   ['veil2',['Veil2',['../index.html',1,'']]],
   ['veil2_2ec',['veil2.c',['../veil2_8c.html',1,'']]],
-  ['veil2_2ed',['veil2.d',['../veil2_8d.html',1,'']]],
   ['veil2_2eh',['veil2.h',['../veil2_8h.html',1,'']]],
   ['veil2_5fadd_5fsession_5fprivileges',['veil2_add_session_privileges',['../veil2_8c.html#a077cedf7abdcaaca296bb6d4d164b20d',1,'veil2_add_session_privileges(FunctionCallInfo fcinfo):&#160;veil2.c'],['../veil2_8h.html#a32badc8d209e3a35308fb445a0f1f6a9',1,'veil2_add_session_privileges(PG_FUNCTION_ARGS):&#160;veil2.h']]],
   ['veil2_5fbool_5ffrom_5fquery',['veil2_bool_from_query',['../query_8c.html#a7b701739e7cf328e55d3aa4b99b96632',1,'veil2_bool_from_query(const char *qry, int nargs, Oid *argtypes, Datum *args, void **saved_plan, bool *result):&#160;query.c'],['../veil2_8h.html#a7b701739e7cf328e55d3aa4b99b96632',1,'veil2_bool_from_query(const char *qry, int nargs, Oid *argtypes, Datum *args, void **saved_plan, bool *result):&#160;query.c']]],

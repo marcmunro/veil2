@@ -162,28 +162,7 @@ local   whateverdbnameyoulike demouser                          trust
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="idm1204"></a>20.1.2. Data Model Overview</h3></div></div></div>
-<div class="mediaobject"><div id="veil2_demo_erd_div">
-  <map name="veil2_demo_erd_map">
-    <area alt="role entity" title="roles table"
-      target="_self" shape="rect"
-      coords="201,164,383,207"
-      href="apa.html#entity_role">
-    <area alt="privilege entity" title="privileges table"
-      target="_self" shape="rect"
-      coords="0,164,181,207"
-      href="apa.html#entity_privilege">
-    <area alt="role_privilege entity" title="role_privileges table"
-      target="_self" shape="rect"
-      coords="44,329,226,372"
-      href="apa.html#entity_role_privilege">
-    <area alt="role_role entity" title="role_roles table"
-      target="_self" shape="rect"
-      coords="291,658,472,701"
-      href="apa.html#entity_role_role">
-  </map>
-  <img src="veil2_demo_erd.png" usemap="#veil2_demo_erd_map">
-</div>
-</div>
+<div class="mediaobject"><img src="veil2_demo_erd.png"></div>
 <p>
 	The diagram above provides a logical view of the
 	<code class="literal">Veil2_demo</code> database.  The
@@ -852,4 +831,3 @@ marc:veil2$ make mindemo
 </div>
 </body>
 </html>
->

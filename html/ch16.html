@@ -5,7 +5,7 @@
 <title>Chapter 16. Secure Your Tables (STEP 9)</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9.2 (beta)">
 <link rel="up" href="pt02.html" title="Part II. Creating Your Veil2-based VPD Step By Step">
 <link rel="prev" href="ch15.html" title="Chapter 15. Integrate And/Or Create Roles (STEP 8)">
 <link rel="next" href="ch17.html" title="Chapter 17. Secure Your Views (STEP 10)">
@@ -43,14 +43,14 @@
   </p>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm1097"></a>16.1. Doing It</h2></div></div></div>
+<a name="idm1098"></a>16.1. Doing It</h2></div></div></div>
 <p>
       Securing a table is pretty simple.  First you enable row
       level security for that table, and then you define policies on
       the table for select, insert, update and delete.  The following
       is the definition for the select policy on projects from the
       <code class="literal">veil2_demo</code> extension.  See STEP 9 in file
-      <code class="literal">demo/veil2_demo--.sql</code>.
+      <code class="literal">demo/veil2_demo--0.9.2 (beta).sql</code>.
       </p>
 <pre class="programlisting">
 alter table demo.projects enable row level security;
@@ -91,7 +91,7 @@ create policy parties_tbl__select
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm1112"></a>16.2. The <code class="literal">Veil2</code> tables</h2></div></div></div>
+<a name="idm1113"></a>16.2. The <code class="literal">Veil2</code> tables</h2></div></div></div>
 <p>
       Each <code class="literal">Veil2</code> table is protected with a select
       privilege.  It is generally assumed that no-one will be granted

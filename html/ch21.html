@@ -5,7 +5,7 @@
 <title>Chapter 21. The Veil2 Implementation: What You Need To Know</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9.2 (beta)">
 <link rel="up" href="pt03.html" title="Part III. Implementation Details">
 <link rel="prev" href="ch20.html" title="Chapter 20. Exploring The Veil2 Demos">
 <link rel="next" href="ch22.html" title="Chapter 22. For Developers">
@@ -243,7 +243,7 @@ select 5, s.scope_id,   -- Project to org promotions
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1424"></a>21.1.4. Managing User-Provided Functionality</h3></div></div></div>
+<a name="idm1452"></a>21.1.4. Managing User-Provided Functionality</h3></div></div></div>
 <p>
 	To make user-provided functions and views take effect, they
 	must be installed to replace the original system-provided
@@ -531,7 +531,7 @@ select 5, s.scope_id,   -- Project to org promotions
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm1575"></a>21.5. Authentication Contexts</h2></div></div></div>
+<a name="idm1603"></a>21.5. Authentication Contexts</h2></div></div></div>
 <p>
       As described in the concepts section, having distinct <a class="link" href="ch04.html#authentication_context" title="4.7. Authentication Contexts">authentication contexts</a>
       means that you can have distinct sets of usernames for different
@@ -630,7 +630,7 @@ select * from veil2.create_session(&lt;username&gt;, 4, 44);
     </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm1608"></a>21.5.1. Associating Accessors With Their Authentication Context</h3></div></div></div>
+<a name="idm1636"></a>21.5.1. Associating Accessors With Their Authentication Context</h3></div></div></div>
 <p>
 	The association between an accessor and their authentication
 	context is entirely user-defined.  <code class="literal">Veil2</code>

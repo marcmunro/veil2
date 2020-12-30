@@ -5,7 +5,7 @@
 <title>Chapter 11. Link Your Users To Veil2's Accessors (STEP 4)</title>
 <link rel="stylesheet" type="text/css" href="veil2.css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="index.html" title="Veil2 Documentation">
+<link rel="home" href="index.html" title="Veil2 0.9.2 (beta)">
 <link rel="up" href="pt02.html" title="Part II. Creating Your Veil2-based VPD Step By Step">
 <link rel="prev" href="ch10.html" title="Chapter 10. Setting Up Authentication and Session Management (STEP 3)">
 <link rel="next" href="ch12.html" title="Chapter 12. Link Your Scopes and Security Contexts (STEP 5)">
@@ -55,7 +55,7 @@
   </p>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm846"></a>11.1. Create A Mapping Table With Foreign-Key Links to Your Users</h2></div></div></div>
+<a name="idm847"></a>11.1. Create A Mapping Table With Foreign-Key Links to Your Users</h2></div></div></div>
 <p>
       You will create a mapping table, ideally in the
       <code class="literal">veil2</code> schema, that will consist of foreign key
@@ -73,7 +73,7 @@
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm855"></a>11.2. Copy Existing User Records</h2></div></div></div>
+<a name="idm856"></a>11.2. Copy Existing User Records</h2></div></div></div>
 <p>
       Create copies of the existing user records in
       <code class="literal">veil2.accessors</code>.  Note that you will need to
@@ -84,7 +84,7 @@
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm860"></a>11.3. Copy Existing Authentication Details</h2></div></div></div>
+<a name="idm861"></a>11.3. Copy Existing Authentication Details</h2></div></div></div>
 <p>
       What we need to do is populate the 
       <code class="literal"><a class="link" href="apa.html#entity_authentication_detail" title="A.1.16. Authentication Details Table">veil2.authentication_details</a></code>
@@ -121,7 +121,7 @@
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm873"></a>11.4. Create Referential Integrity Triggers</h2></div></div></div>
+<a name="idm874"></a>11.4. Create Referential Integrity Triggers</h2></div></div></div>
 <p>
       When new users are created, updated or deleted in your users
       table, we need the <code class="literal">veil2.accessors</code> records to
@@ -131,7 +131,7 @@
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm877"></a>11.5. Ensure Authentication Changes Are Propagated</h2></div></div></div>
+<a name="idm878"></a>11.5. Ensure Authentication Changes Are Propagated</h2></div></div></div>
 <p>
       Ideally, on an ongoing basis, all authentication details will be
       kept solely in <code class="literal">veil2.authentication_details</code>

@@ -18,6 +18,18 @@
 -- This is a simple database that allows users to post stuff, that
 -- other users may or may not be able to see.
 
+do
+$$
+declare
+  _result integer;
+begin
+  select 1 into _result from pg_roles where rolname = 'demouser';
+  if not found then
+    execute 'create role demouser with login password ''pass''';
+  end if;
+end;
+$$;
+
 -- Trigger function usable by various triggers.
 create or replace
 function nocando() returns trigger as

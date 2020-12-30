@@ -48,7 +48,8 @@
 ]>
 
 <book id="Veil2">
-  <title>Veil2 &version; Documentation</title>
+  <title>Veil2 &version;</title>
+  <subtitle>Relational Security for Postgres</subtitle>
   <preface id="introduction">
     <title>Introduction to Veil2</title>
     <para>

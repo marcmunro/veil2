@@ -25,7 +25,7 @@ $$
 declare
   _result integer;
 begin
-  select 1 into _result from pg_roles where rolname = 'veil_user';
+  select 1 into _result from pg_roles where rolname = 'demouser';
   if not found then
     execute 'create role demouser with login password ''pass''';
   end if;

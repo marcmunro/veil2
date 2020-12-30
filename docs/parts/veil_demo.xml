@@ -10,7 +10,7 @@
 	</para>
 	<para>
 	  This provides an extension that demonstrates multiple types
-	  of scopes emulating a Sofware As A Service implementation
+	  of scopes emulating a Software As A Service implementation
 	  for multiple corporate clients.  The demo is workable but
 	  incomplete as not all triggers, rules, etc are provided.
 	</para>
@@ -116,6 +116,49 @@ local   whateverdbnameyoulike demouser                          trust
           users.
 	</para>
       </sect3>
+    </sect2>
+    <sect2>
+      <title>Data Model Overview</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata
+	      id="veil2_demo_erd_div"
+	      fileref="veil2_demo_erd.png"
+	      format="PNG"/>
+	</imageobject>
+      </mediaobject>
+      <para>
+	The diagram above provides a logical view of the
+	<literal>Veil2_demo</literal> database.  The
+	<literal>privilege</literal>, <literal>role</literal>,
+	<literal>role_privilege</literal> and
+	<literal>role_role</literal> entities are from
+	<literal>Veil2</literal>, while the rest are created
+	specifically for the application.
+      </para>
+      <para>
+	<literal>Parties</literal> may be persons, corporations or
+	organizations, where organizations are subdivisions of
+	corporations.  Every party belongs to both an organization and
+	a corporation.
+      </para>
+      <para>
+	All users are <literal>persons</literal>.  Their access rights
+	are determined by their <literal>party_roles</literal>, their
+	<literal>project_assignments</literal> and by their (implied)
+	<literal>personal_context</literal> role (this relationship is
+	shown in the diagram with an asterisk).  These tables and
+	relationships provide the <emphasis>entire</emphasis>
+	relational security model for the
+	<literal>veil2_demo</literal> application.
+      </para>
+      <para>
+	Note that <literal>role_role</literal> has a <literal>mapping
+	context</literal> relationship back to
+	<literal>corporation</literal>.  This allows each corporation
+	to manage its own independent set of <literal>role</literal>
+	to <literal>role</literal> mappings.
+      </para>
     </sect2>
     <sect2>
       <title>The Security Contexts</title>
@@ -659,7 +702,7 @@ vpd=#
 	</programlisting>
       </para>
       <para>
-	As an alternative you can run the <literal>demo.sql</literal>
+	As an alternative you can run the <literal>minimal_demo.sql</literal>
 	script which can be found as described <link
 	linkend="next_steps">here</link>, eg
 	<programlisting>

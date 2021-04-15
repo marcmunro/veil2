@@ -1,5 +1,5 @@
 <chapter id="housekeeping">
-  <title>Setup Housekeeping Tasks STEP 12</title>
+  <title>Setup Housekeeping Tasks (STEP 12)</title>
   <para>
     The only essential housekeeping task beyond normal database
     maintenance is to add a periodic job to delete expired sessions.

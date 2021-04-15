@@ -2,7 +2,7 @@
   "name": "veil2",
   "abstract": "An extension for implementing relational security systems.",
   "description": "Provides a framework for implementing Virtual Private Databases using a relational security model.",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "maintainer": ["Marc Munro <marc@bloodnok.com>"],
   "license": {
     "gpl_3": "https://www.gnu.org/licenses/gpl-3.0.en.html"
@@ -11,23 +11,23 @@
     "runtime": {
       "requires": {
         "PostgreSQL": "10.0.0",
-	"pgbitmap": "0.0.0"
+	"pgbitmap": "0.0.1"
       }
     }
   },
   "provides": {
     "veil2": {
-      "file": "sql/veil2--0.9.2.sql",
-      "version": "0.9.2",
+      "file": "sql/veil2--0.9.3.sql",
+      "version": "0.9.3",
       "docfile": "docs/README.md"
     },
     "veil2_demo": {
-      "file": "demo/veil2_demo--0.9.2.sql",
-      "version": "0.9.2"
+      "file": "demo/veil2_demo--0.9.3.sql",
+      "version": "0.9.3"
     },
     "veil2_minimal_demo": {
-      "file": "demo/veil2_minimal_demo--0.9.2.sql",
-      "version": "0.9.2"
+      "file": "demo/veil2_minimal_demo--0.9.3.sql",
+      "version": "0.9.3"
     }
   },
   "resources": {

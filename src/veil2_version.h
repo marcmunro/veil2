@@ -11,4 +11,4 @@
  * 
  */
 
-#define VEIL2_VERSION "0.9.2 (beta)"
+#define VEIL2_VERSION "0.9.3 (beta)"

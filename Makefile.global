@@ -12,8 +12,8 @@
 
 # Version information
 PACKAGE_NAME=		veil2
-VEIL2_VERSION=		0.9.2 (beta)
-VERSION=		0.9.2 (beta)
+VEIL2_VERSION=		0.9.3 (beta)
+VERSION=		0.9.3 (beta)
 MAJOR_VERSION=		0
 MINOR_VERSION=		9
 

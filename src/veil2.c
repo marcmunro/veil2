@@ -2,7 +2,7 @@
  * @file   veil2.c
  * \code
  *     Author:       Marc Munro
- *     Copyright (c) 2020 Marc Munro
+ *     Copyright (c) 2020,2021 Marc Munro
  *     License:      GPL V3
  * 
  * \endcode
@@ -17,7 +17,9 @@
 #include "catalog/pg_type.h"
 #include "access/xact.h"
 #include "executor/spi.h"
+#include "access/htup_details.h"
 #include "utils/builtins.h"
+
 #include "veil2.h"
 
 PG_MODULE_MAGIC;

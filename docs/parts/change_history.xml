@@ -95,6 +95,23 @@
 	    </para>
 	  </entry>
 	</row>
+	<row>
+	  <entry>0.9.3 (beta)</entry>
+	  <entry>v0.9.2</entry>
+	  <entry>20210414</entry>
+	  <entry>
+	    <para>
+	      Update to fix compilation problems with Postgres 11.
+	    </para>
+	    <para>
+	      It is believed that this version will be stable.  There
+	      are no planned enhancements or updates at the time of release.
+	    </para>
+	    <para>
+	      Consider this a production release candidate.
+	    </para>
+	  </entry>
+	</row>
       </tbody>
     </tgroup>
   </table>

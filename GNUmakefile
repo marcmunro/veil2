@@ -135,6 +135,9 @@ DOCS_TREE = $(HTMLDIR)
 
 TARGET_FILES := PG_CONFIG PG_VERSION $(OBJS) $(VEIL2_LIB)
 
+# Ensure warnings are considered fatal.
+PG_CFLAGS = -Werror
+
 include $(PGXS)
 
 # Add the install-data-tree target to the standard install target.

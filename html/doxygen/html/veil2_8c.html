@@ -97,6 +97,7 @@ $(document).ready(function(){initNavTree('veil2_8c.html','');});
 <code>#include &quot;catalog/pg_type.h&quot;</code><br />
 <code>#include &quot;access/xact.h&quot;</code><br />
 <code>#include &quot;executor/spi.h&quot;</code><br />
+<code>#include &quot;access/htup_details.h&quot;</code><br />
 <code>#include &quot;utils/builtins.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="veil2_8h_source.html">veil2.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
@@ -104,8 +105,8 @@ Include dependency graph for veil2.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="veil2_8c__incl.png" border="0" usemap="#src_2veil2_8c" alt=""/></div>
 <map name="src_2veil2_8c" id="src_2veil2_8c">
-<area shape="rect" id="node10" href="veil2_8h.html" title="Main header file for veil2. " alt="" coords="1153,95,1215,121"/>
-<area shape="rect" id="node12" href="veil2__version_8h.html" title="veil2_version.h" alt="" coords="1203,191,1319,218"/>
+<area shape="rect" id="node11" href="veil2_8h.html" title="Main header file for veil2. " alt="" coords="1334,95,1397,121"/>
+<area shape="rect" id="node13" href="veil2__version_8h.html" title="veil2_version.h" alt="" coords="1385,191,1501,218"/>
 </map>
 </div>
 </div>
@@ -209,7 +210,7 @@ Variables</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Provides callable veil2 functions. These are written in C for performance and to ensure that they cannot be easily subverted. </p>
-<div class="fragment"><div class="line">Author:       Marc Munro</div><div class="line">Copyright (c) 2020 Marc Munro</div><div class="line">License:      GPL V3</div></div><!-- fragment --> 
+<div class="fragment"><div class="line">Author:       Marc Munro</div><div class="line">Copyright (c) 2020,2021 Marc Munro</div><div class="line">License:      GPL V3</div></div><!-- fragment --> 
 <p class="definition">Definition in file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a70b0583241093e12b08f1c11c6b03e68"></a>
@@ -225,7 +226,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>How many ContextPrivs entries a SessionPrivs structure will be created with or extended by. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00268">268</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00270">270</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -244,9 +245,9 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">(                   \</div><div class="line">    sizeof(<a class="code" href="structSessionRolePrivs.html">SessionRolePrivs</a>) +                          \</div><div class="line">    (<span class="keyword">sizeof</span>(<a class="code" href="structContextRolePrivs.html">ContextRolePrivs</a>) *                         \</div><div class="line">     (elems + <a class="code" href="veil2_8c.html#a70b0583241093e12b08f1c11c6b03e68">CONTEXT_ROLEPRIVS_INCREMENT</a>)))</div><div class="ttc" id="veil2_8c_html_a70b0583241093e12b08f1c11c6b03e68"><div class="ttname"><a href="veil2_8c.html#a70b0583241093e12b08f1c11c6b03e68">CONTEXT_ROLEPRIVS_INCREMENT</a></div><div class="ttdeci">#define CONTEXT_ROLEPRIVS_INCREMENT</div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00268">veil2.c:268</a></div></div>
-<div class="ttc" id="structSessionRolePrivs_html"><div class="ttname"><a href="structSessionRolePrivs.html">SessionRolePrivs</a></div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00089">veil2.c:89</a></div></div>
-<div class="ttc" id="structContextRolePrivs_html"><div class="ttname"><a href="structContextRolePrivs.html">ContextRolePrivs</a></div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00079">veil2.c:79</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line">(                   \</div><div class="line">    sizeof(<a class="code" href="structSessionRolePrivs.html">SessionRolePrivs</a>) +                          \</div><div class="line">    (<span class="keyword">sizeof</span>(<a class="code" href="structContextRolePrivs.html">ContextRolePrivs</a>) *                         \</div><div class="line">     (elems + <a class="code" href="veil2_8c.html#a70b0583241093e12b08f1c11c6b03e68">CONTEXT_ROLEPRIVS_INCREMENT</a>)))</div><div class="ttc" id="veil2_8c_html_a70b0583241093e12b08f1c11c6b03e68"><div class="ttname"><a href="veil2_8c.html#a70b0583241093e12b08f1c11c6b03e68">CONTEXT_ROLEPRIVS_INCREMENT</a></div><div class="ttdeci">#define CONTEXT_ROLEPRIVS_INCREMENT</div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00270">veil2.c:270</a></div></div>
+<div class="ttc" id="structSessionRolePrivs_html"><div class="ttname"><a href="structSessionRolePrivs.html">SessionRolePrivs</a></div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00091">veil2.c:91</a></div></div>
+<div class="ttc" id="structContextRolePrivs_html"><div class="ttname"><a href="structContextRolePrivs.html">ContextRolePrivs</a></div><div class="ttdef"><b>Definition:</b> <a href="veil2_8c_source.html#l00081">veil2.c:81</a></div></div>
 </div><!-- fragment --><p>Provide the size that we want our <a class="el" href="structSessionRolePrivs.html">SessionRolePrivs</a> structure to be.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -255,7 +256,7 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00275">275</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00277">277</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -316,7 +317,7 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00327">327</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00329">329</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -385,7 +386,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>false if no context can be found, otherwise true if the user has priv in the supplied scope. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00217">217</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00219">219</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -422,7 +423,7 @@ Here is the call graph for this function:</div>
 <p>Check whether a session has been properly initialized. If not, and we are supposed to fail in such a situation, fail with an appropriate error message. Otherwise return true if the session is ready to go.</p>
 <dl class="section return"><dt>Returns</dt><dd>boolean True if our session has been properly initialized. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00808">808</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00810">810</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -465,7 +466,7 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 <p>Clear all <a class="el" href="structContextRolePrivs.html">ContextRolePrivs</a> entries in session_roleprivs. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00248">248</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00250">250</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -501,7 +502,7 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 <p>Create a temporary table used for handling privileges in become_user. Originally, more temp tables were used but these have been replaced by in memory structures for performance and security. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00443">443</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00445">445</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -546,7 +547,7 @@ Here is the call graph for this function:</div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00461">461</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00463">463</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -589,7 +590,7 @@ Here is the call graph for this function:</div>
 <p>Predicate to indicate whether to raise an error if a privilege test function has been called prior to a session being established. If not, the privilege testing function should return false. The determination of whether to error or return false is based on the value of the veil2.system_parameter 'error on uninitialized session' at the time that the database session is established.</p>
 <dl class="section return"><dt>Returns</dt><dd>boolean, whether or not to raise an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00393">393</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00395">395</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -631,7 +632,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00288">288</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00290">290</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -685,7 +686,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>bool</code> false, indicating to <a class="el" href="query_8c.html#ac43e6b3b80193c907eb796da31304f49">veil2_query()</a> that no more rows are expected. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00426">426</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00428">428</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -738,7 +739,7 @@ Here is the call graph for this function:</div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00149">149</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00151">151</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -773,7 +774,7 @@ Here is the call graph for this function:</div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00235">235</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00237">237</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -809,7 +810,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Dynamically allocated (by palloc()) copy of in. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01167">1167</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01169">1169</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -869,7 +870,7 @@ Here is the call graph for this function:</div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00363">363</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00365">365</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -909,7 +910,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00749">749</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00751">751</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -940,7 +941,7 @@ Here is the call graph for this function:</div>
 <p>Provide the path to where veil2 sql scripts should be stored on the server.</p>
 <dl class="section return"><dt>Returns</dt><dd>Text value containing the path. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01195">1195</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01197">1197</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -970,7 +971,7 @@ Here is the call graph for this function:</div>
 <p>Provide the path to where documentation should be stored on the server.</p>
 <dl class="section return"><dt>Returns</dt><dd>Text value containing the path. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01183">1183</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01185">1185</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1007,7 +1008,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00833">833</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00835">835</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1055,7 +1056,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege in the personal scope of the given accessor_id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00862">862</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00864">864</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1104,7 +1105,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege for the given scope_type_id and scope_id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00893">893</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00895">895</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1153,7 +1154,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege for the given scope_type_id and scope_id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00925">925</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00927">927</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1202,7 +1203,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege in the scope given by scope_type_id and scope_id or a supeior one. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01017">1017</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01019">1019</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1251,7 +1252,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege in the scope given by scope_type_id and scope_id or a supeior one or global scope. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01083">1083</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01085">1085</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1300,7 +1301,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean true if the session has the given privilege in a scope superior to that given by scope_type_id and scope_id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00961">961</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00963">963</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1339,7 +1340,7 @@ Here is the call graph for this function:</div>
 <p>Resets a postgres session prior to the recording of session privilege information. This ensures that the Veil2 temporary tables, on which our security depends, exist and have not been tamperered with. Unless this function succeeds, the privilege testing functions <a class="el" href="veil2_8c.html#a0f03a4c32bbac407d040e66fcb807e48">veil2_i_have_global_priv()</a>, <a class="el" href="veil2_8c.html#abdf7a99cee51319e393a9d0d3a1e79ef">veil2_i_have_personal_priv()</a>, <a class="el" href="veil2_8c.html#a1f3226ae495eaf76f2f1165026a7f0eb">veil2_i_have_priv_in_scope()</a> and <a class="el" href="veil2_8c.html#ab26e0230a290a97425e5fd7c420737b6">veil2_i_have_priv_in_superior_scope()</a> will always return false.</p>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00557">557</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00559">559</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1379,7 +1380,7 @@ Here is the call graph for this function:</div>
 <p>Clears the temp table and cached privileges for a postgres session and reloads them.</p>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00577">577</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00579">579</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1418,7 +1419,7 @@ Here is the call graph for this function:</div>
 <p>Return the number of times one of the i_have_privilege_xxxx() functions has returned false and true.</p>
 <dl class="section return"><dt>Returns</dt><dd>Record: false_count, true_count </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01138">1138</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01140">1140</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1441,7 +1442,7 @@ Here is the call graph for this function:</div>
 <p>Optionally set (if variables are provided), and return the session context.</p>
 <dl class="section return"><dt>Returns</dt><dd>record </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00596">596</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00598">598</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1464,7 +1465,7 @@ Here is the call graph for this function:</div>
 <p>Return the current in-memory session_privileges as though they were a SQL table.</p>
 <dl class="section return"><dt>Returns</dt><dd>setof record </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00670">670</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00672">672</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1486,7 +1487,7 @@ Here is the call graph for this function:</div>
 <p><code><a class="el" href="veil2_8c.html#ab1c1816e2ef1b38fdfc3abf503d3fc50">veil2_session_ready()</a> returns bool</code> Predicate to indicate whether the current session has been properly initialized by <a class="el" href="veil2_8c.html#aa978d6e0212eb0edf5436a07a4bec88d">veil2_reset_session()</a>. It tests the static variable <a class="el" href="veil2_8c.html#a9206d7502b250a49f4279f788cd19c03">session_ready</a>.</p>
 <dl class="section return"><dt>Returns</dt><dd><code>bool</code> true if this session has been set up. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00537">537</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00539">539</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1509,7 +1510,7 @@ Here is the call graph for this function:</div>
 <p>Always return true, regardless of parameters. This is used to determine the minimum possible overhead for a privilege testing predicate, for performance measurements.</p>
 <dl class="section return"><dt>Returns</dt><dd>boolean true </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00794">794</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00796">796</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1540,7 +1541,7 @@ Here is the call graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00773">773</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00775">775</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1572,7 +1573,7 @@ Here is the call graph for this function:</div>
 <p>Provide the veil2 version as a string.</p>
 <dl class="section return"><dt>Returns</dt><dd>Text value containing the version. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01207">1207</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l01209">1209</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1606,7 +1607,7 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 <p>Used to record counts of false and true results from the i_have_priv_xxx() functions. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00072">72</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00074">74</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1630,7 +1631,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">= { ((bool) 0) , 0, 0, 0, 0,</div><div class="line">                                         0, 0, 0, 0}</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00129">129</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00131">131</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1656,7 +1657,7 @@ Here is the call graph for this function:</div>
 <p>Used to record whether the current session's temporary tables have been properly initialised using <a class="el" href="veil2_8c.html#aa978d6e0212eb0edf5436a07a4bec88d">veil2_reset_session()</a>. If not the privilege testing functions <a class="el" href="veil2_8c.html#a0f03a4c32bbac407d040e66fcb807e48">veil2_i_have_global_priv()</a>, <a class="el" href="veil2_8c.html#abdf7a99cee51319e393a9d0d3a1e79ef">veil2_i_have_personal_priv()</a>, <a class="el" href="veil2_8c.html#a1f3226ae495eaf76f2f1165026a7f0eb">veil2_i_have_priv_in_scope()</a> and <a class="el" href="veil2_8c.html#ab26e0230a290a97425e5fd7c420737b6">veil2_i_have_priv_in_superior_scope()</a> will always return false. If you need to implement your own pl/pgsql base privilege testing function, it should call veil2_session_reeady() to ensure that privileges have been correctly set up.</p>
 <p>The primary reason for this variable to exist is to ensure that a user cannot trick the privileges functions by creating their own session_privileges table. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00065">65</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00067">67</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1681,7 +1682,7 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 <p>The SessionPrivs object for this session. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00122">122</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00124">124</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>
@@ -1706,7 +1707,7 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 <p>Whether we have loaded our session's ContextPrivs into session memory. </p>
 
-<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00127">127</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="veil2_8c_source.html#l00129">129</a> of file <a class="el" href="veil2_8c_source.html">veil2.c</a>.</p>
 
 </div>
 </div>

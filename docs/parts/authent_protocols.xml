@@ -668,7 +668,7 @@ select veil2.hello();
       Sometimes you may need changes to a user's privileges to happen
       immediately, rather than the next time that they connect.  In
       this case, your session should call <link
-      linkend="func_reload_connection_privs()"><literal>veil2.reload_connection_privs()</literal></link>.
+      linkend="func_reload_connection_privs"><literal>veil2.reload_connection_privs()</literal></link>.
     </para>
     <para>
       This will rarely be needed in a shared session environment as

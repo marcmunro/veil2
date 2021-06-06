@@ -49,7 +49,7 @@
     </para>
     <para>
       Privileges are not assigned directly to users.  Instead they are
-      assigned through <link linkend="roles">roles</link> which are
+      assigned through <link linkend="roles">roles</link>, which are
       essentially collections of privileges.
     </para>
     <para>
@@ -146,7 +146,7 @@
     <para>
       It is largely because privileges may apply in different scopes
       from their role's assignment context, that contexts and scopes
-      have distinct terms.  While this may seem to be semantic
+      are distinct terms.  While this may seem to be semantic
       pedantry, the opportunities for confusion when discussing scopes
       and contexts are such that the distinction is useful.  The
       author has been there and resents that he will never get those
@@ -193,46 +193,70 @@
   </sect1>
   <sect1 id="scopes">
     <title>Scopes</title>
-    <para>
-      A scope describes the applicability of a <link
-      linkend="privileges">privilege</link>.  Scopes are mostly based
-      upon existing relationships in your data.
-    </para>
-    <para>
-      Note that for every scope, there is an equivalent <link
-      linkend="security-contexts">security context</link>.  Where
-      contexts are user facing and are applied to the assignment of
-      <link linkend="roles">roles</link>, scopes apply at the level of
-      individual privileges and are more of an implementation detail.
-    </para>
-    <para>
-      A scope may apply to an organization, a department, a project,
-      or whatever you wish.  Having a privilege in the scope of one
-      department would presumably give you access rights to data for
-      that department.  It would not give you access to equivalent
-      data for other departments.
-    </para>
-    <para>
-      Some scopes will allow access to large subsets of data, and some
-      to very small subsets.  We refer to this as the scope level.  A
-      scope that is very restrictive is considered a low-level scope,
-      and one that is not, is a high-level scope.  When we talk about
-      <link linkend="scope-promotion">scope promotion</link>,
-      this is always from a lower level to a higher level, which is to
-      say that the scope becomes less restrictive, and likely to
-      return a larger set of data.
-    </para>
-    <para>
-      One scope that is particularly low-level is personal scope.
-      This limits access to data that specifically relates to the
-      accessor (privilege holder).  So if <literal>user X</literal>
-      has the <literal>select user</literal> privilege in personal
-      scope, they will be able to see their own
-      <literal>users</literal> record.  Whether they can see other
-      <literal>users</literal> records will depend on whether they
-      have the <literal>select users</literal> privilege in any other
-      scopes.
-    </para>
+    <sect2>
+      <title>Scopes As a Concept</title>
+      <para>
+	Each type of scope represents a distinct type of relationship
+	between your system's users and the various relations (tables
+	and views) in your database: it is these relationships that
+	are the heart of relational security.
+      </para>
+      <para>
+	If your users have a relationship with an employer, then maybe
+	you will want an employer scope.  If they have a relationship
+	with an email domain, then you may need a domain scope.  If
+	you have an organizational hierarchy that your users fit into,
+	then you may need an organization or department scope.
+      </para>
+      <para>
+	Your scope types should naturally fall out from your data
+	model and your access requirements.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Scopes In Practice</title>
+      <para>
+	A scope describes the applicability of a <link
+	linkend="privileges">privilege</link>.  Scopes are mostly
+	based upon existing relationships in your data.
+      </para>
+      <para>
+	Note that for every scope, there is an equivalent <link
+	linkend="security-contexts">security context</link>.  Where
+	contexts are user facing and are applied to the assignment of
+	<link linkend="roles">roles</link>, scopes apply at the level
+	of individual privileges and are more of an implementation
+	detail.
+      </para>
+      <para>
+	A scope may apply to an organization, a department, a project,
+	or whatever you wish.  Having a privilege in the scope of one
+	department would give you access rights to data for that
+	department.  It would not give you access to equivalent data
+	for other departments.
+      </para>
+      <para>
+	Some scopes will allow access to large subsets of data, and
+	some to very small subsets.  We refer to this as the scope
+	level.  A scope that is very restrictive is considered a
+	low-level scope, and one that is not, is a high-level scope.
+	When we talk about <link linkend="scope-promotion">scope
+	promotion</link>, this is always from a lower level to a
+	higher level, which is to say that the scope becomes less
+	restrictive, and likely to return a larger set of data.
+      </para>
+      <para>
+	A built-in scope that is particularly low-level is personal
+	scope.  This limits access to data that specifically relates
+	to the accessor (privilege holder).  So if <literal>user
+	X</literal> has the <literal>select user</literal> privilege
+	in personal scope, they will be able to see their own
+	<literal>users</literal> record.  Whether they can see other
+	<literal>users</literal> records will depend on whether they
+	have the <literal>select users</literal> privilege in any
+	other scopes.
+      </para>
+    </sect2>
   </sect1>
   <sect1 id="roles">
     <title>Roles</title>

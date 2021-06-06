@@ -230,12 +230,12 @@ veil2_query(const char *qry,
 
 /** 
  * ::Fetch_fn function for processing a single row of a single integer for 
- * ::query.
+ * ::veil2_query.
  * \param tuple The row to be processed
  * \param tupdesc Descriptor for the types of the fields in the tuple.
  * \param p_result Pointer to an int4 variable into which the value
  * returned from the query will be placed.
- * \return false.  This causes ::query to terminate after processing a
+ * \return false.  This causes ::veil2_query to terminate after processing a
  * single row.
  */
 static bool

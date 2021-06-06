@@ -205,7 +205,7 @@ elif [ "x$1" = "x-1" ]; then
 else
     version=`cut -d" " -f1 VERSION`
     find $1 -name '*xml' | xargs \
-        gawk '/<?sql-definition/ {print $2, $3, $4}' | 
+        gawk '/<\?sql-definition/ {print $2, $3, $4}' | 
 	sed -e "s/&version_number;/${version}/" | sort -u |
         while read objtype name file; do
     	    echo Creating extract for ${objtype} ${name}...

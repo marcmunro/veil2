@@ -1,5 +1,5 @@
 /**
- * @file   veil2_version.h.in
+ * @file   veil2_version.h
  * \code
  *     Author:       Marc Munro
  *     Copyright (c) 2020 Marc Munro

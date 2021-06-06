@@ -318,10 +318,10 @@ extendSessionRolePrivs(SessionRolePrivs *session_roleprivs)
 
 
 /**
- * Add a ContextPrivs entry to ::session_privs, from the parameters.
+ * Add a ContextPrivs entry to ::session_roleprivs, from the parameters.
  *
  * @param scope_type The scope_type for the new entry
- * @param the scope scope for the new entry
+ * @param scope The scope scope for the new entry
  * @param roles The roles Bitmap for the new entry
  * @param privs The privileges Bitmap for the new entry
  */
@@ -353,11 +353,11 @@ add_scope_roleprivs(int scope_type, int scope, Bitmap *roles, Bitmap *privs)
 }
 
 /**
- * Update a ContextPrivs entry in ::session_privs with new roles and
+ * Update a ContextPrivs entry in ::session_roleprivs with new roles and
  * privs.  If there is no matching entry, we do nothing.
  *
  * @param scope_type The scope_type for the entry to be updated.
- * @param the scope scope for the entry to be updated.
+ * @param scope The scope scope for the entry to be updated.
  * @param roles The new roles Bitmap for the entry
  * @param privs The new privileges Bitmap for the entry
  */

@@ -106,7 +106,7 @@ Include dependency graph for veil2.c:</div>
 <div class="center"><img src="veil2_8c__incl.png" border="0" usemap="#src_2veil2_8c" alt=""/></div>
 <map name="src_2veil2_8c" id="src_2veil2_8c">
 <area shape="rect" id="node11" href="veil2_8h.html" title="Main header file for veil2. " alt="" coords="1334,95,1397,121"/>
-<area shape="rect" id="node13" href="veil2__version_8h.html" title="veil2_version.h" alt="" coords="1385,191,1501,218"/>
+<area shape="rect" id="node13" href="veil2__version_8h.html" title="Provide build&#45;dependant definitions. " alt="" coords="1385,191,1501,218"/>
 </map>
 </div>
 </div>
@@ -306,11 +306,11 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Add a ContextPrivs entry to ::session_privs, from the parameters.</p>
+<p>Add a ContextPrivs entry to <a class="el" href="veil2_8c.html#a3107d158c1cf2a3ed43023e7e2deb037">session_roleprivs</a>, from the parameters.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">scope_type</td><td>The scope_type for the new entry </td></tr>
-    <tr><td class="paramname">the</td><td>scope scope for the new entry </td></tr>
+    <tr><td class="paramname">scope</td><td>The scope scope for the new entry </td></tr>
     <tr><td class="paramname">roles</td><td>The roles Bitmap for the new entry </td></tr>
     <tr><td class="paramname">privs</td><td>The privileges Bitmap for the new entry </td></tr>
   </table>
@@ -859,11 +859,11 @@ Here is the call graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Update a ContextPrivs entry in ::session_privs with new roles and privs. If there is no matching entry, we do nothing.</p>
+<p>Update a ContextPrivs entry in <a class="el" href="veil2_8c.html#a3107d158c1cf2a3ed43023e7e2deb037">session_roleprivs</a> with new roles and privs. If there is no matching entry, we do nothing.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">scope_type</td><td>The scope_type for the entry to be updated. </td></tr>
-    <tr><td class="paramname">the</td><td>scope scope for the entry to be updated. </td></tr>
+    <tr><td class="paramname">scope</td><td>The scope scope for the entry to be updated. </td></tr>
     <tr><td class="paramname">roles</td><td>The new roles Bitmap for the entry </td></tr>
     <tr><td class="paramname">privs</td><td>The new privileges Bitmap for the entry </td></tr>
   </table>

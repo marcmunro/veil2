@@ -49,7 +49,7 @@
   </p>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm898"></a>12.1. Create Foreign Key Links</h2></div></div></div>
+<a name="idm905"></a>12.1. Create Foreign Key Links</h2></div></div></div>
 <p>
       You will start by creating a table that inherits from
       <code class="literal"><a class="link" href="apa.html#entity_scope" title="A.1.5. Scopes Table">veil2.scopes</a></code>.  To this
@@ -118,7 +118,7 @@ alter table veil2.scope_links
     </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm916"></a>12.1.1. A Note on Keys</h3></div></div></div>
+<a name="idm923"></a>12.1.1. A Note on Keys</h3></div></div></div>
 <p>
 	If the linked scope in your protected database uses a simple
 	integer primary key, this can safely be used as the
@@ -145,7 +145,7 @@ alter table veil2.scope_links
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm928"></a>12.2. Create Insert Triggers</h2></div></div></div>
+<a name="idm935"></a>12.2. Create Insert Triggers</h2></div></div></div>
 <p>
       We need to ensure that new scopes (in the demo these are
       projects, orgs and corps) created in the underlying tables are
@@ -160,7 +160,7 @@ alter table veil2.scope_links
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm932"></a>12.3. Create Update Triggers</h2></div></div></div>
+<a name="idm939"></a>12.3. Create Update Triggers</h2></div></div></div>
 <p>
       Next, we want to ensure that the keys used by scopes do not
       change, or that if they do, we handle it.
@@ -179,7 +179,7 @@ alter table veil2.scope_links
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm937"></a>12.4. Copy Existing Scopes Into The Links Table</h2></div></div></div>
+<a name="idm944"></a>12.4. Copy Existing Scopes Into The Links Table</h2></div></div></div>
 <p>
       Now we need to copy our existing scope records into our new
       <code class="literal">scope_links</code> table.
@@ -197,7 +197,7 @@ select 5, project_id, project_id
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm942"></a>12.5. Update the <code class="literal">all_accessor_roles</code> View</h2></div></div></div>
+<a name="idm949"></a>12.5. Update the <code class="literal">all_accessor_roles</code> View</h2></div></div></div>
 <p>
       If you have role assignments that are not managed solely through
       the <code class="literal">veil2.accessor_roles</code> table, you will need
@@ -222,7 +222,7 @@ select 5, project_id, project_id
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm957"></a>12.6. On Caches</h2></div></div></div>
+<a name="idm964"></a>12.6. On Caches</h2></div></div></div>
 <p>
       For performance reasons <code class="literal">Veil2</code> <a class="link" href="apb.html#caches" title="B.1.4. Materialized Views and Caches">caches a lot of scope-related privilege
       data</a>.  Some steps in your <code class="literal">Veil2</code> VPD
@@ -231,7 +231,7 @@ select 5, project_id, project_id
     </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm963"></a>12.6.1. Changes To Scopes</h3></div></div></div>
+<a name="idm970"></a>12.6.1. Changes To Scopes</h3></div></div></div>
 <p>
 	Changes to scopes do not require the refresh of materialized
 	views or the clearing of caches.  The rationale for this is as
@@ -263,7 +263,7 @@ select 5, project_id, project_id
 <div class="sect2">
 <div class="titlepage"><div>
 <div><h3 class="title">
-<a name="idm969"></a>12.6.2. Changes To Role Assignments</h3></div>
+<a name="idm976"></a>12.6.2. Changes To Role Assignments</h3></div>
 <div><h4 class="subtitle">(Triggers for Maintaining our Accessor Privileges Cache)</h4></div>
 </div></div>
 <p>

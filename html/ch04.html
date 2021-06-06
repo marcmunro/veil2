@@ -87,7 +87,7 @@
     </p>
 <p>
       Privileges are not assigned directly to users.  Instead they are
-      assigned through <a class="link" href="ch04.html#roles" title="4.4. Roles">roles</a> which are
+      assigned through <a class="link" href="ch04.html#roles" title="4.4. Roles">roles</a>, which are
       essentially collections of privileges.
     </p>
 <p>
@@ -183,7 +183,7 @@
 <p>
       It is largely because privileges may apply in different scopes
       from their role's assignment context, that contexts and scopes
-      have distinct terms.  While this may seem to be semantic
+      are distinct terms.  While this may seem to be semantic
       pedantry, the opportunities for confusion when discussing scopes
       and contexts are such that the distinction is useful.  The
       author has been there and resents that he will never get those
@@ -232,44 +232,70 @@
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="scopes"></a>4.3. Scopes</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm294"></a>4.3.1. Scopes As a Concept</h3></div></div></div>
 <p>
-      A scope describes the applicability of a <a class="link" href="ch04.html#privileges" title="4.1. Privileges">privilege</a>.  Scopes are mostly based
-      upon existing relationships in your data.
-    </p>
+	Each type of scope represents a distinct type of relationship
+	between your system's users and the various relations (tables
+	and views) in your database: it is these relationships that
+	are the heart of relational security.
+      </p>
 <p>
-      Note that for every scope, there is an equivalent <a class="link" href="ch04.html#security-contexts" title="4.2. Security Contexts">security context</a>.  Where
-      contexts are user facing and are applied to the assignment of
-      <a class="link" href="ch04.html#roles" title="4.4. Roles">roles</a>, scopes apply at the level of
-      individual privileges and are more of an implementation detail.
-    </p>
+	If your users have a relationship with an employer, then maybe
+	you will want an employer scope.  If they have a relationship
+	with an email domain, then you may need a domain scope.  If
+	you have an organizational hierarchy that your users fit into,
+	then you may need an organization or department scope.
+      </p>
 <p>
-      A scope may apply to an organization, a department, a project,
-      or whatever you wish.  Having a privilege in the scope of one
-      department would presumably give you access rights to data for
-      that department.  It would not give you access to equivalent
-      data for other departments.
-    </p>
+	Your scope types should naturally fall out from your data
+	model and your access requirements.
+      </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="idm299"></a>4.3.2. Scopes In Practice</h3></div></div></div>
 <p>
-      Some scopes will allow access to large subsets of data, and some
-      to very small subsets.  We refer to this as the scope level.  A
-      scope that is very restrictive is considered a low-level scope,
-      and one that is not, is a high-level scope.  When we talk about
-      <a class="link" href="ch04.html#scope-promotion" title="4.6. Scope (and Context) Promotion">scope promotion</a>,
-      this is always from a lower level to a higher level, which is to
-      say that the scope becomes less restrictive, and likely to
-      return a larger set of data.
-    </p>
+	A scope describes the applicability of a <a class="link" href="ch04.html#privileges" title="4.1. Privileges">privilege</a>.  Scopes are mostly
+	based upon existing relationships in your data.
+      </p>
 <p>
-      One scope that is particularly low-level is personal scope.
-      This limits access to data that specifically relates to the
-      accessor (privilege holder).  So if <code class="literal">user X</code>
-      has the <code class="literal">select user</code> privilege in personal
-      scope, they will be able to see their own
-      <code class="literal">users</code> record.  Whether they can see other
-      <code class="literal">users</code> records will depend on whether they
-      have the <code class="literal">select users</code> privilege in any other
-      scopes.
-    </p>
+	Note that for every scope, there is an equivalent <a class="link" href="ch04.html#security-contexts" title="4.2. Security Contexts">security context</a>.  Where
+	contexts are user facing and are applied to the assignment of
+	<a class="link" href="ch04.html#roles" title="4.4. Roles">roles</a>, scopes apply at the level
+	of individual privileges and are more of an implementation
+	detail.
+      </p>
+<p>
+	A scope may apply to an organization, a department, a project,
+	or whatever you wish.  Having a privilege in the scope of one
+	department would give you access rights to data for that
+	department.  It would not give you access to equivalent data
+	for other departments.
+      </p>
+<p>
+	Some scopes will allow access to large subsets of data, and
+	some to very small subsets.  We refer to this as the scope
+	level.  A scope that is very restrictive is considered a
+	low-level scope, and one that is not, is a high-level scope.
+	When we talk about <a class="link" href="ch04.html#scope-promotion" title="4.6. Scope (and Context) Promotion">scope
+	promotion</a>, this is always from a lower level to a
+	higher level, which is to say that the scope becomes less
+	restrictive, and likely to return a larger set of data.
+      </p>
+<p>
+	A built-in scope that is particularly low-level is personal
+	scope.  This limits access to data that specifically relates
+	to the accessor (privilege holder).  So if <code class="literal">user
+	X</code> has the <code class="literal">select user</code> privilege
+	in personal scope, they will be able to see their own
+	<code class="literal">users</code> record.  Whether they can see other
+	<code class="literal">users</code> records will depend on whether they
+	have the <code class="literal">select users</code> privilege in any
+	other scopes.
+      </p>
+</div>
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
@@ -418,7 +444,7 @@
     </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm375"></a>4.6.1. Promotion Of Scope For Privileges</h3></div></div></div>
+<a name="idm382"></a>4.6.1. Promotion Of Scope For Privileges</h3></div></div></div>
 <p>
 	<a class="link" href="ch04.html#privileges" title="4.1. Privileges">Privileges</a> may give access
 	to rows in a table, or to specific functionality. Often, a
@@ -488,7 +514,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm412"></a>4.6.2. Promotion Of Session Context For Mapping Context</h3></div></div></div>
+<a name="idm419"></a>4.6.2. Promotion Of Session Context For Mapping Context</h3></div></div></div>
 <p>
 	The <a class="link" href="ch04.html#mapping-context">mapping context</a>
 	that we use for <a class="link" href="ch04.html#role_mapping" title="4.4.1. Contextual Role Mapping">contextual role

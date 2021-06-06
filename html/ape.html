@@ -36,7 +36,7 @@
 <a name="shared_session_management"></a>E.1. Shared Session Authentication</h2></div></div></div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2858"></a>E.1.1. The Problem Space</h3></div></div></div>
+<a name="idm2867"></a>E.1.1. The Problem Space</h3></div></div></div>
 <p>
 	Shared sessions are database connections that are shared
 	amongst many users.  Typically these are used by web
@@ -78,7 +78,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2869"></a>E.1.2. Requirements</h3></div></div></div>
+<a name="idm2878"></a>E.1.2. Requirements</h3></div></div></div>
 <p>
 	There is only one fundamental requirement of a session
 	management protocol.  That is, that the session should know at
@@ -108,7 +108,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2878"></a>E.1.3. The Threat Space</h3></div></div></div>
+<a name="idm2887"></a>E.1.3. The Threat Space</h3></div></div></div>
 <p>
 	Ordinarily, web systems aim to protect themselves from
 	user-space only.  It is assumed that we are protected from bad
@@ -146,7 +146,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2890"></a>E.1.4. Properties of the Solution Space</h3></div></div></div>
+<a name="idm2899"></a>E.1.4. Properties of the Solution Space</h3></div></div></div>
 <p>
 	This is what <code class="literal">Veil2</code> provides,
 	out-of-the-box, for session management:
@@ -174,7 +174,7 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2901"></a>E.1.5. The Protocol</h3></div></div></div>
+<a name="idm2910"></a>E.1.5. The Protocol</h3></div></div></div>
 <p>
 	There are 3 functions that your application server's session
 	management must call:
@@ -197,7 +197,7 @@
       </p>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm2915"></a>Begin New Session</h5></div></div></div>
+<a name="idm2924"></a>Begin New Session</h5></div></div></div>
 <p>
 	  We begin a session by calling
 	  <code class="literal">create_session()</code>.  This returns a
@@ -220,7 +220,7 @@
 </div>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm2925"></a>Authenticate New Session</h5></div></div></div>
+<a name="idm2934"></a>Authenticate New Session</h5></div></div></div>
 <p>
 	  Having created a session and been given a
 	  <code class="literal">session_id</code> by
@@ -243,7 +243,7 @@
 </div>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm2932"></a>Close Connection</h5></div></div></div>
+<a name="idm2941"></a>Close Connection</h5></div></div></div>
 <p>
 	  When we are done and are ready to return the database
 	  connection to the pool for use by another user, we call
@@ -255,7 +255,7 @@
 </div>
 <div class="sect4">
 <div class="titlepage"><div><div><h5 class="title">
-<a name="idm2936"></a>Re-open Connection</h5></div></div></div>
+<a name="idm2945"></a>Re-open Connection</h5></div></div></div>
 <p>
 	  As long as a session has not timed-out, new connections can
 	  be opened using that session.  These re-opened connections
@@ -280,10 +280,10 @@
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idm2941"></a>E.1.6. Function Calling Minutiae</h3></div></div></div>
+<a name="idm2950"></a>E.1.6. Function Calling Minutiae</h3></div></div></div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm2943"></a>E.1.6.1. <code class="literal">create_session()</code>
+<a name="idm2952"></a>E.1.6.1. <code class="literal">create_session()</code>
 </h4></div></div></div>
 <p>
 	  We provide the following parameters to
@@ -401,7 +401,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm2998"></a>E.1.6.2. <code class="literal">open_connection()</code>
+<a name="idm3007"></a>E.1.6.2. <code class="literal">open_connection()</code>
 	Authentication</h4></div></div></div>
 <p>
 	  This call is used to authenticate a user to a previously
@@ -537,7 +537,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm3054"></a>E.1.6.3. <code class="literal">open_connection()</code> Continuation</h4></div></div></div>
+<a name="idm3063"></a>E.1.6.3. <code class="literal">open_connection()</code> Continuation</h4></div></div></div>
 <p>
 	  Once a session has been successfully authenticated,
 	  subsequent calls to <code class="literal">open_connection()</code> are
@@ -676,7 +676,7 @@
 </div>
 <div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="idm3113"></a>E.1.6.4. <code class="literal">close_connection()</code>
+<a name="idm3122"></a>E.1.6.4. <code class="literal">close_connection()</code>
 </h4></div></div></div>
 <p>
 	  This function has no parameters returns void.
@@ -719,11 +719,11 @@ select veil2.hello();
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm3129"></a>E.3. Resetting Cached Privileges</h2></div></div></div>
+<a name="idm3138"></a>E.3. Resetting Cached Privileges</h2></div></div></div>
 <p>
       Sometimes you may need changes to a user's privileges to happen
       immediately, rather than the next time that they connect.  In
-      this case, your session should call <a class="link" href=""><code class="literal">veil2.reload_connection_privs()</code></a>.
+      this case, your session should call <a class="link" href="apc.html#func_reload_connection_privs" title="C.4.25. reload_connection_privs()"><code class="literal">veil2.reload_connection_privs()</code></a>.
     </p>
 <p>
       This will rarely be needed in a shared session environment as
@@ -738,7 +738,7 @@ select veil2.hello();
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idm3137"></a>E.4. Custom Database Sessions</h2></div></div></div>
+<a name="idm3146"></a>E.4. Custom Database Sessions</h2></div></div></div>
 <p>
       If the built-in session management does not work for you, you
       can always build your own. 
